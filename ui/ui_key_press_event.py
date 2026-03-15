@@ -1,0 +1,331 @@
+
+from PyQt5.QtCore import Qt, QDate
+from PyQt5.QtWidgets import QApplication, QMessageBox
+from utility.static import comma2int, comma2float, str_ymd, now_cme, now_utc, error_decorator
+
+
+@error_decorator
+def key_press_event(ui, event):
+    if event.key() in (Qt.Key_Return, Qt.Key_Enter):
+        if ui.dialog_scheduler.focusWidget() == ui.sd_dpushButtonn_01:
+            return
+
+        elif QApplication.keyboardModifiers() & Qt.AltModifier:
+            if ui.BacktestProcessAlive():
+                if ui.main_btn == 3:
+                    ui.ssButtonClicked_06()
+                elif ui.main_btn == 4:
+                    ui.csButtonClicked_06()
+            else:
+                if ui.main_btn == 3:
+                    if ui.svj_pushButton_01.isVisible():
+                        ui.StockBacktestStart()
+                elif ui.main_btn == 4:
+                    if ui.cvj_pushButton_01.isVisible():
+                        ui.CoinBacktestStart()
+
+        elif ui.focusWidget() in (ui.std_tableWidgettt, ui.sgj_tableWidgettt, ui.scj_tableWidgettt, ui.ctd_tableWidgettt, ui.cgj_tableWidgettt, ui.ccj_tableWidgettt):
+            stock = True
+            if ui.focusWidget() in (ui.ctd_tableWidgettt, ui.cgj_tableWidgettt, ui.ccj_tableWidgettt):
+                stock = False
+            row  = ui.focusWidget().currentIndex().row()
+            col  = ui.focusWidget().currentIndex().column()
+            item = ui.focusWidget().item(row, 0)
+            if item is not None:
+                name       = item.text()
+                linetext   = ui.ct_lineEdittttt_03.text()
+                tickcount  = int(linetext) if linetext else 30
+                searchdate = str_ymd(now_utc()) if not stock else str_ymd() if '키움증권' in ui.dict_set['증권사'] else str_ymd(now_cme())
+                code       = ui.dict_code[name] if name in ui.dict_code else name
+                ui.ct_lineEdittttt_04.setText(code)
+                ui.ct_lineEdittttt_05.setText(name)
+                ui.ShowDialog(name, tickcount, searchdate, col)
+
+        elif ui.focusWidget() in (ui.sds_tableWidgettt, ui.cds_tableWidgettt):
+            if ui.focusWidget() == ui.sds_tableWidgettt:
+                searchdate = ui.s_calendarWidgett.selectedDate().toString('yyyyMMdd')
+            else:
+                searchdate = ui.c_calendarWidgett.selectedDate().toString('yyyyMMdd')
+            row  = ui.focusWidget().currentIndex().row()
+            item = ui.focusWidget().item(row, 1)
+            if item is not None:
+                name      = item.text()
+                linetext  = ui.ct_lineEdittttt_03.text()
+                tickcount = int(linetext) if linetext else 30
+                code      = ui.dict_code[name] if name in ui.dict_code else name
+                ui.ct_lineEdittttt_04.setText(code)
+                ui.ct_lineEdittttt_05.setText(name)
+                ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
+                ui.ShowDialog(name, tickcount, searchdate, 4)
+
+        elif ui.focusWidget() in (ui.sns_tableWidgettt, ui.cns_tableWidgettt):
+            if ui.focusWidget() == ui.sns_tableWidgettt:
+                gubun = '주식'
+            else:
+                gubun = '코인'
+            row  = ui.focusWidget().currentIndex().row()
+            item = ui.focusWidget().item(row, 0)
+            if item is not None:
+                date = item.text()
+                date = date.replace('.', '')
+                if gubun == '주식':
+                    table_name = 's_tradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_tradelist'
+                else:
+                    table_name = 'c_tradelist' if ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'
+                df = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name} WHERE 체결시간 LIKE '{date}%'")
+                if len(date) == 6 and gubun == '코인':
+                    df['구분용체결시간'] = df['체결시간'].apply(lambda x: x[:6])
+                    df = df[df['구분용체결시간'] == date]
+                elif len(date) == 4 and gubun == '코인':
+                    df['구분용체결시간'] = df['체결시간'].apply(lambda x: x[:4])
+                    df = df[df['구분용체결시간'] == date]
+                df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
+                df.set_index('index', inplace=True)
+                ui.ShowDialogGraph(df)
+
+        elif ui.focusWidget() in (ui.ss_tableWidget_01, ui.cs_tableWidget_01):
+            tableWidget = ui.ss_tableWidget_01 if ui.focusWidget() == ui.ss_tableWidget_01 else ui.cs_tableWidget_01
+            row  = tableWidget.currentIndex().row()
+            item = tableWidget.item(row, 0)
+            if item is not None:
+                name       = item.text()
+                searchdate = tableWidget.item(row, 2).text()[:8]
+                buytime    = comma2int(tableWidget.item(row, 2).text())
+                selltime   = comma2int(tableWidget.item(row, 3).text())
+                buyprice   = comma2float(tableWidget.item(row, 5).text())
+                sellprice  = comma2float(tableWidget.item(row, 6).text())
+                detail     = [buytime, buyprice, selltime, sellprice]
+                buytimes   = tableWidget.item(row, 13).text()
+                coin       = True if 'KRW' in name or 'USDT' in name else False
+                code       = ui.dict_code[name] if name in ui.dict_code else name
+                starttime  = ui.ct_lineEdittttt_01.text()
+                endtime    = ui.ct_lineEdittttt_02.text()
+                if len(starttime) < 6 or len(endtime) < 6:
+                    QMessageBox.critical(ui.dialog_chart, '오류 알림', '차트의 시작 및 종료시간은 초단위까지로 입력하십시오.\n(예: 000000, 090000, 152000)\n')
+                    return
+                ui.ct_lineEdittttt_04.setText(code)
+                ui.ct_lineEdittttt_05.setText(name)
+                ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
+                ui.ShowDialogChart(False, coin, code, 30, searchdate, starttime, endtime, detail, buytimes)
+
+    elif (QApplication.keyboardModifiers() & Qt.AltModifier) and \
+            event.key() in (Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5,
+                            Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0):
+        if ui.main_btn == 3:
+            if event.key() == Qt.Key_1:
+                ui.StockStgEditer()
+            elif event.key() == Qt.Key_2:
+                ui.StockOptiEditer()
+            elif event.key() == Qt.Key_3:
+                ui.StockOptiTestEditer()
+            elif event.key() == Qt.Key_4:
+                ui.StockRwfTestEditer()
+            elif event.key() == Qt.Key_5:
+                ui.StockOptiGaEditer()
+            elif event.key() == Qt.Key_6:
+                ui.StockCondEditer()
+            elif event.key() == Qt.Key_7:
+                ui.StockOptiVarsEditer()
+            elif event.key() == Qt.Key_8:
+                ui.StockVarsEditer()
+            elif event.key() == Qt.Key_9:
+                ui.StockBacktestLog()
+            elif event.key() == Qt.Key_0:
+                ui.StockBacktestDetail()
+        elif ui.main_btn == 4:
+            if event.key() == Qt.Key_1:
+                ui.CoinStgEditer()
+            elif event.key() == Qt.Key_2:
+                ui.CoinOptiEditer()
+            elif event.key() == Qt.Key_3:
+                ui.CoinOptiTestEditer()
+            elif event.key() == Qt.Key_4:
+                ui.CoinRwfTestEditer()
+            elif event.key() == Qt.Key_5:
+                ui.CoinOptiGaEditer()
+            elif event.key() == Qt.Key_6:
+                ui.CoinCondEditer()
+            elif event.key() == Qt.Key_7:
+                ui.CoinOptiVarsEditer()
+            elif event.key() == Qt.Key_8:
+                ui.CoinVarsEditer()
+            elif event.key() == Qt.Key_9:
+                ui.CoinBacktestLog()
+            elif event.key() == Qt.Key_0:
+                ui.CoinBacktestDetail()
+
+    elif event.key() == Qt.Key_F1:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.StockBuyStgLoad()
+            elif ui.svc_pushButton_06.isVisible() or ui.sva_pushButton_03.isVisible():
+                ui.StockOptiBuyLoad()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.StockCondbuyLoad()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.CoinBuyStgLoad()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.CoinOptiBuyLoad()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.CoinCondbuyLoad()
+
+    elif event.key() == Qt.Key_F2:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.svjb_comboBoxx_01.showPopup()
+            elif ui.svc_pushButton_06.isVisible() or ui.sva_pushButton_03.isVisible():
+                ui.svc_comboBoxxx_01.showPopup()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.svo_comboBoxxx_01.showPopup()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.cvjb_comboBoxx_01.showPopup()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.cvc_comboBoxxx_01.showPopup()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.cvo_comboBoxxx_01.showPopup()
+
+    elif event.key() == Qt.Key_F3:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.svjb_lineEditt_01.setFocus()
+            elif ui.svc_pushButton_06.isVisible() or ui.sva_pushButton_03.isVisible():
+                ui.svc_lineEdittt_01.setFocus()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.svo_lineEdittt_01.setFocus()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.cvjb_lineEditt_01.setFocus()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.cvc_lineEdittt_01.setFocus()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.cvo_lineEdittt_01.setFocus()
+
+    elif event.key() == Qt.Key_F4:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.StockBuyStgSave()
+            elif ui.svc_pushButton_06.isVisible() or ui.svc_pushButton_15.isVisible() or ui.svc_pushButton_18.isVisible() or ui.sva_pushButton_01.isVisible():
+                ui.StockOptiBuySave()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.StockCondbuySave()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.CoinBuyStgSave()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cvc_pushButton_15.isVisible() or ui.cvc_pushButton_18.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.CoinOptiBuySave()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.CoinCondbuySave()
+
+    elif event.key() == Qt.Key_F5:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.StockSellStgLoad()
+            elif ui.svc_pushButton_06.isVisible() or ui.sva_pushButton_03.isVisible():
+                ui.StockOptiSellLoad()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.StockCondsellLoad()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.CoinSellStgLoad()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.CoinOptiSample()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.CoinCondsellLoad()
+
+    elif event.key() == Qt.Key_F6:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.svjs_comboBoxx_01.showPopup()
+            elif ui.svc_pushButton_06.isVisible() or ui.sva_pushButton_03.isVisible():
+                ui.svc_comboBoxxx_08.showPopup()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.svo_comboBoxxx_02.showPopup()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.cvjs_comboBoxx_01.showPopup()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.cvc_comboBoxxx_08.showPopup()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.cvo_comboBoxxx_02.showPopup()
+
+    elif event.key() == Qt.Key_F7:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.svjs_lineEditt_01.setFocus()
+            elif ui.svc_pushButton_06.isVisible() or ui.sva_pushButton_03.isVisible():
+                ui.svc_lineEdittt_03.setFocus()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.svo_lineEdittt_02.setFocus()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.cvjs_lineEditt_01.setFocus()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.cvc_lineEdittt_03.setFocus()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.cvo_lineEdittt_02.setFocus()
+
+    elif event.key() == Qt.Key_F8:
+        if ui.main_btn == 3:
+            if ui.svj_pushButton_01.isVisible():
+                ui.StockSellStgSave()
+            elif ui.svc_pushButton_06.isVisible() or ui.svc_pushButton_15.isVisible() or ui.svc_pushButton_18.isVisible() or ui.sva_pushButton_01.isVisible():
+                ui.StockOptiSellSave()
+            elif ui.svo_pushButton_05.isVisible():
+                ui.StockCondsellSave()
+        elif ui.main_btn == 4:
+            if ui.cvj_pushButton_01.isVisible():
+                ui.CoinSellStgSave()
+            elif ui.cvc_pushButton_06.isVisible() or ui.cvc_pushButton_15.isVisible() or ui.cvc_pushButton_18.isVisible() or ui.cva_pushButton_01.isVisible():
+                ui.CoinOptiSellSave()
+            elif ui.cvo_pushButton_05.isVisible():
+                ui.CoinCondsellSave()
+
+    elif event.key() == Qt.Key_F9:
+        if ui.main_btn == 3:
+            if ui.svc_pushButton_06.isVisible():
+                ui.StockOptiVarsLoad()
+            elif ui.sva_pushButton_03.isVisible():
+                ui.StockGavarsLoad()
+        elif ui.main_btn == 4:
+            if ui.cvc_pushButton_06.isVisible():
+                ui.CoinOptiVarsLoad()
+            elif ui.cva_pushButton_01.isVisible():
+                ui.CoinGavarsSave()
+
+    elif event.key() == Qt.Key_F10:
+        if ui.main_btn == 3:
+            if ui.svc_pushButton_06.isVisible():
+                ui.svc_comboBoxxx_02.showPopup()
+            elif ui.sva_pushButton_03.isVisible():
+                ui.sva_comboBoxxx_01.showPopup()
+        elif ui.main_btn == 4:
+            if ui.cvc_pushButton_06.isVisible():
+                ui.cvc_comboBoxxx_02.showPopup()
+            elif ui.cva_pushButton_01.isVisible():
+                ui.cva_comboBoxxx_01.showPopup()
+
+    elif event.key() == Qt.Key_F11:
+        if ui.main_btn == 3:
+            if ui.svc_pushButton_06.isVisible():
+                ui.svc_lineEdittt_02.setFocus()
+            elif ui.sva_pushButton_03.isVisible():
+                ui.sva_lineEdittt_01.setFocus()
+        elif ui.main_btn == 4:
+            if ui.cvc_pushButton_06.isVisible():
+                ui.cvc_lineEdittt_02.setFocus()
+            elif ui.cva_pushButton_01.isVisible():
+                ui.cva_lineEdittt_01.setFocus()
+
+    elif event.key() == Qt.Key_F12:
+        if ui.main_btn == 3:
+            if ui.svc_pushButton_06.isVisible():
+                ui.StockOptiVarsSave()
+            elif ui.sva_pushButton_03.isVisible():
+                ui.StockGavarsSave()
+        elif ui.main_btn == 4:
+            if ui.cvc_pushButton_06.isVisible():
+                ui.CoinOptiVarsSave()
+            elif ui.cva_pushButton_03.isVisible():
+                ui.CoinGavarsSave()
