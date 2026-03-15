@@ -18,7 +18,3 @@ https://www.youtube.com/@stomlive
 무료 버전은 IP 당 하나의 STOM만 실행할 수 있으며 최적화 및 전진분석을 제외한
 
 일반 백테스트 및 백파인더만 사용할 수 있습니다.
-
-구독 결재를 통해 유료 버전으로 사용할 수 있으며 구독 방법은 아래의 카페에서 확인할 수 있습니다
-
-https://cafe.naver.com/stom
