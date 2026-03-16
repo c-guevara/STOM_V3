@@ -77,6 +77,7 @@ class WebCrawingHomTab:
         price_list = []
         gap_list   = []
         pct_list   = []
+        last_times = None
 
         while True:
             url  = f'{self.base_url}/sise/sise_index_time.naver?code={symbol}&thistime={search_time}&page={i}'
@@ -84,6 +85,11 @@ class WebCrawingHomTab:
             soup = BeautifulSoup(resp.text, 'html.parser')
 
             page_times  = [t.get_text(strip=True) for t in soup.select('td.date')]
+            if last_times != page_times:
+                last_times = page_times
+            else:
+                break
+
             page_prices = [p.get_text(strip=True) for p in soup.select('td.number_1')[::4]]
             page_gaps   = [p.get_text(strip=True) for p in soup.select('span.tah')]
             page_buhos  = [t['alt'] for t in soup.select('td > img') if t['alt'] != '']
@@ -103,9 +109,6 @@ class WebCrawingHomTab:
                 pct_list.extend(page_pcts[:duplicate_index])
                 break
             else:
-                if time_list and time_list[-1] == page_times[-1] and price_list[-1] == page_prices[-1]:
-                    break
-
                 time_list.extend(page_times)
                 price_list.extend(page_prices)
                 gap_list.extend(page_gaps)
