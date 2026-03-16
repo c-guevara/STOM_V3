@@ -1,8 +1,6 @@
 
 import os
 import sys
-from traceback import print_exc
-
 import zmq
 import win32gui
 import subprocess
