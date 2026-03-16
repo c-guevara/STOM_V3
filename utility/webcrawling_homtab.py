@@ -38,6 +38,7 @@ class WebCrawingHomTab:
         self.complted_thread = 0
         search_time = now()
         weekday = search_time.weekday()
+        before_open = int(str_hms(search_time)) < 90000
         market_open = True
         if weekday == 5:
             search_time = timedelta_day(-1, search_time)
@@ -45,8 +46,11 @@ class WebCrawingHomTab:
         elif weekday == 6:
             search_time = timedelta_day(-2, search_time)
             market_open = False
-        elif weekday == 0 and int(str_hms(search_time)) < 90000:
+        elif weekday == 0 and before_open:
             search_time = timedelta_day(-3, search_time)
+            market_open = False
+        elif before_open:
+            search_time = timedelta_day(-1, search_time)
             market_open = False
         search_today = str_ymd_ios(search_time)
         if market_open:
