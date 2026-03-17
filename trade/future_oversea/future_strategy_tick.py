@@ -571,7 +571,7 @@ class FutureStrategyTick(StrategyBase):
         if self.dict_gj:
             self.dict_gj = dict(sorted(self.dict_gj.items(), key=lambda x: x[1]['dm'], reverse=True))
             df_gj = get_pd().DataFrame.from_dict(self.dict_gj, orient='index')
-            self.mgzservQ.put(('window', (ui_num[f'S관심종목'], df_gj)))
+            self.mgzservQ.put(('window', (ui_num['S관심종목'], df_gj)))
         if self.dict_profit:
             self.dict_profit = {k: v for k, v in self.dict_profit.items() if k in self.dict_jg}
 
