@@ -1,7 +1,7 @@
 
-from utility.static import error_decorator
-from PyQt5.QtWidgets import QDialog, QApplication
+from PyQt5.QtWidgets import QDialog
 from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
+from utility.static import error_decorator
 
 
 class AnimatedDialog(QDialog):
@@ -214,62 +214,3 @@ class DialogAnimator:
         DialogAnimator._cleanup_animation(dialog)
         if callback:
             callback()
-
-
-class SlideAnimatedDialog(QDialog):
-    """슬라이드 애니메이션이 적용된 다이얼로그 클래스"""
-    def __init__(self, parent=None, direction='right'):
-        super().__init__(parent)
-        self.slide_animation = None
-        self.animation_duration = 250
-        self.slide_direction = direction
-        self.is_sliding = False
-        self._animation_setup_done = False
-
-    def showEvent(self, event):
-        """다이얼로그 표시 시 슬라이드인 애니메이션 실행"""
-        super().showEvent(event)
-        if not self._animation_setup_done:
-            self.slide_in()
-            self._animation_setup_done = True
-
-    def slide_in(self):
-        """슬라이드인 애니메이션"""
-        if self.is_sliding:
-            return
-
-        self.is_sliding = True
-
-        if self.parent():
-            parent_geometry = self.parent().geometry()
-            start_x = parent_geometry.x() + parent_geometry.width() if self.slide_direction == 'right' else parent_geometry.x() - self.width()
-            start_y = parent_geometry.y()
-            end_x = parent_geometry.x() + (parent_geometry.width() - self.width()) // 2
-            end_y = parent_geometry.y() + (parent_geometry.height() - self.height()) // 2
-        else:
-            screen_geometry = QApplication.desktop().screenGeometry()
-            start_x = screen_geometry.width() if self.slide_direction == 'right' else -self.width()
-            start_y = screen_geometry.y()
-            end_x = (screen_geometry.width() - self.width()) // 2
-            end_y = (screen_geometry.height() - self.height()) // 2
-
-        self.move(start_x, start_y)
-
-        if self.slide_animation:
-            self.slide_animation.stop()
-            del self.slide_animation
-
-        self.slide_animation = QPropertyAnimation(self, b"geometry")
-        self.slide_animation.setDuration(self.animation_duration)
-        self.slide_animation.setStartValue(self.geometry())
-        self.slide_animation.setEndValue(self.geometry().translated(end_x - start_x, end_y - start_y))
-        self.slide_animation.setEasingCurve(QEasingCurve.OutCubic)
-        self.slide_animation.finished.connect(self._on_slide_in_finished)
-        self.slide_animation.start()
-
-    def _on_slide_in_finished(self):
-        """슬라이드인 완료 처리"""
-        self.is_sliding = False
-        if self.slide_animation:
-            del self.slide_animation
-            self.slide_animation = None
