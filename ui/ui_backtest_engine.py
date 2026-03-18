@@ -254,7 +254,7 @@ def backengine_start(ui, gubun):
         shared_info_ = ui.backQ.get()
         ui.shared_info += shared_info_
         ui.windowQ.put((ui_num['백테엔진'], f'{log_gubun} 데이터 로딩 중 ... [{i+1}/{multi}]'))
-    ui.shared_info = sorted(ui.shared_info, key=lambda x: x['size'], reverse=True)
+    ui.shared_info = sorted(ui.shared_info, key=lambda x: x['shape'][0], reverse=True)
     ui.back_tick_cunsum = [x['shape'][0] for x in ui.shared_info]
     ui.back_tick_cunsum = get_np().cumsum(ui.back_tick_cunsum)
     ui.windowQ.put((ui_num['백테엔진'], f'{log_gubun} 데이터 로딩 완료'))
