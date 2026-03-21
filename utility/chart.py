@@ -5,7 +5,7 @@ from copy import deepcopy
 from traceback import format_exc
 from utility.lazy_imports import get_np, get_pd, get_talib
 from trade.formula_manager import FormulaManager, get_formula_data
-from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm
+from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
     DB_BACKTEST, DB_COIN_MIN_BACK, DB_STOCK_MIN_BACK, DB_CODE_INFO, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK, \
     list_stock_min, list_coin_min
@@ -220,11 +220,11 @@ class Chart:
                 def get_cgtime(cgtime_):
                     while cgtime_ not in arry[:, 0]:
                         onesecago = timedelta_sec(-1, dt_ymdhms(str(cgtime_)) if is_tick else dt_ymdhm(str(cgtime_)))
-                        cgtime_ = int(str_ymdhms(onesecago))
+                        cgtime_ = int(str_ymdhms(onesecago)) if is_tick else int(str_ymdhm(onesecago))
                     return cgtime_
 
                 for index in df.index:
-                    cgtime = float(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
+                    cgtime = int(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
                     cgtime = get_cgtime(cgtime)
                     if market in (1, 3):
                         if df['주문구분'][index] == '매수':
