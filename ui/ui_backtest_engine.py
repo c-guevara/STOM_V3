@@ -125,7 +125,11 @@ def backengine_start(ui, gubun):
                 target = BackEngineBinanceTick2 if ui.dict_set['코인타임프레임'] else BackEngineBinanceMin2
 
     def create_backsubtotal_process(j):
-        proc = Process(target=BackSubTotal, args=(j, ui.totalQ, ui.back_sques, ui.dict_set['백테매수시간기준']), daemon=True)
+        proc = Process(
+            target=BackSubTotal,
+            args=(j, ui.totalQ, ui.back_sques, ui.dict_set['백테매수시간기준']),
+            daemon=True
+        )
         proc.start()
         ui.back_sprocs.append(proc)
         ui.windowQ.put((ui_num['백테엔진'], f'중간집계 프로세스{j + 1} 생성 완료'))
@@ -134,8 +138,8 @@ def backengine_start(ui, gubun):
         profiling = j == 0 and ui.dict_set['백테엔진프로파일링']
         proc = Process(
             target=target,
-            args=(j, ui.shared_cnt, ui.shared_lock, ui.windowQ, ui.totalQ, ui.backQ,
-                  ui.back_eques, ui.back_sques, ui.dict_set, profiling),
+            args=(j, ui.shared_cnt, ui.shared_lock, ui.windowQ, ui.totalQ, ui.backQ, ui.back_eques, ui.back_sques,
+                  ui.dict_set, profiling),
             daemon=True
         )
         proc.start()
