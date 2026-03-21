@@ -9,7 +9,7 @@ from utility.lazy_imports import get_np, get_pd
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from trade.upbit.upbit_websocket import WebSocketReceiver
 from utility.setting_base import ui_num, DB_COIN_TICK, DB_COIN_MIN
-from utility.static import now, timedelta_sec, str_ymdhms_utc, str_hms, now_utc
+from utility.static import now, str_ymdhms_utc, str_hms, now_utc
 
 
 class Updater(QThread):
