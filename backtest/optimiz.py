@@ -11,7 +11,7 @@ from utility.lazy_imports import get_np, get_pd
 from backtest.optimiz_3d_visualization import Visualization3D
 from backtest.back_static_numba import GetResult, bootstrap_test
 from backtest.back_static import SendResult, PlotShow, GetMoneytopQuery, GetResultDataframe, AddMdd
-from utility.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd, error_decorator, set_builtin_print
+from utility.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd
 from utility.setting_base import DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, ui_num, DB_STRATEGY, DB_BACKTEST, columns_vc, \
     DB_SETTING, DB_OPTUNA, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
 
@@ -68,7 +68,6 @@ class Total:
         self.hstd         = -float('inf')
         self.sub_total    = 0
 
-        set_builtin_print(True, self.wq)
         self.MainLoop()
 
     def MainLoop(self):
@@ -201,7 +200,6 @@ class Total:
             vars_copy[vturn] = self.vars_list[vturn][0][vkey]
         return ['최적화', self.ui_gubun, self.wq, self.mq, self.hstd, self.optistandard, self.opti_kind, vturn, vkey, vars_copy, self.startday, self.endday, self.std_list, self.betting]
 
-    @error_decorator
     def Report(self, list_tsg, arry_bct):
         if not list_tsg:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '매수전략을 만족하는 경우가 없어 결과를 표시할 수 없습니다.'))
@@ -350,10 +348,8 @@ class Optimize:
         self.study      = None
         self.dict_simple_vars = {}
 
-        set_builtin_print(True, self.wq)
         self.Start()
 
-    @error_decorator
     def Start(self):
         start_time = now()
         data = self.bq.get()

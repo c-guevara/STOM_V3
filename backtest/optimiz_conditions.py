@@ -6,8 +6,7 @@ import sqlite3
 from multiprocessing import Process, Queue
 from utility.lazy_imports import get_np, get_pd
 from backtest.back_static import SendResult, GetMoneytopQuery
-from utility.static import factorial, now, timedelta_day, timedelta_sec, str_ymd, str_ymdhms, dt_ymd, error_decorator, \
-    set_builtin_print
+from utility.static import factorial, now, timedelta_day, timedelta_sec, str_ymd, str_ymdhms, dt_ymd
 from utility.setting_base import ui_num, DB_STRATEGY, DB_BACKTEST, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
     DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
 
@@ -169,10 +168,8 @@ class OptimizeConditions:
             self.gubun = 'coin'
         self.savename     = f'{self.gubun}_{self.backname.replace("최적화", "").lower()}'
 
-        set_builtin_print(True, self.wq)
         self.Start()
 
-    @error_decorator
     def Start(self):
         start_time = now()
         data = self.bq.get()

@@ -7,7 +7,7 @@ from multiprocessing import Process, Queue
 from backtest.back_static_numba import GetResult, bootstrap_test
 from utility.lazy_imports import get_np, get_pd
 from backtest.back_static import PlotShow, GetMoneytopQuery, GetResultDataframe, AddMdd
-from utility.static import now, str_ymdhms, error_decorator, set_builtin_print
+from utility.static import now, str_ymdhms
 from utility.setting_user import stockreadlines, coinreadlines, futurereadlines
 from utility.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num, columns_vj, DB_STOCK_TICK_BACK, \
     DB_COIN_TICK_BACK, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
@@ -52,7 +52,6 @@ class Total:
 
         self.insertlist   = []
 
-        set_builtin_print(True, self.wq)
         self.MainLoop()
 
     def MainLoop(self):
@@ -136,7 +135,6 @@ class Total:
                 with open('./utility/blacklist_coin.txt', 'w') as f:
                     f.write(''.join(coinreadlines))
 
-    @error_decorator
     def Report(self, list_tsg, arry_bct):
         if not list_tsg:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '매수전략을 만족하는 경우가 없어 결과를 표시할 수 없습니다.'))
@@ -267,10 +265,8 @@ class BackTest:
         else:
             self.gubun = 'coin'
 
-        set_builtin_print(True, self.wq)
         self.Start()
 
-    @error_decorator
     def Start(self):
         start_time = now()
         data = self.bq.get()
