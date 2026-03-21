@@ -482,7 +482,7 @@ def database_check():
                     df = get_pd().read_sql(f'SELECT * FROM "{table_list[0]}"', con)
                     if '당일매수금액' not in df.columns:
                         con.close()
-                        return False, '일자DB의 칼럼이 일치하지 않습니다.\nupdate_db_20260211.bat 파일을 실행하여 데이터베이스를 업데이트하십시오.'
+                        return False, '일자DB의 칼럼이 일치하지 않습니다.\nupdate_db_20260211.bat 파일을 실행하여 DB를 업데이트하십시오.'
                 con.close()
 
             file_list_ = [x for x in file_list if file_name in x and '.db' in x and 'back' in x]
