@@ -107,12 +107,6 @@ class Chart:
             self.windowQ.put((ui_num['코스닥'], xticks, self.arry_kosd[:, 1]))
 
     def UpdateChart(self, data):
-        def get_cgtime(cgtime_):
-            while cgtime_ not in df.index:
-                onesecago = timedelta_sec(-1, dt_ymdhms(str(cgtime_)) if is_tick else dt_ymdhm(str(cgtime_)))
-                cgtime_ = int(str_ymdhms(onesecago))
-            return cgtime_
-
         if len(data) == 7:
             coin, code, w_unit, searchdate, starttime, endtime, k = data
             detail, buytimes, cf1, cf2 = None, None, None, None
@@ -223,31 +217,38 @@ class Chart:
             con.close()
 
             if len(df) > 0:
+                def get_cgtime(cgtime_):
+                    while cgtime_ not in arry[:, 0]:
+                        onesecago = timedelta_sec(-1, dt_ymdhms(str(cgtime_)) if is_tick else dt_ymdhm(str(cgtime_)))
+                        cgtime_ = int(str_ymdhms(onesecago))
+                    return cgtime_
+
                 for index in df.index:
-                    cgtime = int(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
+                    cgtime = float(df['체결시간'][index] if is_tick else str(df['체결시간'][index])[:12])
+                    cgtime = get_cgtime(cgtime)
                     if market in (1, 3):
                         if df['주문구분'][index] == '매수':
-                            buy_index.append(get_cgtime(cgtime))
+                            buy_index.append(cgtime)
                             arry[arry[:, 0] == cgtime, -2] = df['체결가'][index]
 
                         elif df['주문구분'][index] == '매도':
-                            sell_index.append(get_cgtime(cgtime))
+                            sell_index.append(cgtime)
                             arry[arry[:, 0] == cgtime, -1] = df['체결가'][index]
                     else:
                         if df['주문구분'][index] == 'BUY_LONG':
-                            buy_index.append(get_cgtime(cgtime))
+                            buy_index.append(cgtime)
                             arry[arry[:, 0] == cgtime, -4] = df['체결가'][index]
 
                         elif df['주문구분'][index] == 'SELL_LONG':
-                            sell_index.append(get_cgtime(cgtime))
+                            sell_index.append(cgtime)
                             arry[arry[:, 0] == cgtime, -3] = df['체결가'][index]
 
                         elif df['주문구분'][index] == 'SELL_SHORT':
-                            buy_index.append(get_cgtime(cgtime))
+                            buy_index.append(cgtime)
                             arry[arry[:, 0] == cgtime, -2] = df['체결가'][index]
 
                         elif df['주문구분'][index] == 'BUY_SHORT':
-                            sell_index.append(get_cgtime(cgtime))
+                            sell_index.append(cgtime)
                             arry[arry[:, 0] == cgtime, -1] =  df['체결가'][index]
         else:
             매수시간, 매수가, 매도시간, 매도가 = detail
