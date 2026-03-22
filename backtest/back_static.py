@@ -1,15 +1,14 @@
 
-import yfinance as yf
 from traceback import format_exc
-from optuna_dashboard import run_server
-from utility.lazy_imports import get_np, get_pd
-from backtest.back_static_numba import GetOptiValidStd
-from utility.setting_base import ui_num, GRAPH_PATH, DB_OPTUNA
-from utility.static import thread_decorator, dt_hms, dt_hm, dt_ymd, dt_ymdhms, dt_ymdhm, str_ymd_ios, str_ymdhms_ios
+from utility.lazy_imports import get_np
+from utility.setting_base import ui_num
+from utility.static import thread_decorator
 
 
 @thread_decorator
 def RunOptunaServer():
+    from optuna_dashboard import run_server
+    from utility.setting_base import DB_OPTUNA
     try:
         run_server(DB_OPTUNA)
     except:
@@ -17,6 +16,7 @@ def RunOptunaServer():
 
 
 def get_trade_info(gubun):
+    from utility.static import dt_ymd
     buy_time = dt_ymd('20000101')
     if gubun == 1:
         v = {
@@ -283,6 +283,7 @@ def SendResult(result, dict_train, dict_valid=None, exponential=False):
             valid_text.append(text3)
             valid_stds.append(std)
 
+        from backtest.back_static_numba import GetOptiValidStd
         train_stds = get_np().array(train_stds, dtype=get_np().float64)
         valid_stds = get_np().array(valid_stds, dtype=get_np().float64)
         std = GetOptiValidStd(train_stds, valid_stds, exponential)
@@ -388,6 +389,7 @@ def GetOptiStdText(optistd, std_list, result, pre_text):
 
 
 def get_yf_ticker(code, startday, endday):
+    import yfinance as yf
     start_str  = str(startday)
     end_str    = str(endday)
     start_date = f'{start_str[:4]}-{start_str[4:6]}-{start_str[6:8]}'
@@ -411,6 +413,8 @@ def get_interval(total_sec):
 
 def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday, endday, starttime, endtime, list_days,
              backname, back_text, label_text, save_file_name, schedul, notplotshow, buy_vars=None, sell_vars=None):
+
+    from utility.static import dt_hms, dt_hm, dt_ymd, dt_ymdhms, dt_ymdhm, str_ymd_ios, str_ymdhms_ios
 
     df_kp, df_kd, df_nd, df_bc = None, None, None, None
     if startday != endday:
@@ -598,6 +602,7 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     ax2.legend(loc='best')
     ax2.grid(True, alpha=0.3)
 
+    from utility.setting_base import GRAPH_PATH
     fig1.savefig(f"{GRAPH_PATH}/{save_file_name}_.png", dpi=100, bbox_inches='tight')
     fig2.savefig(f"{GRAPH_PATH}/{save_file_name}.png", dpi=100, bbox_inches='tight')
 
@@ -611,6 +616,7 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
 
 
 def GetResultDataframe(ui_gubun, list_tsg, arry_bct):
+    from utility.lazy_imports import get_pd
     columns1 = [
         'index', '종목명', '포지션' if ui_gubun in ('SF', 'CF') else '시가총액', '매수시간', '매도시간',
         '보유시간', '매수가', '매도가', '매수금액', '매도금액', '수익률', '수익금', '매도조건', '추가매수시간'

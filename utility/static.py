@@ -1,29 +1,11 @@
 
-import os
-import re
-import sys
-import pytz
-import psutil
-import _pickle
 import datetime
-import builtins
-import winreg as reg
-from loguru import logger
-from PyQt5.QtTest import QTest
-from traceback import print_exc
-import exchange_calendars as ec
-from threading import Thread, Timer
-from cryptography.fernet import Fernet
-from utility.setting_base import ui_num
-from utility.lazy_imports import get_np, get_talib_stream
-
-now_utc_ = datetime.datetime.now(pytz.utc)
-now_cme_ = now_utc_.astimezone(pytz.timezone('America/Chicago'))
-summer_t = int(now_cme_.dst().total_seconds())
-time_gap = int(summer_t - 50400)
 
 
 def set_builtin_print(bit64, q):
+    import builtins
+    from utility.setting_base import ui_num
+
     # noinspection PyUnusedLocal
     def ui_print(*args, sep=' ', end='\n', file=None):
         try:
@@ -51,6 +33,8 @@ def get_ema_list(is_tick):
 
 
 def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
+    from utility.lazy_imports import get_np
+
     for window in get_ema_list(is_tick):
         df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(3 if market == 1 else 8)
 
@@ -108,6 +92,8 @@ def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
 
 
 def error_decorator(func):
+    from traceback import print_exc
+
     def wrapper(*args, **kwargs):
         try:
             return func(*args, **kwargs)
@@ -118,12 +104,16 @@ def error_decorator(func):
 
 
 def thread_decorator(func):
+    from threading import Thread
+
     def wrapper(*args):
         Thread(target=func, args=args, daemon=True).start()
     return wrapper
 
 
 def get_logger(name):
+    import sys
+    from loguru import logger
     logger.remove()
     logger.add(
         sys.stderr,
@@ -137,6 +127,15 @@ def get_logger(name):
     return logger
 
 
+def get_time_gap():
+    import pytz
+    now_utc_ = datetime.datetime.now(pytz.utc)
+    now_cme_ = now_utc_.astimezone(pytz.timezone('America/Chicago'))
+    summer_t = int(now_cme_.dst().total_seconds())
+    time_gap = int(summer_t - 50400)
+    return time_gap
+
+
 def now():
     return datetime.datetime.now()
 
@@ -146,7 +145,7 @@ def now_utc():
 
 
 def now_cme():
-    return timedelta_sec(time_gap)
+    return timedelta_sec(get_time_gap())
 
 
 def str_ymdhmsf(std_time=None):
@@ -239,7 +238,7 @@ def str_hms(std_time=None):
 
 def str_hms_cme_from_str(std_hms=None):
     if std_hms is not None:
-        std_time = timedelta_sec(time_gap, dt_hms(std_hms))
+        std_time = timedelta_sec(get_time_gap(), dt_hms(std_hms))
     else:
         std_time = now_cme()
     return str_hms(std_time)
@@ -297,6 +296,7 @@ def timedelta_day(day, std_time=None):
 
 
 def threading_timer(sec, func, args=None):
+    from threading import Timer
     if args is None:
         Timer(float(sec), func).start()
     else:
@@ -304,6 +304,7 @@ def threading_timer(sec, func, args=None):
 
 
 def win_proc_alive(name):
+    import psutil
     alive = False
     for proc in psutil.process_iter():
         if name in proc.name():
@@ -326,11 +327,14 @@ def opstarter_kill():
 
 
 def pickle_write(file, data):
+    import _pickle
     with open(f'{file}.pkl', "wb") as f:
         _pickle.dump(data, f, protocol=-1)
 
 
 def pickle_read(file):
+    import os
+    import _pickle
     data = None
     if os.path.isfile(f'{file}.pkl'):
         with open(f'{file}.pkl', "rb") as f:
@@ -339,6 +343,7 @@ def pickle_read(file):
 
 
 def qtest_qwait(sec):
+    from PyQt5.QtTest import QTest
     # noinspection PyArgumentList
     QTest.qWait(int(sec * 1000))
 
@@ -380,6 +385,8 @@ def comma2float(t):
 
 
 def write_key():
+    import winreg as reg
+    from cryptography.fernet import Fernet
     key = str(Fernet.generate_key(), 'utf-8')
     reg.CreateKey(reg.HKEY_LOCAL_MACHINE, r'SOFTWARE\WOW6432Node\STOM')
     reg.CreateKey(reg.HKEY_LOCAL_MACHINE, r'SOFTWARE\WOW6432Node\STOM\EN_KEY')
@@ -389,6 +396,7 @@ def write_key():
 
 
 def read_key():
+    import winreg as reg
     openkey = reg.OpenKey(reg.HKEY_LOCAL_MACHINE, r'SOFTWARE\WOW6432Node\STOM\EN_KEY', 0, reg.KEY_ALL_ACCESS)
     key, _ = reg.QueryValueEx(openkey, 'EN_KEY')
     reg.CloseKey(openkey)
@@ -396,11 +404,13 @@ def read_key():
 
 
 def en_text(key, text):
+    from cryptography.fernet import Fernet
     fernet = Fernet(bytes(key, 'utf-8'))
     return str(fernet.encrypt(bytes(text, 'utf-8')), 'utf-8')
 
 
 def de_text(key, text):
+    from cryptography.fernet import Fernet
     fernet = Fernet(bytes(key, 'utf-8'))
     return str(fernet.decrypt(bytes(text, 'utf-8')), 'utf-8')
 
@@ -416,6 +426,7 @@ def factorial(x):
 
 
 def text_not_in_special_characters(t):
+    import re
     t = t.replace(' ', '')
     if t == re.findall(r'\w+', t)[0]:
         return True
@@ -423,6 +434,7 @@ def text_not_in_special_characters(t):
 
 
 def cme_normal_open():
+    import exchange_calendars as ec
     str_day  = str_ymd(now_cme())
     today    = dt_ymdhms_ios(f'{str_day} 17:00:00')
     ec_cme   = ec.get_calendar('CMES')
@@ -717,6 +729,7 @@ def GetSangHahanga(kosd, predayclose, index):
 
 
 def GetIndicator(mc, mh, ml, mv, k):
+    from utility.lazy_imports import get_talib_stream
     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, OBV, PPO, \
         ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = \
         0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0
