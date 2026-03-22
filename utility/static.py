@@ -127,12 +127,16 @@ def get_logger(name):
     return logger
 
 
-def get_time_gap():
+def summer_time():
     import pytz
     now_utc_ = datetime.datetime.now(pytz.utc)
     now_cme_ = now_utc_.astimezone(pytz.timezone('America/Chicago'))
     summer_t = int(now_cme_.dst().total_seconds())
-    time_gap = int(summer_t - 50400)
+    return summer_t
+
+
+def get_time_gap():
+    time_gap = int(summer_time() - 50400)
     return time_gap
 
 
