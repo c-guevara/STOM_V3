@@ -242,7 +242,7 @@ class KiwoomStrategyTick(StrategyBase):
 
         pre_data = self.dict_data.get(종목코드)
         if pre_data is not None:
-            self.dict_data[종목코드] = get_np().concatenate([pre_data, get_np().array([new_data_tick])])
+            self.dict_data[종목코드] = get_np().concatenate([pre_data, [new_data_tick]])
         else:
             self.dict_data[종목코드] = get_np().array([new_data_tick])
 

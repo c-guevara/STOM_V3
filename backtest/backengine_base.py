@@ -548,9 +548,9 @@ class BackEngineBase(StrategyBase):
             last = len(self.arry_code) - 1
             if last > 0:
                 indexs = self.arry_code[:, 0].astype(get_np().int64)
-                day_last_indexs = indexs // 1000000
-                day_last_indexs = [i for i in range(last) if day_last_indexs[i] != day_last_indexs[i + 1]]
-                day_last_indexs.append(last)
+                day_vals = indexs // 1000000
+                day_last_indexs = get_np().where(day_vals[:-1] != day_vals[1:])[0]
+                day_last_indexs = get_np().concatenate([day_last_indexs, [last]])
 
                 start_idx = 0
                 for end_idx in day_last_indexs:

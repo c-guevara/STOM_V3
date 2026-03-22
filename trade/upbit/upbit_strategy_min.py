@@ -35,7 +35,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
 
             pre_data = self.dict_data.get(종목코드)
             if pre_data is not None:
-                self.dict_data[종목코드] = get_np().concatenate([pre_data, get_np().array([new_data_tick])])
+                self.dict_data[종목코드] = get_np().concatenate([pre_data, [new_data_tick]])
             else:
                 self.dict_data[종목코드] = get_np().array([new_data_tick])
 
@@ -230,7 +230,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
             if not 전략연산:
                 new_data_tick = get_np().zeros(self.data_cnt + self.fm_tcnt, dtype=get_np().float64)
                 new_data_tick[:self.base_cnt] = data[:self.base_cnt]
-                self.arry_code = get_np().concatenate([pre_data, get_np().array([new_data_tick])])
+                self.arry_code = get_np().concatenate([pre_data, [new_data_tick]])
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self.GetParameterArea(rw)
                 self.arry_code[-1, self.area_cnt:self.data_cnt] = GetIndicator(
                     self.arry_code[:, self.dict_findex['현재가']],
