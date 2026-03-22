@@ -182,9 +182,9 @@ def backengine_start(ui, gubun):
         query = GetMoneytopQuery(is_tick, gubun_, ui.startday, ui.endday, ui.starttime, ui.endtime)
         df_mt = pd.read_sql(query, con)
         if is_tick:
-            df_mt['일자'] = (df_mt['index'].values // 1000000).astype(int)
+            df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
-            df_mt['일자'] = (df_mt['index'].values // 10000).astype(int)
+            df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
         df_mt.set_index('index', inplace=True)
         con.close()
     except:
