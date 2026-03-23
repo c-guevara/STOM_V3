@@ -121,10 +121,11 @@ class WebCrawingHomTab:
 
             if existing_data is not None and last_time in page_times:
                 duplicate_index = page_times.index(last_time)
-                time_list.extend(page_times[:duplicate_index])
-                price_list.extend(page_prices[:duplicate_index])
-                gap_list.extend(page_gaps[:duplicate_index])
-                pct_list.extend(page_pcts[:duplicate_index])
+                if duplicate_index > 0:
+                    time_list.extend(page_times[:duplicate_index])
+                    price_list.extend(page_prices[:duplicate_index])
+                    gap_list.extend(page_gaps[:duplicate_index])
+                    pct_list.extend(page_pcts[:duplicate_index])
                 break
             else:
                 time_list.extend(page_times)
@@ -147,7 +148,8 @@ class WebCrawingHomTab:
 
         with self.thread_lock:
             if existing_data is not None:
-                self.dict_data[name] = pd.concat([existing_data, df])
+                if df is not None:
+                    self.dict_data[name] = pd.concat([existing_data, df])
             else:
                 self.dict_data[name] = df
             self.complted_thread += 1
@@ -191,9 +193,10 @@ class WebCrawingHomTab:
 
                 if existing_data is not None and last_time in page_times:
                     duplicate_index = page_times.index(last_time)
-                    time_list.extend(page_times[:duplicate_index])
-                    price_list.extend(page_prices[:duplicate_index])
-                    pct_list.extend(page_pcts[:duplicate_index])
+                    if duplicate_index > 0:
+                        time_list.extend(page_times[:duplicate_index])
+                        price_list.extend(page_prices[:duplicate_index])
+                        pct_list.extend(page_pcts[:duplicate_index])
                     break
                 else:
                     time_list.extend(page_times)
@@ -217,7 +220,8 @@ class WebCrawingHomTab:
 
             with self.thread_lock:
                 if existing_data is not None:
-                    self.dict_data[name] = pd.concat([existing_data, df])
+                    if df is not None:
+                        self.dict_data[name] = pd.concat([existing_data, df])
                 else:
                     self.dict_data[name] = df
                 self.complted_thread += 1
