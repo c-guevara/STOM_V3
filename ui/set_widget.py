@@ -257,6 +257,11 @@ class BounceButton(QPushButton):
         self.click_animation.start()
 
 
+class PlainTextEdit(QTextEdit):
+    def insertFromMimeData(self, source):
+        self.insertPlainText(source.text())
+
+
 class WidgetCreater:
     def __init__(self, ui_class):
         self.ui = ui_class
@@ -337,7 +342,10 @@ class WidgetCreater:
         return line
 
     def setTextEdit(self, tab, visible=True, font=None, vscroll=False, filter_=False):
-        textedit = QTextEdit(tab)
+        if filter_:
+            textedit = PlainTextEdit(tab)
+        else:
+            textedit = QTextEdit(tab)
         textedit.setStyleSheet(style_bc_dk)
         if filter_:
             textedit.installEventFilter(self.ui)
