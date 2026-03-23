@@ -47,6 +47,8 @@ style_st_ks = 'QPushButton{background-color: rgb(100, 100, 80);border-style: sol
 if dict_set['테마'] == '다크블루':
     color_bf_bt = QColor(110, 110, 120)
     color_bf_dk = QColor(70, 70, 80)
+    color_gb_hv = QColor(63, 63, 73)
+    color_gb_nm = QColor(53, 53, 63)
     color_bg_bt = QColor(50, 50, 60)
     color_bg_ld = (50, 50, 60, 150)
     color_bg_bc = QColor(40, 40, 50)
@@ -73,6 +75,8 @@ if dict_set['테마'] == '다크블루':
 elif dict_set['테마'] == '다크브라운':
     color_bf_bt = QColor(120, 110, 110)
     color_bf_dk = QColor(80, 70, 70)
+    color_gb_hv = QColor(73, 63, 63)
+    color_gb_nm = QColor(63, 53, 53)
     color_bg_bt = QColor(60, 50, 50)
     color_bg_ld = (60, 50, 50, 150)
     color_bg_bc = QColor(50, 40, 40)
@@ -99,6 +103,8 @@ elif dict_set['테마'] == '다크브라운':
 elif dict_set['테마'] == '다크그린':
     color_bf_bt = QColor(110, 120, 110)
     color_bf_dk = QColor(70, 80, 70)
+    color_gb_hv = QColor(63, 73, 63)
+    color_gb_nm = QColor(53, 63, 53)
     color_bg_bt = QColor(50, 60, 50)
     color_bg_ld = (50, 60, 50, 150)
     color_bg_bc = QColor(40, 50, 40)
@@ -125,6 +131,8 @@ elif dict_set['테마'] == '다크그린':
 elif dict_set['테마'] == '다크옐로':
     color_bf_bt = QColor(120, 120, 110)
     color_bf_dk = QColor(80, 80, 70)
+    color_gb_hv = QColor(73, 73, 63)
+    color_gb_nm = QColor(63, 63, 53)
     color_bg_bt = QColor(60, 60, 50)
     color_bg_ld = (60, 60, 50, 150)
     color_bg_bc = QColor(50, 50, 40)
@@ -151,6 +159,8 @@ elif dict_set['테마'] == '다크옐로':
 elif dict_set['테마'] == '다크라임':
     color_bf_bt = QColor(110, 120, 120)
     color_bf_dk = QColor(70, 80, 80)
+    color_gb_hv = QColor(63, 63, 73)
+    color_gb_nm = QColor(53, 53, 63)
     color_bg_bt = QColor(50, 60, 60)
     color_bg_ld = (50, 60, 60, 150)
     color_bg_bc = QColor(40, 50, 50)
@@ -177,6 +187,8 @@ elif dict_set['테마'] == '다크라임':
 elif dict_set['테마'] == '다크퍼플':
     color_bf_bt = QColor(120, 110, 120)
     color_bf_dk = QColor(80, 70, 80)
+    color_gb_hv = QColor(73, 63, 73)
+    color_gb_nm = QColor(63, 53, 63)
     color_bg_bt = QColor(60, 50, 60)
     color_bg_ld = (60, 50, 60, 150)
     color_bg_bc = QColor(50, 40, 50)
@@ -203,6 +215,8 @@ elif dict_set['테마'] == '다크퍼플':
 elif dict_set['테마'] == '다크레드':
     color_bf_bt = QColor(130, 90, 90)
     color_bf_dk = QColor(90, 60, 60)
+    color_gb_hv = QColor(83, 58, 58)
+    color_gb_nm = QColor(73, 48, 48)
     color_bg_bt = QColor(70, 45, 45)
     color_bg_ld = (70, 45, 45, 150)
     color_bg_bc = QColor(55, 35, 35)
@@ -229,6 +243,8 @@ elif dict_set['테마'] == '다크레드':
 elif dict_set['테마'] == '다크오렌지':
     color_bf_bt = QColor(130, 100, 80)
     color_bf_dk = QColor(90, 70, 55)
+    color_gb_hv = QColor(83, 68, 53)
+    color_gb_nm = QColor(73, 58, 43)
     color_bg_bt = QColor(70, 55, 40)
     color_bg_ld = (70, 55, 40, 150)
     color_bg_bc = QColor(55, 42, 30)
@@ -255,6 +271,8 @@ elif dict_set['테마'] == '다크오렌지':
 elif dict_set['테마'] == '다크핑크':
     color_bf_bt = QColor(130, 100, 110)
     color_bf_dk = QColor(90, 70, 80)
+    color_gb_hv = QColor(83, 63, 71)
+    color_gb_nm = QColor(73, 53, 61)
     color_bg_bt = QColor(70, 50, 58)
     color_bg_ld = (70, 50, 58, 150)
     color_bg_bc = QColor(55, 40, 47)
@@ -281,6 +299,8 @@ elif dict_set['테마'] == '다크핑크':
 elif dict_set['테마'] == '다크그레이':
     color_bf_bt = QColor(100, 100, 100)
     color_bf_dk = QColor(70, 70, 70)
+    color_gb_hv = QColor(68, 68, 68)
+    color_gb_nm = QColor(58, 58, 58)
     color_bg_bt = QColor(55, 55, 55)
     color_bg_ld = (55, 55, 55, 150)
     color_bg_bc = QColor(45, 45, 45)
@@ -307,6 +327,8 @@ elif dict_set['테마'] == '다크그레이':
 elif dict_set['테마'] == '다크네이비':
     color_bf_bt = QColor(90, 100, 120)
     color_bf_dk = QColor(60, 70, 85)
+    color_gb_hv = QColor(58, 63, 78)
+    color_gb_nm = QColor(48, 53, 68)
     color_bg_bt = QColor(45, 50, 65)
     color_bg_ld = (45, 50, 65, 150)
     color_bg_bc = QColor(35, 40, 52)
