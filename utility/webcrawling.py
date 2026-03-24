@@ -35,6 +35,7 @@ class WebCrawling:
         self.treemap     = False
         self.imagelist1  = None
         self.imagelist2  = None
+        self.dt_today    = None
         self.dict_data   = {}
         self.thread_lock = Lock()
         self.thread_join = 0
@@ -43,8 +44,7 @@ class WebCrawling:
 
     def MainLoop(self):
         hometap_crawling_time = now()
-        self.get_all_data()
-        self.windowQ.put((ui_num['홈차트'], self.dict_data))
+        self.CrawlingAllData()
         while True:
             try:
                 try:
@@ -53,8 +53,7 @@ class WebCrawling:
                 except queue.Empty:
                     pass
                 if now() > hometap_crawling_time:
-                    self.get_all_data()
-                    self.windowQ.put((ui_num['홈차트'], self.dict_data))
+                    self.CrawlingAllData()
                     hometap_crawling_time = timedelta_sec(30)
             except:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
@@ -248,9 +247,8 @@ class WebCrawling:
         else:
             self.windowQ.put((ui_num['트리맵2'], '', df, '', cl))
 
-    def get_all_data(self):
+    def CrawlingAllData(self):
         """모든 데이터 수집 (한국주식+암호화폐)"""
-        self.thread_join = 0
         search_time = now()
         weekday = search_time.weekday()
         before_open = int(str_hms(search_time)) < 90000
@@ -267,11 +265,19 @@ class WebCrawling:
         elif before_open:
             search_time = timedelta_day(-1, search_time)
             market_open = False
+
         search_today = str_ymd_ios(search_time)
         if market_open:
             search_time = str_ymdhm(search_time) + '00'
         else:
             search_time = str_ymd(search_time) + '185900'
+
+        if self.dt_today != search_today:
+            for name in ('코스피', '코스닥', '코스피100', '코스피200', '코스피200선물'):
+                del self.dict_data[name]
+            self.dt_today = search_today
+
+        self.thread_join = 0
         self.get_korean_stocks(search_today, search_time, '코스피', 'KOSPI')
         self.get_korean_stocks(search_today, search_time, '코스닥', 'KOSDAQ')
         self.get_korean_stocks(search_today, search_time, '코스피100', 'KPI100')
@@ -279,8 +285,10 @@ class WebCrawling:
         self.get_korean_stocks(search_today, search_time, '코스피200선물', 'FUT')
         self.get_market_indicator()
         self.get_crypto_data()
+
         while self.thread_join < 16:
             time.sleep(0.1)
+        self.windowQ.put((ui_num['홈차트'], self.dict_data))
 
     @thread_decorator
     def get_korean_stocks(self, search_today, search_time, name, symbol):
@@ -331,19 +339,20 @@ class WebCrawling:
             page_gaps   = [g * b for g, b in zip(page_gaps, page_buhos)]
             page_pcts   = [round((p / (p - g) - 1) * 100, 2) for p, g in zip(page_prices, page_gaps)]
 
-            if existing_data is not None and last_time in page_times:
-                duplicate_index = page_times.index(last_time)
-                if duplicate_index > 0:
-                    time_list.extend(page_times[:duplicate_index])
-                    price_list.extend(page_prices[:duplicate_index])
-                    gap_list.extend(page_gaps[:duplicate_index])
-                    pct_list.extend(page_pcts[:duplicate_index])
-                break
-            else:
-                time_list.extend(page_times)
-                price_list.extend(page_prices)
-                gap_list.extend(page_gaps)
-                pct_list.extend(page_pcts)
+            if page_times and page_prices and page_gaps and page_pcts:
+                if existing_data is not None and last_time in page_times:
+                    duplicate_index = page_times.index(last_time)
+                    if duplicate_index > 0:
+                        time_list.extend(page_times[:duplicate_index])
+                        price_list.extend(page_prices[:duplicate_index])
+                        gap_list.extend(page_gaps[:duplicate_index])
+                        pct_list.extend(page_pcts[:duplicate_index])
+                    break
+                else:
+                    time_list.extend(page_times)
+                    price_list.extend(page_prices)
+                    gap_list.extend(page_gaps)
+                    pct_list.extend(page_pcts)
 
             time.sleep(0.1)
             i += 1
