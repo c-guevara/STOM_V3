@@ -1,6 +1,5 @@
 
 import time
-import queue
 import random
 import requests
 import matplotlib
@@ -43,7 +42,7 @@ class WebCrawling:
         self.MainLoop()
 
     def MainLoop(self):
-        self.CrawlingAllData()
+        self.CrawlingHomTapData()
         hometap_crawling_time = timedelta_sec(30)
         while True:
             try:
@@ -52,7 +51,7 @@ class WebCrawling:
                     self.Crawling(data)
 
                 if now() > hometap_crawling_time:
-                    self.CrawlingAllData()
+                    self.CrawlingHomTapData()
                     hometap_crawling_time = timedelta_sec(30)
 
                 if self.thread_join == 16:
@@ -252,7 +251,7 @@ class WebCrawling:
         else:
             self.windowQ.put((ui_num['트리맵2'], '', df, '', cl))
 
-    def CrawlingAllData(self):
+    def CrawlingHomTapData(self):
         """모든 데이터 수집 (한국주식+암호화폐)"""
         search_time = now()
         weekday = search_time.weekday()
