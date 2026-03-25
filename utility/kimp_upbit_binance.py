@@ -98,23 +98,23 @@ class WebSocketManager(QThread):
         await asyncio.gather(upbit_task, binance_task)
 
     async def run_upbit(self):
-        await self.connect_upbit()
-        await self.receive_upbit()
-        await asyncio.sleep(1)
-        await self.run_upbit()
+        while True:
+            await self.connect_upbit()
+            await self.receive_upbit()
+            await asyncio.sleep(1)
 
     async def run_binance(self):
-        await self.connect_binance()
-        await self.receive_binance()
-        await asyncio.sleep(1)
-        await self.run_binance()
+        while True:
+            await self.connect_binance()
+            await self.receive_binance()
+            await asyncio.sleep(1)
 
     async def connect_upbit(self):
         try:
             self.wsk_upbit = await websockets.connect('wss://api.upbit.com/websocket/v1', ping_interval=60)
-            self.con_upbit = True
             data = [{'ticket': str(uuid.uuid4())[:6]}, {'type': 'ticker', 'codes': self.codes, 'isOnlyRealtime': True}]
             await self.wsk_upbit.send(json.dumps(data))
+            self.con_upbit = True
         except:
             self.con_upbit = False
 
@@ -123,6 +123,7 @@ class WebSocketManager(QThread):
             client = await AsyncClient.create()
             bsm = BinanceSocketManager(client)
             self.wsk_binance = bsm.miniticker_socket()
+            self.con_binance = True
         except:
             self.con_binance = False
 
@@ -133,18 +134,14 @@ class WebSocketManager(QThread):
                 data = json.loads(data)
                 self.signal1.emit(data)
             except:
-                await self.disconnect_ticker()
+                await self.wsk_upbit.close()
+                self.con_upbit = False
 
     async def receive_binance(self):
-        async with self.wsk_binance:
-            self.con_binance = True
-            while self.con_binance:
+        while self.con_binance:
+            async with self.wsk_binance:
                 try:
                     data = await self.wsk_binance.recv()
                     self.signal2.emit(data)
                 except:
                     self.con_binance = False
-
-    async def disconnect_ticker(self):
-        await self.wsk_upbit.close()
-        self.con_upbit = False
