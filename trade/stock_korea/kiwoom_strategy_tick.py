@@ -19,11 +19,11 @@ from utility.static import now, timedelta_sec, GetKiwoomPgSgSp, GetHogaunit, get
 
 class KiwoomStrategyTick(StrategyBase):
     def __init__(self, gubun, qlist, dict_set):
-        super().__init__()
         """
         self.mgzservQ, self.sagentQ, self.straderQ, self.sstgQs
                 0            1             2            3
         """
+        super().__init__()
         self.gubun            = gubun
         self.mgzservQ         = qlist[0]
         self.straderQ         = qlist[2]

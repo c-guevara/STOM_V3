@@ -17,11 +17,11 @@ from utility.static import now, now_cme, get_buy_indi_stg, GetFutureLongPgSgSp, 
 
 class FutureStrategyTick(StrategyBase):
     def __init__(self, qlist, dict_set):
-        super().__init__()
         """
         self.mgzservQ, self.sagentQ, self.straderQ, self.sstgQ
                 0            1             2            3
         """
+        super().__init__()
         self.mgzservQ         = qlist[0]
         self.straderQ         = qlist[2]
         self.sstgQ            = qlist[3]

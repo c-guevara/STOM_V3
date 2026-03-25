@@ -14,11 +14,11 @@ from utility.static import now, now_utc, GetUpbitHogaunit, GetUpbitPgSgSp, get_b
 
 class UpbitStrategyTick(StrategyBase):
     def __init__(self, qlist, dict_set):
+        """
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
+           0        1       2      3       4      5      6      7       8         9         10     11      12
+        """
         super().__init__()
-        """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, kimpQ, wdzservQ, totalQ
-           0        1       2      3       4      5      6      7       8         9         10     11    12      13       14
-        """
         self.windowQ          = qlist[0]
         self.teleQ            = qlist[3]
         self.ctraderQ         = qlist[9]
