@@ -43,8 +43,9 @@ class WebCrawling:
         self.MainLoop()
 
     def MainLoop(self):
-        hometap_crawling_time = now()
+        self.thread_join = 0
         self.CrawlingAllData()
+        hometap_crawling_time = timedelta_sec(30)
         while True:
             try:
                 try:
@@ -53,8 +54,12 @@ class WebCrawling:
                 except queue.Empty:
                     pass
                 if now() > hometap_crawling_time:
+                    self.thread_join = 0
                     self.CrawlingAllData()
                     hometap_crawling_time = timedelta_sec(30)
+                if self.thread_join == 16:
+                    self.thread_join = 0
+                    self.windowQ.put((ui_num['홈차트'], self.dict_data))
             except:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
@@ -278,7 +283,6 @@ class WebCrawling:
                     del self.dict_data[name]
             self.dt_today = search_today
 
-        self.thread_join = 0
         self.get_korean_stocks(search_today, search_time, '코스피', 'KOSPI')
         self.get_korean_stocks(search_today, search_time, '코스닥', 'KOSDAQ')
         self.get_korean_stocks(search_today, search_time, '코스피100', 'KPI100')
@@ -286,10 +290,6 @@ class WebCrawling:
         self.get_korean_stocks(search_today, search_time, '코스피200선물', 'FUT')
         self.get_market_indicator()
         self.get_crypto_data()
-
-        while self.thread_join < 16:
-            time.sleep(0.1)
-        self.windowQ.put((ui_num['홈차트'], self.dict_data))
 
     @thread_decorator
     def get_korean_stocks(self, search_today, search_time, name, symbol):
