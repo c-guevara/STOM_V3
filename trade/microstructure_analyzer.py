@@ -170,7 +170,7 @@ class DataBuffer:
 
 
 class MicrostructureAnalyzer:
-    def __init__(self, market_type: str = 'stock', data_cnt: int = 1800, history_cnt: int = 30, test_mode=False):
+    def __init__(self, market_type: str = 'stock', data_cnt: int = 1800, history_cnt: int = 30):
         """
         초기화
 
@@ -178,14 +178,12 @@ class MicrostructureAnalyzer:
             market_type: 'stock', 'coin', 'future' (시장 종류)
             data_cnt: 종목별 최대 히스토리 저장 크기 (슬라이딩 윈도우)
             history_cnt: 전처리 데이터 히스토리 크기
-            test_mode: 테스트모드
         """
         # 기본 설정
         self.market_type = market_type
         self.data_cnt = data_cnt
         self.history_cnt = history_cnt
         self.curr_data = None
-        self.test_mode = test_mode
         self.data_results = []
 
         # 데이터 타입별 파라미터 설정
@@ -302,8 +300,6 @@ class MicrostructureAnalyzer:
         total_risk = self._analyze_risk(code)
         # 시그널 및 신뢰도 계산
         signal, confidence = self._analyze_signal(buy_cf, sell_cf)
-        if self.test_mode and self.data_results:
-            self.data_results[-1][3] = total_risk
         return signal, confidence, total_risk
 
     def _calculate_processed_data(self, code: str):
@@ -1032,9 +1028,6 @@ class MicrostructureAnalyzer:
             (0.07 if trade_ratio['dominance'] == 'sell_dominant' else 0)
         )
 
-        if self.test_mode:
-            self.data_results.append([buy_flow_strength, sell_flow_strength, None, None])
-
         # 최종 신호 결정
         if buy_flow_strength > sell_flow_strength + buy_cf:
             return 'buy'
@@ -1100,9 +1093,6 @@ class MicrostructureAnalyzer:
                             volume_confidence + trade_ratio_confidence + risk_confidence)
 
         final_confidence = round(final_confidence, 2)
-
-        if self.test_mode:
-            self.data_results[-1][2] = final_confidence
 
         return final_confidence
 
