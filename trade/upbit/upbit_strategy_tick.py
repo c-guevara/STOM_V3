@@ -86,6 +86,12 @@ class UpbitStrategyTick(StrategyBase):
 
         self.ms_analyzer = MicrostructureAnalyzer('coin')
 
+        # microstructure_analyzer numba 함수 워밍업
+        from trade.microstructure_analyzer import nb_calculate_returns, nb_calculate_sharpe_ratio, nb_calculate_max_drawdown
+        _ = nb_calculate_returns(np.array([100., 101., 102.]))
+        _ = nb_calculate_sharpe_ratio(np.array([0.01, -0.005, 0.02]), True)
+        _ = nb_calculate_max_drawdown(np.array([100., 110., 105., 95., 100.]))
+
         set_builtin_print(True, self.windowQ)
         self.SetFormulaData()
         self.UpdateStringategy()

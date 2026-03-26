@@ -98,6 +98,18 @@ class BackEngineBase(StrategyBase):
         self.opti_kind       = 0
         self.sell_count      = 0
 
+        # numba 함수 워밍업 (컴파일 로그가 set_builtin_print 영향 받지 않도록)
+        from backtest.back_static_numba import GetOptiValidStd, GetResult, bootstrap_test
+        _ = GetOptiValidStd(np.array([1., 2.]), np.array([1., 2.]), True)
+        _ = GetResult(np.zeros((2, 5)), np.zeros((2, 5)), 100, 'S', 1)
+        _ = bootstrap_test(np.array([0.01, -0.01, 0.02]), 10)
+
+        # microstructure_analyzer numba 함수 워밍업
+        from trade.microstructure_analyzer import nb_calculate_returns, nb_calculate_sharpe_ratio, nb_calculate_max_drawdown
+        _ = nb_calculate_returns(np.array([100., 101., 102.]))
+        _ = nb_calculate_sharpe_ratio(np.array([0.01, -0.005, 0.02]), True)
+        _ = nb_calculate_max_drawdown(np.array([100., 110., 105., 95., 100.]))
+
         set_builtin_print(True, self.wq)
         self.UpdateMarketGubun()
         self.MainLoop()
