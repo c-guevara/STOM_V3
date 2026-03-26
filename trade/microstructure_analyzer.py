@@ -1,6 +1,12 @@
 
+import os
+import sys
 import numpy as np
 from typing import Dict, List, Tuple
+try:
+    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
+except:
+    pass
 from utility.setting_base import list_stock_tick, list_coin_tick
 
 try:
