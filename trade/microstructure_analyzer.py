@@ -875,7 +875,7 @@ class MicrostructureAnalyzer:
         manipulation_risk = self._calculate_manipulation_risk()         # 조작 리스크
         liquidity_risk = self._calculate_liquidity_risk()               # 유동성 리스크
         price_risk = self._calculate_price_risk(code)                   # 가격 기반 리스크 (VaR 등)
-        total_risk = (market_risk + manipulation_risk + liquidity_risk + price_risk) / 4
+        total_risk = round((market_risk + manipulation_risk + liquidity_risk + price_risk) / 4, 2)
 
         self.curr_data['total_risk'] = total_risk
 
