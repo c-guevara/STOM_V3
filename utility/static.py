@@ -18,11 +18,6 @@ def set_builtin_print(bit64, q):
             message = sep.join(processed_args)
             message = message.lstrip()
             message = message.rstrip()
-
-            # numba 컴파일 로그 필터링
-            if 'microstructure_analyzer.py' in message:
-                return
-
             if bit64:
                 q.put((ui_num['시스템로그'], message))
             else:
