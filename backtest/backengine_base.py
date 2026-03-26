@@ -6,7 +6,6 @@ from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.strategy_base import StrategyBase
 from trade.formula_manager import get_formula_data
-from trade.microstructure_analyzer import MicrostructureAnalyzer
 from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellConds, GetBackloadCodeQuery, \
     get_trade_info, GetBuyStgFuture, GetSellStgFuture, GetBuyCondsFuture, GetSellCondsFuture
 from utility.setting_base import DB_STOCK_TICK_BACK, BACK_TEMP, ui_num, DB_STOCK_MIN_BACK, indicator, \
@@ -98,13 +97,12 @@ class BackEngineBase(StrategyBase):
         self.opti_kind       = 0
         self.sell_count      = 0
 
-        # numba 함수 워밍업 (컴파일 로그가 set_builtin_print 영향 받지 않도록)
+        # numba 함수 워밍업
         from backtest.back_static_numba import GetOptiValidStd, GetResult, bootstrap_test
         _ = GetOptiValidStd(np.array([1., 2.]), np.array([1., 2.]), True)
         _ = GetResult(np.zeros((2, 5)), np.zeros((2, 5)), 100, 'S', 1)
         _ = bootstrap_test(np.array([0.01, -0.01, 0.02]), 10)
 
-        # microstructure_analyzer numba 함수 워밍업
         from trade.microstructure_analyzer import nb_calculate_returns, nb_calculate_sharpe_ratio, nb_calculate_max_drawdown
         _ = nb_calculate_returns(np.array([100., 101., 102.]))
         _ = nb_calculate_sharpe_ratio(np.array([0.01, -0.005, 0.02]), True)
@@ -127,6 +125,8 @@ class BackEngineBase(StrategyBase):
         if self.market_gubun == 1:   gubun = 'stock'
         elif self.market_gubun == 2: gubun = 'future'
         else:                        gubun = 'coin'
+
+        from trade.microstructure_analyzer import MicrostructureAnalyzer
         self.ms_analyzer = MicrostructureAnalyzer(gubun)
 
         if self.market_gubun == 1:
