@@ -209,7 +209,6 @@ class UpbitStrategyMin(UpbitStrategyTick):
                             self.Sell()
 
         else:
-            # pre_data = self.dict_data[종목코드]
             pre_data = self.dict_data.get(종목코드)
             if pre_data is None:
                 pre_data = np.empty((0, self.data_cnt + self.fm_tcnt), dtype=np.float64)
