@@ -357,10 +357,26 @@ class UpdateTablewidget:
                      ui_num['스톰라이브7'], ui_num['스톰라이브9'], ui_num['스톰라이브10']):
             tableWidget.setSortingEnabled(True)
 
-        if gubun not in (ui_num['S상세기록'], ui_num['C상세기록'], ui_num['S잔고목록'], ui_num['C잔고목록'],
-                         ui_num['S체결목록'], ui_num['C체결목록'], ui_num['S호가종목'], ui_num['C호가종목'],
-                         ui_num['기업공시'], ui_num['기업뉴스'], ui_num['재무년도'], ui_num['재무분기'],
-                         ui_num['C호가잔량'], ui_num['S호가잔량']):
+        if gubun in (ui_num['S상세기록'], ui_num['C상세기록'], ui_num['S잔고목록'], ui_num['C잔고목록'], ui_num['S체결목록'], ui_num['C체결목록']):
+            header = tableWidget.horizontalHeader()
+            hwidth = header.width() if gubun in (ui_num['S상세기록'], ui_num['C상세기록']) else 670
+            if gubun in (ui_num['S상세기록'], ui_num['C상세기록']):
+                header_count = 12
+            elif len(df.columns) in (9, 11):
+                header_count = 7
+            else:
+                header_count = 8
+            width = []
+            for column in range(header_count):
+                header.setSectionResizeMode(column, QHeaderView.ResizeToContents)
+                width.append(header.sectionSize(column))
+            wfactor = hwidth / sum(width)
+            for column in range(header_count):
+                header.setSectionResizeMode(column, QHeaderView.Interactive)
+                header.resizeSection(column, int(width[column] * wfactor))
+
+        elif gubun not in (ui_num['S호가종목'], ui_num['C호가종목'], ui_num['C호가잔량'], ui_num['S호가잔량'],
+                           ui_num['기업공시'], ui_num['기업뉴스'], ui_num['재무년도'], ui_num['재무분기']):
             header = tableWidget.horizontalHeader()
             hwidth = header.width()
             width = []
