@@ -20,6 +20,10 @@ class DrawDBChart(DrawChartBase):
         self.gubun, self.ui.ctpg_xticks, self.ui.ctpg_arry, self.ui.buy_index, self.ui.sell_index, \
             fm_list, dict_fm, fm_tcnt = data[1:]
 
+        if self.ui.trading:
+            QMessageBox.critical(self.ui.dialog_chart, '오류 알림', '매매 중에는 DB차트를 볼 수 없습니다.\n')
+            return
+
         if dict_fm:
             self.ui.fm_list = fm_list
             self.ui.dict_fm = dict_fm
