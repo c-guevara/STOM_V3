@@ -359,34 +359,57 @@ class UpdateTablewidget:
 
         if gubun in (ui_num['S상세기록'], ui_num['C상세기록'], ui_num['S잔고목록'], ui_num['C잔고목록'], ui_num['S체결목록'], ui_num['C체결목록']):
             header = tableWidget.horizontalHeader()
-            hwidth = header.width() if gubun in (ui_num['S상세기록'], ui_num['C상세기록']) else 670
+            hwidth = header.width() if gubun in (ui_num['S상세기록'], ui_num['C상세기록']) else 668
             if gubun in (ui_num['S상세기록'], ui_num['C상세기록']):
                 header_count = 12
             elif len(df.columns) in (9, 11):
                 header_count = 7
             else:
                 header_count = 8
+
             width = []
-            for column in range(header_count):
-                header.setSectionResizeMode(column, QHeaderView.ResizeToContents)
-                width.append(header.sectionSize(column))
+            for i in range(header_count):
+                header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+                width.append(header.sectionSize(i))
+
             wfactor = hwidth / sum(width)
-            for column in range(header_count):
-                header.setSectionResizeMode(column, QHeaderView.Interactive)
-                header.resizeSection(column, int(width[column] * wfactor))
+
+            cumsum_width = 0
+            last = header_count - 1
+            for i in range(header_count):
+                header.setSectionResizeMode(i, QHeaderView.Interactive)
+                if i != last:
+                    column_width = int(width[i] * wfactor)
+                    header.resizeSection(i, column_width)
+                    cumsum_width += column_width
+                else:
+                    column_width = hwidth - cumsum_width
+                    header.resizeSection(i, column_width)
 
         elif gubun not in (ui_num['S호가종목'], ui_num['C호가종목'], ui_num['C호가잔량'], ui_num['S호가잔량'],
                            ui_num['기업공시'], ui_num['기업뉴스'], ui_num['재무년도'], ui_num['재무분기']):
             header = tableWidget.horizontalHeader()
             hwidth = header.width()
+            header_count = header.count()
+
             width = []
-            for column in range(header.count()):
-                header.setSectionResizeMode(column, QHeaderView.ResizeToContents)
-                width.append(header.sectionSize(column))
+            for i in range(header_count):
+                header.setSectionResizeMode(i, QHeaderView.ResizeToContents)
+                width.append(header.sectionSize(i))
+
             wfactor = hwidth / sum(width)
-            for column in range(header.count()):
-                header.setSectionResizeMode(column, QHeaderView.Interactive)
-                header.resizeSection(column, int(width[column] * wfactor))
+
+            cumsum_width = 0
+            last = header_count - 1
+            for i in range(header_count):
+                header.setSectionResizeMode(i, QHeaderView.Interactive)
+                if i != last:
+                    column_width = int(width[i] * wfactor)
+                    header.resizeSection(i, column_width)
+                    cumsum_width += column_width
+                else:
+                    column_width = hwidth - cumsum_width
+                    header.resizeSection(i, column_width)
 
     def UpdateHogainfoForChart(self, gubun, ymdhms):
         def fi(fname):
