@@ -153,7 +153,6 @@ class UpdateTablewidget:
             tableWidget.setSortingEnabled(False)
 
         tableWidget.setRowCount(len_df)
-        tableWidget.blockSignals(True)
         arry = df.values
         for i, index in enumerate(df.index):
             for j, column in enumerate(df.columns):
@@ -323,8 +322,6 @@ class UpdateTablewidget:
                     item.setForeground(color)
 
                 tableWidget.setItem(i, j, item)
-
-        tableWidget.blockSignals(False)
 
         if len_df < 13 and gubun in (ui_num['S거래목록'], ui_num['S잔고목록'], ui_num['C거래목록'], ui_num['C잔고목록']):
             tableWidget.setRowCount(13)
