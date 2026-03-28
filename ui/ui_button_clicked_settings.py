@@ -1044,8 +1044,8 @@ def setting_order_save_01(ui):
         QMessageBox.critical(ui, '오류 알림', '지정가 호가 외 모든 입력값은 양수여야합니다.\n')
         return
 
-    if 주식매수분할횟수 > 5:
-        QMessageBox.critical(ui, '오류 알림', '매수분할횟수는 5을 초과할 수 없습니다.\n')
+    if 주식매수분할횟수 > 10:
+        QMessageBox.critical(ui, '오류 알림', '매수분할횟수는 10을 초과할 수 없습니다.\n')
         return
 
     if '해외선물' in ui.dict_set['증권사'] and 주식매수주문구분 not in ('시장가', '지정가'):
@@ -1186,12 +1186,12 @@ def setting_order_save_02(ui):
         QMessageBox.critical(ui, '오류 알림', '모든 값은 양수로 입력하십시오.\n')
         return
 
-    if 주식매도분할횟수 > 5:
-        QMessageBox.critical(ui, '오류 알림', '매도분할횟수는 5을 초과할 수 없습니다.\n')
+    if 주식매도분할횟수 > 10:
+        QMessageBox.critical(ui, '오류 알림', '매도분할횟수는 10을 초과할 수 없습니다.\n')
         return
 
-    if 주식매도금지매수횟수값 > 4:
-        QMessageBox.critical(ui, '오류 알림', '매도금지 매수횟수는 5미만으로 입력하십시오.\n')
+    if 주식매도금지매수횟수값 > 9:
+        QMessageBox.critical(ui, '오류 알림', '매도금지 매수횟수는 10미만으로 입력하십시오.\n')
         return
 
     if '해외선물' in ui.dict_set['증권사'] and 주식매도주문구분 not in ('시장가', '지정가'):
@@ -1357,8 +1357,8 @@ def setting_order_save_03(ui):
         QMessageBox.critical(ui, '오류 알림', '지정가 호가 외 모든 입력값은 양수여야합니다.\n')
         return
 
-    if 코인매수분할횟수 > 5:
-        QMessageBox.critical(ui, '오류 알림', '매수분할횟수는 5를 초과할 수 없습니다.\n')
+    if 코인매수분할횟수 > 10:
+        QMessageBox.critical(ui, '오류 알림', '매수분할횟수는 10를 초과할 수 없습니다.\n')
         return
 
     if ui.dict_set['거래소'] == '업비트' and 코인매수주문구분 not in ('시장가', '지정가'):
@@ -1489,12 +1489,12 @@ def setting_order_save_04(ui):
         QMessageBox.critical(ui, '오류 알림', '모든 값은 양수로 입력하십시오.\n')
         return
 
-    if 코인매도분할횟수 > 5:
-        QMessageBox.critical(ui, '오류 알림', '매도분할횟수는 5을 초과할 수 없습니다.\n')
+    if 코인매도분할횟수 > 10:
+        QMessageBox.critical(ui, '오류 알림', '매도분할횟수는 10을 초과할 수 없습니다.\n')
         return
 
-    if 코인매도금지매수횟수값 > 4:
-        QMessageBox.critical(ui, '오류 알림', '매도금지 매수횟수는 5미만으로 입력하십시오.\n')
+    if 코인매도금지매수횟수값 > 9:
+        QMessageBox.critical(ui, '오류 알림', '매도금지 매수횟수는 10미만으로 입력하십시오.\n')
         return
 
     if ui.dict_set['거래소'] == '업비트' and 코인매도주문구분 not in ('시장가', '지정가'):
