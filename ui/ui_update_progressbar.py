@@ -45,7 +45,6 @@ def update_progressbar(ui):
 
     ui.kp_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_kimp.isVisible() else style_bc_bt)
     ui.dd_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_db.isVisible() else style_bc_bt)
-    ui.js_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_jisu.isVisible() else style_bc_bt)
     ui.uj_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_tree.isVisible() else style_bc_bt)
     ui.gu_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_info.isVisible() else style_bc_bt)
     ui.hg_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_hoga.isVisible() else style_bc_bt)

@@ -273,15 +273,6 @@ def show_treemap(ui):
 
 
 @error_decorator
-def show_jisu(ui):
-    if not ui.dialog_jisu.isVisible():
-        DialogAnimator.setup_dialog_animation(ui.dialog_jisu, duration=250)
-        ui.dialog_jisu.show()
-    else:
-        ui.dialog_jisu.close()
-
-
-@error_decorator
 def show_db(ui):
     if not ui.dialog_db.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_db, duration=250)
