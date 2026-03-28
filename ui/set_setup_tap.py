@@ -135,10 +135,12 @@ class SetSetupTap:
         self.ui.sj_back_labell_01.setToolTip('그리드 최적화 시 직전 대비 기준값 상승률이 설정값보다 적을 경우 종료됩니다.\n0%로 설정 시 최고기준값을 갱신하지 못하면 최적화가 종료됩니다.')
         self.ui.sj_back_liEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_07)
 
+        self.ui.sj_back_cheBox_16 = self.wc.setCheckBox('1초스냅샷 전략에 시장미시구조분석 적용하기', self.ui.sj_bs_groupBox_07)
+        self.ui.sj_back_cheBox_17 = self.wc.setCheckBox('1초스냅샷 전략에 시장리스크분석 적용하기', self.ui.sj_bs_groupBox_07)
         self.ui.sj_back_cheBox_09 = self.wc.setCheckBox('백테스트 그래프 매수시간 기준으로 표시하기', self.ui.sj_bs_groupBox_07, tip='체크해제 시 매도시간 기준으로 표시됩니다.')
-        self.ui.sj_back_cheBox_10 = self.wc.setCheckBox('일반 백테스트 시 그래프 저장하지 않기', self.ui.sj_bs_groupBox_07, changed=self.ui.CheckboxChanged_12)
-        self.ui.sj_back_cheBox_11 = self.wc.setCheckBox('일반 백테스트 시 그래프 띄우지 않기', self.ui.sj_bs_groupBox_07, changed=self.ui.CheckboxChanged_13)
         self.ui.sj_back_cheBox_12 = self.wc.setCheckBox('백테스트로그 기록하지 않기', self.ui.sj_bs_groupBox_07)
+        self.ui.sj_back_cheBox_10 = self.wc.setCheckBox('일반 백테스트 시 그래프 저장하지 않기', self.ui.sj_bs_groupBox_07, changed=self.ui.CheckboxChanged_12)
+        self.ui.sj_back_cheBox_11 = self.wc.setCheckBox('띄우지 않기', self.ui.sj_bs_groupBox_07, changed=self.ui.CheckboxChanged_13)
 
         self.ui.sj_back_cheBox_13 = self.wc.setCheckBox('스케쥴러 자동실행  |  요일                    시간                                                                                        ▣  엔진시작일자', self.ui.sj_bs_groupBox_07, tip='백테 스케쥴러를 자동실행한다.')
         self.ui.sj_back_comBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_07, items=['금', '토', '일'])
@@ -149,7 +151,6 @@ class SetSetupTap:
         self.ui.sj_back_liEdit_03 = self.wc.setLineedit(self.ui.sj_bs_groupBox_07)
         self.ui.sj_back_cheBox_15 = self.wc.setCheckBox('고정', self.ui.sj_bs_groupBox_07, changed=self.ui.CheckboxChanged_17)
         self.ui.sj_back_daEdit_01 = self.wc.setDateEdit(self.ui.sj_bs_groupBox_07)
-        self.ui.sj_back_cheBox_16 = self.wc.setCheckBox('1초스냅샷 전략에 시장미시구조분석 적용하기', self.ui.sj_bs_groupBox_07)
 
         self.ui.sj_ilbunback_listtt = [self.ui.sj_back_cheBox_02, self.ui.sj_back_cheBox_03]
 
@@ -295,10 +296,12 @@ class SetSetupTap:
         self.ui.sj_back_labell_01.setGeometry(500, 100, 330, 20)
         self.ui.sj_back_liEdit_01.setGeometry(698, 100, 40, 20)
 
-        self.ui.sj_back_cheBox_09.setGeometry(880, 25, 300, 20)
-        self.ui.sj_back_cheBox_10.setGeometry(880, 50, 300, 20)
-        self.ui.sj_back_cheBox_11.setGeometry(880, 75, 300, 20)
+        self.ui.sj_back_cheBox_16.setGeometry(880, 25, 250, 20)
+        self.ui.sj_back_cheBox_17.setGeometry(880, 50, 250, 20)
+        self.ui.sj_back_cheBox_09.setGeometry(880, 75, 300, 20)
         self.ui.sj_back_cheBox_12.setGeometry(880, 100, 300, 20)
+        self.ui.sj_back_cheBox_10.setGeometry(880, 125, 300, 20)
+        self.ui.sj_back_cheBox_11.setGeometry(1100, 125, 300, 20)
 
         self.ui.sj_back_cheBox_13.setGeometry(10, 125, 800, 20)
         self.ui.sj_back_comBox_01.setGeometry(160, 125, 50, 20)
@@ -309,7 +312,6 @@ class SetSetupTap:
         self.ui.sj_back_liEdit_03.setGeometry(615, 125, 50, 20)
         self.ui.sj_back_cheBox_15.setGeometry(700, 125, 220, 20)
         self.ui.sj_back_daEdit_01.setGeometry(750, 125, 110, 20)
-        self.ui.sj_back_cheBox_16.setGeometry(880, 125, 250, 20)
 
         self.ui.sj_etc_labelll_01.setGeometry(10, 25, 300, 20)
         self.ui.sj_etc_comBoxx_01.setGeometry(100, 25, 85, 20)

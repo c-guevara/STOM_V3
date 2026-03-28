@@ -361,55 +361,6 @@ try:
 
         return results[:result_count]
 
-
-    @jit(nopython=True, cache=True, fastmath=True)
-    def _calc_analyze_volume_pattern(volumes: np.ndarray):
-        """거래량 패턴 분석 (Numba JIT) - 결과: (mean_vol, std_vol, max_vol, trend_score, is_increasing)"""
-        n = len(volumes)
-        if n < 2:
-            return np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
-
-        # 평균 계산
-        mean_vol = 0.0
-        for i in range(n):
-            mean_vol += volumes[i]
-        mean_vol = mean_vol / n
-
-        # 표준편차 계산
-        variance = 0.0
-        for i in range(n):
-            diff = volumes[i] - mean_vol
-            variance += diff * diff
-        std_vol = (variance / n) ** 0.5
-
-        # 최대값
-        max_vol = volumes[0]
-        for i in range(1, n):
-            if volumes[i] > max_vol:
-                max_vol = volumes[i]
-
-        # 추세 점수 (선형 회귀 기울기 근사)
-        if n >= 5:
-            x_mean = (n - 1) / 2.0
-            xy_sum = 0.0
-            x_sq_sum = 0.0
-            for i in range(n):
-                x = float(i) - x_mean
-                xy_sum += x * (volumes[i] - mean_vol)
-                x_sq_sum += x * x
-
-            if x_sq_sum > 0:
-                slope = xy_sum / x_sq_sum
-                trend_score = slope / (mean_vol + 1e-8)
-            else:
-                trend_score = 0.0
-        else:
-            trend_score = 0.0
-
-        # 증가 여부
-        is_increasing = 1.0 if trend_score > 0 else 0.0
-
-        return np.array([mean_vol, std_vol, max_vol, trend_score, is_increasing], dtype=np.float64)
 except:
     def _calc_analyze_price_levels(quantities: np.ndarray, multiplier: float, min_occurrences: int):
         """가격 레벨별 분석 (벡터 연산 버전 - 32비트 fallback)"""
@@ -670,35 +621,6 @@ except:
                     break
 
         return np.array(results, dtype=np.float64) if results else np.empty((0, 3), dtype=np.float64)
-
-
-    def _calc_analyze_volume_pattern(volumes: np.ndarray):
-        """거래량 패턴 분석 (벡터 연산 버전 - 32비트 fallback)"""
-        volumes = np.asarray(volumes, dtype=np.float64)
-        n = len(volumes)
-        if n < 2:
-            return np.array([0.0, 0.0, 0.0, 0.0, 0.0], dtype=np.float64)
-
-        # 평균, 표준편차, 최대값 (벡터화)
-        mean_vol = volumes.mean()
-        std_vol = volumes.std()
-        max_vol = volumes.max()
-
-        # 추세 점수 (선형 회귀 기울기 근사)
-        if n >= 5:
-            x = np.arange(n, dtype=np.float64)
-            x_mean = x.mean()
-            y_mean = mean_vol
-
-            with np.errstate(divide='ignore', invalid='ignore'):
-                slope = np.sum((x - x_mean) * (volumes - y_mean)) / np.sum((x - x_mean) ** 2)
-                trend_score = slope / (mean_vol + 1e-8) if mean_vol > 0 else 0.0
-        else:
-            trend_score = 0.0
-
-        is_increasing = 1.0 if trend_score > 0 else 0.0
-
-        return np.array([mean_vol, std_vol, max_vol, trend_score, is_increasing], dtype=np.float64)
 
 
 class HistoryBuffer:
@@ -1055,10 +977,6 @@ class MicrostructureAnalyzer:
         stop_hunt    = self._detect_stop_hunt(hist_buffer)                      # 스탑헌트 감지
         overall_risk = self._calculate_overall_risk(layering, pump_dump, iceberg, stop_hunt)  # 리스크 평가
 
-        # 거래량 패턴 분석
-        volume_pattern = self._analyze_volume_pattern(hist_buffer)              # 거래량 패턴 분석
-        trade_ratio    = self._calculate_trade_ratio(buy_volume, sell_volume)   # 매수/매도 체결 비율
-
         # 최신 데이터 저장 (전략 클래스들에서 참조)
         self.curr_data = {
             'curr_price': curr_price,
@@ -1077,9 +995,7 @@ class MicrostructureAnalyzer:
             'pump_dump': pump_dump,
             'iceberg': iceberg,
             'stop_hunt': stop_hunt,
-            'overall_risk': overall_risk,
-            'volume_pattern': volume_pattern,
-            'trade_ratio': trade_ratio
+            'overall_risk': overall_risk
         }
 
     def _detect_layering(self, hist_buffer: HistoryBuffer) -> List[Tuple]:
@@ -1279,73 +1195,6 @@ class MicrostructureAnalyzer:
             'stop_hunt_count': len(stop_hunt_signals)
         }
 
-    def _analyze_volume_pattern(self, hist_buffer: HistoryBuffer) -> Dict:
-        """
-        거래량 패턴 분석 (Numba JIT 최적화 버전)
-        """
-        volumes = hist_buffer.get_volumes_array()
-        n = len(volumes)
-
-        if n < 10:
-            return {'pattern': 'insufficient_data', 'volatility': 0, 'trend': 0}
-
-        results = _calc_analyze_volume_pattern(volumes)
-
-        mean_vol = float(results[0])
-        std_vol = float(results[1])
-        trend_score = float(results[3])
-
-        volume_volatility = std_vol / (mean_vol + 1e-8)
-        volume_trend = trend_score * mean_vol
-
-        # 패턴 분류
-        if volume_volatility > 2.0:
-            pattern = 'high_volatility'
-        elif abs(volume_trend) > mean_vol * 0.1:
-            pattern = 'strong_trend'
-        else:
-            pattern = 'stable'
-
-        return {
-            'pattern': pattern,
-            'volatility': volume_volatility,
-            'trend': volume_trend,
-            'avg_volume': mean_vol,
-            'current_volume': volumes[-1]
-        }
-
-    def _calculate_trade_ratio(self, buy_volume, sell_volume) -> Dict:
-        """
-        매수/매도 체결 비율 분석
-        실제 체결된 거래의 매수/매도 비율을 계산
-
-        Returns:
-            Dict: 체결 비율 정보
-        """
-        # 실제 체결 데이터 사용 (초당 매수/매도 수량)
-        total_volume = buy_volume + sell_volume
-
-        if total_volume == 0:
-            return {'buy_ratio': 0.5, 'sell_ratio': 0.5, 'dominance': 'neutral'}
-
-        buy_ratio = buy_volume / total_volume
-        sell_ratio = sell_volume / total_volume
-
-        # 우세도 판단
-        if buy_ratio > 0.6:
-            dominance = 'buy_dominant'
-        elif sell_ratio > 0.6:
-            dominance = 'sell_dominant'
-        else:
-            dominance = 'balanced'
-
-        return {
-            'buy_ratio': buy_ratio,
-            'sell_ratio': sell_ratio,
-            'dominance': dominance,
-            'total_volume': total_volume
-        }
-
     def _analyze_risk(self, code: str):
         """리스크 분석"""
         if self.curr_data is None:
@@ -1543,8 +1392,6 @@ class MicrostructureAnalyzer:
         ask_concentration = self.curr_data['ask_concentration']
         log_depth_ratio = np.log(depth_ratio) / self._log_depth_ratio_threshold if depth_ratio > 0 else 0
         weighted_depth_ratio = self.curr_data['weighted_depth_ratio']
-        volume_pattern = self.curr_data['volume_pattern']
-        trade_ratio = self.curr_data['trade_ratio']
 
         # 매수 흐름 강도 계산 (연속적인 0.0~1.0 값)
         buy_flow_strength = (
@@ -1554,14 +1401,10 @@ class MicrostructureAnalyzer:
             min(1.0, max(0.0, imbalance_trend / (self.params['imbalance_threshold'] * 0.1))) * 0.20 +
             # 깊이 비율: 매수 깊이가 깊을수록 높은 값 (0.0~0.20)
             min(1.0, max(0.0, log_depth_ratio)) * 0.20 +
-            # 가중 깊이 비율: 중요한 신규 지표 (0.0~0.10)
-            min(1.0, weighted_depth_ratio) * 0.10 +
-            # 집중도: 매수 집중도가 높을수록 높은 값 (0.0~0.10)
-            min(1.0, max(0.0, bid_concentration / self.params['concentration_threshold'])) * 0.10 +
-            # 거래량 패턴: 안정성 지표 (0.0~0.03)
-            (0.03 if volume_pattern['pattern'] == 'stable' else 0.01) +
-            # 체결 비율: 실제 거래 반영 (0.0~0.07)
-            (0.07 if trade_ratio['dominance'] == 'buy_dominant' else 0)
+            # 가중 깊이 비율: 중요한 신규 지표 (0.0~0.15)
+            min(1.0, weighted_depth_ratio) * 0.15 +
+            # 집중도: 매수 집중도가 높을수록 높은 값 (0.0~0.15)
+            min(1.0, max(0.0, bid_concentration / self.params['concentration_threshold'])) * 0.15
         )
 
         # 매도 흐름 강도 계산 (연속적인 0.0~1.0 값)
@@ -1572,14 +1415,10 @@ class MicrostructureAnalyzer:
             min(1.0, max(0.0, -imbalance_trend / (self.params['imbalance_threshold'] * 0.1))) * 0.20 +
             # 깊이 비율: 매도 깊이가 깊을수록 높은 값 (0.0~0.20)
             min(1.0, max(0.0, -log_depth_ratio)) * 0.20 +
-            # 가중 깊이 비율: 중요한 신규 지표 (0.0~0.10)
-            min(1.0, max(0.0, 1.0 - weighted_depth_ratio)) * 0.10 +
-            # 집중도: 매도 집중도가 높을수록 높은 값 (0.0~0.10)
-            min(1.0, max(0.0, ask_concentration / self.params['concentration_threshold'])) * 0.10 +
-            # 거래량 패턴: 안정성 지표 (0.0~0.03)
-            (0.03 if volume_pattern['pattern'] == 'stable' else 0.01) +
-            # 체결 비율: 실제 거래 반영 (0.0~0.07)
-            (0.07 if trade_ratio['dominance'] == 'sell_dominant' else 0)
+            # 가중 깊이 비율: 중요한 신규 지표 (0.0~0.15)
+            min(1.0, max(0.0, 1.0 - weighted_depth_ratio)) * 0.15 +
+            # 집중도: 매도 집중도가 높을수록 높은 값 (0.0~0.15)
+            min(1.0, max(0.0, ask_concentration / self.params['concentration_threshold'])) * 0.15
         )
 
         # 최종 신호 결정
@@ -1607,44 +1446,28 @@ class MicrostructureAnalyzer:
         depth_ratio = self.curr_data['depth_ratio']
         pressure_level = self.curr_data['pressure_level']
         weighted_depth_ratio = self.curr_data['weighted_depth_ratio']
-        volume_pattern = self.curr_data['volume_pattern']
-        trade_ratio = self.curr_data['trade_ratio']
 
         signal_adjustments = {'buy': 1.0, 'sell': 1.0, 'hold': 0.1}
-        base_confidence = signal_adjustments[signal] * 0.20
-        imbalance_confidence = min(max(0.01, imbalance), 1.0) * 0.20
+        base_confidence = signal_adjustments[signal] * 0.15
+        imbalance_confidence = min(max(0.01, imbalance), 1.0) * 0.15
 
         if signal == 'buy':
-            trend_confidence = min(max(0.01, imbalance_trend * (1 / (self.params['imbalance_threshold'] * 0.05))), 1.0) * 0.10
-            depth_confidence = min(max(0.01, depth_ratio * (self.params['depth_ratio_threshold'] * 0.1)), 1.0) * 0.10
+            trend_confidence = min(max(0.01, imbalance_trend * (1 / (self.params['imbalance_threshold'] * 0.05))), 1.0) * 0.15
+            depth_confidence = min(max(0.01, depth_ratio * (self.params['depth_ratio_threshold'] * 0.1)), 1.0) * 0.15
         else:
-            trend_confidence = min(max(0.01, -imbalance_trend * (1 / (self.params['imbalance_threshold'] * 0.05))), 1.0) * 0.10
-            depth_confidence = min(max(0.01, 1 - depth_ratio * (self.params['depth_ratio_threshold'] * 0.1)), 1.0) * 0.10
+            trend_confidence = min(max(0.01, -imbalance_trend * (1 / (self.params['imbalance_threshold'] * 0.05))), 1.0) * 0.15
+            depth_confidence = min(max(0.01, 1 - depth_ratio * (self.params['depth_ratio_threshold'] * 0.1)), 1.0) * 0.15
 
-        pressure_confidence = min(max(0.01, pressure_level * (1 / self.params['pressure_threshold'])), 1.0) * 0.10
-        risk_confidence = min(max(0.01, 1 - total_risk), 1.0) * 0.10
+        pressure_confidence = min(max(0.01, pressure_level * (1 / self.params['pressure_threshold'])), 1.0) * 0.15
+        risk_confidence = min(max(0.01, 1 - total_risk), 1.0) * 0.15
 
         if signal == 'buy':
             weighted_depth_confidence = min(max(0.01, weighted_depth_ratio), 1.0) * 0.10
         else:
             weighted_depth_confidence = min(max(0.01, 1.0 - weighted_depth_ratio), 1.0) * 0.10
 
-        if volume_pattern['pattern'] == 'stable':
-            volume_confidence = 0.05
-        elif volume_pattern['pattern'] == 'high_volatility':
-            volume_confidence = 0.01
-        else:
-            volume_confidence = 0.03
-
-        dominance = trade_ratio['dominance']
-        if (dominance == 'buy_dominant' and signal == 'buy') or (dominance == 'sell_dominant' and signal == 'sell'):
-            trade_ratio_confidence = 0.05
-        else:
-            trade_ratio_confidence = 0.01
-
         final_confidence = (base_confidence + pressure_confidence + imbalance_confidence + 
-                            trend_confidence + depth_confidence + weighted_depth_confidence +
-                            volume_confidence + trade_ratio_confidence + risk_confidence)
+                            trend_confidence + depth_confidence + weighted_depth_confidence + risk_confidence)
 
         final_confidence = round(final_confidence, 2)
 

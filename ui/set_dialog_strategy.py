@@ -238,7 +238,7 @@ class SetDialogStrategy:
         self.ui.stg_pushButton_185 = self.wc.setPushbutton('고점저점기준등락율각도', parent=self.ui.dialog_strategy, color=13, animated=True, click=self.ui.StrategyButtonClicked, cmd=185)
 
         self.ui.stg_pushButton_186 = self.wc.setPushbutton('시장미시구조분석', parent=self.ui.dialog_strategy, color=14, animated=True, click=self.ui.StrategyButtonClicked, cmd=186)
-        self.ui.stg_pushButton_187 = self.wc.setPushbutton('사용자버튼설정', parent=self.ui.dialog_strategy, color=14, animated=True, click=self.ui.StrategyButtonClicked, cmd=187)
+        self.ui.stg_pushButton_187 = self.wc.setPushbutton('시장리스크분석', parent=self.ui.dialog_strategy, color=14, animated=True, click=self.ui.StrategyButtonClicked, cmd=187)
         self.ui.stg_pushButton_188 = self.wc.setPushbutton('사용자버튼설정', parent=self.ui.dialog_strategy, color=14, animated=True, click=self.ui.StrategyButtonClicked, cmd=188)
         self.ui.stg_pushButton_189 = self.wc.setPushbutton('사용자버튼설정', parent=self.ui.dialog_strategy, color=14, animated=True, click=self.ui.StrategyButtonClicked, cmd=189)
         self.ui.stg_pushButton_190 = self.wc.setPushbutton('사용자버튼설정', parent=self.ui.dialog_strategy, color=14, animated=True, click=self.ui.StrategyButtonClicked, cmd=190)
