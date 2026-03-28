@@ -4,6 +4,7 @@ import numpy as np
 import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
+from trade.risk_analyzer import RiskAnalyzer
 from trade.strategy_base import StrategyBase
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
@@ -71,6 +72,7 @@ class BackEngineBase(StrategyBase):
         self.hoga_sidex      = None
         self.hoga_eidex      = None
         self.ms_analyzer     = None
+        self.rk_analyzer     = None
 
         self.shogainfo       = None
         self.shreminfo       = None
@@ -118,6 +120,7 @@ class BackEngineBase(StrategyBase):
         elif self.market_gubun == 2: gubun = 'future'
         else:                        gubun = 'coin'
         self.ms_analyzer = MicrostructureAnalyzer(gubun)
+        self.rk_analyzer = RiskAnalyzer(gubun)
 
         if self.market_gubun == 1:
             factor_list = list_stock_tick if self.is_tick else list_stock_min
@@ -568,7 +571,7 @@ class BackEngineBase(StrategyBase):
             last = len(self.arry_code) - 1
             if last > 0:
                 indexs = self.arry_code[:, 0].astype(np.int64)
-                day_vals = indexs // 1000000
+                day_vals = indexs // 1_000_000 if self.is_tick else indexs // 10_000
                 day_last_indexs = np.where(day_vals[:-1] != day_vals[1:])[0]
                 day_last_indexs = np.concatenate([day_last_indexs, [last]])
 

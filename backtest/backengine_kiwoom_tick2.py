@@ -19,6 +19,10 @@ class BackEngineKiwoomTick2(BackEngineBaseOms):
         if self.dict_set['시장미시구조분석']:
             self.ms_analyzer.update_data(self.code, self.arry_code[self.indexn, :])
 
+        리스크점수 = 0
+        if self.dict_set['시장리스크분석']:
+            리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code[self.indexn + 1 - self.tick_count:self.indexn + 1, :])
+
         VI해제시간, 순매수금액 = dt_ymdhms(str(int(VI해제시간))), 초당매수금액 - 초당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:])
         self.hoga_unit = 호가단위 = GetHogaunit(self.dict_kosd.get(종목코드, False), 현재가, 체결시간)

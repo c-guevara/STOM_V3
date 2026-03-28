@@ -164,7 +164,7 @@ class RiskAnalyzer:
             }
 
     def get_risk_score(self, arry_code: np.ndarray) -> float:
-        """포트폴리오 분석"""
+        """리스크점수 계산"""
         try:
             analysis = self._analyze_market_data(arry_code)
             risk_score = self._calculate_risk_score(analysis)
