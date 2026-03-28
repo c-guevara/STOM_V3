@@ -11,7 +11,7 @@ from utility.kimp_upbit_binance import Kimp
 from utility.static import str_hms, dt_hms, error_decorator
 from utility.setting_base import columns_hc, DB_COIN_TICK_BACK, DB_STOCK_TICK_BACK, DB_PATH, DB_COIN_MIN_BACK, \
     DB_STOCK_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
-from ui.set_style import style_bc_bt, style_bc_bb
+from ui.set_style import style_bc_bt, style_bc_bb, style_bc_st
 
 
 class QuietPage(QWebEnginePage):
@@ -190,7 +190,7 @@ def dialog_chart_show(ui):
 @error_decorator
 def show_qsize(ui):
     if not ui.showQsize:
-        ui.qs_pushButton.setStyleSheet(style_bc_bt)
+        ui.qs_pushButton.setStyleSheet(style_bc_st)
         ui.showQsize = True
     else:
         ui.qs_pushButton.setStyleSheet(style_bc_bb)
