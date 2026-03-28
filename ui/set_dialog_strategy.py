@@ -264,7 +264,7 @@ class SetDialogStrategy:
         self.ui.dialog_strategy.resize(1050, 1365)
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
-                self.ui.dialog_strategy.move(self.ui.dict_set['창위치'][22], self.ui.dict_set['창위치'][23])
+                self.ui.dialog_strategy.move(self.ui.dict_set['창위치'][20], self.ui.dict_set['창위치'][21])
             except:
                 pass
         self.ui.dialog_strategy.resizeEvent = self.resize_dialog_strategy
