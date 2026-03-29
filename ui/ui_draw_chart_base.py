@@ -473,6 +473,7 @@ class DrawChartBase:
                 legend.setText(get_label_text(self.ui, True, self.gubun, self.code, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
                 legend.setFont(qfont12)
                 legend.setPos(self.xmax, self.ymax)
+                legend.setZValue(30)
                 self.ui.ctpg[i].addItem(legend)
                 self.ui.ctpg_legend[i] = legend
 
