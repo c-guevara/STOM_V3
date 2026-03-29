@@ -91,7 +91,6 @@ def backtest_engine_kill(ui):
         q.close()
     for q in ui.back_eques:
         q.close()
-    qtest_qwait(1)
     ui.windowQ.put((ui_num['시스템로그'], 'Bactest subtotal process terminate completed'))
 
     ui.back_eprocs = []

@@ -48,8 +48,6 @@ class BackTest:
         self.buystg       = None
         self.sellstg      = None
         self.day_count    = None
-        self.df_tsg       = None
-        self.df_bct       = None
         self.is_tick      = None
 
         if self.ui_gubun == 'S':
@@ -167,16 +165,16 @@ class BackTest:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '매수전략을 만족하는 경우가 없어 결과를 표시할 수 없습니다.'))
             self.SysExit(True)
 
-        self.df_tsg, self.df_bct = GetResultDataframe(self.ui_gubun, list_tsg, arry_bct)
-        if self.blacklist: self.InsertBlacklist()
+        df_tsg, df_bct = GetResultDataframe(self.ui_gubun, list_tsg, arry_bct)
+        if self.blacklist: self.InsertBlacklist(df_tsg)
 
-        arry_tsg = np.array(self.df_tsg[['보유시간', '매도시간', '수익률', '수익금', '수익금합계']].copy(), dtype='float64')
+        arry_tsg = np.array(df_tsg[['보유시간', '매도시간', '수익률', '수익금', '수익금합계']].copy(), dtype='float64')
         arry_bct = np.sort(arry_bct, axis=0)[::-1]
         result   = GetResult(arry_tsg, arry_bct, self.betting, self.ui_gubun, self.day_count)
         result   = AddMdd(arry_tsg, result)
         tc, atc, pc, mc, wr, ah, app, tpp, tsg, mhct, seed, cagr, tpi, mdd, mdd_ = result
 
-        bootstrap_dist = bootstrap_test(self.df_tsg['수익률'].values / 100)
+        bootstrap_dist = bootstrap_test(df_tsg['수익률'].values / 100)
         bootstrap_avg  = round(np.mean(bootstrap_dist), 2)
         bootstrap_min  = round(np.percentile(bootstrap_dist, 2.5), 2)
         bootstrap_max  = round(np.percentile(bootstrap_dist, 97.5), 2)
@@ -218,9 +216,9 @@ class BackTest:
         save_file_name = f'{self.savename}_{self.buystg_name}_{save_time}'
         con = sqlite3.connect(DB_BACKTEST)
         df.to_sql(self.savename, con, if_exists='append', chunksize=1000)
-        self.df_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=1000)
+        df_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=1000)
         con.close()
-        self.wq.put((ui_num[f'{self.ui_gubun.replace("F", "")}상세기록'], self.df_tsg))
+        self.wq.put((ui_num[f'{self.ui_gubun.replace("F", "")}상세기록'], df_tsg))
 
         if self.blacklist:
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'블랙리스트 추가 {self.insertblacklist}'))
@@ -252,27 +250,27 @@ class BackTest:
                     sell_vars = f'{sell_vars}, {text}'
 
             self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '결과 그래프 생성 중 ...'))
-            PlotShow('백테스트', self.is_tick, self.teleQ, self.df_tsg, self.df_bct, self.dict_cn, seed, mdd, self.startday,
+            PlotShow('백테스트', self.is_tick, self.teleQ, df_tsg, df_bct, self.dict_cn, seed, mdd, self.startday,
                      self.endday, self.starttime, self.endtime, None, self.backname, back_text, label_text + bootstrap_text,
                      save_file_name, self.schedul, False, buy_vars=buy_vars, sell_vars=sell_vars)
         else:
             if not self.dict_set['그래프저장하지않기']:
                 self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '결과 그래프 생성 중 ...'))
-                PlotShow('백테스트', self.is_tick, self.teleQ, self.df_tsg, self.df_bct, self.dict_cn, seed, mdd, self.startday,
+                PlotShow('백테스트', self.is_tick, self.teleQ, df_tsg, df_bct, self.dict_cn, seed, mdd, self.startday,
                          self.endday, self.starttime, self.endtime, None, self.backname, back_text, label_text + bootstrap_text,
                          save_file_name, self.schedul, self.dict_set['그래프띄우지않기'])
 
-    def InsertBlacklist(self):
-        name_list = self.df_tsg['종목명'].unique()
+    def InsertBlacklist(self, df_tsg):
+        name_list = df_tsg['종목명'].unique()
         dict_code = {name: code for code, name in self.dict_cn.items()}
 
         for name in name_list:
             if name not in dict_code:
                 continue
             code = dict_code[name]
-            df_tsg = self.df_tsg[self.df_tsg['종목명'] == name]
-            trade_count = len(df_tsg)
-            total_eyun = df_tsg['수익금'].sum()
+            df_tsg_code = df_tsg[df_tsg['종목명'] == name]
+            trade_count = len(df_tsg_code)
+            total_eyun = df_tsg_code['수익금'].sum()
             if trade_count >= 10 and total_eyun < 0:
                 if self.ui_gubun == 'S':
                     if code + '\n' not in stockreadlines:
