@@ -72,10 +72,10 @@ class TelegramBot(QThread):
             update_queue = await self.application.updater.start_polling()
 
             keyboard = [
-                ['주식          거래목록', '주식          잔고평가', '주식          잔고청산', '주식          전략중지'],
-                ['해선          거래목록', '해선          잔고평가', '해선          잔고청산', '해선          전략중지'],
-                ['코인          거래목록', '코인          잔고평가', '코인          잔고청산', '코인          전략중지'],
-                ['주식          라이브', '해선          라이브', '코인          라이브', '백테          라이브']
+                ['주식\n거래목록', '주식\n잔고평가', '주식\n잔고청산', '주식\n전략중지'],
+                ['해선\n거래목록', '해선\n잔고평가', '해선\n잔고청산', '해선\n전략중지'],
+                ['코인\n거래목록', '코인\n잔고평가', '코인\n잔고청산', '코인\n전략중지'],
+                ['주식\n라이브', '해선\n라이브', '코인\n라이브', '백테\n라이브']
             ]
             reply_markup = ReplyKeyboardMarkup(keyboard)
 
@@ -101,7 +101,7 @@ class TelegramBot(QThread):
     # noinspection PyUnusedLocal
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         cmd = update.message.text
-        cmd = cmd.replace('          ', '')
+        cmd = cmd.replace('\n', '')
         if cmd in ('주식전략중지', '해선전략중지'):
             self.wdzservQ.put(('strategy', '매수전략중지'))
         elif cmd == '코인전략중지':
