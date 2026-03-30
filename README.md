@@ -23,7 +23,8 @@
 - **무료버전 사용방법**: 설정탭 시리얼키 입력란에 STOM_PUBLIC이라고 입력 후 저장
 - **무료버전**: 파일편집 후 제한 기능 우회 실행 시 변조를 감지하여 프로그램이 종료됩니다.
 - **유료버전**: 사용자 편의에 맞게 소스코드를 자유롭게 수정하여 사용할 수 있습니다.
-- [**구독결재문의**](https://cafe.naver.com/stom), [**비지니스문의**](mailto:youseonho@naver.com)
+- [**구독결재문의**](https://cafe.naver.com/stom)
+- [**비지니스문의**](mailto:youseonho@naver.com)
 
 ## 프로젝트 구조
 
