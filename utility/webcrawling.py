@@ -94,7 +94,7 @@ class WebCrawling(QThread):
                 datas = [x.split('.jpg')[0] + '.jpg' for x in datas]
                 self.imagelist1 = [x for x in datas if '\\' not in x]
             if self.imagelist2 is None:
-                url  = 'https://search.naver.com/search.naver?sm=tab_hty.top&where=image&ssc=tab.image.all&query=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EC%84%B8%EB%A1%9C%EC%82%AC%EC%A7%84&oquery=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EA%B0%80%EB%A1%9C%EC%82%AC%EC%A7%84&tqi=iAM7OdqVOsVssAwVjfossssstwd-182384'
+                url   = 'https://search.naver.com/search.naver?sm=tab_hty.top&where=image&ssc=tab.image.all&query=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EC%84%B8%EB%A1%9C%EC%82%AC%EC%A7%84&oquery=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EA%B0%80%EB%A1%9C%EC%82%AC%EC%A7%84&tqi=iAM7OdqVOsVssAwVjfossssstwd-182384'
                 resp  = self.session.get(url, headers=self.headers)
                 datas = resp.text.split('"viewerThumb":"')[1:]
                 datas = [x.split('lensThumb')[0] for x in datas]

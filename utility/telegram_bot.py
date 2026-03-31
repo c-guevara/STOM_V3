@@ -134,7 +134,7 @@ class TelegramBot(QThread):
                     await self.send_photo(data)
                 else:
                     await self.send_message(data)
-            elif data.__class__ == pd.DataFrame:
+            elif isinstance(data.__class__, pd.DataFrame):
                 await self.send_message(data.to_string())
             elif data.__class__ == tuple:
                 self.dict_set = data[1]
