@@ -745,10 +745,10 @@ class Optimize:
 
             self.visual3D.update_3d_visualization(k, dict_turn_hvar_hstd.copy())
 
-            high_ratio = [0, hstd, hstd]
+            high_ratio = []
             if bool_changed_hstd:
                 high_ratio, vars_change_count = self.CheckOptivalueCombination(
-                    mq, hstd, high_ratio, vars_change_count, dict_turn_hvar_hstd
+                    mq, previous_high_std, vars_change_count, dict_turn_hvar_hstd
                 )
 
             if self.dict_set['범위자동관리'] and hstd > 0:
@@ -769,12 +769,12 @@ class Optimize:
 
             hstd = high_ratio[2]
 
-    def CheckOptivalueCombination(self, mq, hstd, high_ratio, vars_change_count, dict_turn_hvar_hstd):
+    def CheckOptivalueCombination(self, mq, previous_high_std, vars_change_count, dict_turn_hvar_hstd):
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '최적값 조합 확인 시작'))
+        high_ratio = [0, previous_high_std, previous_high_std]
         std_set = sorted(set(v[1] for v in dict_turn_hvar_hstd.values()))
-        std_set = std_set[:-1]
         last = len(std_set)
-        for j, std in enumerate(std_set):
+        for i, std in enumerate(std_set):
             vars_copy = copy.deepcopy(self.vars_)
             for vturn, hvar_hstd in dict_turn_hvar_hstd.items():
                 pre_turn_hvar = vars_copy[vturn][1]
@@ -788,11 +788,11 @@ class Optimize:
                 self.SysExit(True)
             else:
                 check_hstd = data[-1]
-                if hstd > 0:
-                    ratio = round((check_hstd / hstd - 1) * 100, 2)
+                if previous_high_std > 0:
+                    ratio = round((check_hstd / previous_high_std - 1) * 100, 2)
                 else:
-                    ratio = round((1 - check_hstd / hstd) * 100, 2)
-                self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'최적값 조합 확인 중[{j+1}/{last}] ... 조합기준값[{std:,.2f}] 기준값상승률[{ratio}%]'))
+                    ratio = round((1 - check_hstd / previous_high_std) * 100, 2)
+                self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'최적값 조합 확인 중[{i+1}/{last}] ... 조합기준값[{std:,.2f}] 기준값상승률[{ratio}%]'))
                 if ratio > high_ratio[0]:
                     high_ratio = [ratio, std, check_hstd]
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '최적값 조합 확인 완료'))

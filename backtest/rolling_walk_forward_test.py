@@ -520,18 +520,18 @@ class RollingWalkForwardTest:
 
         hstd_list = []
         hvar_list = []
-        for j, days in enumerate(list_days):
+        for in_count, days in enumerate(list_days):
             train_days, _, _ = days
             startday, endday = train_days[0], train_days[1]
 
             if 'B' not in self.backname:
                 hstd = self.OptimizeGrid(
-                    mq, back_count, ccount, vars_type, startday, endday, j
+                    mq, back_count, ccount, vars_type, startday, endday, in_count
                 )
             else:
                 hstd = self.OptimizeOptuna(
                     mq, optuna_count, back_count, optuna_fixvars, optuna_autostep, buystg_name, sampler,
-                    startday, endday, j
+                    startday, endday, in_count
                 )
 
             hvar_list.append(copy.deepcopy(self.vars_))
@@ -655,9 +655,9 @@ class RollingWalkForwardTest:
 
         return vars_type, self.vars_[0][0]
 
-    def OptimizeGrid(self, mq, back_count, ccount, vars_type, startday, endday, j):
-        self.tq.put(('경우의수', back_count, startday, endday, j))
-        self.BackStart(('변수정보', self.vars_, 0, startday, endday, j))
+    def OptimizeGrid(self, mq, back_count, ccount, vars_type, startday, endday, in_count):
+        self.tq.put(('경우의수', back_count, startday, endday, in_count))
+        self.BackStart(('변수정보', self.vars_, 0, startday, endday, in_count))
 
         hstd = 0
         data = mq.get()
@@ -671,7 +671,7 @@ class RollingWalkForwardTest:
         for k in range(ccount if ccount != 0 else 100):
             self.wq.put((
                 ui_num[f'{self.ui_gubun}백테스트'],
-                f'{self.backname} 인샘플 [{j + 1}]구간 [{k + 1}]단계 그리드 최적화 시작, 최고 기준값[{hstd:,.2f}], 최적값 변경 개수 [{vars_change_count}]'
+                f'{self.backname} 인샘플 [{in_count + 1}]구간 [{k + 1}]단계 그리드 최적화 시작, 최고 기준값[{hstd:,.2f}], 최적값 변경 개수 [{vars_change_count}]'
             ))
 
             vars_change_count   = 0
@@ -684,7 +684,7 @@ class RollingWalkForwardTest:
                 self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '모든 파라미터 고정, 최적화를 종료합니다.'))
                 break
 
-            self.BackStart(('변수정보', self.vars_, 1, startday, endday, j))
+            self.BackStart(('변수정보', self.vars_, 1, startday, endday, in_count))
 
             for _ in range(result_receiv_count):
                 data = mq.get()
@@ -707,10 +707,10 @@ class RollingWalkForwardTest:
                             if not bool_changed_hstd:
                                 bool_changed_hstd = True
 
-            high_ratio = [0, hstd, hstd]
+            high_ratio = []
             if bool_changed_hstd:
                 high_ratio, vars_change_count = self.CheckOptivalueCombination(
-                    mq, hstd, high_ratio, vars_change_count, dict_turn_hvar_hstd, startday, endday, j
+                    mq, previous_high_std, vars_change_count, dict_turn_hvar_hstd, startday, endday, in_count
                 )
 
             if previous_high_std > 0:
@@ -728,10 +728,12 @@ class RollingWalkForwardTest:
 
         return hstd
 
-    def CheckOptivalueCombination(self, mq, hstd, high_ratio, vars_change_count, dict_turn_hvar_hstd, startday, endday, j):
-        std_set = sorted(set(v[1] for v in dict_turn_hvar_hstd.values()))
+    def CheckOptivalueCombination(self, mq, previous_high_std, vars_change_count, dict_turn_hvar_hstd, startday, endday, in_count):
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '최적값 조합 확인 시작'))
-        for std in std_set[1:-1]:
+        high_ratio = [0, previous_high_std, previous_high_std]
+        std_set = sorted(set(v[1] for v in dict_turn_hvar_hstd.values()))
+        last = len(std_set)
+        for i, std in enumerate(std_set):
             vars_copy = copy.deepcopy(self.vars_)
             for vturn, hvar_hstd in dict_turn_hvar_hstd.items():
                 pre_turn_hvar = vars_copy[vturn][1]
@@ -739,17 +741,17 @@ class RollingWalkForwardTest:
                 if cur_turn_hstd >= std and cur_turn_hvar != pre_turn_hvar:
                     vars_copy[vturn][1] = cur_turn_hvar
 
-            self.BackStart(('변수정보', vars_copy, 0, startday, endday, j))
+            self.BackStart(('변수정보', vars_copy, 0, startday, endday, in_count))
             data = mq.get()
             if data.__class__ == str:
                 self.SysExit(True)
             else:
                 check_hstd = data[-1]
-                if hstd > 0:
-                    ratio = round((check_hstd / hstd - 1) * 100, 2)
+                if previous_high_std > 0:
+                    ratio = round((check_hstd / previous_high_std - 1) * 100, 2)
                 else:
-                    ratio = round((1 - check_hstd / hstd) * 100, 2)
-                self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'최적값 조합 확인 중 ... 조합기준값[{std:,.2f}] 기준값상승률[{ratio}%]'))
+                    ratio = round((1 - check_hstd / previous_high_std) * 100, 2)
+                self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'최적값 조합 확인 중[{i+1}/{last}] ... 조합기준값[{std:,.2f}] 기준값상승률[{ratio}%]'))
                 if ratio > high_ratio[0]:
                     high_ratio = [ratio, std, check_hstd]
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '최적값 조합 확인 완료'))
@@ -792,11 +794,11 @@ class RollingWalkForwardTest:
         if text != '\n': self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], text[:-1]))
 
     def OptimizeOptuna(self, mq, optuna_count, back_count, optuna_fixvars, optuna_autostep, buystg_name,
-                       sampler, startday, endday, j):
+                       sampler, startday, endday, in_count):
 
         self.dict_simple_vars = {}
-        self.tq.put(('경우의수', back_count, startday, endday, j))
-        self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 인샘플 [{j + 1}]구간 OPTUNA 최적화 시작'))
+        self.tq.put(('경우의수', back_count, startday, endday, in_count))
+        self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], f'{self.backname} 인샘플 [{in_count + 1}]구간 OPTUNA 최적화 시작'))
 
         def objective(trial):
             optuna_vars = []
@@ -822,7 +824,7 @@ class RollingWalkForwardTest:
 
             str_simple_vars = str(optuna_vars)
             if str_simple_vars not in self.dict_simple_vars:
-                self.BackStart(('변수정보', backte_vars, 4, startday, endday, j))
+                self.BackStart(('변수정보', backte_vars, 4, startday, endday, in_count))
                 data_ = mq.get()
                 if data_.__class__ == str:
                     ostd = 0
