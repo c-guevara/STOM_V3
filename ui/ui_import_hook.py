@@ -15,12 +15,12 @@ class ImportProgressHook:
             'ui.set_dialog_formula', 'ui.set_dialog_strategy', 'ui.ui_draw_treemap', 'ui.ui_draw_chart_db',
             'ui.ui_load_database', 'ui.ui_draw_home_chart', 'ui.ui_draw_chart_real', 'ui.ui_update_textedit',
             'ui.ui_process_starter', 'ui.ui_update_tablewidget', 'ui.ui_process_alive', 'ui.ui_etc',
-            'ui.ui_event_filter', 'ui.ui_cell_clicked', 'ui.ui_key_press_event', 'ui.ui_backtest_engine',
-            'ui.ui_update_progressbar', 'ui.ui_button_clicked_shortcut', 'ui.ui_button_clicked_strategy',
-            'ui.ui_button_clicked_settings', 'ui.ui_button_clicked_editer_coin',
-            'ui.ui_button_clicked_editer_stock', 'ui.ui_button_clicked_editer_backlog',
-            'ui.ui_button_clicked_dialog_backengine', 'ui.ui_button_clicked_editer_stg_sell_coin',
-            'ui.ui_button_clicked_editer_stg_sell_stock', 'ui.ui_button_clicked_dialog_elapsed_tick_number',
+            'ui.ui_event_filter', 'ui.ui_key_press_event', 'ui.ui_backtest_engine', 'ui.ui_update_progressbar',
+            'ui.ui_button_clicked_shortcut', 'ui.ui_button_clicked_strategy', 'ui.ui_button_clicked_settings',
+            'ui.ui_button_clicked_editer_coin', 'ui.ui_button_clicked_editer_stock',
+            'ui.ui_button_clicked_editer_backlog', 'ui.ui_button_clicked_dialog_backengine',
+            'ui.ui_button_clicked_editer_stg_sell_coin', 'ui.ui_button_clicked_editer_stg_sell_stock',
+            'ui.ui_button_clicked_dialog_elapsed_tick_number',
         ]
         self.total_modules = len(self.modules)
         self.current_index = 0

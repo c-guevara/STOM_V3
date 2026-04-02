@@ -8,6 +8,7 @@ from ui.ui_button_clicked_dialog_database import *
 from ui.ui_button_clicked_dialog_elapsed_tick_number import *
 from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
 from ui.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
+from ui.ui_cell_clicked import cell_clicked_09, cell_clicked_10, cell_clicked_08
 from utility.setting_base import columns_hj, columns_hc, columns_hg, columns_gc, columns_ns, columns_jm1, columns_jm2, \
     columns_stg1, columns_stg2, columns_kp, columns_hc2
 
@@ -26,7 +27,7 @@ class SetDialogEtc:
         self.ui.hj_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hj, 1)
         self.ui.hc_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc, 12)
         self.ui.hc_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc2, 12, visible=False)
-        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hg, 12, clicked=self.ui.CellClicked_10)
+        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hg, 12, clicked=lambda row, col: cell_clicked_10(self.ui, row, col))
         self.ui.hg_lineeeeeeeee_01 = self.wc.setLine(self.ui.dialog_hoga, 1)
         self.ui.hg_labellllllll_01 = QLabel('', self.ui.dialog_hoga)
         self.ui.hg_pushButtonnn_01 = self.wc.setPushbutton('이전(Alt+left)', parent=self.ui.dialog_hoga, click=lambda: hg_button_clicked_01(self.ui, '이전'), shortcut='Alt+left')
@@ -38,8 +39,8 @@ class SetDialogEtc:
         self.ui.dialog_info.geometry().center()
 
         self.ui.gg_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_info, font=qfont14)
-        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_gc, 20, clicked=self.ui.CellClicked_08)
-        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_ns, 10, clicked=self.ui.CellClicked_08)
+        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_gc, 20, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_ns, 10, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
         self.ui.jm_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm1, 13)
         self.ui.jm_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm2, 13)
 
@@ -135,11 +136,11 @@ class SetDialogEtc:
         self.ui.db_labellllllll_17 = QLabel('거래기록 테이블 모두 삭제 (체결목록, 잔고목록, 거래목록, 일별실현손익)', self.ui.db_groupBoxxxxx_02)
         self.ui.db_pushButtonnn_17 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_17(self.ui))
 
-        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.ssg_tab1, columns_stg1, 8, clicked=self.ui.CellClicked_09)
-        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.ssg_tab2, columns_stg2, 8, clicked=self.ui.CellClicked_09)
-        self.ui.db_tableWidgett_03 = self.wc.setTablewidget(self.ui.csg_tab1, columns_stg1, 8, clicked=self.ui.CellClicked_09)
-        self.ui.db_tableWidgett_04 = self.wc.setTablewidget(self.ui.csg_tab2, columns_stg2, 8, clicked=self.ui.CellClicked_09)
-        self.ui.db_tableWidgett_05 = self.wc.setTablewidget(self.ui.bsd_tab0, ['백테스트 스케쥴'], 8, clicked=self.ui.CellClicked_09)
+        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.ssg_tab1, columns_stg1, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.ssg_tab2, columns_stg2, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.db_tableWidgett_03 = self.wc.setTablewidget(self.ui.csg_tab1, columns_stg1, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.db_tableWidgett_04 = self.wc.setTablewidget(self.ui.csg_tab2, columns_stg2, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.db_tableWidgett_05 = self.wc.setTablewidget(self.ui.bsd_tab0, ['백테스트 스케쥴'], 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.db_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_db, vscroll=True)
 
         self.ui.dialog_order = self.wc.setDialog('STOM ORDER')

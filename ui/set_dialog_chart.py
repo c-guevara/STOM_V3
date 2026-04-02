@@ -1,9 +1,11 @@
 
 import pyqtgraph as pg
+
 from ui.ui_etc import chart_screenshot2
 from ui.set_widget import error_decorator
 from utility.setting_base import indi_base
 from ui.ui_return_press import return_press_01
+from ui.ui_cell_clicked import cell_clicked_07
 from ui.ui_chart_count_change import chart_count_change
 from utility.static import str_hms, dt_hms, timedelta_sec
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout
@@ -80,7 +82,7 @@ class SetDialogChart:
         self.ui.ct_pushButtonnn_11 = self.wc.setPushbutton('', parent=self.ui.ct_groupBoxxxxx_01, click=lambda: chart_screenshot2(self.ui), shortcut='Shift+S')
 
         self.ui.ct_dateEdittttt_02 = self.wc.setDateEdit(self.ui.dialog_chart, changed=lambda: chart_moneytop_list(self.ui))
-        self.ui.ct_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_chart, ['종목명'], 100, vscroll=True, clicked=self.ui.CellClicked_07)
+        self.ui.ct_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_chart, ['종목명'], 100, vscroll=True, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
 
         self.ui.ctpg = {}
         self.ui.ctpg_cvb = {}

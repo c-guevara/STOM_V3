@@ -29,8 +29,9 @@ def cell_clicked_01(ui, row, col):
     show_dialog(ui, name, tickcount, searchdate, col)
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_02(ui, row):
+def cell_clicked_02(ui, row, col):
     item = ui.sjg_tableWidgettt.item(row, 0)
     if item is None:
         return
@@ -76,8 +77,9 @@ def cell_clicked_03(ui, row, col):
                 ui.ctraderQ.put((p, code, c, oc, now(), True))
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_04(ui, row):
+def cell_clicked_04(ui, row, col):
     searchdate = ''
     if ui.focusWidget() == ui.sds_tableWidgettt:
         searchdate = ui.s_calendarWidgett.selectedDate().toString('yyyyMMdd')
@@ -96,8 +98,9 @@ def cell_clicked_04(ui, row):
     show_dialog(ui, name, tickcount, searchdate, 4)
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_05(ui, row):
+def cell_clicked_05(ui, row, col):
     gubun = '주식'
     if ui.focusWidget() == ui.cns_tableWidgettt:
         gubun = '코인'
@@ -125,8 +128,9 @@ def cell_clicked_05(ui, row):
     show_dialog_graph(ui, df)
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_06(ui, row):
+def cell_clicked_06(ui, row, col):
     tableWidget = None
     if ui.focusWidget() == ui.ss_tableWidget_01 or ui.focusWidget().parentWidget() == ui.ss_tableWidget_01:
         tableWidget = ui.ss_tableWidget_01
@@ -170,8 +174,9 @@ def cell_clicked_06(ui, row):
     show_dialog_chart(ui, False, coin, code, tickcount, searchdate, starttime, endtime, detail, buytimes)
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_07(ui, row):
+def cell_clicked_07(ui, row, col):
     item = ui.ct_tableWidgett_01.item(row, 0)
     if item is None:
         return
@@ -196,8 +201,9 @@ def cell_clicked_07(ui, row):
     if ui.dialog_web.isVisible(): show_dialog_web(ui, False, code)
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_08(ui, row):
+def cell_clicked_08(ui, row, col):
     item = ui.dialog_info.focusWidget().item(row, 3)
     if item is None:
         return
@@ -322,8 +328,9 @@ def cell_clicked_10(ui, row, col):
         text_changed_05(ui)
 
 
+# noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_11(ui):
+def cell_clicked_11(ui, row, col):
     if ui.focusWidget() == ui.snt_tableWidgettt:
         table_name = 's_tradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_tradelist'
     else:

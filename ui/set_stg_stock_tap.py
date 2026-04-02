@@ -9,6 +9,7 @@ from ui.ui_button_clicked_editer_opti_stock import *
 from ui.ui_button_clicked_editer_stg_buy_stock import *
 from ui.ui_button_clicked_editer_stg_sell_stock import *
 from utility.setting_base import columns_bt
+from ui.ui_cell_clicked import cell_clicked_06
 from ui import ui_activated_stg, ui_activated_etc
 from utility.static import dt_hms, str_hms, timedelta_sec
 from ui.set_text import optistandard, optitext, train_period, valid_period, test_period, optimized_count, opti_standard
@@ -57,7 +58,7 @@ class SetStockBack:
 
     # =================================================================================================================
 
-        self.ui.ss_tableWidget_01 = self.wc.setTablewidget(self.ui.ss_tab, columns_bt, 32, vscroll=True, fixed=True, clicked=self.ui.CellClicked_06)
+        self.ui.ss_tableWidget_01 = self.wc.setTablewidget(self.ui.ss_tab, columns_bt, 32, vscroll=True, fixed=True, clicked=lambda row, col: cell_clicked_06(self.ui, row, col))
         self.ui.ss_comboBoxxxx_01 = self.wc.setCombobox(self.ui.ss_tab, font=qfont12, activated=lambda: ui_activated_etc.dactivated_01(self.ui))
         self.ui.ss_pushButtonn_01 = self.wc.setPushbutton('백테스트상세기록', parent=self.ui.ss_tab, bounced=True, click=lambda: ssbutton_clicked_01(self.ui), tip='백테스트 상세기록을 불러온다.')
         self.ui.ss_pushButtonn_02 = self.wc.setPushbutton('그래프', parent=self.ui.ss_tab, bounced=True, click=lambda: ssbutton_clicked_04(self.ui), tip='선택된 상세기록의 그래프를 표시한다.')
