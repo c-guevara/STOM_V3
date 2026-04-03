@@ -470,12 +470,9 @@ class RollingWalkForwardTest:
         self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '텍스트에디터 클리어'))
 
         if is_tick:
-            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
         else:
-            # noinspection PyUnresolvedReferences
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
-        # noinspection PyUnresolvedReferences
         day_list = df_mt['일자'].unique()
         day_list.sort()
 
