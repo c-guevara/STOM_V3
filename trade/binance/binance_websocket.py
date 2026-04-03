@@ -1,9 +1,9 @@
 
 import asyncio
 from traceback import format_exc
+from utility.setting_base import ui_num
 from PyQt5.QtCore import QThread, pyqtSignal
 from binance import AsyncClient, BinanceSocketManager
-from utility.setting_base import ui_num
 
 
 class WebSocketReceiver(QThread):

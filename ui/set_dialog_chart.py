@@ -1,6 +1,5 @@
 
 import pyqtgraph as pg
-
 from ui.ui_etc import chart_screenshot2
 from ui.set_widget import error_decorator
 from utility.setting_base import indi_base

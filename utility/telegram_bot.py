@@ -5,10 +5,10 @@ import pandas as pd
 from threading import Thread
 from traceback import format_exc
 from PyQt5.QtCore import QThread
+from utility.setting_base import ui_num
 from telegram.request import HTTPXRequest
 from telegram import Update, ReplyKeyboardMarkup
 from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTypes
-from utility.setting_base import ui_num
 
 
 class TelegramBot(QThread):

@@ -5,10 +5,10 @@ import pandas as pd
 from PyQt5.QtCore import QDate, Qt
 from ui.ui_etc import update_dictset
 from ui.set_text import famous_saying
-from PyQt5.QtWidgets import QMessageBox, QPushButton
-from utility.static import qtest_qwait, strf_time, error_decorator
-from utility.setting_base import columns_nt, ui_num, columns_nd
 from backtest.back_static import RunOptunaServer
+from PyQt5.QtWidgets import QMessageBox, QPushButton
+from utility.setting_base import columns_nt, ui_num, columns_nd
+from utility.static import qtest_qwait, strf_time, error_decorator
 
 
 # noinspection PyUnusedLocal

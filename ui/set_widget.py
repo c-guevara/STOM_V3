@@ -1,18 +1,14 @@
 
 import sys
 import pyqtgraph as pg
+from ui.set_style import *
 from utility import syntax
 from PyQt5.QtGui import QPen
 from traceback import format_exc
+from utility.setting_base import *
 from PyQt5.QtCore import Qt, QDate, QPropertyAnimation, QRect, QEasingCurve, QTimer, QEvent
 from PyQt5.QtWidgets import QPushButton, QFrame, QTextEdit, QComboBox, QCheckBox, QLineEdit, QDateEdit, QProgressBar, \
     QDialog, QTableWidget, QAbstractItemView, QGroupBox, QMessageBox, QTableWidgetItem, QSizePolicy
-from utility.setting_base import columns_nt, columns_td, columns_jg, columns_cj, columns_hj, columns_hc, columns_ns, \
-    columns_gc, columns_hg, columns_jm1, columns_jm2, columns_nd, columns_stg1, columns_stg2, columns_sb, \
-    columns_kp, columns_sd, columns_hc2, columns_bt
-from ui.set_style import qfont12, style_bc_bt, style_bc_st, style_bc_sl, style_bc_bs, style_bc_by, style_fc_dk, \
-    style_bc_bb, style_bc_dk, style_st_cf, style_st_sf, style_st_mf, style_st_sp, style_st_ct, style_st_ks, style_st_ss, \
-    style_st_su, color_gb_nm, color_gb_hv, color_bf_dk
 
 
 def error_decorator(func):

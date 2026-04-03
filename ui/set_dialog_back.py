@@ -4,11 +4,11 @@ from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import QGroupBox, QLabel
 from ui.ui_button_clicked_dialog_backengine import *
 from ui.ui_checkbox_changed import checkbox_changed_15
+from utility.static import str_hms, dt_hms, timedelta_sec
 from ui.set_style import style_ck_bx, style_pgbar, style_bc_dk
 from ui.ui_button_clicked_etc import change_back_sdate, change_back_edate
 from ui.ui_activated_back import bactivated_01, bactivated_02, bactivated_03
 from ui.ui_text_changed import text_changed_01, text_changed_02, text_changed_03, text_changed_04
-from utility.static import str_hms, dt_hms, timedelta_sec
 
 
 class SetDialogBack:

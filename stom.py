@@ -2,10 +2,10 @@
 import sys
 from PyQt5.QtCore import Qt
 from PyQt5.QtGui import QPalette
-from PyQt5.QtWidgets import QApplication, QMessageBox
 from ui.ui_splash_screen import StomSplashScreen
 from ui.ui_import_hook import ImportProgressHook
 from utility.database_check import database_check
+from PyQt5.QtWidgets import QApplication, QMessageBox
 
 if __name__ == '__main__':
     auto_run = 0

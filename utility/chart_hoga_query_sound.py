@@ -7,8 +7,8 @@ import sqlite3
 import pyttsx3
 import numpy as np
 import pandas as pd
-from threading import Lock
 from copy import deepcopy
+from threading import Lock
 from traceback import format_exc
 from trade.formula_manager import FormulaManager, get_formula_data
 from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm, thread_decorator

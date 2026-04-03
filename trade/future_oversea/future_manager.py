@@ -5,14 +5,14 @@ import zmq
 import queue
 import win32gui
 import subprocess
+from future_trader import FutureTrader
 from PyQt5.QtWidgets import QApplication
 from multiprocessing import Process, Queue
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from future_trader import FutureTrader
 from future_agent_min import FutureAgentMin
 from future_agent_tick import FutureAgentTick
 from future_strategy_min import FutureStrategyMin
 from future_strategy_tick import FutureStrategyTick
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from login_future.manuallogin import find_window, manual_login, leftClick, doubleClick, press_keys, click_button
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from utility.setting_user import load_settings

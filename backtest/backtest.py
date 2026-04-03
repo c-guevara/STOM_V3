@@ -6,10 +6,10 @@ import sqlite3
 import numpy as np
 import pandas as pd
 from traceback import format_exc
-from backtest.back_static_numba import GetResult, bootstrap_test
-from backtest.back_static import PlotShow, GetMoneytopQuery, GetResultDataframe, AddMdd
 from utility.static import now, str_ymdhms
+from backtest.back_static_numba import GetResult, bootstrap_test
 from utility.setting_user import stockreadlines, coinreadlines, futurereadlines
+from backtest.back_static import PlotShow, GetMoneytopQuery, GetResultDataframe, AddMdd
 from utility.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num, columns_vj, DB_STOCK_TICK_BACK, \
     DB_COIN_TICK_BACK, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
 

@@ -5,14 +5,14 @@ import zmq
 import queue
 import win32gui
 import subprocess
+from kiwoom_trader import KiwoomTrader
 from PyQt5.QtWidgets import QApplication
 from multiprocessing import Process, Queue
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from kiwoom_trader import KiwoomTrader
 from kiwoom_agent_min import KiwoomAgentMin
 from kiwoom_agent_tick import KiwoomAgentTick
 from kiwoom_strategy_min import KiwoomStrategyMin
 from kiwoom_strategy_tick import KiwoomStrategyTick
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from login_kiwoom.manuallogin import find_window, manual_login, click_button
 sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from utility.setting_user import load_settings

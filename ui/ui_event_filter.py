@@ -6,8 +6,8 @@ from ui.ui_button_clicked_zoom import *
 from ui.ui_button_clicked_editer_coin import *
 from ui.ui_button_clicked_editer_stock import *
 from ui.ui_extend_window import extend_window
-from PyQt5.QtGui import QTextCursor, QTextCharFormat
 from PyQt5.QtWidgets import QMainWindow, QTextEdit
+from PyQt5.QtGui import QTextCursor, QTextCharFormat
 
 syntax_highlighters = {}
 

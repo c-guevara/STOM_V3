@@ -12,8 +12,8 @@ from multiprocessing import Process, Queue
 from utility.strategy_version_manager import stg_save_version
 from backtest.optimiz_3d_visualization import Visualization3D
 from backtest.back_static_numba import GetResult, bootstrap_test
-from backtest.back_static import SendResult, PlotShow, GetMoneytopQuery, GetResultDataframe, AddMdd
 from utility.static import now, timedelta_day, str_ymd, str_ymdhms, dt_ymd
+from backtest.back_static import SendResult, PlotShow, GetMoneytopQuery, GetResultDataframe, AddMdd
 from utility.setting_base import DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, ui_num, DB_STRATEGY, DB_BACKTEST, columns_vc, \
     DB_SETTING, DB_OPTUNA, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, DB_FUTURE_MIN_BACK, DB_FUTURE_TICK_BACK
 
