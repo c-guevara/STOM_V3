@@ -398,7 +398,7 @@ class RollingWalkForwardTest:
         optuna_fixvars = []
         if data[20]:
             try:
-                optuna_fixvars  = [int(x.strip()) for x in data[22].split(',')]
+                optuna_fixvars = [int(x.strip()) for x in data[20].split(',')]
             except:
                 self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], '고정할 범위의 번호를 잘못입력하였습니다.'))
                 self.SysExit(True)
