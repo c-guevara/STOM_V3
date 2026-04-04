@@ -38,7 +38,7 @@
 
 ```
 STOM/
-├── stom.py                             # 메인 실행 파일
+├── stom.bat                            # 메인 실행 파일
 ├── stom_stock.bat                      # 국내주식 모드 실행
 ├── stom_coin.bat                       # 코인 모드 실행
 ├── stom_future.bat                     # 해외선물 모드 실행
