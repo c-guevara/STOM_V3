@@ -53,10 +53,10 @@ class BackFinder:
         cols_match = re.search(r"self.tickcols\s*=\s*\[(.*?)\]", buystg)
         data_match = re.search(r"self.tickdata\s*=\s*\[(.*?)\]", buystg)
         if cols_match and data_match:
-            cols_content = cols_match.group(1)
-            data_content = data_match.group(1)
-            cols_count   = len(re.findall(r"'[^']*'", cols_content))
-            data_count   = len([x.strip() for x in data_content.split(',') if x.strip()])
+            cols_text  = cols_match.group(1)
+            data_text  = data_match.group(1)
+            cols_count = len(re.findall(r"'[^']*'", cols_text)) + len(re.findall(r'"[^"]*"', cols_text))
+            data_count = len([x.strip() for x in data_text.split(',') if x.strip()])
             if cols_count != data_count:
                 self.wq.put((ui_num[f'{self.ui_gubun}백테스트'], 'self.tickcols의 개수와 self.tickdata의 개수가 일치하지 않습니다.'))
                 self.SysExit(True)
