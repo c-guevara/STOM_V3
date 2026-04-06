@@ -49,11 +49,18 @@ class Upbit:
 
     def _get(self, url, data=None):
         headers = self._request_headers(data)
-        if data is None:
-            data = requests.get(url, headers=headers)
-        else:
-            data = requests.get(url, headers=headers, data=json.dumps(data))
-        return data.json()
+        response = requests.get(url, headers=headers, data=data)
+        return response.json()
+
+    def _post(self, url, data):
+        headers = self._request_headers(data)
+        response = requests.post(url, headers=headers, data=json.dumps(data))
+        return response.json()
+
+    def _delete(self, url, data):
+        headers = self._request_headers(data)
+        response = requests.delete(url, headers=headers, data=json.dumps(data))
+        return response.json()
 
     def get_balances(self):
         url = 'https://api.upbit.com/v1/accounts'
@@ -62,27 +69,27 @@ class Upbit:
     def buy_market_order(self, ticker, price):
         url = 'https://api.upbit.com/v1/orders'
         data = {'market': ticker, 'side': 'bid', 'price': str(price), 'ord_type': 'price'}
-        return self._get(url, data)
+        return self._post(url, data)
 
     def buy_limit_order(self, ticker, price, volume):
         url = 'https://api.upbit.com/v1/orders'
         data = {'market': ticker, 'side': 'bid', 'volume': str(volume), 'price': str(price), 'ord_type': 'limit'}
-        return self._get(url, data)
+        return self._post(url, data)
 
     def sell_market_order(self, ticker, volume):
         url = 'https://api.upbit.com/v1/orders'
         data = {'market': ticker, 'side': 'ask', 'volume': str(volume), 'ord_type': 'market'}
-        return self._get(url, data)
+        return self._post(url, data)
 
     def sell_limit_order(self, ticker, price, volume):
         url = 'https://api.upbit.com/v1/orders'
         data = {'market': ticker, 'side': 'ask', 'volume': str(volume), 'price': str(price), 'ord_type': 'limit'}
-        return self._get(url, data)
+        return self._post(url, data)
 
     def cancel_order(self, od_no):
         url = 'https://api.upbit.com/v1/order'
         data = {'uuid': od_no}
-        return self._get(url, data)
+        return self._delete(url, data)
 
     def get_order(self, od_no, state='wait', page=1, limit=100):
         p = re.compile(r'^\w+-\w+-\w+-\w+-\w+$')
