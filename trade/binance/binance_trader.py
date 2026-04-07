@@ -78,7 +78,7 @@ class BinanceTrader:
             '잔고청산': False
         }
 
-        self.binance    = binance.Client(self.dict_set['Access_key2'], self.dict_set['Secret_key2'])
+        self.binance    = binance.Client(self.dict_set['access_key2'], self.dict_set['secret_key2'])
         self.jgcs_time  = self.get_jgcs_time()
         self.str_today  = str_ymd(now_utc())
         self.order_time = now()
@@ -89,7 +89,7 @@ class BinanceTrader:
 
         self.ws_thread = None
         if not self.dict_set['모의투자']:
-            self.ws_thread = WebSocketTrader(self.dict_set['Access_key2'], self.dict_set['Secret_key2'], self.windowQ)
+            self.ws_thread = WebSocketTrader(self.dict_set['access_key2'], self.dict_set['secret_key2'], self.windowQ)
             self.ws_thread.signal1.connect(self.UpdateUserData)
             self.ws_thread.start()
 

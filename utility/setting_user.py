@@ -103,10 +103,10 @@ def load_settings():
             '인증서비밀번호8': de_text(EN_KEY, df_sa['인증서비밀번호'][8])   if df_sa_not_empty and df_sa['인증서비밀번호'][8] else None,
             '계좌비밀번호8':   de_text(EN_KEY, df_sa['계좌비밀번호'][8])    if df_sa_not_empty and df_sa['계좌비밀번호'][8] else None,
 
-            'Access_key1':   de_text(EN_KEY, df_ca['Access_key'][1])    if df_ca_not_empty and df_ca['Access_key'][1] else None,
-            'Secret_key1':   de_text(EN_KEY, df_ca['Secret_key'][1])    if df_ca_not_empty and df_ca['Secret_key'][1] else None,
-            'Access_key2':   de_text(EN_KEY, df_ca['Access_key'][2])    if df_ca_not_empty and df_ca['Access_key'][2] else None,
-            'Secret_key2':   de_text(EN_KEY, df_ca['Secret_key'][2])    if df_ca_not_empty and df_ca['Secret_key'][2] else None,
+            'access_key1':   de_text(EN_KEY, df_ca['access_key'][1])    if df_ca_not_empty and df_ca['access_key'][1] else None,
+            'secret_key1':   de_text(EN_KEY, df_ca['secret_key'][1])    if df_ca_not_empty and df_ca['secret_key'][1] else None,
+            'access_key2':   de_text(EN_KEY, df_ca['access_key'][2])    if df_ca_not_empty and df_ca['access_key'][2] else None,
+            'secret_key2':   de_text(EN_KEY, df_ca['secret_key'][2])    if df_ca_not_empty and df_ca['secret_key'][2] else None,
 
             '텔레그램봇토큰1':      de_text(EN_KEY, df_t['str_bot'][1])      if df_t_not_empty and df_t['str_bot'][1] else None,
             '텔레그램사용자아이디1': int(de_text(EN_KEY, df_t['int_id'][1]))  if df_t_not_empty and df_t['int_id'][1]  else None,

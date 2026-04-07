@@ -6,7 +6,7 @@ from utility.static import error_decorator
 
 
 @error_decorator
-def setting_stock_elapsed_tick_number_sample(ui):
+def setting_elapsed_tick_number_sample(ui):
     ui.set_lineEdittt_01.setText('이평60데드')
     ui.set_lineEdittt_02.setText('이평60골든')
     ui.set_lineEdittt_11.setText('현재가N(1) >= 이동평균(60, 1) and  이동평균(60) > 현재가')
@@ -14,7 +14,7 @@ def setting_stock_elapsed_tick_number_sample(ui):
 
 
 @error_decorator
-def setting_stock_elapsed_tick_number_load(ui):
+def setting_elapsed_tick_number_load(ui):
     for lineedit in ui.scn_lineedit_list:
         lineedit.clear()
     for lineedit in ui.scc_lineedit_list:
@@ -32,7 +32,7 @@ def setting_stock_elapsed_tick_number_load(ui):
 
 
 @error_decorator
-def setting_stock_elapsed_tick_number_save(ui):
+def setting_elapsed_tick_number_save(ui):
     text = ''
     for i, lineedit in enumerate(ui.scn_lineedit_list):
         ltext = lineedit.text()

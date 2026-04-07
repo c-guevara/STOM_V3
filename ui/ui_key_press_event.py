@@ -30,9 +30,9 @@ def key_press_event(_ui, event):
                     if _ui.cvj_pushButton_01.isVisible():
                         backtest_start(_ui, 'coin')
 
-        elif _ui.focusWidget() in (_ui.std_tableWidgettt, _ui.sgj_tableWidgettt, _ui.scj_tableWidgettt, _ui.ctd_tableWidgettt, _ui.cgj_tableWidgettt, _ui.ccj_tableWidgettt):
+        elif _ui.focusWidget() in (_ui.td_tableWidgettt, _ui.gj_tableWidgettt, _ui.cj_tableWidgettt, _ui.td_tableWidgettt, _ui.gj_tableWidgettt, _ui.cj_tableWidgettt):
             stock = True
-            if _ui.focusWidget() in (_ui.ctd_tableWidgettt, _ui.cgj_tableWidgettt, _ui.ccj_tableWidgettt):
+            if _ui.focusWidget() in (_ui.td_tableWidgettt, _ui.gj_tableWidgettt, _ui.cj_tableWidgettt):
                 stock = False
             row  = _ui.focusWidget().currentIndex().row()
             col  = _ui.focusWidget().currentIndex().column()
@@ -47,11 +47,11 @@ def key_press_event(_ui, event):
                 _ui.ct_lineEdittttt_05.setText(name)
                 show_dialog(_ui, name, tickcount, searchdate, col)
 
-        elif _ui.focusWidget() in (_ui.sds_tableWidgettt, _ui.cds_tableWidgettt):
-            if _ui.focusWidget() == _ui.sds_tableWidgettt:
-                searchdate = _ui.s_calendarWidgett.selectedDate().toString('yyyyMMdd')
+        elif _ui.focusWidget() in (_ui.ds_tableWidgetttt, _ui.ds_tableWidgetttt):
+            if _ui.focusWidget() == _ui.ds_tableWidgetttt:
+                searchdate = _ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
             else:
-                searchdate = _ui.c_calendarWidgett.selectedDate().toString('yyyyMMdd')
+                searchdate = _ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
             row  = _ui.focusWidget().currentIndex().row()
             item = _ui.focusWidget().item(row, 1)
             if item is not None:
@@ -64,8 +64,8 @@ def key_press_event(_ui, event):
                 _ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
                 show_dialog(_ui, name, tickcount, searchdate, 4)
 
-        elif _ui.focusWidget() in (_ui.sns_tableWidgettt, _ui.cns_tableWidgettt):
-            if _ui.focusWidget() == _ui.sns_tableWidgettt:
+        elif _ui.focusWidget() in (_ui.ns_tableWidgetttt, _ui.cns_tableWidgettt):
+            if _ui.focusWidget() == _ui.ns_tableWidgetttt:
                 gubun_ = '주식'
             else:
                 gubun_ = '코인'

@@ -282,5 +282,5 @@ class BackEngineFutureMin(BackEngineFutureTick):
                 self.profit, self.hold_time = 수익률, 보유시간
                 exec(self.sellstg)
 
-    def UpdateGlobalsFunc(self, dict_add_func):
+    def update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)

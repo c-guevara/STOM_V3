@@ -60,7 +60,7 @@ UI_ACTIBATED_CONFIG = {
             'combo_06': 'sva_comboBoxxx_01', 'line_06': 'sva_lineEdittt_01',
             'combo_07': 'svo_comboBoxxx_01', 'line_07': 'svo_lineEdittt_01',
             'combo_08': 'svo_comboBoxxx_02', 'line_08': 'svo_lineEdittt_02',
-            'combo_09': 'sj_stock_cbBox_01',
+            'combo_09': 'sj_strat_cbBox_01',
             'push_41': 'ss_pushButtonn_41',
         },
         'types': ['basic', 'basic', 'opti', 'opti', 'opti', 'opti', 'cond', 'cond'],

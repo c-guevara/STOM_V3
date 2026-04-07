@@ -9,10 +9,10 @@ def process_starter(ui):
     inthms = int(str_hms())
 
     if not ui.backtest_engine and ui.dict_set['스톰라이브'] and ui.live_recv.isRunning():
-        if ui.dict_set['주식트레이더'] and '키움증권' in ui.dict_set['증권사'] and \
+        if ui.dict_set['트레이더'] and '키움증권' in ui.dict_set['증권사'] and \
            ((ui.int_time < 93100 <= inthms) or (ui.int_time < 152000 <= inthms)):
             stom_live_screenshot(ui, '주식')
-        elif ui.dict_set['주식트레이더'] and '해외선물' in ui.dict_set['증권사'] and \
+        elif ui.dict_set['트레이더'] and '해외선물' in ui.dict_set['증권사'] and \
                 ((ui.int_time < 50000 <= inthms and summer_time != 0) or (ui.int_time < 60000 <= inthms)):
             stom_live_screenshot(ui, '해선')
         elif ui.dict_set['코인트레이더'] and ui.int_time < 235000 <= inthms:
@@ -34,8 +34,8 @@ def process_starter(ui):
 @error_decorator
 def UpdateWindowTitle(ui):
     text = 'STOM'
-    if ui.dict_set['주식트레이더']:
-        data_type = '1초스냅샷' if ui.dict_set['주식타임프레임'] else '1분봉'
+    if ui.dict_set['트레이더']:
+        data_type = '1초스냅샷' if ui.dict_set['타임프레임'] else '1분봉'
         if '키움증권' in ui.dict_set['증권사']:
             text = f'{text} | 키움증권 | {data_type}'
         else:
@@ -55,15 +55,15 @@ def UpdateWindowTitle(ui):
                f'hogaQ[{ui.hogaQ.qsize()}] | soundQ[{ui.soundQ.qsize()}] | backegQ[{beqsize}] | backstQ[{bstqsize}] | ' \
                f'backttQ[{ui.totalQ.qsize()}]'
     else:
-        if ui.dict_set['주식트레이더']:
-            text = f'{text} | 모의' if ui.dict_set['주식모의투자'] else f'{text} | 실전'
+        if ui.dict_set['트레이더']:
+            text = f'{text} | 모의' if ui.dict_set['모의투자'] else f'{text} | 실전'
             text = f'{text} | {ui.dict_set["주식매수전략"] if ui.dict_set["주식매수전략"] != "" else "전략사용안함"}'
         elif ui.dict_set['코인트레이더']:
             text = f'{text} | 모의' if ui.dict_set['코인모의투자'] else f'{text} | 실전'
             text = f'{text} | {ui.dict_set["코인매수전략"] if ui.dict_set["코인매수전략"] != "" else "전략사용안함"}'
         if ui.dict_set['거래소'] == '바이낸스선물' and ui.dict_set['코인트레이더']:
             text = f"{text} | {str_ymdhms_ios(now_utc())}"
-        elif '해외선물' in ui.dict_set['증권사'] and ui.dict_set['주식트레이더']:
+        elif '해외선물' in ui.dict_set['증권사'] and ui.dict_set['트레이더']:
             text = f"{text} | {str_ymdhms_ios(now_cme())}"
         else:
             text = f"{text} | {str_ymdhms_ios()}"

@@ -110,8 +110,8 @@ class RiskAnalyzer:
             from utility.setting_base import list_stock_tick
             self.columns = list_stock_tick
         else:
-            from utility.setting_base import list_coin_tick
-            self.columns = list_coin_tick
+            from utility.setting_base import list_basic_tick
+            self.columns = list_basic_tick
 
         # 칼럼 인덱스 매핑 (빠른 접근용)
         col_index = {col: idx for idx, col in enumerate(self.columns)}

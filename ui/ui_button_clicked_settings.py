@@ -18,13 +18,13 @@ def setting_load_01(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM main').set_index('index')
     if len(df) > 0:
         ui.sj_main_comBox_01.setCurrentText(df['증권사'][0])
-        ui.sj_main_cheBox_01.setChecked(True) if df['주식에이전트'][0] else ui.sj_main_cheBox_01.setChecked(False)
-        ui.sj_main_cheBox_02.setChecked(True) if df['주식트레이더'][0] else ui.sj_main_cheBox_02.setChecked(False)
-        ui.sj_main_cheBox_03.setChecked(True) if df['주식데이터저장'][0] else ui.sj_main_cheBox_03.setChecked(False)
+        ui.sj_main_cheBox_01.setChecked(True) if df['에이전트'][0] else ui.sj_main_cheBox_01.setChecked(False)
+        ui.sj_main_cheBox_02.setChecked(True) if df['트레이더'][0] else ui.sj_main_cheBox_02.setChecked(False)
+        ui.sj_main_cheBox_03.setChecked(True) if df['데이터저장'][0] else ui.sj_main_cheBox_03.setChecked(False)
         ui.sj_main_comBox_02.setCurrentText(df['거래소'][0])
-        ui.sj_main_cheBox_04.setChecked(True) if df['코인리시버'][0] else ui.sj_main_cheBox_04.setChecked(False)
-        ui.sj_main_cheBox_05.setChecked(True) if df['코인트레이더'][0] else ui.sj_main_cheBox_05.setChecked(False)
-        ui.sj_main_cheBox_06.setChecked(True) if df['코인데이터저장'][0] else ui.sj_main_cheBox_06.setChecked(False)
+        ui.sj_main_cheBox_04.setChecked(True) if df['리시버'][0] else ui.sj_main_cheBox_04.setChecked(False)
+        ui.sj_main_cheBox_05.setChecked(True) if df['트레이더'][0] else ui.sj_main_cheBox_05.setChecked(False)
+        ui.sj_main_cheBox_06.setChecked(True) if df['데이터저장'][0] else ui.sj_main_cheBox_06.setChecked(False)
         ui.sj_main_comBox_03.setCurrentText('격리' if df['바이낸스선물마진타입'][0] == 'ISOLATED' else '교차')
         ui.sj_main_comBox_04.setCurrentText('단방향' if df['바이낸스선물포지션'][0] == 'false' else '양방향')
     else:
@@ -43,7 +43,7 @@ def setting_load_02(ui):
             ui.sj_sacc_liEdit_03.setText(de_text(ui.dict_set['키'], df['인증서비밀번호'][id_num]))
             ui.sj_sacc_liEdit_04.setText(de_text(ui.dict_set['키'], df['계좌비밀번호'][id_num]))
     else:
-        QMessageBox.critical(ui, '오류 알림', '주식 계정 설정값이\n존재하지 않습니다.\n')
+        QMessageBox.critical(ui, '오류 알림', '계정 설정값이\n존재하지 않습니다.\n')
 
 
 @error_decorator
@@ -51,12 +51,12 @@ def setting_load_03(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM cacc').set_index('index')
     combo_name = ui.sj_main_comBox_02.currentText()
     if len(df) > 0:
-        if combo_name == '업비트' and df['Access_key'][1] and df['Secret_key'][1]:
-            ui.sj_cacc_liEdit_01.setText(de_text(ui.dict_set['키'], df['Access_key'][1]))
-            ui.sj_cacc_liEdit_02.setText(de_text(ui.dict_set['키'], df['Secret_key'][1]))
-        elif combo_name == '바이낸스선물' and df['Access_key'][2] and df['Secret_key'][2]:
-            ui.sj_cacc_liEdit_01.setText(de_text(ui.dict_set['키'], df['Access_key'][2]))
-            ui.sj_cacc_liEdit_02.setText(de_text(ui.dict_set['키'], df['Secret_key'][2]))
+        if combo_name == '업비트' and df['access_key'][1] and df['secret_key'][1]:
+            ui.sj_accc_liEdit_01.setText(de_text(ui.dict_set['키'], df['access_key'][1]))
+            ui.sj_accc_liEdit_02.setText(de_text(ui.dict_set['키'], df['secret_key'][1]))
+        elif combo_name == '바이낸스선물' and df['access_key'][2] and df['secret_key'][2]:
+            ui.sj_accc_liEdit_01.setText(de_text(ui.dict_set['키'], df['access_key'][2]))
+            ui.sj_accc_liEdit_02.setText(de_text(ui.dict_set['키'], df['secret_key'][2]))
     else:
         QMessageBox.critical(ui, '오류 알림', '계정 설정값이\n존재하지 않습니다.\n')
 
@@ -81,49 +81,49 @@ def setting_load_05(ui):
     dfob = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun}optibuy').set_index('index')
     dfos = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun}optisell').set_index('index')
     if len(df) > 0:
-        ui.sj_stock_ckBox_01.setChecked(True) if df['주식모의투자'][0] else ui.sj_stock_ckBox_01.setChecked(False)
-        ui.sj_stock_ckBox_02.setChecked(True) if df['주식알림소리'][0] else ui.sj_stock_ckBox_02.setChecked(False)
-        ui.sj_stock_ckBox_03.setChecked(True) if df['주식잔고청산'][0] else ui.sj_stock_ckBox_03.setChecked(False)
-        ui.sj_stock_ckBox_04.setChecked(True) if df['주식프로세스종료'][0] else ui.sj_stock_ckBox_04.setChecked(False)
-        ui.sj_stock_ckBox_05.setChecked(True) if df['주식컴퓨터종료'][0] else ui.sj_stock_ckBox_05.setChecked(False)
-        ui.sj_stock_ckBox_09.setChecked(True) if df['주식투자금고정'][0] else ui.sj_stock_ckBox_09.setChecked(False)
-        ui.sj_stock_ckBox_10.setChecked(True) if df['주식손실중지'][0] else ui.sj_stock_ckBox_10.setChecked(False)
-        ui.sj_stock_ckBox_11.setChecked(True) if df['주식수익중지'][0] else ui.sj_stock_ckBox_11.setChecked(False)
-        ui.sj_stock_lEdit_01.setText(str(df['주식평균값계산틱수'][0]))
-        ui.sj_stock_lEdit_02.setText(str(df['주식최대매수종목수'][0]))
-        ui.sj_stock_lEdit_03.setText(str(df['주식전략종료시간'][0]))
-        ui.sj_stock_cbBox_01.clear()
-        ui.sj_stock_cbBox_02.clear()
-        ui.sj_stock_cbBox_01.addItem('사용안함')
-        ui.sj_stock_cbBox_02.addItem('사용안함')
+        ui.sj_strat_ckBox_01.setChecked(True) if df['모의투자'][0] else ui.sj_strat_ckBox_01.setChecked(False)
+        ui.sj_strat_ckBox_02.setChecked(True) if df['알림소리'][0] else ui.sj_strat_ckBox_02.setChecked(False)
+        ui.sj_strat_ckBox_03.setChecked(True) if df['잔고청산'][0] else ui.sj_strat_ckBox_03.setChecked(False)
+        ui.sj_strat_ckBox_04.setChecked(True) if df['프로세스종료'][0] else ui.sj_strat_ckBox_04.setChecked(False)
+        ui.sj_strat_ckBox_05.setChecked(True) if df['컴퓨터종료'][0] else ui.sj_strat_ckBox_05.setChecked(False)
+        ui.sj_strat_ckBox_09.setChecked(True) if df['투자금고정'][0] else ui.sj_strat_ckBox_09.setChecked(False)
+        ui.sj_strat_ckBox_10.setChecked(True) if df['손실중지'][0] else ui.sj_strat_ckBox_10.setChecked(False)
+        ui.sj_strat_ckBox_11.setChecked(True) if df['수익중지'][0] else ui.sj_strat_ckBox_11.setChecked(False)
+        ui.sj_strat_lEdit_01.setText(str(df['주식평균값계산틱수'][0]))
+        ui.sj_strat_lEdit_02.setText(str(df['주식최대매수종목수'][0]))
+        ui.sj_strat_lEdit_03.setText(str(df['주식전략종료시간'][0]))
+        ui.sj_strat_cbBox_01.clear()
+        ui.sj_strat_cbBox_02.clear()
+        ui.sj_strat_cbBox_01.addItem('사용안함')
+        ui.sj_strat_cbBox_02.addItem('사용안함')
         if len(dfb) > 0:
             stg_list = list(dfb.index)
             stg_list.sort()
             for stg in stg_list:
-                ui.sj_stock_cbBox_01.addItem(stg)
+                ui.sj_strat_cbBox_01.addItem(stg)
         if len(dfob) > 0:
             stg_list = list(dfob.index)
             stg_list.sort()
             for stg in stg_list:
-                ui.sj_stock_cbBox_01.addItem(stg)
+                ui.sj_strat_cbBox_01.addItem(stg)
         if df['주식매수전략'][0]:
-            ui.sj_stock_cbBox_01.setCurrentText(df['주식매수전략'][0])
+            ui.sj_strat_cbBox_01.setCurrentText(df['주식매수전략'][0])
         if len(dfs) > 0:
             stg_list = list(dfs.index)
             stg_list.sort()
             for stg in stg_list:
-                ui.sj_stock_cbBox_02.addItem(stg)
+                ui.sj_strat_cbBox_02.addItem(stg)
         if len(dfos) > 0:
             stg_list = list(dfos.index)
             stg_list.sort()
             for stg in stg_list:
-                ui.sj_stock_cbBox_02.addItem(stg)
+                ui.sj_strat_cbBox_02.addItem(stg)
         if df['주식매도전략'][0]:
-            ui.sj_stock_cbBox_02.setCurrentText(df['주식매도전략'][0])
-        ui.sj_stock_cbBox_03.setCurrentText('1초스냅샷' if df['주식타임프레임'][0] else '1분봉')
-        ui.sj_stock_lEdit_07.setText(str(df['주식투자금'][0]))
-        ui.sj_stock_lEdit_09.setText(str(df['주식손실중지수익률'][0]))
-        ui.sj_stock_lEdit_10.setText(str(df['주식수익중지수익률'][0]))
+            ui.sj_strat_cbBox_02.setCurrentText(df['주식매도전략'][0])
+        ui.sj_strat_cbBox_03.setCurrentText('1초스냅샷' if df['주식타임프레임'][0] else '1분봉')
+        ui.sj_strat_lEdit_07.setText(str(df['주식투자금'][0]))
+        ui.sj_strat_lEdit_09.setText(str(df['주식손실중지수익률'][0]))
+        ui.sj_strat_lEdit_10.setText(str(df['주식수익중지수익률'][0]))
         if gubun == 'stock' and 153000 < df['주식전략종료시간'][0]:
             QMessageBox.critical(ui, '오류 알림', '주식전략의 종료시간을\n153001 이후 시간으로 설정할 수 없습니다.\n')
         elif gubun == 'future' and 160000 < df['주식전략종료시간'][0]:
@@ -140,10 +140,10 @@ def setting_load_06(ui):
     dfob = ui.dbreader.read_sql('전략디비', 'SELECT * FROM coinoptibuy').set_index('index')
     dfos = ui.dbreader.read_sql('전략디비', 'SELECT * FROM coinoptisell').set_index('index')
     if len(df) > 0:
-        ui.sj_coin_cheBox_01.setChecked(True) if df['코인모의투자'][0] else ui.sj_coin_cheBox_01.setChecked(False)
-        ui.sj_coin_cheBox_02.setChecked(True) if df['코인알림소리'][0] else ui.sj_coin_cheBox_02.setChecked(False)
-        ui.sj_coin_cheBox_03.setChecked(True) if df['코인잔고청산'][0] else ui.sj_coin_cheBox_03.setChecked(False)
-        ui.sj_coin_cheBox_04.setChecked(True) if df['코인프로세스종료'][0] else ui.sj_coin_cheBox_04.setChecked(False)
+        ui.sj_coin_cheBox_01.setChecked(True) if df['모의투자'][0] else ui.sj_coin_cheBox_01.setChecked(False)
+        ui.sj_coin_cheBox_02.setChecked(True) if df['알림소리'][0] else ui.sj_coin_cheBox_02.setChecked(False)
+        ui.sj_coin_cheBox_03.setChecked(True) if df['잔고청산'][0] else ui.sj_coin_cheBox_03.setChecked(False)
+        ui.sj_coin_cheBox_04.setChecked(True) if df['프로세스종료'][0] else ui.sj_coin_cheBox_04.setChecked(False)
         ui.sj_coin_cheBox_05.setChecked(True) if df['코인컴퓨터종료'][0] else ui.sj_coin_cheBox_05.setChecked(False)
         ui.sj_coin_cheBox_09.setChecked(True) if df['코인투자금고정'][0] else ui.sj_coin_cheBox_09.setChecked(False)
         ui.sj_coin_cheBox_10.setChecked(True) if df['코인손실중지'][0] else ui.sj_coin_cheBox_10.setChecked(False)
@@ -283,10 +283,10 @@ def setting_save_01(ui):
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
         if '키움증권' in ui.dict_set['증권사']:
-            ui.sj_stock_label_03.setText(
+            ui.sj_strat_label_03.setText(
                 '종목당투자금                          백만원                                  전략중지 및 잔고청산   |')
         else:
-            ui.sj_stock_label_03.setText(
+            ui.sj_strat_label_03.setText(
                 '종목당투자금                          계약수                                  전략중지 및 잔고청산   |')
         if ui.dict_set['거래소'] == '업비트':
             ui.sj_coin_labell_03.setText(
@@ -346,8 +346,8 @@ def setting_save_02(ui):
 
 @error_decorator
 def setting_save_03(ui):
-    access_key = ui.sj_cacc_liEdit_01.text()
-    secret_key = ui.sj_cacc_liEdit_02.text()
+    access_key = ui.sj_accc_liEdit_01.text()
+    secret_key = ui.sj_accc_liEdit_02.text()
 
     if '' in (access_key, secret_key):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
@@ -357,16 +357,16 @@ def setting_save_03(ui):
             en_access_key = en_text(ui.dict_set['키'], access_key)
             en_secret_key = en_text(ui.dict_set['키'], secret_key)
             index  = 1 if combo_name == '업비트' else 2
-            query  = 'UPDATE cacc SET Access_key = ?, Secret_key = ? WHERE `index` = ?'
+            query  = 'UPDATE cacc SET access_key = ?, secret_key = ? WHERE `index` = ?'
             values = (en_access_key, en_secret_key, index)
             ui.queryQ.put(('설정디비', query, values))
 
             if combo_name == '업비트':
-                ui.dict_set['Access_key1'] = access_key
-                ui.dict_set['Secret_key1'] = secret_key
+                ui.dict_set['access_key1'] = access_key
+                ui.dict_set['secret_key1'] = secret_key
             else:
-                ui.dict_set['Access_key2'] = access_key
-                ui.dict_set['Secret_key2'] = secret_key
+                ui.dict_set['access_key2'] = access_key
+                ui.dict_set['secret_key2'] = secret_key
 
             QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
@@ -396,23 +396,23 @@ def setting_save_04(ui):
 
 @error_decorator
 def setting_save_05(ui):
-    주식모의투자 = 1 if ui.sj_stock_ckBox_01.isChecked() else 0
-    주식알림소리 = 1 if ui.sj_stock_ckBox_02.isChecked() else 0
-    주식잔고청산 = 1 if ui.sj_stock_ckBox_03.isChecked() else 0
-    주식프로세스종료 = 1 if ui.sj_stock_ckBox_04.isChecked() else 0
-    주식컴퓨터종료 = 1 if ui.sj_stock_ckBox_05.isChecked() else 0
-    주식투자금고정 = 1 if ui.sj_stock_ckBox_09.isChecked() else 0
-    주식손실중지 = 1 if ui.sj_stock_ckBox_10.isChecked() else 0
-    주식수익중지 = 1 if ui.sj_stock_ckBox_11.isChecked() else 0
-    주식매수전략 = ui.sj_stock_cbBox_01.currentText()
-    주식매도전략 = ui.sj_stock_cbBox_02.currentText()
-    주식타임프레임 = 1 if ui.sj_stock_cbBox_03.currentText() == '1초스냅샷' else 0
-    주식평균값계산틱수 = ui.sj_stock_lEdit_01.text()
-    주식최대매수종목수 = ui.sj_stock_lEdit_02.text()
-    주식전략종료시간 = ui.sj_stock_lEdit_03.text()
-    주식투자금 = ui.sj_stock_lEdit_07.text()
-    주식손실중지수익률 = ui.sj_stock_lEdit_09.text()
-    주식수익중지수익률 = ui.sj_stock_lEdit_10.text()
+    주식모의투자 = 1 if ui.sj_strat_ckBox_01.isChecked() else 0
+    주식알림소리 = 1 if ui.sj_strat_ckBox_02.isChecked() else 0
+    주식잔고청산 = 1 if ui.sj_strat_ckBox_03.isChecked() else 0
+    주식프로세스종료 = 1 if ui.sj_strat_ckBox_04.isChecked() else 0
+    주식컴퓨터종료 = 1 if ui.sj_strat_ckBox_05.isChecked() else 0
+    주식투자금고정 = 1 if ui.sj_strat_ckBox_09.isChecked() else 0
+    주식손실중지 = 1 if ui.sj_strat_ckBox_10.isChecked() else 0
+    주식수익중지 = 1 if ui.sj_strat_ckBox_11.isChecked() else 0
+    주식매수전략 = ui.sj_strat_cbBox_01.currentText()
+    주식매도전략 = ui.sj_strat_cbBox_02.currentText()
+    주식타임프레임 = 1 if ui.sj_strat_cbBox_03.currentText() == '1초스냅샷' else 0
+    주식평균값계산틱수 = ui.sj_strat_lEdit_01.text()
+    주식최대매수종목수 = ui.sj_strat_lEdit_02.text()
+    주식전략종료시간 = ui.sj_strat_lEdit_03.text()
+    주식투자금 = ui.sj_strat_lEdit_07.text()
+    주식손실중지수익률 = ui.sj_strat_lEdit_09.text()
+    주식수익중지수익률 = ui.sj_strat_lEdit_10.text()
 
     if '' in (주식평균값계산틱수, 주식최대매수종목수, 주식전략종료시간, 주식투자금, 주식손실중지수익률, 주식수익중지수익률):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
@@ -619,8 +619,8 @@ def setting_acc_view(ui):
         ui.sj_sacc_liEdit_02.setEchoMode(QLineEdit.Password)
         ui.sj_sacc_liEdit_03.setEchoMode(QLineEdit.Password)
         ui.sj_sacc_liEdit_04.setEchoMode(QLineEdit.Password)
-        ui.sj_cacc_liEdit_01.setEchoMode(QLineEdit.Password)
-        ui.sj_cacc_liEdit_02.setEchoMode(QLineEdit.Password)
+        ui.sj_accc_liEdit_01.setEchoMode(QLineEdit.Password)
+        ui.sj_accc_liEdit_02.setEchoMode(QLineEdit.Password)
         ui.sj_tele_liEdit_01.setEchoMode(QLineEdit.Password)
         ui.sj_tele_liEdit_02.setEchoMode(QLineEdit.Password)
         ui.sj_etc_liEditt_01.setEchoMode(QLineEdit.Password)
@@ -1450,7 +1450,7 @@ def setting_all_save(ui):
 
 
 @error_decorator
-def setting_stock_elapsed_tick_number(ui):
+def setting_elapsed_tick_number(ui):
     ui.dialog_setsj.show() if not ui.dialog_setsj.isVisible() else ui.dialog_setsj.close()
 
 

@@ -29,12 +29,12 @@ class SetDialogChart:
         self.ui.ct_groupBoxxxxx_02 = QGroupBox(' ', self.ui.dialog_chart)
 
         if self.ui.dict_set is not None:
-            if self.ui.dict_set['주식에이전트']:
-                if '해외선물' in self.ui.dict_set['증권사'] and self.ui.dict_set['주식타임프레임']:
+            if self.ui.dict_set['에이전트']:
+                if '해외선물' in self.ui.dict_set['증권사'] and self.ui.dict_set['타임프레임']:
                     starttime = '093000'
                 else:
                     starttime = '090000'
-                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['주식전략종료시간'])))).zfill(6)
+                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['전략종료시간'])))).zfill(6)
             else:
                 starttime = '000000'
                 endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['코인전략종료시간'])))).zfill(6)
@@ -89,7 +89,7 @@ class SetDialogChart:
         pg.setConfigOption('background', color_bg_bk)
         self.ui.ctpg_layout = pg.GraphicsLayoutWidget()
         if self.ui.dict_set is not None and \
-                ((self.ui.dict_set['주식에이전트'] and not self.ui.dict_set['주식타임프레임']) or (self.ui.dict_set['코인리시버'] and not self.ui.dict_set['코인타임프레임'])):
+                ((self.ui.dict_set['에이전트'] and not self.ui.dict_set['주식타임프레임']) or (self.ui.dict_set['코인리시버'] and not self.ui.dict_set['코인타임프레임'])):
             self.ui.ctpg[0], self.ui.ctpg_cvb[0] = self.wc.setaddPlot(self.ui.ctpg_layout, 0, 0, colspan=2)
             self.ui.ctpg[1], self.ui.ctpg_cvb[1] = self.wc.setaddPlot(self.ui.ctpg_layout, 1, 0, colspan=2)
             self.ui.ctpg[2], self.ui.ctpg_cvb[2] = self.wc.setaddPlot(self.ui.ctpg_layout, 2, 0)

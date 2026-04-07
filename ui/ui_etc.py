@@ -7,11 +7,11 @@ from PyQt5.QtCore import QSize, Qt
 from ui.set_text import famous_saying
 from PyQt5.QtWidgets import QApplication, QMessageBox
 from ui.ui_button_clicked_shortcut import mnbutton_c_clicked_01
-from utility.setting_base import columns_dt, columns_dd, ui_num
+from utility.setting_base import columns_dt, columns_dd, ui_num, DICT_MARKET_GUBUN, DICT_MARKET_INFO
 from ui.ui_backtest_engine import backengine_start, backengine_show
 from ui.ui_button_clicked_dialog_backengine import backtest_engine_kill, sdbutton_clicked_04
 from utility.static import thread_decorator, qtest_qwait, str_ymdhmsf, str_ymdhms, error_decorator
-from ui.ui_process_alive import coin_strategy_process_alive, coin_trader_process_alive, coin_receiver_process_alive
+from ui.ui_process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 
 
 @error_decorator
@@ -42,7 +42,7 @@ def update_cpuper(ui):
 def auto_back_schedule(ui, gubun):
     if gubun == 1:
         ui.auto_mode = True
-        if ui.dict_set['주식알림소리'] or ui.dict_set['코인알림소리']:
+        if ui.dict_set['알림소리'] or ui.dict_set['코인알림소리']:
             ui.soundQ.put('예약된 백테스트 스케쥴러를 시작합니다.')
         if not ui.dialog_backengine.isVisible():
             backengine_show(ui, ui.dict_set['백테스케쥴구분'])
@@ -71,9 +71,9 @@ def auto_back_schedule(ui, gubun):
 def update_dictset(ui):
     if ui.proc_manager is not None and ui.proc_manager.poll() is None:
         ui.wdzservQ.put(('manager', ('설정변경', ui.dict_set)))
-    if coin_receiver_process_alive(ui): ui.creceivQ.put(('설정변경', ui.dict_set))
-    if coin_trader_process_alive(ui):   ui.ctraderQ.put(('설정변경', ui.dict_set))
-    if coin_strategy_process_alive(ui): ui.cstgQ.put(('설정변경', ui.dict_set))
+    if receiver_process_alive(ui): ui.creceivQ.put(('설정변경', ui.dict_set))
+    if trader_process_alive(ui):   ui.ctraderQ.put(('설정변경', ui.dict_set))
+    if strategy_process_alive(ui): ui.cstgQ.put(('설정변경', ui.dict_set))
     if ui.proc_chqs.is_alive():         ui.chartQ.put(('설정변경', ui.dict_set))
     if ui.telegram.isRunning():         ui.teleQ.put(('설정변경', ui.dict_set))
     if ui.backtest_engine:
@@ -96,17 +96,14 @@ def chart_clear(ui):
 
 
 @error_decorator
-def calendar_clicked(ui, gubun):
-    if gubun == 'S':
-        table = 's_tradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_tradelist'
-        searchday = ui.s_calendarWidgett.selectedDate().toString('yyyyMMdd')
-    else:
-        table = 'c_tradelist' if ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'
-        searchday = ui.c_calendarWidgett.selectedDate().toString('yyyyMMdd')
+def calendar_clicked(ui):
+    market_gubun = DICT_MARKET_GUBUN[ui.dict_set['거래소']]
+    table = DICT_MARKET_INFO[market_gubun]['거래디비']
+    searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
     df1 = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table} WHERE 체결시간 LIKE '{searchday}%'").set_index('index')
     if len(df1) > 0:
         df1.sort_values(by=['체결시간'], ascending=True, inplace=True)
-        if table in ('f_tradelist', 'c_tradelist_future'):
+        if 'future' in table:
             df1 = df1[['체결시간', '종목명', '포지션', '매수금액', '매도금액', '주문수량', '수익률', '수익금']]
         else:
             df1 = df1[['체결시간', '종목명', '매수금액', '매도금액', '주문수량', '수익률', '수익금']]
@@ -118,8 +115,8 @@ def calendar_clicked(ui, gubun):
     else:
         df1 = pd.DataFrame(columns=columns_dd)
         df2 = pd.DataFrame(columns=columns_dt)
-    ui.update_tablewidget.update_tablewidget((ui_num[f'{gubun}당일합계'], df2))
-    ui.update_tablewidget.update_tablewidget((ui_num[f'{gubun}당일상세'], df1))
+    ui.update_tablewidget.update_tablewidget((ui_num['당일합계'], df2))
+    ui.update_tablewidget.update_tablewidget((ui_num['당일상세'], df1))
 
 
 @error_decorator
@@ -180,7 +177,7 @@ def manual_save_and_exit(ui):
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
-        if coin_receiver_process_alive(ui):
+        if receiver_process_alive(ui):
             ui.creceivQ.put(('수동데이터저장', 'dummy'))
         else:
             ui.wdzservQ.put(('agent', ('수동데이터저장', 'dummy')))

@@ -48,83 +48,14 @@ DB_COIN_FUTURE_MIN       = './_database/coin_future_min.db'
 DB_COIN_FUTURE_TICK_BACK = './_database/coin_future_tick_back.db'
 DB_COIN_FUTURE_MIN_BACK  = './_database/coin_future_min_back.db'
 
-DICT_MARKET_DB = {
-    1: {0: DB_STOCK_MIN, 1: DB_STOCK_TICK},
-    2: {0: DB_STOCK_ETF_MIN, 1: DB_STOCK_ETF_TICK},
-    3: {0: DB_STOCK_ETN_MIN, 1: DB_STOCK_ETN_TICK},
-    4: {0: DB_STOCK_USA_MIN, 1: DB_STOCK_USA_TICK},
-    5: {0: DB_COIN_MIN, 1: DB_COIN_TICK},
-    6: {0: DB_FUTURE_MIN, 1: DB_FUTURE_TICK},
-    7: {0: DB_FUTURE_NT_MIN, 1: DB_FUTURE_NT_TICK},
-    8: {0: DB_FUTURE_OS_MIN, 1: DB_FUTURE_OS_TICK},
-    9: {0: DB_COIN_FUTURE_MIN, 1: DB_COIN_FUTURE_TICK}
-}
-
-DICT_MARKET_BACKDB = {
-    1: {0: DB_STOCK_MIN_BACK, 1: DB_STOCK_TICK_BACK},
-    2: {0: DB_STOCK_ETF_MIN_BACK, 1: DB_STOCK_ETF_TICK_BACK},
-    3: {0: DB_STOCK_ETN_MIN_BACK, 1: DB_STOCK_ETN_TICK_BACK},
-    4: {0: DB_STOCK_USA_MIN_BACK, 1: DB_STOCK_USA_TICK_BACK},
-    5: {0: DB_COIN_MIN_BACK, 1: DB_COIN_TICK_BACK},
-    6: {0: DB_FUTURE_MIN_BACK, 1: DB_FUTURE_TICK_BACK},
-    7: {0: DB_FUTURE_NT_MIN_BACK, 1: DB_FUTURE_NT_TICK_BACK},
-    8: {0: DB_FUTURE_OS_MIN_BACK, 1: DB_FUTURE_OS_TICK_BACK},
-    9: {0: DB_COIN_FUTURE_MIN_BACK, 1: DB_COIN_FUTURE_TICK_BACK}
-}
-
-DICT_MARKET_GUBUN = {
-    '국내주식01': 1,
-    '국내주식02': 1,
-    '국내주식ETF03': 2,
-    '국내주식ETF04': 2,
-    '국내주식ETN05': 3,
-    '국내주식ETN06': 3,
-    '해외주식07': 4,
-    '해외주식08': 4,
-    '업비트09': 5,
-    '업비트10': 5,
-    '지수선물11': 6,
-    '지수선물12': 6,
-    '야간선물13': 7,
-    '야간선물14': 7,
-    '해외선물15': 8,
-    '해외선물16': 8,
-    '바이낸스선물17': 9,
-    '바이낸스선물18': 9,
-}
-
-DICT_MTOP_RANK = {
-    1: 100,
-    2: 10,
-    3: 10,
-    4: 100,
-    5: 10,
-    6: 100,
-    7: 100,
-    8: 10,
-    9: 10
-}
-
-DICT_CODE_INFO_TNAME = {
-    1: 'stockinfo',
-    2: 'stocketfinfo',
-    3: 'stocketninfo',
-    4: 'stockusainfo',
-    6: 'futureinfo',
-    7: 'futurentinfo',
-    8: 'futureosinfo'
-}
-
-ui_num = {'설정로그': 1, '종목명데이터': 2, '백테엔진': 3, '기본로그': 4, '타임로그': 5, '시스템로그': 6, 'S백테스트': 7, 'SF백테스트': 8,
-          'C백테스트': 9, 'CF백테스트': 10, '사용자수식': 10.5, 'DB관리': 11, 'S실현손익': 12, 'S거래목록': 13, 'S잔고평가': 14, 'S잔고목록': 15,
-          'S체결목록': 16, 'S당일합계': 17, 'S당일상세': 18, 'S누적합계': 19, 'S누적상세': 20, 'S관심종목': 21, 'C실현손익': 22,
-          'C거래목록': 23, 'C잔고평가': 24, 'C잔고목록': 25, 'C체결목록': 26, 'C당일합계': 27, 'C당일상세': 28, 'C누적합계': 29,
-          'C누적상세': 30, 'C관심종목': 31, 'S호가종목': 32, 'S호가체결': 33, 'S호가잔량': 34, 'C호가종목': 35, 'C호가체결': 36,
-          'C호가잔량': 37, 'S호가체결2': 38, 'C호가체결2': 39, '스톰라이브1': 40, '스톰라이브2': 41, '스톰라이브3': 42,
-          '스톰라이브4': 43, '스톰라이브5': 44, '스톰라이브6': 45, '스톰라이브7': 50, '스톰라이브8': 51, '스톰라이브9': 52,
-          '스톰라이브10': 53, '스톰라이브11': 54, '김프': 55, '기업개요': 56, '기업공시': 57, '기업뉴스': 58, '재무년도': 59,
-          '재무분기': 60, 'S상세기록': 61, 'C상세기록': 62, '차트': 63, '실시간차트': 64, '코스피': 65, '코스닥': 66, '트리맵': 67,
-          '트리맵1': 68, '트리맵2': 69, '풍경사진': 70, '홈차트': 71}
+ui_num = {'설정로그': 1, '종목명데이터': 2, '백테엔진': 3, '기본로그': 4, '타임로그': 5, '시스템로그': 6, '백테스트': 7,
+          '사용자수식': 8, 'DB관리': 9, '실현손익': 10, '거래목록': 11, '잔고평가': 12, '잔고목록': 13,
+          '체결목록': 14, '당일합계': 15, '당일상세': 16, '누적합계': 17, '누적상세': 18, '관심종목': 19,
+          '호가종목': 20, '호가체결': 21, '호가잔량': 22, '호가체결2': 23, '스톰라이브1': 24, '스톰라이브2': 25, '스톰라이브3': 26,
+          '스톰라이브4': 27, '스톰라이브5': 28, '스톰라이브6': 29, '스톰라이브7': 30, '스톰라이브8': 31, '스톰라이브9': 32,
+          '스톰라이브10': 33, '스톰라이브11': 34, '김프': 35, '기업개요': 36, '기업공시': 37, '기업뉴스': 38, '재무년도': 39,
+          '재무분기': 40, 'S상세기록': 41, 'C상세기록': 42, '차트': 43, '실시간차트': 44, '코스피': 45, '코스닥': 46, '트리맵': 47,
+          '트리맵1': 48, '트리맵2': 49, '풍경사진': 50, '홈차트': 51}
 
 columns_tt   = ['거래횟수', '총매수금액', '총매도금액', '총수익금액', '총손실금액', '수익률', '수익금합계']
 columns_td   = ['종목명', '매수금액', '매도금액', '주문수량', '수익률', '수익금', '체결시간']
@@ -164,53 +95,77 @@ columns_stg1 = ['매수전략', '매도전략', '최적화매수전략', '최적
 columns_stg2 = ['최적화범위', 'GA범위', '매수조건', '매도조건']
 columns_kp   = ['종목명', '바이낸스(달러)', '업비트(원)', '대비(원)', '대비율(%)']
 
-list_stock_tick = [
-    'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
-    '거래대금증감', '전일비', '회전율', '전일동시간비', '시가총액', '라운드피겨위5호가이내', 'VI해제시간', 'VI가격', 'VI호가단위',
-    '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
-    '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
-    '매도호가5', '매도호가4', '매도호가3', '매도호가2', '매도호가1', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
-    '매도잔량5', '매도잔량4', '매도잔량3', '매도잔량2', '매도잔량1', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
-    '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
-    '이동평균60', '이동평균150', '이동평균300', '이동평균600', '이동평균1200', '최고현재가', '최저현재가',
-    '체결강도평균', '최고체결강도', '최저체결강도', '최고초당매수수량', '최고초당매도수량', '누적초당매수수량',
-    '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도', '전일비각도'
-]
-
-list_stock_min_base = [
-    'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량',
-    '거래대금증감', '전일비', '회전율', '전일동시간비', '시가총액', '라운드피겨위5호가이내', 'VI해제시간', 'VI가격', 'VI호가단위',
-    '분봉시가', '분봉고가', '분봉저가',
-    '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
-    '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
-    '매도호가5', '매도호가4', '매도호가3', '매도호가2', '매도호가1', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
-    '매도잔량5', '매도잔량4', '매도잔량3', '매도잔량2', '매도잔량1', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
-    '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
-    '이동평균5', '이동평균10', '이동평균20', '이동평균60', '이동평균120', '최고현재가', '최저현재가',
-    '최고분봉고가', '최저분봉저가',
-    '체결강도평균', '최고체결강도', '최저체결강도', '최고분당매수수량', '최고분당매도수량', '누적분당매수수량',
-    '누적분당매도수량', '분당거래대금평균', '등락율각도', '당일거래대금각도', '전일비각도'
-]
-
-list_coin_tick = [
+list_basic_tick = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
     '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
     '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
-    '매도호가5', '매도호가4', '매도호가3', '매도호가2', '매도호가1', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
-    '매도잔량5', '매도잔량4', '매도잔량3', '매도잔량2', '매도잔량1', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
+    '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
+    '매도잔량1', '매도잔량2', '매도잔량3', '매도잔량4', '매도잔량5', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
     '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
     '이동평균60', '이동평균150', '이동평균300', '이동평균600', '이동평균1200', '최고현재가', '최저현재가',
     '체결강도평균', '최고체결강도', '최저체결강도', '최고초당매수수량', '최고초당매도수량', '누적초당매수수량',
     '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도'
 ]
 
-list_coin_min_base = [
+list_basic_min_base = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량',
     '분봉시가', '분봉고가', '분봉저가',
     '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
     '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
-    '매도호가5', '매도호가4', '매도호가3', '매도호가2', '매도호가1', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
-    '매도잔량5', '매도잔량4', '매도잔량3', '매도잔량2', '매도잔량1', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
+    '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
+    '매도잔량1', '매도잔량2', '매도잔량3', '매도잔량4', '매도잔량5', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
+    '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
+    '이동평균5', '이동평균10', '이동평균20', '이동평균60', '이동평균120', '최고현재가', '최저현재가',
+    '최고분봉고가', '최저분봉저가',
+    '체결강도평균', '최고체결강도', '최저체결강도', '최고분당매수수량', '최고분당매도수량', '누적분당매수수량',
+    '누적분당매도수량', '분당거래대금평균', '등락율각도', '당일거래대금각도'
+]
+
+list_stock_tick = [
+    'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
+    '시가총액', '라운드피겨위5호가이내', 'VI해제시간', 'VI가격', 'VI호가단위',
+    '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
+    '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
+    '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
+    '매도잔량1', '매도잔량2', '매도잔량3', '매도잔량4', '매도잔량5', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
+    '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
+    '이동평균60', '이동평균150', '이동평균300', '이동평균600', '이동평균1200', '최고현재가', '최저현재가',
+    '체결강도평균', '최고체결강도', '최저체결강도', '최고초당매수수량', '최고초당매도수량', '누적초당매수수량',
+    '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도'
+]
+
+list_stock_min_base = [
+    'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량',
+    '시가총액', '라운드피겨위5호가이내', 'VI해제시간', 'VI가격', 'VI호가단위', '분봉시가', '분봉고가', '분봉저가',
+    '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
+    '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
+    '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
+    '매도잔량1', '매도잔량2', '매도잔량3', '매도잔량4', '매도잔량5', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
+    '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
+    '이동평균5', '이동평균10', '이동평균20', '이동평균60', '이동평균120', '최고현재가', '최저현재가',
+    '최고분봉고가', '최저분봉저가',
+    '체결강도평균', '최고체결강도', '최저체결강도', '최고분당매수수량', '최고분당매도수량', '누적분당매수수량',
+    '누적분당매도수량', '분당거래대금평균', '등락율각도', '당일거래대금각도'
+]
+
+list_stockusa_tick = [
+    'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
+    '시가총액', '초당거래대금', '고저평균대비등락율', '저가대비고가등락율', '초당매수금액', '초당매도금액',
+    '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
+    '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
+    '매도잔량1', '매도잔량2', '매도잔량3', '매도잔량4', '매도잔량5', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
+    '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
+    '이동평균60', '이동평균150', '이동평균300', '이동평균600', '이동평균1200', '최고현재가', '최저현재가',
+    '체결강도평균', '최고체결강도', '최저체결강도', '최고초당매수수량', '최고초당매도수량', '누적초당매수수량',
+    '누적초당매도수량', '초당거래대금평균', '등락율각도', '당일거래대금각도'
+]
+
+list_stockusa_min_base = [
+    'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량',
+    '시가총액', '분봉시가', '분봉고가', '분봉저가', '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
+    '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
+    '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
+    '매도잔량1', '매도잔량2', '매도잔량3', '매도잔량4', '매도잔량5', '매수잔량1', '매수잔량2', '매수잔량3', '매수잔량4', '매수잔량5',
     '매도총잔량', '매수총잔량', '매도수5호가잔량합', '관심종목',
     '이동평균5', '이동평균10', '이동평균20', '이동평균60', '이동평균120', '최고현재가', '최저현재가',
     '최고분봉고가', '최저분봉저가',
@@ -225,14 +180,168 @@ list_indicator       = [
     'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
-list_stock_min    = list_stock_min_base + list_indicator
-list_coin_min     = list_coin_min_base + list_indicator
-list_stock_tick2  = list_stock_tick + list_chegyeol_colum1
-list_stock_min2   = list_stock_min_base + list_chegyeol_colum1 + list_indicator
-list_coin_tick2   = list_coin_tick + list_chegyeol_colum1
-list_coin_min2    = list_coin_min_base + list_chegyeol_colum1 + list_indicator
-list_future_tick2 = list_coin_tick + list_chegyeol_colum2
-list_future_min2  = list_coin_min_base + list_chegyeol_colum2 + list_indicator
+list_stock_min      = list_stock_min_base + list_indicator
+list_basic_min      = list_basic_min_base + list_indicator
+list_stockusa_min   = list_stockusa_min_base + list_indicator
+
+list_stock_tick2    = list_stock_tick + list_chegyeol_colum1
+list_basic_tick2    = list_basic_tick + list_chegyeol_colum1
+list_stockusa_tick2 = list_stockusa_tick + list_chegyeol_colum1
+
+list_stock_min2     = list_stock_min_base + list_chegyeol_colum1 + list_indicator
+list_basic_min2     = list_basic_min_base + list_chegyeol_colum1 + list_indicator
+list_stockusa_min2  = list_stockusa_min + list_chegyeol_colum1 + list_indicator
+
+list_future_tick2   = list_basic_tick + list_chegyeol_colum2
+list_future_min2    = list_basic_min_base + list_chegyeol_colum2 + list_indicator
+
+DICT_MARKET_GUBUN = {
+    '국내주식01': 1,
+    '국내주식02': 1,
+    '국내주식ETF03': 2,
+    '국내주식ETF04': 2,
+    '국내주식ETN05': 3,
+    '국내주식ETN06': 3,
+    '해외주식07': 4,
+    '해외주식08': 4,
+    '업비트09': 5,
+    '업비트10': 5,
+    '지수선물11': 6,
+    '지수선물12': 6,
+    '야간선물13': 7,
+    '야간선물14': 7,
+    '해외선물15': 8,
+    '해외선물16': 8,
+    '바이낸스선물17': 9,
+    '바이낸스선물18': 9,
+}
+
+len_list_stock_tick    = len(list_stock_tick)
+len_list_stock_min     = len(list_stock_min)
+len_list_basic_tick    = len(list_basic_tick)
+len_list_basic_min     = len(list_basic_min)
+len_list_stockusa_tick = len(list_stockusa_tick)
+len_list_stockusa_min  = len(list_stockusa_min)
+
+DICT_MARKET_INFO = {
+    1: {
+        '마켓구분': 'stock', '종목디비': 'stock_info', '거래대금순위': 100, '반올림단위': 3,
+        '체결디비': 'stock_chegeollist',         '잔고디비': 'stock_jangolist',
+        '손익디비': 'stock_totaltradelist',      '거래디비': 'stock_tradelist',
+        '매수전략디비': 'stock_buy',              '매도전략디비': 'stock_sell',
+        '최적화매수전략디비': 'stock_optibuy',     '최적화매도전략디비': 'stock_optisell',
+        '당일디비': {0: DB_STOCK_MIN,            1: DB_STOCK_TICK},
+        '백테디비': {0: DB_STOCK_MIN_BACK,       1: DB_STOCK_TICK_BACK},
+        '데이터릿': {0: list_stock_tick,         1: list_stock_min},
+        '데이터수': {0: len_list_stock_tick,     1: len_list_stock_min},
+        '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
+        '시작시간': 90000,                       '종료시간': 153500,
+    },
+    2: {
+        '마켓구분': 'stock', '종목디비': 'stocketf_info', '거래대금순위': 10, '반올림단위': 3,
+        '체결디비': 'stocketf_chegeollist',      '잔고디비': 'stocketf_jangolist',
+        '손익디비': 'stocketf_totaltradelist',   '거래디비': 'stocketf_tradelist',
+        '매수전략디비': 'stocketf_buy',           '매도전략디비': 'stocketf_sell',
+        '최적화매수전략디비': 'stocketf_optibuy',  '최적화매도전략디비': 'stocketf_optisell',
+        '당일디비': {0: DB_STOCK_ETF_MIN,        1: DB_STOCK_ETF_TICK},
+        '백테디비': {0: DB_STOCK_ETF_MIN_BACK,   1: DB_STOCK_ETF_TICK_BACK},
+        '데이터릿': {0: list_stock_tick,         1: list_stock_min},
+        '데이터수': {0: len_list_stock_tick,     1: len_list_stock_min},
+        '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
+        '시작시간': 90000,                       '종료시간': 153500,
+    },
+    3: {
+        '마켓구분': 'stock', '종목디비': 'stocketn_info', '거래대금순위': 10, '반올림단위': 3,
+        '체결디비': 'stocketn_chegeollist',      '잔고디비': 'stocketn_jangolist',
+        '손익디비': 'stocketn_totaltradelist',   '거래디비': 'stocketn_tradelist',
+        '매수전략디비': 'stocketn_buy',           '매도전략디비': 'stocketn_sell',
+        '최적화매수전략디비': 'stocketn_optibuy',  '최적화매도전략디비': 'stocketn_optisell',
+        '당일디비': {0: DB_STOCK_ETN_MIN,        1: DB_STOCK_ETN_TICK},
+        '백테디비': {0: DB_STOCK_ETN_MIN_BACK,   1: DB_STOCK_ETN_TICK_BACK},
+        '데이터릿': {0: list_stock_tick,         1: list_stock_min},
+        '데이터수': {0: len_list_stock_tick,     1: len_list_stock_min},
+        '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
+        '시작시간': 90000,                       '종료시간': 153500,
+    },
+    4: {
+        '마켓구분': 'stock', '종목디비': 'stockusa_info', '거래대금순위': 100, '반올림단위': 3,
+        '체결디비': 'stockusa_chegeollist',      '잔고디비': 'stockusa_jangolist',
+        '손익디비': 'stockusa_totaltradelist',   '거래디비': 'stockusa_tradelist',
+        '매수전략디비': 'stockusa_buy',           '매도전략디비': 'stockusa_sell',
+        '최적화매수전략디비': 'stockusa_optibuy',  '최적화매도전략디비': 'stockusa_optisell',
+        '당일디비': {0: DB_STOCK_USA_MIN,        1: DB_STOCK_USA_TICK},
+        '백테디비': {0: DB_STOCK_USA_MIN_BACK,   1: DB_STOCK_USA_TICK_BACK},
+        '데이터릿': {0: list_stockusa_tick,      1: list_stockusa_min},
+        '데이터수': {0: len_list_stockusa_tick,  1: len_list_stockusa_min},
+        '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
+        '시작시간': 93000,                       '종료시간': 160500,
+    },
+    5: {
+        '마켓구분': 'coin', '종목디비': '', '거래대금순위': 10, '반올림단위': 8,
+        '체결디비': 'coin_chegeollist',          '잔고디비': 'coin_jangolist',
+        '손익디비': 'coin_totaltradelist',       '거래디비': 'coin_tradelist',
+        '매수전략디비': 'coin_buy',               '매도전략디비': 'coin_sell',
+        '최적화매수전략디비': 'coin_optibuy',      '최적화매도전략디비': 'coin_optisell',
+        '당일디비': {0: DB_COIN_MIN,             1: DB_COIN_TICK},
+        '백테디비': {0: DB_COIN_MIN_BACK,        1: DB_COIN_TICK_BACK},
+        '데이터릿': {0: list_basic_tick,         1: list_basic_min},
+        '데이터수': {0: len_list_basic_tick,     1: len_list_basic_min},
+        '각도계수': {0: [10, 0.000_000_01],      1: [10, 0.000_000_01]},
+        '시작시간': 0,                           '종료시간': 235030,
+    },
+    6: {
+        '마켓구분': 'future', '종목디비': 'future_info', '거래대금순위': 100, '반올림단위': 3,
+        '체결디비': 'future_chegeollist',        '잔고디비': 'future_jangolist',
+        '손익디비': 'future_totaltradelist',     '거래디비': 'future_tradelist',
+        '매수전략디비': 'future_buy',             '매도전략디비': 'future_sell',
+        '최적화매수전략디비': 'future_optibuy',    '최적화매도전략디비': 'future_optisell',
+        '당일디비': {0: DB_FUTURE_MIN,           1: DB_FUTURE_TICK},
+        '백테디비': {0: DB_FUTURE_MIN_BACK,      1: DB_FUTURE_TICK_BACK},
+        '데이터릿': {0: list_basic_tick,         1: list_basic_min},
+        '데이터수': {0: len_list_basic_tick,     1: len_list_basic_min},
+        '각도계수': {0: [100, 0.000_000_05],     1: [100, 0.000_000_05]},
+        '시작시간': 84500,                       '종료시간': 155000,
+    },
+    7: {
+        '마켓구분': 'future', '종목디비': 'futurent_info', '거래대금순위': 100, '반올림단위': 3,
+        '체결디비': 'futurent_chegeollist',      '잔고디비': 'futurent_jangolist',
+        '손익디비': 'futurent_totaltradelist',   '거래디비': 'futurent_tradelist',
+        '당일디비': {0: DB_FUTURE_NT_MIN,        1: DB_FUTURE_NT_TICK},
+        '백테디비': {0: DB_FUTURE_NT_MIN_BACK,   1: DB_FUTURE_NT_TICK_BACK},
+        '데이터릿': {0: list_basic_tick,         1: list_basic_min},
+        '데이터수': {0: len_list_basic_tick,     1: len_list_basic_min},
+        '매수전략디비': 'futurent_buy',           '매도전략디비': 'futurent_sell',
+        '최적화매수전략디비': 'futurent_optibuy',  '최적화매도전략디비': 'futurent_optisell',
+        '각도계수': {0: [100, 0.000_000_05],     1: [100, 0.000_000_05]},
+        '시작시간': 180000,                      '종료시간': 60500,
+    },
+    8: {
+        '마켓구분': 'future', '종목디비': 'futureos_info', '거래대금순위': 10, '반올림단위': 3,
+        '체결디비': 'futureos_chegeollist',      '잔고디비': 'futureos_jangolist',
+        '손익디비': 'futureos_totaltradelist',   '거래디비': 'futureos_tradelist',
+        '당일디비': {0: DB_FUTURE_OS_MIN,        1: DB_FUTURE_OS_TICK},
+        '백테디비': {0: DB_FUTURE_OS_MIN_BACK,   1: DB_FUTURE_OS_TICK_BACK},
+        '데이터릿': {0: list_basic_tick,         1: list_basic_min},
+        '데이터수': {0: len_list_basic_tick,     1: len_list_basic_min},
+        '매수전략디비': 'futureos_buy',           '매도전략전략디비': 'futureos_sell',
+        '최적화매수전략디비': 'futureos_optibuy',  '최적화매도전략전략디비': 'futureos_optisell',
+        '각도계수': {0: [100, 0.000_000_05],     1: [100, 0.000_000_05]},
+        '시작시간': 93000,                       '종료시간': 160500,
+    },
+    9: {
+        '마켓구분': 'coin', '종목디비': '', '거래대금순위': 10, '반올림단위': 8,
+        '체결디비': 'coinfuture_chegeollist',    '잔고디비': 'coinfuture_jangolist',
+        '손익디비': 'coinfuture_totaltradelist', '거래디비': 'coinfuture_tradelist',
+        '당일디비': {0: DB_COIN_FUTURE_MIN,      1: DB_COIN_FUTURE_TICK},
+        '백테디비': {0: DB_COIN_FUTURE_MIN_BACK, 1: DB_COIN_FUTURE_TICK_BACK},
+        '데이터릿': {0: list_basic_tick,         1: list_basic_min},
+        '데이터수': {0: len_list_basic_tick,     1: len_list_basic_min},
+        '매수전략디비': 'coinfuture_buy',         '매도전략디비': 'coinfuture_sell',
+        '최적화매수전략디비': 'coinfuture_optibuy', '최적화매도전략디비': 'coinfuture_optisell',
+        '각도계수': {0: [10, 0.000_000_01],      1: [10, 0.000_000_01]},
+        '시작시간': 0,                           '종료시간': 235030,
+    }
+}
 
 dict_order_ratio = {
     1: {

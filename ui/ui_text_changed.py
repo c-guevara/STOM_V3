@@ -58,11 +58,11 @@ def text_changed_05(ui):
     if name:
         try:
             if ui.main_btn == 1:
-                row_num = next((row for row in range(ui.sjg_tableWidgettt.rowCount()) if ui.sjg_tableWidgettt.item(row, 0).text() == name), None)
+                row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
                 columns = columns_jg if '키움증권' in ui.dict_set['증권사'] else columns_jgf
                 col_num = columns.index('보유수량')
             else:
-                row_num = next((row for row in range(ui.cjg_tableWidgettt.rowCount()) if ui.cjg_tableWidgettt.item(row, 0).text() == name), None)
+                row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
                 columns = columns_jg if '업비트' in ui.dict_set['거래소'] else columns_jgcf
                 col_num = columns.index('보유수량')
         except:
@@ -79,9 +79,9 @@ def text_changed_05(ui):
                     order_count = round(ui.dict_set['코인투자금'] / order_price, 8)
         else:
             if ui.main_btn == 1:
-                order_count = ui.sjg_tableWidgettt.item(row_num, col_num).text()
+                order_count = ui.jg_tableWidgettt.item(row_num, col_num).text()
             else:
-                order_count = ui.cjg_tableWidgettt.item(row_num, col_num).text()
+                order_count = ui.jg_tableWidgettt.item(row_num, col_num).text()
 
         if name not in ui.order_combo_name_list:
             ui.od_comboBoxxxxx_01.addItem(name)

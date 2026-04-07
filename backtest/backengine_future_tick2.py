@@ -218,7 +218,7 @@ class BackEngineFutureTick2(BackEngineBaseOms):
     def UpdateMarketGubun(self):
         self.market_gubun = 2
 
-    def UpdateGlobalsFunc(self, dict_add_func):
+    def update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     def GetHogaunit(self, 호가빼기데이터):

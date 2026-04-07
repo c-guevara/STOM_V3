@@ -318,5 +318,5 @@ class BackEngineFutureMin2(BackEngineFutureTick2):
                     if not self.CheckDividSell(포지션, 수익률, 매도분할횟수) and self.dict_set[f'{self.market_text}매도분할시그널']:
                         exec(self.sellstg)
 
-    def UpdateGlobalsFunc(self, dict_add_func):
+    def update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)

@@ -897,7 +897,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    gubun_ = '국내주식'  # 국내주식, 국내주식ETF, 국내주식ETN, 지수선물, 야간선물, 해외주식, 해외선물
+    gubun_ = '해외선물'  # 국내주식, 국내주식ETF, 국내주식ETN, 지수선물, 야간선물, 해외주식, 해외선물
     access_key = 'PSRFkgSSsFHFZ5scUWeEd6dFnw5cqbdCA3gk'
     secret_key = 'dp9q92cFbpxMaTARhE3jSJOipCtTc2Gl'
 

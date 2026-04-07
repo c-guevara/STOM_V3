@@ -3,7 +3,7 @@ import pandas as pd
 from PyQt5.QtCore import Qt
 from ui.ui_draw_label_text import get_label_text
 from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
-from ui.ui_process_alive import coin_receiver_process_alive
+from ui.ui_process_alive import receiver_process_alive
 from utility.setting_base import ui_num, columns_hg, columns_hj
 from utility.static import change_format, comma2int, comma2float, dt_ymdhms, error_decorator
 from ui.set_style import color_fg_bt, color_fg_dk, color_fg_bc, color_bf_bt, color_bf_dk, color_ct_hg
@@ -19,26 +19,26 @@ class UpdateTablewidget:
         self.ui = ui
 
         self.dict_table = {
-            ui_num['S실현손익']: self.ui.stt_tableWidgettt,
-            ui_num['S거래목록']: self.ui.std_tableWidgettt,
-            ui_num['S잔고평가']: self.ui.stj_tableWidgettt,
-            ui_num['S잔고목록']: self.ui.sjg_tableWidgettt,
-            ui_num['S체결목록']: self.ui.scj_tableWidgettt,
-            ui_num['S당일합계']: self.ui.sdt_tableWidgettt,
-            ui_num['S당일상세']: self.ui.sds_tableWidgettt,
-            ui_num['S누적합계']: self.ui.snt_tableWidgettt,
-            ui_num['S누적상세']: self.ui.sns_tableWidgettt,
-            ui_num['S관심종목']: self.ui.sgj_tableWidgettt,
-            ui_num['C실현손익']: self.ui.ctt_tableWidgettt,
-            ui_num['C거래목록']: self.ui.ctd_tableWidgettt,
-            ui_num['C잔고평가']: self.ui.ctj_tableWidgettt,
-            ui_num['C잔고목록']: self.ui.cjg_tableWidgettt,
-            ui_num['C체결목록']: self.ui.ccj_tableWidgettt,
-            ui_num['C당일합계']: self.ui.cdt_tableWidgettt,
-            ui_num['C당일상세']: self.ui.cds_tableWidgettt,
+            ui_num['S실현손익']: self.ui.tt_tableWidgettt,
+            ui_num['S거래목록']: self.ui.td_tableWidgettt,
+            ui_num['S잔고평가']: self.ui.tj_tableWidgettt,
+            ui_num['S잔고목록']: self.ui.jg_tableWidgettt,
+            ui_num['S체결목록']: self.ui.cj_tableWidgettt,
+            ui_num['S당일합계']: self.ui.dt_tableWidgetttt,
+            ui_num['S당일상세']: self.ui.ds_tableWidgetttt,
+            ui_num['S누적합계']: self.ui.nt_tableWidgetttt,
+            ui_num['S누적상세']: self.ui.ns_tableWidgetttt,
+            ui_num['S관심종목']: self.ui.gj_tableWidgettt,
+            ui_num['C실현손익']: self.ui.tt_tableWidgettt,
+            ui_num['C거래목록']: self.ui.td_tableWidgettt,
+            ui_num['C잔고평가']: self.ui.tj_tableWidgettt,
+            ui_num['C잔고목록']: self.ui.jg_tableWidgettt,
+            ui_num['C체결목록']: self.ui.cj_tableWidgettt,
+            ui_num['C당일합계']: self.ui.dt_tableWidgetttt,
+            ui_num['C당일상세']: self.ui.ds_tableWidgetttt,
             ui_num['C누적합계']: self.ui.cnt_tableWidgettt,
             ui_num['C누적상세']: self.ui.cns_tableWidgettt,
-            ui_num['C관심종목']: self.ui.cgj_tableWidgettt,
+            ui_num['C관심종목']: self.ui.gj_tableWidgettt,
             ui_num['S상세기록']: self.ui.ss_tableWidget_01,
             ui_num['C상세기록']: self.ui.cs_tableWidget_01,
             ui_num['S호가종목']: self.ui.hj_tableWidgett_01,
@@ -201,7 +201,7 @@ class UpdateTablewidget:
         if gubun in self.uinums_hogatick:
             if not self.ui.dialog_hoga.isVisible():
                 self.ui.wdzservQ.put(('agent', ('호가종목코드', '000000')))
-                if coin_receiver_process_alive(self.ui):  self.ui.creceivQ.put(('호가종목코드', '000000'))
+                if receiver_process_alive(self.ui):  self.ui.creceivQ.put(('호가종목코드', '000000'))
                 return
 
         elif gubun == ui_num['김프']:

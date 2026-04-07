@@ -5,7 +5,7 @@ from ui.ui_vars_change import get_fix_strategy
 from ui.set_style import style_bc_st, style_bc_dk
 from ui.ui_strategy_version import strategy_version
 from PyQt5.QtWidgets import QMessageBox, QApplication
-from ui.ui_process_alive import coin_strategy_process_alive
+from ui.ui_process_alive import strategy_process_alive
 from utility.strategy_version_manager import stg_save_version
 from utility.static import text_not_in_special_characters, error_decorator
 from ui.set_text import famous_saying, sell_signal, future_sell_signal, sell_text
@@ -41,7 +41,7 @@ UI_STG_SELL_EDITER_CONFIG = {
         },
         'gubun_fn': lambda ui: 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future',
         'is_stock_fn': lambda ui: '키움증권' in ui.dict_set['증권사'],
-        'tf_key': '주식타임프레임',
+        'tf_key': '타임프레임',
         'table_fn': lambda gubun: f'{gubun}sell',
         'queue': 'wdzservQ',
         'need_process_check': False,
@@ -185,7 +185,7 @@ def sell_stg_start(ui, ui_type):
         )
         if buttonReply == QMessageBox.Yes:
             if ui_type == 'coin':
-                if coin_strategy_process_alive(ui):
+                if strategy_process_alive(ui):
                     queue.put(('매도전략', strategy))
             else:
                 queue.put(('strategy', ('매도전략', strategy)))
@@ -201,7 +201,7 @@ def sell_stg_stop(ui, ui_type):
     queue = _get_queue(ui, ui_type)
 
     if ui_type == 'coin':
-        if coin_strategy_process_alive(ui):
+        if strategy_process_alive(ui):
             queue.put('매도전략중지')
     else:
         queue.put(('strategy', '매도전략중지'))

@@ -7,8 +7,8 @@ try:
 except:
     pass
 from utility.static import dt_ymdhms
-from trade.base_strategy import BaseStrategy
-from utility.setting_base import list_stock_tick2, list_stock_min2, list_coin_tick2, list_coin_min2, list_future_tick2, \
+from trade.base_globals_func import BaseGlobalsFunc
+from utility.setting_base import list_stock_tick2, list_stock_min2, list_basic_tick2, list_basic_min2, list_future_tick2, \
     list_future_min2, DB_STRATEGY
 
 dict_fm_count = {
@@ -60,7 +60,7 @@ def get_formula_data(forchart, col_idx):
     return fm_list, dict_fm, fm_tcnt
 
 
-class FormulaManager(BaseStrategy):
+class FormulaManager(BaseGlobalsFunc):
     def __init__(self, fm_list):
         super().__init__()
         self.fm_list   = fm_list
@@ -72,9 +72,9 @@ class FormulaManager(BaseStrategy):
         self.up        = None
         self.down      = None
         self.hold      = False
-        self.SetGlobalsFunc()
+        self.set_globals_func()
 
-    def UpdateGlobalsFunc(self, dict_add_func):
+    def update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     # noinspection PyUnboundLocalVariable,PyUnusedLocal
@@ -89,7 +89,7 @@ class FormulaManager(BaseStrategy):
         if market == 1:
             factor_list = list_stock_tick2 if self.is_tick else list_stock_min2
         elif market == 3:
-            factor_list = list_coin_tick2 if self.is_tick else list_coin_min2
+            factor_list = list_basic_tick2 if self.is_tick else list_basic_min2
         else:
             factor_list = list_future_tick2 if self.is_tick else list_future_min2
 

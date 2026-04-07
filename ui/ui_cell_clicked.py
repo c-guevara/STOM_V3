@@ -2,7 +2,7 @@
 from PyQt5.QtCore import QDate, QUrl
 from PyQt5.QtWidgets import QMessageBox
 from ui.ui_text_changed import text_changed_05
-from ui.ui_process_alive import coin_trader_process_alive
+from ui.ui_process_alive import trader_process_alive
 from ui.ui_button_clicked_chart import get_indicator_detail
 from utility.setting_base import columns_jg, columns_jgf, columns_jgcf, ui_num
 from ui.ui_show_dialog import show_db, show_dialog_graph, show_dialog, show_dialog_web, show_dialog_chart
@@ -12,9 +12,9 @@ from utility.static import comma2int, comma2float, now, str_ymd, now_utc, now_cm
 @error_decorator
 def cell_clicked_01(ui, row, col):
     stock = True
-    if ui.focusWidget() in (ui.ctd_tableWidgettt, ui.cgj_tableWidgettt, ui.ccj_tableWidgettt):
+    if ui.focusWidget() in (ui.td_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
         stock = False
-    if ui.focusWidget().parentWidget() in (ui.ctd_tableWidgettt, ui.cgj_tableWidgettt, ui.ccj_tableWidgettt):
+    if ui.focusWidget().parentWidget() in (ui.td_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
         stock = False
     item = ui.focusWidget().item(row, 0)
     if item is None:
@@ -32,14 +32,14 @@ def cell_clicked_01(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_02(ui, row, col):
-    item = ui.sjg_tableWidgettt.item(row, 0)
+    item = ui.jg_tableWidgettt.item(row, 0)
     if item is None:
         return
     name = item.text()
     gubun = '주식' if '키움증권' in ui.dict_set['증권사'] else '해선'
     columns = columns_jg if gubun == '주식' else columns_jgf
-    oc = comma2int(ui.sjg_tableWidgettt.item(row, columns.index('보유수량')).text())
-    c = comma2int(ui.sjg_tableWidgettt.item(row, columns.index('현재가')).text())
+    oc = comma2int(ui.jg_tableWidgettt.item(row, columns.index('보유수량')).text())
+    c = comma2int(ui.jg_tableWidgettt.item(row, columns.index('현재가')).text())
     buttonReply = QMessageBox.question(
         ui, f'{gubun} 시장가 매도', f'{name} {oc}주를 시장가매도합니다.\n계속하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
@@ -48,7 +48,7 @@ def cell_clicked_02(ui, row, col):
         if gubun == '주식':
             ui.wdzservQ.put(('trade', ('매도', ui.dict_code[name], name, c, oc, now(), True)))
         else:
-            p = ui.sjg_tableWidgettt.item(row, columns.index('포지션')).text()
+            p = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
             p = 'SELL_LONG' if p == 'LONG' else 'BUY_SHORT'
             ui.wdzservQ.put(('trade', (p, ui.dict_code[name], name, c, oc, now(), True)))
 
@@ -56,23 +56,23 @@ def cell_clicked_02(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_03(ui, row, col):
-    item = ui.cjg_tableWidgettt.item(row, 0)
+    item = ui.jg_tableWidgettt.item(row, 0)
     if item is None:
         return
     code    = item.text()
     columns = columns_jg if 'KRW' in code else columns_jgcf
-    oc      = comma2float(ui.cjg_tableWidgettt.item(row, columns.index('보유수량')).text())
-    c       = comma2float(ui.cjg_tableWidgettt.item(row, columns.index('현재가')).text())
+    oc      = comma2float(ui.jg_tableWidgettt.item(row, columns.index('보유수량')).text())
+    c       = comma2float(ui.jg_tableWidgettt.item(row, columns.index('현재가')).text())
     buttonReply = QMessageBox.question(
         ui, '코인 시장가 매도', f'{code} {oc}개를 시장가매도합니다.\n계속하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
-        if coin_trader_process_alive(ui):
+        if trader_process_alive(ui):
             if 'KRW' in code:
                 ui.ctraderQ.put(('매도', code, c, oc, now(), True))
             else:
-                p = ui.cjg_tableWidgettt.item(row, columns.index('포지션')).text()
+                p = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
                 p = 'SELL_LONG' if p == 'LONG' else 'BUY_SHORT'
                 ui.ctraderQ.put((p, code, c, oc, now(), True))
 
@@ -81,10 +81,10 @@ def cell_clicked_03(ui, row, col):
 @error_decorator
 def cell_clicked_04(ui, row, col):
     searchdate = ''
-    if ui.focusWidget() == ui.sds_tableWidgettt:
-        searchdate = ui.s_calendarWidgett.selectedDate().toString('yyyyMMdd')
-    elif ui.focusWidget() == ui.cds_tableWidgettt:
-        searchdate = ui.c_calendarWidgett.selectedDate().toString('yyyyMMdd')
+    if ui.focusWidget() == ui.ds_tableWidgetttt:
+        searchdate = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
+    elif ui.focusWidget() == ui.ds_tableWidgetttt:
+        searchdate = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
     item = ui.focusWidget().item(row, 1)
     if item is None:
         return
@@ -331,7 +331,7 @@ def cell_clicked_10(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_11(ui, row, col):
-    if ui.focusWidget() == ui.snt_tableWidgettt:
+    if ui.focusWidget() == ui.nt_tableWidgetttt:
         table_name = 's_tradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_tradelist'
     else:
         table_name = 'c_tradelist' if ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'

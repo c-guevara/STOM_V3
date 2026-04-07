@@ -7,7 +7,7 @@ from ui.ui_button_clicked_dialog_database import *
 from ui.ui_backtest_engine import backtest_process_kill
 from ui.ui_button_clicked_editer_unified import backtest_detail
 from ui.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
-from ui.ui_process_alive import coin_strategy_process_alive, coin_receiver_process_alive, coin_trader_process_alive
+from ui.ui_process_alive import strategy_process_alive, receiver_process_alive, trader_process_alive
 
 
 class UpdateTextedit:
@@ -144,7 +144,7 @@ class UpdateTextedit:
 
             elif data[0] == ui_num['기본로그'] and \
                     ('에이전트 종료' in data[1] or '리시버 종료' in data[1] or '트레이더 종료' in data[1] or '전략연산 종료' in data[1]):
-                if self.ui.dict_set['주식에이전트']:
+                if self.ui.dict_set['에이전트']:
                     if '에이전트 종료' in data[1]:
                         self.ui.wdzservQ.put(('manager', '에이전트 종료'))
                     elif '트레이더 종료' in data[1]:
@@ -157,13 +157,13 @@ class UpdateTextedit:
                             self.StockShutDownCheck()
                 else:
                     if '리시버 종료' in data[1]:
-                        if coin_receiver_process_alive(self.ui):
+                        if receiver_process_alive(self.ui):
                             self.ui.proc_receiver_coin.kill()
                     elif '트레이더 종료' in data[1]:
-                        if coin_trader_process_alive(self.ui):
+                        if trader_process_alive(self.ui):
                             self.ui.proc_trader_coin.kill()
                     elif '전략연산 종료' in data[1]:
-                        if coin_strategy_process_alive(self.ui):
+                        if strategy_process_alive(self.ui):
                             self.ui.proc_strategy_coin.kill()
                         if self.data_save and self.ui.dict_set['디비자동관리']:
                             self.AutoDataBase(4)

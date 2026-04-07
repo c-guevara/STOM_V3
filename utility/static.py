@@ -54,6 +54,8 @@ def get_ema_list(is_tick):
 
 def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
     import numpy as np
+    from utility.setting_base import DICT_MARKET_INFO
+
     for window in get_ema_list(is_tick):
         df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(3 if market == 1 else 8)
 
@@ -89,8 +91,7 @@ def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
             df[f'분당거래대금평균{avg}'] = df['분당거래대금'].rolling(window=avg).mean().round(0)
 
         if cf1 is None:
-            cf1 = get_angle_cf(market, is_tick, 0)
-            cf2 = get_angle_cf(market, is_tick, 1)
+            cf1, cf2 = DICT_MARKET_INFO[market]['각도계수'][is_tick]
 
         df2 = df[['등락율', '당일거래대금']].copy()
         df2[f'등락율N{avg}'] = df2['등락율'].shift(avg - 1)
@@ -482,49 +483,6 @@ def cme_normal_open():
     else:
         return False
     return True
-
-
-def get_buy_indi_stg(buytxt):
-    lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
-    buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
-    indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
-    if buystg:
-        try:
-            buystg = compile(buystg, '<string>', 'exec')
-        except:
-            buystg = None
-    else:
-        buystg = None
-    if indistg:
-        try:
-            indistg = compile(indistg, '<string>', 'exec')
-        except:
-            indistg = None
-    else:
-        indistg = None
-    return buystg, indistg
-
-
-def get_angle_cf(market_gubun, is_tick, index):
-    dgree = {
-        1: {
-            1: [5, 0.01],
-            0: [5, 0.01]
-        },
-        2: {
-            1: [100, 0.000_000_05],
-            0: [100, 0.000_000_05]
-        },
-        3: {
-            1: [10, 0.000_000_01],
-            0: [10, 0.000_000_01]
-        },
-        4: {
-            1: [10, 0.000_000_01],
-            0: [10, 0.000_000_01]
-        }
-    }
-    return dgree[market_gubun][is_tick][index]
 
 
 _UPBIT_HOGA_KEYS = (0.01, 1, 10, 100, 1000, 10000, 100000, 500000, 1000000, 2000000, float('inf'))

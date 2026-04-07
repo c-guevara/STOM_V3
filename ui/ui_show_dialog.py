@@ -13,9 +13,9 @@ from utility.static import str_hms, dt_hms, error_decorator
 from ui.set_style import style_bc_bt, style_bc_bb, style_bc_st
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWidgets import QVBoxLayout, QTableWidgetItem, QMessageBox
-from ui.ui_process_alive import coinkimp_process_alive, coin_strategy_process_alive, coin_receiver_process_alive
+from ui.ui_process_alive import coinkimp_process_alive, strategy_process_alive, receiver_process_alive
 from utility.setting_base import columns_hc, DB_COIN_TICK_BACK, DB_STOCK_TICK_BACK, DB_PATH, DB_COIN_MIN_BACK, \
-    DB_STOCK_MIN_BACK, DB_FUTURE_OS_MIN_BACK, DB_FUTURE_OS_TICK_BACK
+    DB_STOCK_MIN_BACK, DB_FUTURE_OS_MIN_BACK, DB_FUTURE_OS_TICK_BACK, DICT_MARKET_INFO, DICT_MARKET_GUBUN
 
 
 class QuietPage(QWebEnginePage):
@@ -79,7 +79,7 @@ def show_dialog(ui, code_or_name, tickcount, searchdate, col):
         if not coin:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, True, coin, code)
-    elif col < 4 or ui.focusWidget() in (ui.sgj_tableWidgettt, ui.scj_tableWidgettt, ui.cgj_tableWidgettt, ui.ccj_tableWidgettt):
+    elif col < 4 or ui.focusWidget() in (ui.gj_tableWidgettt, ui.cj_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
         if not coin:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, False, coin, code)
@@ -144,12 +144,14 @@ def show_dialog_chart(ui, real, coin, code, tickcount=None, searchdate=None, sta
     if ui.dialog_chart.isVisible() and ui.proc_chqs.is_alive():
         if real:
             chart_clear(ui)
-            if coin:
-                if coin_strategy_process_alive(ui): ui.cstgQ.put(('차트종목코드', code))
-                if not ui.dict_set['코인타임프레임'] and coin_receiver_process_alive(ui): ui.creceivQ.put(('차트종목코드', code))
-            else:
-                ui.wdzservQ.put(('strategy', ('차트종목코드', code)))
-                if not ui.dict_set['주식타임프레임']: ui.wdzservQ.put(('agent', ('차트종목코드', code)))
+            if receiver_process_alive(ui):
+                ui.receivQ.put(('차트종목코드', code))
+            if strategy_process_alive(ui):
+                if DICT_MARKET_GUBUN[ui.dict_set['거래소']] < 5:
+                    for q in ui.stgQs:
+                        q.put(('차트종목코드', code))
+                else:
+                    ui.stgQ.put(('차트종목코드', code))
         else:
             chart_clear(ui)
             cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
@@ -164,7 +166,7 @@ def dialog_chart_show(ui):
     ui.ct_pushButtonnn_05.setText('CHART III')
     chart_count_change(ui)
 
-    is_min = (ui.dict_set['주식에이전트'] and not ui.dict_set['주식타임프레임']) or \
+    is_min = (ui.dict_set['에이전트'] and not ui.dict_set['주식타임프레임']) or \
              (ui.dict_set['코인리시버'] and not ui.dict_set['코인타임프레임'])
     if is_min:
         if ui.ft_checkBoxxxxx_02.text() != '분당거래대금': ui.ft_checkBoxxxxx_02.setText('분당거래대금')
@@ -401,9 +403,9 @@ def show_order(ui):
 
         tableWidget = None
         if ui.main_btn == 1:
-            tableWidget = ui.sgj_tableWidgettt
+            tableWidget = ui.gj_tableWidgettt
         elif ui.main_btn == 2:
-            tableWidget = ui.cgj_tableWidgettt
+            tableWidget = ui.gj_tableWidgettt
 
         if tableWidget is not None:
             ui.od_comboBoxxxxx_01.clear()
@@ -424,9 +426,9 @@ def show_order(ui):
 def put_hoga_code(ui, coin, code):
     if coin:
         ui.wdzservQ.put(('agent', ('호가종목코드', '000000')))
-        if coin_receiver_process_alive(ui): ui.creceivQ.put(('호가종목코드', code))
+        if receiver_process_alive(ui): ui.creceivQ.put(('호가종목코드', code))
     else:
-        if coin_receiver_process_alive(ui): ui.creceivQ.put(('호가종목코드', '000000'))
+        if receiver_process_alive(ui): ui.creceivQ.put(('호가종목코드', '000000'))
         ui.wdzservQ.put(('agent', ('호가종목코드', code)))
 
 

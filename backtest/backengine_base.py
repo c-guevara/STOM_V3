@@ -5,19 +5,19 @@ import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.risk_analyzer import RiskAnalyzer
-from trade.base_strategy import BaseStrategy
+from trade.base_globals_func import BaseGlobalsFunc
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellConds, GetBackloadCodeQuery, \
     get_trade_info, GetBuyStgFuture, GetSellStgFuture, GetBuyCondsFuture, GetSellCondsFuture
 from utility.setting_base import DB_STOCK_TICK_BACK, BACK_TEMP, ui_num, DB_STOCK_MIN_BACK, indicator, \
     DB_FUTURE_OS_TICK_BACK, DB_FUTURE_OS_MIN_BACK, DB_COIN_TICK_BACK, DB_COIN_MIN_BACK, list_stock_tick, \
-    list_stock_min, list_coin_tick, list_coin_min
+    list_stock_min, list_basic_tick, list_basic_min
 from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_angle_cf, get_ema_list, \
     add_rolling_data, set_builtin_print, get_profile_text
 
 
-class BackEngineBase(BaseStrategy):
+class BackEngineBase(BaseGlobalsFunc):
     def __init__(self, gubun, shared_cnt, lock, wq, tq, bq, beq_list, bstq_list, dict_set, profile=False):
         super().__init__()
         self.gubun           = gubun
@@ -101,7 +101,7 @@ class BackEngineBase(BaseStrategy):
         self.MainLoop()
 
     def UpdateSubVars(self):
-        self.market_text   = '주식' if self.market_gubun < 3 else '코인'
+        self.market_text   = '주식' if self.market_gubun < 3 else ''
         self.ui_num_txt    = 'S백테스트' if self.market_gubun < 3 else 'C백테스트'
         self.is_oms        = self.dict_set['백테주문관리적용']
         self.is_tick       = self.dict_set[f'{self.market_text}타임프레임']
@@ -120,7 +120,7 @@ class BackEngineBase(BaseStrategy):
         if self.market_gubun == 1:
             factor_list = list_stock_tick if self.is_tick else list_stock_min
         else:
-            factor_list = list_coin_tick if self.is_tick else list_coin_min
+            factor_list = list_basic_tick if self.is_tick else list_basic_min
         self.dict_findex = {name: i for i, name in enumerate(factor_list)}
 
         self.base_cnt     = self.dict_findex['관심종목'] + 1
@@ -414,7 +414,7 @@ class BackEngineBase(BaseStrategy):
         self.startday_, self.endday_, self.starttime_, self.endtime_ = startday, endday, starttime, endtime
         self.bq.put(shared_info)
 
-        self.SetGlobalsFunc()
+        self.set_globals_func()
 
     def CheckAvglist(self, avg_list):
         not_in_list = [x for x in avg_list if x not in self.avg_list]
@@ -525,7 +525,7 @@ class BackEngineBase(BaseStrategy):
         if self.fm_list:
             for fm in self.fm_list:
                 fm[8] = compile(fm[-2], '<string>', 'exec')
-            self.SetGlobalsFunc()
+            self.set_globals_func()
 
     def BackTest(self):
         if self.gubun == 0 and self.profile:

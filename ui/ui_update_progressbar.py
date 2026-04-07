@@ -43,7 +43,7 @@ def update_progressbar(ui):
 
     ui.be_pushButtonnn_01.setStyleSheet(style_bc_by if ui.backtest_engine else style_bc_bt)
 
-    ui.tt_pushButton.setStyleSheet(style_bc_bb if not ui.s_calendarWidgett.isVisible() and not ui.c_calendarWidgett.isVisible() else style_bc_st)
+    ui.tt_pushButton.setStyleSheet(style_bc_bb if not ui.calendarWidgetttt.isVisible() and not ui.calendarWidgetttt.isVisible() else style_bc_st)
     ui.dd_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_db.isVisible() else style_bc_st)
     ui.kp_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_kimp.isVisible() else style_bc_st)
     ui.ct_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_chart.isVisible() else style_bc_st)

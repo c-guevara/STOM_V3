@@ -75,7 +75,7 @@ class UpbitTrader:
             '잔고청산': False
         }
 
-        self.upbit      = Upbit(self.dict_set['Access_key1'], self.dict_set['Secret_key1'])
+        self.upbit      = Upbit(self.dict_set['access_key1'], self.dict_set['secret_key1'])
         self.jgcs_time  = self.get_jgcs_time()
         self.str_today  = str_ymd(now_utc())
         self.order_time = now()

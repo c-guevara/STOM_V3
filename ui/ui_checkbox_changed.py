@@ -3,7 +3,7 @@ from PyQt5.QtCore import Qt
 from ui.set_widget import BounceButton
 from utility.static import error_decorator
 from PyQt5.QtWidgets import QPushButton, QMessageBox
-from ui.ui_process_alive import coin_trader_process_alive
+from ui.ui_process_alive import trader_process_alive
 
 
 @error_decorator
@@ -84,12 +84,12 @@ def checkbox_changed_07(ui, state):
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply != QMessageBox.Yes:
-            ui.sj_stock_ckBox_01.nextCheckState()
+            ui.sj_strat_ckBox_01.nextCheckState()
 
 
 @error_decorator
 def checkbox_changed_08(ui, state):
-    if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked and coin_trader_process_alive(ui):
+    if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked and trader_process_alive(ui):
         ui.sj_coin_cheBox_01.nextCheckState()
         QMessageBox.critical(ui, '오류 알림', '트레이더 실행 중에는 모의모드를 해제할 수 없습니다.\n')
 

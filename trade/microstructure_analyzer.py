@@ -8,7 +8,7 @@ try:
     sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 except:
     pass
-from utility.setting_base import list_stock_tick, list_coin_tick
+from utility.setting_base import list_stock_tick, list_basic_tick
 
 
 try:
@@ -804,7 +804,7 @@ class MicrostructureAnalyzer:
         if self.market_type == 'stock':
             self.columns = list_stock_tick
         else:
-            self.columns = list_coin_tick
+            self.columns = list_basic_tick
 
         # 칼럼 인덱스 매핑 (빠른 접근용)
         col_index = {col: idx for idx, col in enumerate(self.columns)}

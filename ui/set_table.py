@@ -17,43 +17,43 @@ class SetTable:
 
     @error_decorator
     def set(self):
-        self.ui.stt_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_tt, 1)
-        self.ui.std_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_td, 13, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
-        self.ui.stj_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_tj, 1)
-        self.ui.sjg_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_jg, 13, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
-        self.ui.sgj_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_gj, 15, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
-        self.ui.scj_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_cj, 15, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
+        self.ui.tt_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_tt, 1)
+        self.ui.td_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_td, 13, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
+        self.ui.tj_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_tj, 1)
+        self.ui.jg_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_jg, 13, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
+        self.ui.gj_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_gj, 15, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
+        self.ui.cj_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_cj, 15, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
 
-        self.ui.stock_basic_listt = [
-            self.ui.stt_tableWidgettt, self.ui.std_tableWidgettt, self.ui.stj_tableWidgettt,
-            self.ui.sjg_tableWidgettt, self.ui.sgj_tableWidgettt, self.ui.scj_tableWidgettt,
+        self.ui.table_basic_listt = [
+            self.ui.tt_tableWidgettt, self.ui.td_tableWidgettt, self.ui.tj_tableWidgettt,
+            self.ui.jg_tableWidgettt, self.ui.gj_tableWidgettt, self.ui.cj_tableWidgettt,
         ]
 
-        self.ui.s_calendarWidgett = QCalendarWidget(self.ui.st_tab)
+        self.ui.calendarWidgetttt = QCalendarWidget(self.ui.st_tab)
         todayDate = QDate.currentDate()
-        self.ui.s_calendarWidgett.setCurrentPage(todayDate.year(), todayDate.month())
-        self.ui.s_calendarWidgett.clicked.connect(lambda: calendar_clicked(self.ui, 'S'))
-        self.ui.sdt_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_dt, 1)
-        self.ui.sds_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_dd, 19, clicked=lambda row, col: cell_clicked_04(self.ui, row, col))
+        self.ui.calendarWidgetttt.setCurrentPage(todayDate.year(), todayDate.month())
+        self.ui.calendarWidgetttt.clicked.connect(lambda: calendar_clicked(self.ui))
+        self.ui.dt_tableWidgetttt = self.wc.setTablewidget(self.ui.st_tab, columns_dt, 1)
+        self.ui.ds_tableWidgetttt = self.wc.setTablewidget(self.ui.st_tab, columns_dd, 19, clicked=lambda row, col: cell_clicked_04(self.ui, row, col))
 
-        self.ui.snt_pushButton_01 = self.wc.setPushbutton('일별집계', parent=self.ui.st_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, 'S일별집계'))
-        self.ui.snt_pushButton_02 = self.wc.setPushbutton('월별집계', parent=self.ui.st_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, 'S월별집계'))
-        self.ui.snt_pushButton_03 = self.wc.setPushbutton('연도별집계', parent=self.ui.st_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, 'S연도별집계'))
-        self.ui.snt_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_nt, 1, clicked=lambda row, col: cell_clicked_11(self.ui, row, col))
-        self.ui.sns_tableWidgettt = self.wc.setTablewidget(self.ui.st_tab, columns_nd, 28, clicked=lambda row, col: cell_clicked_05(self.ui, row, col))
+        self.ui.nt_pushButtonn_01 = self.wc.setPushbutton('일별집계', parent=self.ui.st_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, '일별집계'))
+        self.ui.nt_pushButtonn_02 = self.wc.setPushbutton('월별집계', parent=self.ui.st_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, '월별집계'))
+        self.ui.nt_pushButtonn_03 = self.wc.setPushbutton('연도별집계', parent=self.ui.st_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, '연도별집계'))
+        self.ui.nt_tableWidgetttt = self.wc.setTablewidget(self.ui.st_tab, columns_nt, 1, clicked=lambda row, col: cell_clicked_11(self.ui, row, col))
+        self.ui.ns_tableWidgetttt = self.wc.setTablewidget(self.ui.st_tab, columns_nd, 28, clicked=lambda row, col: cell_clicked_05(self.ui, row, col))
 
-        self.ui.stock_total_listt = [
-            self.ui.s_calendarWidgett, self.ui.sdt_tableWidgettt, self.ui.sds_tableWidgettt, self.ui.snt_pushButton_01,
-            self.ui.snt_pushButton_02, self.ui.snt_pushButton_03, self.ui.snt_tableWidgettt, self.ui.sns_tableWidgettt
+        self.ui.table_total_listt = [
+            self.ui.calendarWidgetttt, self.ui.dt_tableWidgetttt, self.ui.ds_tableWidgetttt, self.ui.nt_pushButtonn_01,
+            self.ui.nt_pushButtonn_02, self.ui.nt_pushButtonn_03, self.ui.nt_tableWidgetttt, self.ui.ns_tableWidgetttt
         ]
 
-        for widget in self.ui.stock_total_listt:
+        for widget in self.ui.table_total_listt:
             widget.setVisible(False)
 
         self.ui.slv_tapWidgett_01 = QTabWidget(self.ui.lv_tab)
         self.ui.slv_index1 = self.ui.slv_tapWidgett_01.addTab(self.ui.slv_tab, '주식 라이브')
         self.ui.slv_index2 = self.ui.slv_tapWidgett_01.addTab(self.ui.clv_tab, '코인 라이브')
-        self.ui.slv_index3 = self.ui.slv_tapWidgett_01.addTab(self.ui.flv_tab, '해선 라이브')
+        self.ui.slv_index3 = self.ui.slv_tapWidgett_01.addTab(self.ui.flv_tab, '선물 라이브')
         self.ui.slv_index4 = self.ui.slv_tapWidgett_01.addTab(self.ui.blv_tab, '백테 라이브')
 
         self.ui.slsd_tableWidgett = self.wc.setTablewidget(self.ui.slv_tab, columns_tt, 30)
@@ -73,54 +73,22 @@ class SetTable:
 
         # =============================================================================================================
 
-        self.ui.ctt_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_tt, 1)
-        self.ui.ctd_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_td, 13, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
-        self.ui.ctj_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_tj, 1)
-        self.ui.cjg_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_jg, 13, fixed=True, clicked=lambda row, col: cell_clicked_03(self.ui, row, col))
-        self.ui.cgj_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_gj, 15, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
-        self.ui.ccj_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_cj, 15, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
+        self.ui.tt_tableWidgettt.setGeometry(7, 10, 668, 42)
+        self.ui.td_tableWidgettt.setGeometry(7, 57, 668, 320)
+        self.ui.tj_tableWidgettt.setGeometry(7, 382, 668, 42)
+        self.ui.jg_tableWidgettt.setGeometry(7, 429, 668, 320)
+        self.ui.gj_tableWidgettt.setGeometry(680, 10, 668, 367)
+        self.ui.cj_tableWidgettt.setGeometry(680, 382, 668, 367)
 
-        self.ui.coin_basic_listtt = [
-            self.ui.ctt_tableWidgettt, self.ui.ctd_tableWidgettt, self.ui.ctj_tableWidgettt,
-            self.ui.cjg_tableWidgettt, self.ui.cgj_tableWidgettt, self.ui.ccj_tableWidgettt,
-        ]
+        self.ui.calendarWidgetttt.setGeometry(7, 10, 668, 245)
+        self.ui.dt_tableWidgetttt.setGeometry(7, 260, 668, 42)
+        self.ui.ds_tableWidgetttt.setGeometry(7, 307, 668, 442)
 
-        self.ui.c_calendarWidgett = QCalendarWidget(self.ui.ct_tab)
-        self.ui.c_calendarWidgett.setCurrentPage(todayDate.year(), todayDate.month())
-        self.ui.c_calendarWidgett.clicked.connect(lambda: calendar_clicked(self.ui, 'C'))
-        self.ui.cdt_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_dt, 1)
-        self.ui.cds_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_dd, 19, clicked=lambda row, col: cell_clicked_04(self.ui, row, col))
-
-        self.ui.cnt_pushButton_01 = self.wc.setPushbutton('일별집계', parent=self.ui.ct_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, 'C일별집계'))
-        self.ui.cnt_pushButton_02 = self.wc.setPushbutton('월별집계', parent=self.ui.ct_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, 'C월별집계'))
-        self.ui.cnt_pushButton_03 = self.wc.setPushbutton('연도별집계', parent=self.ui.ct_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, 'C연도별집계'))
-        self.ui.cnt_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_nt, 1, clicked=lambda row, col: cell_clicked_11(self.ui, row, col))
-        self.ui.cns_tableWidgettt = self.wc.setTablewidget(self.ui.ct_tab, columns_nd, 28, clicked=lambda row, col: cell_clicked_05(self.ui, row, col))
-
-        self.ui.coin_total_listtt = [
-            self.ui.c_calendarWidgett, self.ui.cdt_tableWidgettt, self.ui.cds_tableWidgettt, self.ui.cnt_pushButton_01,
-            self.ui.cnt_pushButton_02, self.ui.cnt_pushButton_03, self.ui.cnt_tableWidgettt, self.ui.cns_tableWidgettt
-        ]
-
-        for widget in self.ui.coin_total_listtt:
-            widget.setVisible(False)
-
-        self.ui.stt_tableWidgettt.setGeometry(7, 10, 668, 42)
-        self.ui.std_tableWidgettt.setGeometry(7, 57, 668, 320)
-        self.ui.stj_tableWidgettt.setGeometry(7, 382, 668, 42)
-        self.ui.sjg_tableWidgettt.setGeometry(7, 429, 668, 320)
-        self.ui.sgj_tableWidgettt.setGeometry(680, 10, 668, 367)
-        self.ui.scj_tableWidgettt.setGeometry(680, 382, 668, 367)
-
-        self.ui.s_calendarWidgett.setGeometry(7, 10, 668, 245)
-        self.ui.sdt_tableWidgettt.setGeometry(7, 260, 668, 42)
-        self.ui.sds_tableWidgettt.setGeometry(7, 307, 668, 442)
-
-        self.ui.snt_pushButton_01.setGeometry(680, 10, 219, 30)
-        self.ui.snt_pushButton_02.setGeometry(904, 10, 219, 30)
-        self.ui.snt_pushButton_03.setGeometry(1128, 10, 220, 30)
-        self.ui.snt_tableWidgettt.setGeometry(680, 45, 668, 42)
-        self.ui.sns_tableWidgettt.setGeometry(680, 92, 668, 657)
+        self.ui.nt_pushButtonn_01.setGeometry(680, 10, 219, 30)
+        self.ui.nt_pushButtonn_02.setGeometry(904, 10, 219, 30)
+        self.ui.nt_pushButtonn_03.setGeometry(1128, 10, 220, 30)
+        self.ui.nt_tableWidgetttt.setGeometry(680, 45, 668, 42)
+        self.ui.ns_tableWidgetttt.setGeometry(680, 92, 668, 657)
 
         self.ui.slv_tapWidgett_01.setGeometry(7, 10, 1341, 740)
 
@@ -138,20 +106,3 @@ class SetTable:
 
         self.ui.slbd_tableWidgett.setGeometry(5, 5, 1328, 89)
         self.ui.slbt_tableWidgett.setGeometry(5, 100, 1328, 607)
-
-        self.ui.ctt_tableWidgettt.setGeometry(7, 10, 668, 42)
-        self.ui.ctd_tableWidgettt.setGeometry(7, 57, 668, 320)
-        self.ui.ctj_tableWidgettt.setGeometry(7, 382, 668, 42)
-        self.ui.cjg_tableWidgettt.setGeometry(7, 429, 668, 320)
-        self.ui.cgj_tableWidgettt.setGeometry(680, 10, 668, 367)
-        self.ui.ccj_tableWidgettt.setGeometry(680, 382, 668, 367)
-
-        self.ui.c_calendarWidgett.setGeometry(7, 10, 668, 245)
-        self.ui.cdt_tableWidgettt.setGeometry(7, 260, 668, 42)
-        self.ui.cds_tableWidgettt.setGeometry(7, 307, 668, 442)
-
-        self.ui.cnt_pushButton_01.setGeometry(680, 10, 219, 30)
-        self.ui.cnt_pushButton_02.setGeometry(904, 10, 219, 30)
-        self.ui.cnt_pushButton_03.setGeometry(1128, 10, 220, 30)
-        self.ui.cnt_tableWidgettt.setGeometry(680, 45, 668, 42)
-        self.ui.cns_tableWidgettt.setGeometry(680, 92, 668, 657)

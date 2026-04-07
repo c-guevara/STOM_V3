@@ -7,16 +7,16 @@ from utility.static import now, now_utc, GetUpbitPgSgSp, dt_ymdhms, GetIndicator
 
 
 class StockUsaStrategyMin(StockUsaStrategyTick):
-    def UpdateGlobalsFunc(self, dict_add_func):
+    def update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
-    def Strategy(self, data):
+    def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
-            매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
-            매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+            매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+            매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
 
         시분초 = int(str(체결시간)[8:] + '00')
@@ -45,7 +45,7 @@ class StockUsaStrategyMin(StockUsaStrategyTick):
             self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
 
             if 데이터길이 >= 평균값계산틱수:
-                self.arry_code[-1, self.base_cnt:self.area_cnt] = self.GetParameterArea(rw)
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(rw)
 
             indicator_list = GetIndicator(
                 self.arry_code[:, self.dict_findex['현재가']],
@@ -230,7 +230,7 @@ class StockUsaStrategyMin(StockUsaStrategyTick):
                 new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
                 new_data_tick[:self.base_cnt] = data[:self.base_cnt]
                 self.arry_code = np.concatenate([pre_data, [new_data_tick]])
-                self.arry_code[-1, self.base_cnt:self.area_cnt] = self.GetParameterArea(rw)
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(rw)
                 self.arry_code[-1, self.area_cnt:self.data_cnt] = GetIndicator(
                     self.arry_code[:, self.dict_findex['현재가']],
                     self.arry_code[:, self.dict_findex['분봉고가']],

@@ -3,8 +3,8 @@ import sqlite3
 import pandas as pd
 from PyQt5.QtWidgets import QCompleter
 from utility.static import error_decorator
-from utility.setting_base import DB_CODE_INFO, DB_COIN_TICK_BACK, list_stock_tick, list_stock_min, list_coin_tick, \
-    list_coin_min, list_stock_tick2, list_stock_min2, list_coin_tick2, list_coin_min2, list_future_tick2, \
+from utility.setting_base import DB_CODE_INFO, DB_COIN_TICK_BACK, list_stock_tick, list_stock_min, list_basic_tick, \
+    list_basic_min, list_stock_tick2, list_stock_min2, list_basic_tick2, list_basic_min2, list_future_tick2, \
     list_future_min2
 
 
@@ -42,11 +42,11 @@ def load_database(ui):
 
     ui.dict_findex_stock_tick   = {name: i for i, name in enumerate(list_stock_tick)}
     ui.dict_findex_stock_min    = {name: i for i, name in enumerate(list_stock_min)}
-    ui.dict_findex_coin_tick    = {name: i for i, name in enumerate(list_coin_tick)}
-    ui.dict_findex_coin_min     = {name: i for i, name in enumerate(list_coin_min)}
+    ui.dict_findex_coin_tick    = {name: i for i, name in enumerate(list_basic_tick)}
+    ui.dict_findex_coin_min     = {name: i for i, name in enumerate(list_basic_min)}
     ui.dict_findex_stock_tick2  = {name: i for i, name in enumerate(list_stock_tick2)}
     ui.dict_findex_stock_min2   = {name: i for i, name in enumerate(list_stock_min2)}
-    ui.dict_findex_coin_tick2   = {name: i for i, name in enumerate(list_coin_tick2)}
-    ui.dict_findex_coin_min2    = {name: i for i, name in enumerate(list_coin_min2)}
+    ui.dict_findex_coin_tick2   = {name: i for i, name in enumerate(list_basic_tick2)}
+    ui.dict_findex_coin_min2    = {name: i for i, name in enumerate(list_basic_min2)}
     ui.dict_findex_future_tick2 = {name: i for i, name in enumerate(list_future_tick2)}
     ui.dict_findex_future_min2  = {name: i for i, name in enumerate(list_future_min2)}

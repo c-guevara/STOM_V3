@@ -281,9 +281,9 @@ class SetDialogEtc:
 
         self.ui.dialog_setsj = self.wc.setDialog('STOM SETSJ', parent=self.ui)
         self.ui.dialog_setsj.geometry().center()
-        self.ui.set_pushButton_01 = self.wc.setPushbutton('설정예제', parent=self.ui.dialog_setsj, click=lambda: setting_stock_elapsed_tick_number_sample(self.ui))
-        self.ui.set_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_setsj, click=lambda: setting_stock_elapsed_tick_number_load(self.ui))
-        self.ui.set_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_setsj, click=lambda: setting_stock_elapsed_tick_number_save(self.ui))
+        self.ui.set_pushButton_01 = self.wc.setPushbutton('설정예제', parent=self.ui.dialog_setsj, click=lambda: setting_elapsed_tick_number_sample(self.ui))
+        self.ui.set_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_setsj, click=lambda: setting_elapsed_tick_number_load(self.ui))
+        self.ui.set_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_setsj, click=lambda: setting_elapsed_tick_number_save(self.ui))
         self.ui.set_groupBoxxx_01 = QGroupBox('', self.ui.dialog_setsj)
         text = '''
         ▣ 백테 및 전략연산에서 사용할 경과틱수('조건명')을 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며

@@ -14,8 +14,8 @@ from trade.formula_manager import FormulaManager, get_formula_data
 from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm, thread_decorator
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, \
     DB_BACKTEST, DB_COIN_MIN_BACK, DB_STOCK_MIN_BACK, DB_CODE_INFO, DB_FUTURE_OS_MIN_BACK, DB_FUTURE_OS_TICK_BACK, \
-    list_stock_min, list_coin_min, DB_SETTING, DB_STRATEGY, DB_STOCK_TICK, DB_STOCK_MIN, DB_FUTURE_OS_TICK, DB_FUTURE_OS_MIN, \
-    DB_COIN_TICK, DB_COIN_MIN, list_stock_tick, list_coin_tick, columns_hj
+    list_stock_min, list_basic_min, DB_SETTING, DB_STRATEGY, DB_STOCK_TICK, DB_STOCK_MIN, DB_FUTURE_OS_TICK, DB_FUTURE_OS_MIN, \
+    DB_COIN_TICK, DB_COIN_MIN, list_stock_tick, list_basic_tick, columns_hj
 
 
 class ChartHogaQuerySound:
@@ -48,11 +48,11 @@ class ChartHogaQuerySound:
             '주식분봉고가': list_stock_min.index('분봉고가'),
             '주식분봉저가': list_stock_min.index('분봉저가'),
             '주식거래대금': list_stock_min.index('분당거래대금'),
-            '그외분봉종가': list_coin_min.index('현재가'),
-            '그외분봉시가': list_coin_min.index('분봉시가'),
-            '그외분봉고가': list_coin_min.index('분봉고가'),
-            '그외분봉저가': list_coin_min.index('분봉저가'),
-            '그외거래대금': list_coin_min.index('분당거래대금')
+            '그외분봉종가': list_basic_min.index('현재가'),
+            '그외분봉시가': list_basic_min.index('분봉시가'),
+            '그외분봉고가': list_basic_min.index('분봉고가'),
+            '그외분봉저가': list_basic_min.index('분봉저가'),
+            '그외거래대금': list_basic_min.index('분당거래대금')
         }
 
         self.text2speak = pyttsx3.init()
@@ -97,19 +97,19 @@ class ChartHogaQuerySound:
             '주식분봉매도총잔': list_stock_min.index('매도총잔량'),
             '주식분봉매수총잔': list_stock_min.index('매수총잔량'),
 
-            '그외틱봉호가시작': list_coin_tick.index('매도호가5'),
-            '그외틱봉호가종료': list_coin_tick.index('매수호가5') + 1,
-            '그외틱봉잔량시작': list_coin_tick.index('매도잔량5'),
-            '그외틱봉잔량종료': list_coin_tick.index('매수잔량5') + 1,
-            '그외틱봉매도총잔': list_coin_tick.index('매도총잔량'),
-            '그외틱봉매수총잔': list_coin_tick.index('매수총잔량'),
+            '그외틱봉호가시작': list_basic_tick.index('매도호가5'),
+            '그외틱봉호가종료': list_basic_tick.index('매수호가5') + 1,
+            '그외틱봉잔량시작': list_basic_tick.index('매도잔량5'),
+            '그외틱봉잔량종료': list_basic_tick.index('매수잔량5') + 1,
+            '그외틱봉매도총잔': list_basic_tick.index('매도총잔량'),
+            '그외틱봉매수총잔': list_basic_tick.index('매수총잔량'),
 
-            '그외분봉호가시작': list_coin_min.index('매도호가5'),
-            '그외분봉호가종료': list_coin_min.index('매수호가5') + 1,
-            '그외분봉잔량시작': list_coin_min.index('매도잔량5'),
-            '그외분봉잔량종료': list_coin_min.index('매수잔량5') + 1,
-            '그외분봉매도총잔': list_coin_min.index('매도총잔량'),
-            '그외분봉매수총잔': list_coin_min.index('매수총잔량')
+            '그외분봉호가시작': list_basic_min.index('매도호가5'),
+            '그외분봉호가종료': list_basic_min.index('매수호가5') + 1,
+            '그외분봉잔량시작': list_basic_min.index('매도잔량5'),
+            '그외분봉잔량종료': list_basic_min.index('매수잔량5') + 1,
+            '그외분봉매도총잔': list_basic_min.index('매도총잔량'),
+            '그외분봉매수총잔': list_basic_min.index('매수총잔량')
         }
 
         self.MainLoop()

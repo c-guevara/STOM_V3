@@ -78,7 +78,7 @@ UI_OPTI_EDITER_CONFIG = {
         },
         'gubun_fn': lambda ui: 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future',
         'is_stock_fn': lambda ui: '키움증권' in ui.dict_set['증권사'],
-        'tf_key': '주식타임프레임',
+        'tf_key': '타임프레임',
         'tables_fn': lambda gubun: {
             'optibuy': f'{gubun}optibuy',
             'optivars': f'{gubun}optivars',

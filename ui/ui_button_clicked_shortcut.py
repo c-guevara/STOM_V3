@@ -17,7 +17,7 @@ from trade.binance.binance_receiver_tick import BinanceReceiverTick
 from trade.binance.binance_strategy_tick import BinanceStrategyTick
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QSize, QEasingCurve
 from utility.static import qtest_qwait, cme_normal_open, error_decorator
-from ui.ui_process_alive import coin_strategy_process_alive, coin_trader_process_alive, coin_receiver_process_alive
+from ui.ui_process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 
 
 @error_decorator
@@ -29,7 +29,7 @@ def mnbutton_c_clicked_01(ui, index):
     if prev_main_btn == index: return
     ui.image_label1.setVisible(False)
     if index == 3:
-        ui.svjb_lineEditt_04.setText(str(ui.dict_set['주식투자금']))
+        ui.svjb_lineEditt_04.setText(str(ui.dict_set['투자금']))
     elif index == 4:
         ui.cvjb_lineEditt_04.setText(str(ui.dict_set['코인투자금']))
     elif index == 6 and ui.lgicon_alert:
@@ -37,10 +37,10 @@ def mnbutton_c_clicked_01(ui, index):
         ui.main_btn_list[index].setIcon(ui.icon_log)
     elif index == 7:
         if '키움증권' in ui.dict_set['증권사']:
-            ui.sj_stock_label_03.setText(
+            ui.sj_strat_label_03.setText(
                 '종목당투자금                          백만원                                  전략중지 및 잔고청산   |')
         else:
-            ui.sj_stock_label_03.setText(
+            ui.sj_strat_label_03.setText(
                 '종목당투자금                          계약수                                  전략중지 및 잔고청산   |')
         if ui.dict_set['거래소'] == '업비트':
             ui.sj_coin_labell_03.setText(
@@ -66,26 +66,26 @@ def mnbutton_c_clicked_01(ui, index):
 @error_decorator
 def mnbutton_c_clicked_02(ui):
     if ui.main_btn == 1:
-        if not ui.s_calendarWidgett.isVisible():
+        if not ui.calendarWidgetttt.isVisible():
             boolean1 = False
             boolean2 = True
         else:
             boolean1 = True
             boolean2 = False
-        for widget in ui.stock_basic_listt:
+        for widget in ui.table_basic_listt:
             widget.setVisible(boolean1)
-        for widget in ui.stock_total_listt:
+        for widget in ui.table_total_listt:
             widget.setVisible(boolean2)
     elif ui.main_btn == 2:
-        if not ui.c_calendarWidgett.isVisible():
+        if not ui.calendarWidgetttt.isVisible():
             boolean1 = False
             boolean2 = True
         else:
             boolean1 = True
             boolean2 = False
-        for widget in ui.coin_basic_listtt:
+        for widget in ui.table_basic_listtt:
             widget.setVisible(boolean1)
-        for widget in ui.coin_total_listtt:
+        for widget in ui.table_total_listtt:
             widget.setVisible(boolean2)
     else:
         QMessageBox.warning(ui, '오류 알림', '해당 버튼은 트레이더탭에서만 작동합니다.\n')
@@ -99,7 +99,7 @@ def mnbutton_c_clicked_03(ui, login=0):
         if ui.dialog_web.isVisible():
             QMessageBox.critical(ui, '오류 알림', '웹뷰어창이 열린 상태에서는 수동시작할 수 없습니다.\n웹뷰어창을 닫고 재시도하십시오.\n')
             return
-        if ui.dict_set['주식에이전트']:
+        if ui.dict_set['에이전트']:
             if '키움증권' in ui.dict_set['증권사']:
                 buttonReply = QMessageBox.question(
                     ui, '주식 수동 시작', '주식 리시버 또는 트레이더를 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n',
@@ -139,13 +139,13 @@ def mnbutton_c_clicked_03(ui, login=0):
                 ui.ms_pushButton.setStyleSheet(style_bc_st)
         elif login == 2 or (login == 0 and ui.dict_set['코인리시버']):
             mnbutton_c_clicked_01(ui, 2)
-            if coin_trader_process_alive(ui):   ui.proc_trader_coin.kill()
-            if coin_strategy_process_alive(ui): ui.proc_strategy_coin.kill()
-            if coin_receiver_process_alive(ui): ui.proc_receiver_coin.kill()
+            if trader_process_alive(ui):   ui.proc_trader_coin.kill()
+            if strategy_process_alive(ui): ui.proc_strategy_coin.kill()
+            if receiver_process_alive(ui): ui.proc_receiver_coin.kill()
             qtest_qwait(3)
-            if ui.dict_set['거래소'] == '업비트' and (ui.dict_set['Access_key1'] is None or ui.dict_set['Secret_key1'] is None):
+            if ui.dict_set['거래소'] == '업비트' and (ui.dict_set['access_key1'] is None or ui.dict_set['secret_key1'] is None):
                 QMessageBox.critical(ui, '오류 알림', '업비트 계정이 설정되지 않아\n트레이더를 시작할 수 없습니다.\n계정 설정 후 다시 시작하십시오.\n')
-            elif ui.dict_set['거래소'] == '바이낸스선물' and (ui.dict_set['Access_key2'] is None or ui.dict_set['Secret_key2'] is None):
+            elif ui.dict_set['거래소'] == '바이낸스선물' and (ui.dict_set['access_key2'] is None or ui.dict_set['secret_key2'] is None):
                 QMessageBox.critical(ui, '오류 알림', '바이낸스선물 계정이 설정되지 않아\n트레이더를 시작할 수 없습니다.\n계정 설정 후 다시 시작하십시오.\n')
             else:
                 if ui.dict_set['코인트레이더']:
@@ -212,7 +212,7 @@ def mnbutton_c_clicked_06(ui):
             df = pd.DataFrame(data, columns=columns).set_index('index')
             ui.queryQ.put((df, 'sacc', 'append'))
 
-            columns = ["index", "Access_key", "Secret_key"]
+            columns = ["index", "access_key", "secret_key"]
             data = [[1, '', ''], [2, '', '']]
             df = pd.DataFrame(data, columns=columns).set_index('index')
             ui.queryQ.put((df, 'cacc', 'append'))
@@ -237,7 +237,7 @@ def mnbutton_c_clicked_06(ui):
 
 @error_decorator
 def CoinReceiverStart(ui):
-    if not coin_receiver_process_alive(ui):
+    if not receiver_process_alive(ui):
         if ui.dict_set['코인타임프레임']:
             target = UpbitReceiverTick if ui.dict_set['거래소'] == '업비트' else BinanceReceiverTick
         else:
@@ -248,20 +248,20 @@ def CoinReceiverStart(ui):
 
 @error_decorator
 def CoinTraderStart(ui):
-    if ui.dict_set['거래소'] == '업비트' and (ui.dict_set['Access_key1'] is None or ui.dict_set['Secret_key1'] is None):
+    if ui.dict_set['거래소'] == '업비트' and (ui.dict_set['access_key1'] is None or ui.dict_set['secret_key1'] is None):
         ui.windowQ.put((ui_num['시스템로그'], '오류 알림 - 업비트 계정이 설정되지 않아 트레이더를 시작할 수 없습니다. 계정 설정 후 다시 시작하십시오.'))
         return
-    elif ui.dict_set['거래소'] == '바이낸스선물' and (ui.dict_set['Access_key2'] is None or ui.dict_set['Secret_key2'] is None):
+    elif ui.dict_set['거래소'] == '바이낸스선물' and (ui.dict_set['access_key2'] is None or ui.dict_set['secret_key2'] is None):
         ui.windowQ.put((ui_num['시스템로그'], '오류 알림 - 바이낸스선물 계정이 설정되지 않아 트레이더를 시작할 수 없습니다. 계정 설정 후 다시 시작하십시오.'))
         return
 
-    if not coin_strategy_process_alive(ui):
+    if not strategy_process_alive(ui):
         if ui.dict_set['코인타임프레임']:
             target = UpbitStrategyTick if ui.dict_set['거래소'] == '업비트' else BinanceStrategyTick
         else:
             target = UpbitStrategyMin if ui.dict_set['거래소'] == '업비트' else BinanceStrategyMin
         ui.proc_strategy_coin = Process(target=target, args=(ui.qlist, ui.dict_set), daemon=True)
         ui.proc_strategy_coin.start()
-    if not coin_trader_process_alive(ui):
+    if not trader_process_alive(ui):
         ui.proc_trader_coin = Process(target=UpbitTrader if ui.dict_set['거래소'] == '업비트' else BinanceTrader, args=(ui.qlist, ui.dict_set))
         ui.proc_trader_coin.start()

@@ -78,7 +78,7 @@ class StockUsaTrader:
         self.str_today  = str_ymd(now_utc())
         self.order_time = now()
 
-        self.ls = LsRestAPI(self.windowQ, self.dict_set['Access_key1'], self.dict_set['Secret_key1'])
+        self.ls = LsRestAPI(self.windowQ, self.dict_set['access_key1'], self.dict_set['secret_key1'])
         self.token = self.ls.create_token()
 
         self.ws_thread = None

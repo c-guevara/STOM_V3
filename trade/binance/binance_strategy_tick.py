@@ -6,16 +6,16 @@ import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
 from trade.risk_analyzer import RiskAnalyzer
-from trade.base_strategy import BaseStrategy
+from trade.base_globals_func import BaseGlobalsFunc
 from trade.formula_manager import get_formula_data
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio, DB_COIN_TICK, DB_COIN_MIN, indicator, \
-    list_coin_tick, list_coin_min
+    list_basic_tick, list_basic_min
 from utility.static import now, now_utc, GetBinanceShortPgSgSp, dt_ymdhms, get_buy_indi_stg, GetBinanceLongPgSgSp, \
     get_ema_list, get_angle_cf, set_builtin_print
 
 
-class BinanceStrategyTick(BaseStrategy):
+class BinanceStrategyTick(BaseGlobalsFunc):
     def __init__(self, qlist, dict_set):
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
@@ -61,8 +61,8 @@ class BinanceStrategyTick(BaseStrategy):
         self.is_tick          = self.dict_set['타임프레임']
         self.avg_list         = [self.dict_set['평균값계산틱수']]
         self.sma_list         = get_ema_list(self.is_tick)
-        self.data_cnt         = len(list_coin_tick) if self.is_tick else len(list_coin_min)
-        self.dict_findex      = {name: i for i, name in enumerate(list_coin_tick if self.is_tick else list_coin_min)}
+        self.data_cnt         = len(list_basic_tick) if self.is_tick else len(list_basic_min)
+        self.dict_findex      = {name: i for i, name in enumerate(list_basic_tick if self.is_tick else list_basic_min)}
         self.base_cnt         = self.dict_findex['관심종목'] + 1
         self.area_cnt         = self.dict_findex['전일비각도' if self.market_gubun == 1 else '당일거래대금각도'] + 1
         self.angle_pct_cf     = get_angle_cf(self.market_gubun, self.is_tick, 0)
@@ -133,9 +133,9 @@ class BinanceStrategyTick(BaseStrategy):
             value_comp_list = [compile_condition(x) for x in value_text_list]
             self.dict_condition = dict(zip(key_list, value_comp_list))
 
-        self.SetGlobalsFunc()
+        self.set_globals_func()
 
-    def UpdateGlobalsFunc(self, dict_add_func):
+    def update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     def SetBuyStg(self, buytxt):
@@ -195,9 +195,6 @@ class BinanceStrategyTick(BaseStrategy):
             self.int_tujagm = data
         elif gubun == '차트종목코드':
             self.chart_code = data
-            cached_chart = self.dict_data.get(data)
-            if cached_chart is not None and len(cached_chart) >= self.dict_set['평균값계산틱수']:
-                self.windowQ.put((ui_num['실시간차트'], data, cached_chart))
         elif gubun == '설정변경':
             self.dict_set = data
             self.UpdateStringategy()
@@ -221,8 +218,8 @@ class BinanceStrategyTick(BaseStrategy):
     def Strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
             초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
-            매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
-            매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+            매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+            매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, _, 틱수신시간 = data
 
         시분초 = int(str(체결시간)[8:])
@@ -310,7 +307,7 @@ class BinanceStrategyTick(BaseStrategy):
                 if 종목코드 not in self.dict_buy_num:
                     self.dict_buy_num[종목코드] = self.indexn
                 # ['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']
-                _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 레버리지, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
+                _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 레버리지 = jg_data.values()
                 if 포지션 == 'LONG':
                     _, 수익금, 수익률 = GetBinanceLongPgSgSp(매입금액, 보유수량 * 현재가, '시장가' in self.dict_set['매수주문구분'], '시장가' in self.dict_set['매도주문구분'])
                 else:
@@ -330,7 +327,6 @@ class BinanceStrategyTick(BaseStrategy):
             else:
                 포지션, 매수틱번호, 수익금, 수익률, 레버리지, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = None, 0, 0, 0, 1, 0, 0, 0, 0, now_utc(), 0, 0, 0
 
-            소숫점자리수 = self.dict_info[종목코드]['소숫점자리수']
             self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
             BBT  = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
@@ -348,7 +344,7 @@ class BinanceStrategyTick(BaseStrategy):
             G    = NISS and self.dict_set['매도취소매수시그널'] and not NIBS
 
             if BBT and BLK and (A or B or (C and D) or (C and E) or D or E or F or G):
-                self.info_for_signal = F or G, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1, 소숫점자리수
+                self.info_for_signal = F or G, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                 if A or B or (C and (D or E)) or F or G:
                     BUY_LONG, SELL_SHORT = True, True
@@ -398,7 +394,7 @@ class BinanceStrategyTick(BaseStrategy):
             if SBT and (A or B or (C and D) or (C and E) or D or E or F or G or H or J or K or L or M or N or P or Q or R or S):
                 강제청산 = H or J or K or L or M or N or P or Q or R or S
                 전량매도 = A or B or 강제청산
-                self.info_for_signal = F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1, 소숫점자리수
+                self.info_for_signal = F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                 SELL_LONG, BUY_SHORT = False, False
                 if A or B or (C and D) or (C and E) or F or G:
@@ -588,7 +584,7 @@ class BinanceStrategyTick(BaseStrategy):
                 del self.dict_data[code]
 
         last = len(self.dict_data)
-        columns_ = list_coin_tick[:self.base_cnt] if self.dict_set['타임프레임'] else list_coin_min[:self.base_cnt]
+        columns_ = list_basic_tick[:self.base_cnt] if self.dict_set['타임프레임'] else list_basic_min[:self.base_cnt]
         con  = sqlite3.connect(DB_COIN_TICK if self.dict_set['타임프레임'] else DB_COIN_MIN)
         if last > 0:
             start = now()

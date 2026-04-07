@@ -1,9 +1,10 @@
 
 from ui.ui_etc import chart_clear
+from utility.setting_base import DICT_MARKET_GUBUN
 from utility.static import error_decorator
 from ui.ui_draw_chart_base import DrawChartBase
 from utility.static import from_timestamp, dt_ymdhms
-from ui.ui_process_alive import coin_strategy_process_alive, coin_receiver_process_alive
+from ui.ui_process_alive import strategy_process_alive, receiver_process_alive
 
 
 class DrawRealChart(DrawChartBase):
@@ -21,13 +22,14 @@ class DrawRealChart(DrawChartBase):
 
         if not self.ui.dialog_chart.isVisible():
             chart_clear(self.ui)
-            if self.gubun == 'C':
-                if coin_strategy_process_alive(self.ui): self.ui.cstgQ.put(('차트종목코드', None))
-                if not self.ui.dict_set['코인타임프레임'] and coin_receiver_process_alive(self.ui): self.ui.creceivQ.put(
-                    ('차트종목코드', None))
-            else:
-                self.ui.wdzservQ.put(('strategy', ('차트종목코드', None)))
-                if not self.ui.dict_set['주식타임프레임']: self.ui.wdzservQ.put(('agent', ('차트종목코드', None)))
+            if receiver_process_alive(self.ui):
+                self.ui.receivQ.put(('차트종목코드', None))
+            if strategy_process_alive(self.ui):
+                if DICT_MARKET_GUBUN[self.ui.dict_set['거래소']] < 5:
+                    for q in self.ui.stgQs:
+                        q.put(('차트종목코드', None))
+                else:
+                    self.ui.stgQ.put(('차트종목코드', None))
             return
 
         self.chart_cnt = len(self.ui.ctpg)

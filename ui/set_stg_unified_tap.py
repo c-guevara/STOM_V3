@@ -307,12 +307,12 @@ class SetStrategyTab:
         # 시간 설정
         if self.ui.dict_set is not None:
             if self.is_stock:
-                if '해외선물' in self.ui.dict_set['증권사'] and self.ui.dict_set['주식타임프레임']:
+                if '해외선물' in self.ui.dict_set['증권사'] and self.ui.dict_set['타임프레임']:
                     starttime = '093000'
                 else:
                     starttime = '090000'
-                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['주식전략종료시간'])))).zfill(6)
-                tujagm = str(self.ui.dict_set['주식투자금'])
+                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['전략종료시간'])))).zfill(6)
+                tujagm = str(self.ui.dict_set['투자금'])
             else:
                 starttime = '000000'
                 endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['코인전략종료시간'])))).zfill(6)
