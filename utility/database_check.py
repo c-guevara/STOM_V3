@@ -35,7 +35,7 @@ def database_check():
                 'index', '거래소', '타임프레임', '데이터저장', '모의투자', '알림소리', '바이낸스선물고정레버리지',
                 '바이낸스선물고정레버리지값', '바이낸스선물변동레버리지값', '바이낸스선물마진타입', '바이낸스선물포지션'
             ]
-            data = [0, '국내주식1', 0, 1, 1, 1, 1, 1, '0;5;1^5;10;2^10;20;3^20;30;4^30;100;5', 'ISOLATED', 'false']
+            data = [0, '국내주식01', 0, 1, 1, 1, 1, 1, '0;5;1^5;10;2^10;20;3^20;30;4^30;100;5', 'ISOLATED', 'false']
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('main', con)
 
@@ -47,10 +47,10 @@ def database_check():
                 [13, '', ''], [14, '', ''], [15, '', ''], [16, '', ''], [17, '', ''], [18, '', '']
             ]
             df = pd.DataFrame(data, columns=columns).set_index('index')
-            df.to_sql('sacc', con)
+            df.to_sql('account', con)
 
         if 'telegram' not in table_list:
-            columns = ["index", "str_bot", "int_id"]
+            columns = ["index", "bot_token", "chatingid"]
             data = [
                 [1, '', ''], [2, '', ''], [3, '', ''], [4, '', ''], [5, '', ''], [6, '', ''],
                 [7, '', ''], [8, '', ''], [9, '', ''], [10, '', ''], [11, '', ''], [12, '', ''],
@@ -63,9 +63,9 @@ def database_check():
             columns = [
                 "index", "매수전략", "매도전략", "평균값계산틱수", "최대매수종목수",
                 "전략종료시간", "잔고청산", "프로세스종료", "컴퓨터종료", "투자금고정", "투자금", "손실중지",
-                "손실중지수익률", "수익중지", "수익중지수익률", "경과틱수설정"
+                "손실중지수익률", "수익중지", "수익중지수익률"
             ]
-            data = [0, '', '', 30, 10, 93000, 1, 1, 0, 1, 20.0, 0, 2.0, 0, 2.0, '']
+            data = [0, '', '', 30, 10, 93000, 1, 1, 0, 1, 20.0, 0, 2.0, 0, 2.0]
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('strategy', con)
 
@@ -85,7 +85,7 @@ def database_check():
 
         if 'etc' not in table_list:
             columns = ["index", "테마", "저해상도", "휴무프로세스종료", "휴무컴퓨터종료", "창위치기억", "창위치", "스톰라이브", "프로그램종료", "팩터선택", "시리얼키"]
-            data = [0, '다크블루', 0, 1, 0, 1, '', 1, 0, '1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1', '']
+            data = [0, '다크블루', 0, 1, 0, 1, '', 1, 0, '1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1', '']
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('etc', con)
 
@@ -94,11 +94,11 @@ def database_check():
                 'index', '매수주문구분', '매수분할횟수', '매수분할방법', '매수분할시그널', '매수분할하방', '매수분할상방',
                 '매수분할하방수익률', '매수분할상방수익률', '매수분할고정수익률', '매수지정가기준가격', '매수지정가호가번호',
                 '매수시장가잔량범위', '매수취소관심이탈', '매수취소매도시그널', '매수취소시간', '매수취소시간초', '매수금지블랙리스트',
-                '매수금지라운드피겨', '매수금지라운드호가', '매수금지손절횟수', '매수금지손절횟수값', '매수금지거래횟수',
+                '매수금지손절횟수', '매수금지손절횟수값', '매수금지거래횟수',
                 '매수금지거래횟수값', '매수금지시간', '매수금지시작시간', '매수금지종료시간', '매수금지간격', '매수금지간격초',
                 '매수금지손절간격', '매수금지손절간격초', '매수정정횟수', '매수정정호가차이', '매수정정호가', '비중조절'
             ]
-            data = [0, '시장가', 1, 2, 1, 0, 1, 0.5, 0.5, 1, '매수1호가', 0, 3, 0, 0, 0, 30, 0, 0, 5, 0, 2, 0, 2, 0, 120000,
+            data = [0, '시장가', 1, 2, 1, 0, 1, 0.5, 0.5, 1, '매수1호가', 0, 3, 0, 0, 0, 30, 0, 0, 2, 0, 2, 0, 120000,
                     130000, 0, 5, 0, 300, 0, 5, 2, '0;0;0;0;0;1;1;1;1;1']
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('buyorder', con)
@@ -108,12 +108,12 @@ def database_check():
                 'index', '매도주문구분', '매도분할횟수', '매도분할방법', '매도분할시그널', '매도분할하방', '매도분할상방',
                 '매도분할하방수익률', '매도분할상방수익률', '매도지정가기준가격', '매도지정가호가번호', '매도시장가잔량범위',
                 '매도취소관심진입', '매도취소매수시그널', '매도취소시간', '매도취소시간초', '매도금지매수횟수',
-                '매도금지매수횟수값', '매도금지라운드피겨', '매도금지라운드호가', '매도금지시간', '매도금지시작시간',
+                '매도금지매수횟수값', '매도금지시간', '매도금지시작시간',
                 '매도금지종료시간', '매도금지간격', '매도금지간격초', '매도정정횟수', '매도정정호가차이', '매도정정호가',
                 '매도익절수익률청산', '매도익절수익률', '매도익절수익금청산', '매도익절수익금',
                 '매도손절수익률청산', '매도손절수익률', '매도손절수익금청산', '매도손절수익금'
             ]
-            data = [0, '시장가', 1, 1, 1, 0, 1, 0.5, 2.0, '매도1호가', 0, 5, 0, 0, 0, 30, 0, 2, 0, 5, 0, 120000, 130000, 0, 300, 0, 5, 2, 0, 5, 0, 1_000_000, 0, 5, 0, 1_000_000]
+            data = [0, '시장가', 1, 1, 1, 0, 1, 0.5, 2.0, '매도1호가', 0, 5, 0, 0, 0, 30, 0, 2, 0, 120000, 130000, 0, 300, 0, 5, 2, 0, 5, 0, 1_000_000, 0, 5, 0, 1_000_000]
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('sellorder', con)
 
@@ -131,41 +131,53 @@ def database_check():
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('stock_info', con)
 
-        if 'stocketf_info' not in table_list:
+        if 'stock_etf_info' not in table_list:
             columns = ['index', '종목명']
             data = ['005930', '삼성전자']
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('stocketf_info', con)
+            df.to_sql('stock_etf_info', con)
 
-        if 'stocketn_info' not in table_list:
+        if 'stock_etn_info' not in table_list:
             columns = ['index', '종목명']
             data = ['005930', '삼성전자']
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('stocketn_info', con)
+            df.to_sql('stock_etn_info', con)
 
-        if 'stockusa_info' not in table_list:
+        if 'stock_usa_info' not in table_list:
             columns = ['index', '종목명', '거래소코드', '상장주식수']
             data = ['AAPL', '애플', '82', 14681100000]
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('stockusa_info', con)
+            df.to_sql('stock_usa_info', con)
 
         if 'future_info' not in table_list:
             columns = ['index', '종목명', '위탁증거금', '호가단위', '틱가치', '소숫점자리수']
-            data = ['A0166000', '코스피200', 0.25, 20.0, 2]
+            data = ['A0166000', '코스피200', 5000, 0.25, 20.0, 2]
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('future_info', con)
 
-        if 'futurent_info' not in table_list:
+        if 'future_nt_info' not in table_list:
             columns = ['index', '종목명', '위탁증거금', '호가단위', '틱가치', '소숫점자리수']
-            data = ['A0166000', '코스피200', 0.25, 20.0, 2]
+            data = ['A0166000', '코스피200', 5000, 0.25, 20.0, 2]
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('futurent_info', con)
+            df.to_sql('future_nt_info', con)
 
-        if 'futureos_info' not in table_list:
+        if 'future_os_info' not in table_list:
             columns = ['index', '종목명', '위탁증거금', '호가단위', '틱가치', '소숫점자리수']
             data = ['LSCH27', 'Steel Scrap(2027.03)', 330, 0.5, 5.0, 2]
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('futureos_info', con)
+            df.to_sql('future_os_info', con)
+
+        if 'upbit_info' not in table_list:
+            columns = ['index', '종목명']
+            data = ['KRW-BTC', 'KRW-BTC']
+            df = pd.DataFrame([data], columns=columns).set_index('index')
+            df.to_sql('upbit_info', con)
+
+        if 'binance_info' not in table_list:
+            columns = ['index', '종목명']
+            data = ['BTSUSDT', 'BTSUSDT']
+            df = pd.DataFrame([data], columns=columns).set_index('index')
+            df.to_sql('binance_info', con)
 
         con.close()
 
@@ -209,110 +221,126 @@ def database_check():
             cur.execute('CREATE TABLE "stock_sellconds" ( "index" TEXT, "전략코드" TEXT )')
             cur.execute('CREATE INDEX "ix_stock_sellconds_index"ON "stock_sellconds" ("index")')
 
-        # --------------------------------------------------------------------------------------------------------------
-
-        if 'stocketf_buy' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_buy" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_buy_index"ON "stocketf_buy" ("index")')
-
-        if 'stocketf_sell' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_sell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_sell_index"ON "stocketf_sell" ("index")')
-
-        if 'stocketf_optibuy' not in table_list:
-            query = 'CREATE TABLE "stocketf_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
-            cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketf_optibuy_index"ON "stocketf_optibuy" ("index")')
-
-        if 'stocketf_optisell' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_optisell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_optisell_index"ON "stocketf_optisell" ("index")')
-
-        if 'stocketf_optivars' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_optivars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_optivars_index"ON "stocketf_optivars" ("index")')
-
-        if 'stocketf_optigavars' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_optigavars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_optigavars_index"ON "stocketf_optigavars" ("index")')
-
-        if 'stocketf_buyconds' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_buyconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_buyconds_index" ON "stocketf_buyconds"("index")')
-
-        if 'stocketf_sellconds' not in table_list:
-            cur.execute('CREATE TABLE "stocketf_sellconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketf_sellconds_index"ON "stocketf_sellconds" ("index")')
+        if 'stock_passticks' not in table_list:
+            cur.execute('CREATE TABLE "stock_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_passticks_index"ON "stock_passticks" ("index")')
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'stocketn_buy' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_buy" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_buy_index"ON "stocketn_buy" ("index")')
+        if 'stock_etf_buy' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_buy" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_buy_index"ON "stock_etf_buy" ("index")')
 
-        if 'stocketn_sell' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_sell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_sell_index"ON "stocketn_sell" ("index")')
+        if 'stock_etf_sell' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_sell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_sell_index"ON "stock_etf_sell" ("index")')
 
-        if 'stocketn_optibuy' not in table_list:
-            query = 'CREATE TABLE "stocketn_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
+        if 'stock_etf_optibuy' not in table_list:
+            query = 'CREATE TABLE "stock_etf_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketn_optibuy_index"ON "stocketn_optibuy" ("index")')
+            cur.execute('CREATE INDEX "ix_stock_etf_optibuy_index"ON "stock_etf_optibuy" ("index")')
 
-        if 'stocketn_optisell' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_optisell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_optisell_index"ON "stocketn_optisell" ("index")')
+        if 'stock_etf_optisell' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_optisell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_optisell_index"ON "stock_etf_optisell" ("index")')
 
-        if 'stocketn_optivars' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_optivars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_optivars_index"ON "stocketn_optivars" ("index")')
+        if 'stock_etf_optivars' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_optivars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_optivars_index"ON "stock_etf_optivars" ("index")')
 
-        if 'stocketn_optigavars' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_optigavars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_optigavars_index"ON "stocketn_optigavars" ("index")')
+        if 'stock_etf_optigavars' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_optigavars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_optigavars_index"ON "stock_etf_optigavars" ("index")')
 
-        if 'stocketn_buyconds' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_buyconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_buyconds_index" ON "stocketn_buyconds"("index")')
+        if 'stock_etf_buyconds' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_buyconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_buyconds_index" ON "stock_etf_buyconds"("index")')
 
-        if 'stocketn_sellconds' not in table_list:
-            cur.execute('CREATE TABLE "stocketn_sellconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stocketn_sellconds_index"ON "stocketn_sellconds" ("index")')
+        if 'stock_etf_sellconds' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_sellconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_sellconds_index"ON "stock_etf_sellconds" ("index")')
+
+        if 'stock_etf_passticks' not in table_list:
+            cur.execute('CREATE TABLE "stock_etf_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etf_passticks_index"ON "stock_etf_passticks" ("index")')
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'stockusa_buy' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_buy" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_buy_index"ON "stockusa_buy" ("index")')
+        if 'stock_etn_buy' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_buy" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_buy_index"ON "stock_etn_buy" ("index")')
 
-        if 'stockusa_sell' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_sell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_sell_index"ON "stockusa_sell" ("index")')
+        if 'stock_etn_sell' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_sell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_sell_index"ON "stock_etn_sell" ("index")')
 
-        if 'stockusa_optibuy' not in table_list:
-            query = 'CREATE TABLE "stockusa_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
+        if 'stock_etn_optibuy' not in table_list:
+            query = 'CREATE TABLE "stock_etn_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stockusa_optibuy_index"ON "stockusa_optibuy" ("index")')
+            cur.execute('CREATE INDEX "ix_stock_etn_optibuy_index"ON "stock_etn_optibuy" ("index")')
 
-        if 'stockusa_optisell' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_optisell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_optisell_index"ON "stockusa_optisell" ("index")')
+        if 'stock_etn_optisell' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_optisell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_optisell_index"ON "stock_etn_optisell" ("index")')
 
-        if 'stockusa_optivars' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_optivars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_optivars_index"ON "stockusa_optivars" ("index")')
+        if 'stock_etn_optivars' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_optivars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_optivars_index"ON "stock_etn_optivars" ("index")')
 
-        if 'stockusa_optigavars' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_optigavars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_optigavars_index"ON "stockusa_optigavars" ("index")')
+        if 'stock_etn_optigavars' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_optigavars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_optigavars_index"ON "stock_etn_optigavars" ("index")')
 
-        if 'stockusa_buyconds' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_buyconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_buyconds_index" ON "stockusa_buyconds"("index")')
+        if 'stock_etn_buyconds' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_buyconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_buyconds_index" ON "stock_etn_buyconds"("index")')
 
-        if 'stockusa_sellconds' not in table_list:
-            cur.execute('CREATE TABLE "stockusa_sellconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_stockusa_sellconds_index"ON "stockusa_sellconds" ("index")')
+        if 'stock_etn_sellconds' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_sellconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_sellconds_index"ON "stock_etn_sellconds" ("index")')
+
+        if 'stock_etn_passticks' not in table_list:
+            cur.execute('CREATE TABLE "stock_etn_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_etn_passticks_index"ON "stock_etn_passticks" ("index")')
+
+        # --------------------------------------------------------------------------------------------------------------
+
+        if 'stock_usa_buy' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_buy" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_buy_index"ON "stock_usa_buy" ("index")')
+
+        if 'stock_usa_sell' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_sell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_sell_index"ON "stock_usa_sell" ("index")')
+
+        if 'stock_usa_optibuy' not in table_list:
+            query = 'CREATE TABLE "stock_usa_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
+            cur.execute(query)
+            cur.execute('CREATE INDEX "ix_stock_usa_optibuy_index"ON "stock_usa_optibuy" ("index")')
+
+        if 'stock_usa_optisell' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_optisell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_optisell_index"ON "stock_usa_optisell" ("index")')
+
+        if 'stock_usa_optivars' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_optivars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_optivars_index"ON "stock_usa_optivars" ("index")')
+
+        if 'stock_usa_optigavars' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_optigavars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_optigavars_index"ON "stock_usa_optigavars" ("index")')
+
+        if 'stock_usa_buyconds' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_buyconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_buyconds_index" ON "stock_usa_buyconds"("index")')
+
+        if 'stock_usa_sellconds' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_sellconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_sellconds_index"ON "stock_usa_sellconds" ("index")')
+
+        if 'stock_usa_passticks' not in table_list:
+            cur.execute('CREATE TABLE "stock_usa_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_stock_usa_passticks_index"ON "stock_usa_passticks" ("index")')
 
         # --------------------------------------------------------------------------------------------------------------
 
@@ -349,75 +377,87 @@ def database_check():
             cur.execute('CREATE TABLE "future_sellconds" ( "index" TEXT, "전략코드" TEXT )')
             cur.execute('CREATE INDEX "ix_future_sellconds_index"ON "future_sellconds" ("index")')
 
-        # --------------------------------------------------------------------------------------------------------------
-
-        if 'futurent_buy' not in table_list:
-            cur.execute('CREATE TABLE "futurent_buy" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_buy_index"ON "futurent_buy" ("index")')
-
-        if 'futurent_sell' not in table_list:
-            cur.execute('CREATE TABLE "futurent_sell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_sell_index"ON "futurent_sell" ("index")')
-
-        if 'futurent_optibuy' not in table_list:
-            query = 'CREATE TABLE "futurent_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
-            cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futurent_optibuy_index"ON "futurent_optibuy" ("index")')
-
-        if 'futurent_optisell' not in table_list:
-            cur.execute('CREATE TABLE "futurent_optisell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_optisell_index"ON "futurent_optisell" ("index")')
-
-        if 'futurent_optivars' not in table_list:
-            cur.execute('CREATE TABLE "futurent_optivars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_optivars_index"ON "futurent_optivars" ("index")')
-
-        if 'futurent_optigavars' not in table_list:
-            cur.execute('CREATE TABLE "futurent_optigavars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_optigavars_index"ON "futurent_optigavars" ("index")')
-
-        if 'futurent_buyconds' not in table_list:
-            cur.execute('CREATE TABLE "futurent_buyconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_buyconds_index" ON "futurent_buyconds"("index")')
-
-        if 'futurent_sellconds' not in table_list:
-            cur.execute('CREATE TABLE "futurent_sellconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futurent_sellconds_index"ON "futurent_sellconds" ("index")')
+        if 'future_passticks' not in table_list:
+            cur.execute('CREATE TABLE "future_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_passticks_index"ON "future_passticks" ("index")')
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'futureos_buy' not in table_list:
-            cur.execute('CREATE TABLE "futureos_buy" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_buy_index"ON "futureos_buy" ("index")')
+        if 'future_nt_buy' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_buy" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_buy_index"ON "future_nt_buy" ("index")')
 
-        if 'futureos_sell' not in table_list:
-            cur.execute('CREATE TABLE "futureos_sell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_sell_index"ON "futureos_sell" ("index")')
+        if 'future_nt_sell' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_sell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_sell_index"ON "future_nt_sell" ("index")')
 
-        if 'futureos_optibuy' not in table_list:
-            query = 'CREATE TABLE "futureos_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
+        if 'future_nt_optibuy' not in table_list:
+            query = 'CREATE TABLE "future_nt_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futureos_optibuy_index"ON "futureos_optibuy" ("index")')
+            cur.execute('CREATE INDEX "ix_future_nt_optibuy_index"ON "future_nt_optibuy" ("index")')
 
-        if 'futureos_optisell' not in table_list:
-            cur.execute('CREATE TABLE "futureos_optisell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_optisell_index"ON "futureos_optisell" ("index")')
+        if 'future_nt_optisell' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_optisell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_optisell_index"ON "future_nt_optisell" ("index")')
 
-        if 'futureos_optivars' not in table_list:
-            cur.execute('CREATE TABLE "futureos_optivars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_optivars_index"ON "futureos_optivars" ("index")')
+        if 'future_nt_optivars' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_optivars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_optivars_index"ON "future_nt_optivars" ("index")')
 
-        if 'futureos_optigavars' not in table_list:
-            cur.execute('CREATE TABLE "futureos_optigavars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_optigavars_index"ON "futureos_optigavars" ("index")')
+        if 'future_nt_optigavars' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_optigavars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_optigavars_index"ON "future_nt_optigavars" ("index")')
 
-        if 'futureos_buyconds' not in table_list:
-            cur.execute('CREATE TABLE "futureos_buyconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_buyconds_index" ON "futureos_buyconds"("index")')
+        if 'future_nt_buyconds' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_buyconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_buyconds_index" ON "future_nt_buyconds"("index")')
 
-        if 'futureos_sellconds' not in table_list:
-            cur.execute('CREATE TABLE "futureos_sellconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_futureos_sellconds_index"ON "futureos_sellconds" ("index")')
+        if 'future_nt_sellconds' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_sellconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_sellconds_index"ON "future_nt_sellconds" ("index")')
+
+        if 'future_nt_passticks' not in table_list:
+            cur.execute('CREATE TABLE "future_nt_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_nt_passticks_index"ON "future_nt_passticks" ("index")')
+
+        # --------------------------------------------------------------------------------------------------------------
+
+        if 'future_os_buy' not in table_list:
+            cur.execute('CREATE TABLE "future_os_buy" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_buy_index"ON "future_os_buy" ("index")')
+
+        if 'future_os_sell' not in table_list:
+            cur.execute('CREATE TABLE "future_os_sell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_sell_index"ON "future_os_sell" ("index")')
+
+        if 'future_os_optibuy' not in table_list:
+            query = 'CREATE TABLE "future_os_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
+            cur.execute(query)
+            cur.execute('CREATE INDEX "ix_future_os_optibuy_index"ON "future_os_optibuy" ("index")')
+
+        if 'future_os_optisell' not in table_list:
+            cur.execute('CREATE TABLE "future_os_optisell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_optisell_index"ON "future_os_optisell" ("index")')
+
+        if 'future_os_optivars' not in table_list:
+            cur.execute('CREATE TABLE "future_os_optivars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_optivars_index"ON "future_os_optivars" ("index")')
+
+        if 'future_os_optigavars' not in table_list:
+            cur.execute('CREATE TABLE "future_os_optigavars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_optigavars_index"ON "future_os_optigavars" ("index")')
+
+        if 'future_os_buyconds' not in table_list:
+            cur.execute('CREATE TABLE "future_os_buyconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_buyconds_index" ON "future_os_buyconds"("index")')
+
+        if 'future_os_sellconds' not in table_list:
+            cur.execute('CREATE TABLE "future_os_sellconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_sellconds_index"ON "future_os_sellconds" ("index")')
+
+        if 'future_os_passticks' not in table_list:
+            cur.execute('CREATE TABLE "future_os_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_future_os_passticks_index"ON "future_os_passticks" ("index")')
 
         # --------------------------------------------------------------------------------------------------------------
 
@@ -454,40 +494,48 @@ def database_check():
             cur.execute('CREATE TABLE "coin_sellconds" ( "index" TEXT, "전략코드" TEXT )')
             cur.execute('CREATE INDEX "ix_coin_sellconds_index"ON "coin_sellconds" ("index")')
 
+        if 'coin_passticks' not in table_list:
+            cur.execute('CREATE TABLE "coin_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_passticks_index"ON "coin_passticks" ("index")')
+
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'coinfuture_buy' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_buy" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_buy_index" ON "coinfuture_buy"("index")')
+        if 'coin_future_buy' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_buy" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_buy_index" ON "coin_future_buy"("index")')
 
-        if 'coinfuture_sell' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_sell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_sell_index"ON "coinfuture_sell" ("index")')
+        if 'coin_future_sell' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_sell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_sell_index"ON "coin_future_sell" ("index")')
 
-        if 'coinfuture_optibuy' not in table_list:
-            query = 'CREATE TABLE "coinfuture_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
+        if 'coin_future_optibuy' not in table_list:
+            query = 'CREATE TABLE "coin_future_optibuy" ( "index" TEXT, "전략코드" TEXT, "변수값" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_coinfuture_optibuy_index"ON "coinfuture_optibuy" ("index")')
+            cur.execute('CREATE INDEX "ix_coin_future_optibuy_index"ON "coin_future_optibuy" ("index")')
 
-        if 'coinfuture_optisell' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_optisell" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_optisell_index"ON "coinfuture_optisell" ("index")')
+        if 'coin_future_optisell' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_optisell" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_optisell_index"ON "coin_future_optisell" ("index")')
 
-        if 'coinfuture_optivars' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_optivars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_optivars_index"ON "coinfuture_optivars" ("index")')
+        if 'coin_future_optivars' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_optivars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_optivars_index"ON "coin_future_optivars" ("index")')
 
-        if 'coinfuture_optigavars' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_optigavars" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_optigavars_index"ON "coinfuture_optigavars" ("index")')
+        if 'coin_future_optigavars' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_optigavars" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_optigavars_index"ON "coin_future_optigavars" ("index")')
 
-        if 'coinfuture_buyconds' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_buyconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_buyconds_index" ON "coinfuture_buyconds"("index")')
+        if 'coin_future_buyconds' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_buyconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_buyconds_index" ON "coin_future_buyconds"("index")')
 
-        if 'coinfuture_sellconds' not in table_list:
-            cur.execute('CREATE TABLE "coinfuture_sellconds" ( "index" TEXT, "전략코드" TEXT )')
-            cur.execute('CREATE INDEX "ix_coinfuture_sellconds_index"ON "coinfuture_sellconds" ("index")')
+        if 'coin_future_sellconds' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_sellconds" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_sellconds_index"ON "coin_future_sellconds" ("index")')
+
+        if 'coin_future_passticks' not in table_list:
+            cur.execute('CREATE TABLE "coin_future_passticks" ( "index" TEXT, "전략코드" TEXT )')
+            cur.execute('CREATE INDEX "ix_coin_future_passticks_index"ON "coin_future_passticks" ("index")')
 
         # --------------------------------------------------------------------------------------------------------------
 
@@ -548,81 +596,81 @@ def database_check():
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'stocketf_chegeollist' not in table_list:
-            query = 'CREATE TABLE "stocketf_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
+        if 'stock_etf_chegeollist' not in table_list:
+            query = 'CREATE TABLE "stock_etf_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
                     '"체결수량" INTEGER, "미체결수량" INTEGER, "체결가" INTEGER, "체결시간" TEXT, "주문가격" INTEGER, "주문번호" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketf_chegeollist_index" ON "stocketf_chegeollist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_etf_chegeollist_index" ON "stock_etf_chegeollist" ( "index" )')
 
-        if 'stocketf_jangolist' not in table_list:
-            query = 'CREATE TABLE "stocketf_jangolist" ( "index" TEXT, "종목명" TEXT, "매수가" INTEGER, "현재가" INTEGER, "수익률" REAL, ' \
+        if 'stock_etf_jangolist' not in table_list:
+            query = 'CREATE TABLE "stock_etf_jangolist" ( "index" TEXT, "종목명" TEXT, "매수가" INTEGER, "현재가" INTEGER, "수익률" REAL, ' \
                     '"평가손익" INTEGER, "매입금액" INTEGER, "평가금액" INTEGER, "보유수량" INTEGER, "분할매수횟수" INTEGER, "분할매도횟수" INTEGER, "매수시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketf_jangolist_index"ON "stocketf_jangolist" ("index")')
+            cur.execute('CREATE INDEX "ix_stock_etf_jangolist_index"ON "stock_etf_jangolist" ("index")')
 
-        if 'stocketf_totaltradelist' not in table_list:
-            query = 'CREATE TABLE "stocketf_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, ' \
+        if 'stock_etf_totaltradelist' not in table_list:
+            query = 'CREATE TABLE "stock_etf_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, ' \
                     '"총수익금액" INTEGER, "총손실금액" INTEGER, "수익률" REAL, "수익금합계" INTEGER)'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketf_totaltradelist_index" ON "stocketf_totaltradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_etf_totaltradelist_index" ON "stock_etf_totaltradelist" ( "index" )')
 
-        if 'stocketf_tradelist' not in table_list:
-            query = 'CREATE TABLE "stocketf_tradelist" ( "index" TEXT, "종목명" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
+        if 'stock_etf_tradelist' not in table_list:
+            query = 'CREATE TABLE "stock_etf_tradelist" ( "index" TEXT, "종목명" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
                     '"주문수량" INTEGER, "수익률" REAL, "수익금" INTEGER, "체결시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketf_tradelist_index" ON "stocketf_tradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_etf_tradelist_index" ON "stock_etf_tradelist" ( "index" )')
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'stocketn_chegeollist' not in table_list:
-            query = 'CREATE TABLE "stocketn_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
+        if 'stock_etn_chegeollist' not in table_list:
+            query = 'CREATE TABLE "stock_etn_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
                     '"체결수량" INTEGER, "미체결수량" INTEGER, "체결가" INTEGER, "체결시간" TEXT, "주문가격" INTEGER, "주문번호" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketn_chegeollist_index" ON "stocketn_chegeollist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_etn_chegeollist_index" ON "stock_etn_chegeollist" ( "index" )')
 
-        if 'stocketn_jangolist' not in table_list:
-            query = 'CREATE TABLE "stocketn_jangolist" ( "index" TEXT, "종목명" TEXT, "매수가" INTEGER, "현재가" INTEGER, "수익률" REAL, ' \
+        if 'stock_etn_jangolist' not in table_list:
+            query = 'CREATE TABLE "stock_etn_jangolist" ( "index" TEXT, "종목명" TEXT, "매수가" INTEGER, "현재가" INTEGER, "수익률" REAL, ' \
                     '"평가손익" INTEGER, "매입금액" INTEGER, "평가금액" INTEGER, "보유수량" INTEGER, "분할매수횟수" INTEGER, "분할매도횟수" INTEGER, "매수시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketn_jangolist_index"ON "stocketn_jangolist" ("index")')
+            cur.execute('CREATE INDEX "ix_stock_etn_jangolist_index"ON "stock_etn_jangolist" ("index")')
 
-        if 'stocketn_totaltradelist' not in table_list:
-            query = 'CREATE TABLE "stocketn_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, ' \
+        if 'stock_etn_totaltradelist' not in table_list:
+            query = 'CREATE TABLE "stock_etn_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, ' \
                     '"총수익금액" INTEGER, "총손실금액" INTEGER, "수익률" REAL, "수익금합계" INTEGER)'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketn_totaltradelist_index" ON "stocketn_totaltradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_etn_totaltradelist_index" ON "stock_etn_totaltradelist" ( "index" )')
 
-        if 'stocketn_tradelist' not in table_list:
-            query = 'CREATE TABLE "stocketn_tradelist" ( "index" TEXT, "종목명" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
+        if 'stock_etn_tradelist' not in table_list:
+            query = 'CREATE TABLE "stock_etn_tradelist" ( "index" TEXT, "종목명" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
                     '"주문수량" INTEGER, "수익률" REAL, "수익금" INTEGER, "체결시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stocketn_tradelist_index" ON "stocketn_tradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_etn_tradelist_index" ON "stock_etn_tradelist" ( "index" )')
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'stockusa_chegeollist' not in table_list:
-            query = 'CREATE TABLE "stockusa_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
+        if 'stock_usa_chegeollist' not in table_list:
+            query = 'CREATE TABLE "stock_usa_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
                     '"체결수량" INTEGER, "미체결수량" INTEGER, "체결가" REAL, "체결시간" TEXT, "주문가격" REAL, "주문번호" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stockusa_chegeollist_index" ON "stockusa_chegeollist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_usa_chegeollist_index" ON "stock_usa_chegeollist" ( "index" )')
 
-        if 'stockusa_jangolist' not in table_list:
-            query = 'CREATE TABLE "stockusa_jangolist" ( "index" TEXT, "종목명" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
+        if 'stock_usa_jangolist' not in table_list:
+            query = 'CREATE TABLE "stock_usa_jangolist" ( "index" TEXT, "종목명" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
                     '"평가손익" INTEGER, "매입금액" INTEGER, "평가금액" INTEGER, "보유수량" INTEGER, "분할매수횟수" INTEGER, "분할매도횟수" INTEGER, "매수시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stockusa_jangolist_index"ON "stockusa_jangolist" ("index")')
+            cur.execute('CREATE INDEX "ix_stock_usa_jangolist_index"ON "stock_usa_jangolist" ("index")')
 
-        if 'stockusa_totaltradelist' not in table_list:
-            query = 'CREATE TABLE "stockusa_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, ' \
+        if 'stock_usa_totaltradelist' not in table_list:
+            query = 'CREATE TABLE "stock_usa_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, ' \
                     '"총수익금액" INTEGER, "총손실금액" INTEGER, "수익률" REAL, "수익금합계" INTEGER)'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stockusa_totaltradelist_index" ON "stockusa_totaltradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_usa_totaltradelist_index" ON "stock_usa_totaltradelist" ( "index" )')
 
-        if 'stockusa_tradelist' not in table_list:
-            query = 'CREATE TABLE "stockusa_tradelist" ( "index" TEXT, "종목명" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
+        if 'stock_usa_tradelist' not in table_list:
+            query = 'CREATE TABLE "stock_usa_tradelist" ( "index" TEXT, "종목명" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
                     '"주문수량" INTEGER, "수익률" REAL, "수익금" INTEGER, "체결시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_stockusa_tradelist_index" ON "stockusa_tradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_stock_usa_tradelist_index" ON "stock_usa_tradelist" ( "index" )')
 
         # --------------------------------------------------------------------------------------------------------------
 
@@ -652,55 +700,55 @@ def database_check():
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'futurent_chegeollist' not in table_list:
-            query = 'CREATE TABLE "futurent_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
+        if 'future_nt_chegeollist' not in table_list:
+            query = 'CREATE TABLE "future_nt_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
                     '"체결수량" INTEGER, "미체결수량" INTEGER, "체결가" REAL, "체결시간" TEXT, "주문가격" REAL, "주문번호" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futurent_chegeollist_index" ON "futurent_chegeollist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_future_nt_chegeollist_index" ON "future_nt_chegeollist" ( "index" )')
 
-        if 'futurent_jangolist' not in table_list:
-            query = 'CREATE TABLE "futurent_jangolist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
+        if 'future_nt_jangolist' not in table_list:
+            query = 'CREATE TABLE "future_nt_jangolist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
                     '"평가손익" REAL, "매입금액" REAL, "평가금액" REAL, "보유수량" INTEGER, "분할매수횟수" INTEGER, "분할매도횟수" INTEGER, "매수시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futurent_jangolist_index"ON "futurent_jangolist" ("index")')
+            cur.execute('CREATE INDEX "ix_future_nt_jangolist_index"ON "future_nt_jangolist" ("index")')
 
-        if 'futurent_totaltradelist' not in table_list:
-            query = 'CREATE TABLE "futurent_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" REAL, "총매도금액" REAL, ' \
+        if 'future_nt_totaltradelist' not in table_list:
+            query = 'CREATE TABLE "future_nt_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" REAL, "총매도금액" REAL, ' \
                     '"총수익금액" REAL, "총손실금액" REAL, "수익률" REAL, "수익금합계" REAL)'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futurent_totaltradelist_index" ON "futurent_totaltradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_future_nt_totaltradelist_index" ON "future_nt_totaltradelist" ( "index" )')
 
-        if 'futurent_tradelist' not in table_list:
-            query = 'CREATE TABLE "futurent_tradelist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수금액" REAL, "매도금액" REAL, ' \
+        if 'future_nt_tradelist' not in table_list:
+            query = 'CREATE TABLE "future_nt_tradelist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수금액" REAL, "매도금액" REAL, ' \
                     '"주문수량" REAL, "수익률" REAL, "수익금" REAL, "체결시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futurent_tradelist_index" ON "futurent_tradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_future_nt_tradelist_index" ON "future_nt_tradelist" ( "index" )')
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'futureos_chegeollist' not in table_list:
-            query = 'CREATE TABLE "futureos_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
+        if 'future_os_chegeollist' not in table_list:
+            query = 'CREATE TABLE "future_os_chegeollist" ( "index" TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" INTEGER, ' \
                     '"체결수량" INTEGER, "미체결수량" INTEGER, "체결가" REAL, "체결시간" TEXT, "주문가격" REAL, "주문번호" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futureos_chegeollist_index" ON "futureos_chegeollist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_future_os_chegeollist_index" ON "future_os_chegeollist" ( "index" )')
 
-        if 'futureos_jangolist' not in table_list:
-            query = 'CREATE TABLE "futureos_jangolist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
+        if 'future_os_jangolist' not in table_list:
+            query = 'CREATE TABLE "future_os_jangolist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
                     '"평가손익" REAL, "매입금액" REAL, "평가금액" REAL, "보유수량" INTEGER, "분할매수횟수" INTEGER, "분할매도횟수" INTEGER, "매수시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futureos_jangolist_index"ON "futureos_jangolist" ("index")')
+            cur.execute('CREATE INDEX "ix_future_os_jangolist_index"ON "future_os_jangolist" ("index")')
 
-        if 'futureos_totaltradelist' not in table_list:
-            query = 'CREATE TABLE "futureos_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" REAL, "총매도금액" REAL, ' \
+        if 'future_os_totaltradelist' not in table_list:
+            query = 'CREATE TABLE "future_os_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" REAL, "총매도금액" REAL, ' \
                     '"총수익금액" REAL, "총손실금액" REAL, "수익률" REAL, "수익금합계" REAL)'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futureos_totaltradelist_index" ON "futureos_totaltradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_future_os_totaltradelist_index" ON "future_os_totaltradelist" ( "index" )')
 
-        if 'futureos_tradelist' not in table_list:
-            query = 'CREATE TABLE "futureos_tradelist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수금액" REAL, "매도금액" REAL, ' \
+        if 'future_os_tradelist' not in table_list:
+            query = 'CREATE TABLE "future_os_tradelist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수금액" REAL, "매도금액" REAL, ' \
                     '"주문수량" REAL, "수익률" REAL, "수익금" REAL, "체결시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_futureos_tradelist_index" ON "futureos_tradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_future_os_tradelist_index" ON "future_os_tradelist" ( "index" )')
 
         # --------------------------------------------------------------------------------------------------------------
 
@@ -730,29 +778,29 @@ def database_check():
 
         # --------------------------------------------------------------------------------------------------------------
 
-        if 'coinfuture_chegeollist' not in table_list:
-            query = 'CREATE TABLE "coinfuture_chegeollist" ( "index"	TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" REAL, ' \
+        if 'coin_future_chegeollist' not in table_list:
+            query = 'CREATE TABLE "coin_future_chegeollist" ( "index"	TEXT, "종목명" TEXT, "주문구분" TEXT, "주문수량" REAL, ' \
                     '"체결수량" REAL, "미체결수량" REAL, "체결가" REAL, "체결시간" TEXT, "주문가격" REAL, "주문번호" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_coinfuture_chegeollist_index" ON "coinfuture_chegeollist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_coin_future_chegeollist_index" ON "coin_future_chegeollist" ( "index" )')
 
-        if 'coinfuture_jangolist' not in table_list:
-            query = 'CREATE TABLE "coinfuture_jangolist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
+        if 'coin_future_jangolist' not in table_list:
+            query = 'CREATE TABLE "coin_future_jangolist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수가" REAL, "현재가" REAL, "수익률" REAL, ' \
                     '"평가손익" INTEGER, "매입금액" INTEGER, "평가금액" INTEGER, "보유수량" REAL, "분할매수횟수" INTEGER, "분할매도횟수" INTEGER, "매수시간" TEXT, "레버리지" INTEGER )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_coinfuture_jangolist_index"ON "coinfuture_jangolist" ("index")')
+            cur.execute('CREATE INDEX "ix_coin_future_jangolist_index"ON "coin_future_jangolist" ("index")')
 
-        if 'coinfuture_totaltradelist' not in table_list:
-            query = 'CREATE TABLE "coinfuture_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, "총수익금액" INTEGER, ' \
+        if 'coin_future_totaltradelist' not in table_list:
+            query = 'CREATE TABLE "coin_future_totaltradelist" ( "index" TEXT, "거래횟수" INTEGER, "총매수금액" INTEGER, "총매도금액" INTEGER, "총수익금액" INTEGER, ' \
                     '"총손실금액" INTEGER, "수익률" REAL, "수익금합계" INTEGER )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_coinfuture_totaltradelist_index" ON "coinfuture_totaltradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_coin_future_totaltradelist_index" ON "coin_future_totaltradelist" ( "index" )')
 
-        if 'coinfuture_tradelist' not in table_list:
-            query = 'CREATE TABLE "coinfuture_tradelist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
+        if 'coin_future_tradelist' not in table_list:
+            query = 'CREATE TABLE "coin_future_tradelist" ( "index" TEXT, "종목명" TEXT, "포지션" TEXT, "매수금액" INTEGER, "매도금액" INTEGER, ' \
                     '"주문수량" REAL, "수익률" REAL, "수익금" INTEGER, "체결시간" TEXT )'
             cur.execute(query)
-            cur.execute('CREATE INDEX "ix_coinfuture_tradelist_index" ON "coinfuture_tradelist" ( "index" )')
+            cur.execute('CREATE INDEX "ix_coin_future_tradelist_index" ON "coin_future_tradelist" ( "index" )')
 
         con.commit()
         con.close()
@@ -779,8 +827,8 @@ def database_check():
                 df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
                 table_list = df['name'].to_list()
                 if 'moneytop' in table_list: table_list.remove('moneytop')
-                if 'stockinfo' in table_list: table_list.remove('stockinfo')
-                if 'futureinfo' in table_list: table_list.remove('futureinfo')
+                if 'stock_info' in table_list: table_list.remove('stock_info')
+                if 'future_info' in table_list: table_list.remove('future_info')
                 if table_list:
                     df = pd.read_sql(f'SELECT * FROM "{table_list[0]}"', con)
                     if '당일매수금액' not in df.columns:

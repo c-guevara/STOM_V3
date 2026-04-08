@@ -19,8 +19,8 @@ from utility.static import comma2float, thread_decorator
 class Kimp:
     def __init__(self, qlist):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
-           0        1       2      3       4      5      6      7       8         9         10     11      12
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
+           0        1       2      3       4      5      6      7       8        9       10     11
         """
         app = QApplication(sys.argv)
 
@@ -30,26 +30,26 @@ class Kimp:
         _, self.codes  = get_symbols_info()
         self.df        = pd.DataFrame(columns=columns_kp)
 
-        self.ConvertedCurrency()
+        self._converted_currency()
 
         self.qtimer = QTimer()
         self.qtimer.setInterval(60 * 1000)
-        self.qtimer.timeout.connect(self.ConvertedCurrency)
+        self.qtimer.timeout.connect(self._converted_currency)
         self.qtimer.start()
 
         self.thread_ws = WebSocketManager(self.codes)
-        self.thread_ws.signal1.connect(self.UpdateUpbitData)
-        self.thread_ws.signal2.connect(self.UpdateBinanceData)
+        self.thread_ws.signal1.connect(self._update_upbit_data)
+        self.thread_ws.signal2.connect(self._update_binance_data)
         self.thread_ws.start()
 
         app.exec_()
 
-    def UpdateUpbitData(self, data):
+    def _update_upbit_data(self, data):
         code = data['code'].replace('KRW-', '')
         c = data['trade_price']
         self.df.loc[code, ['종목명', '업비트(원)']] = [code, c]
 
-    def UpdateBinanceData(self, data):
+    def _update_binance_data(self, data):
         for x in data:
             if re.search('USDT$', x['s']) is not None:
                 code = x['s'].replace('USDT', '')
@@ -64,7 +64,7 @@ class Kimp:
             self.windowQ.put((ui_num['김프'], self.df, self.usdtokrw))
 
     @thread_decorator
-    def ConvertedCurrency(self):
+    def _converted_currency(self):
         try:
             html = requests.get('https://finance.naver.com/marketindex/exchangeDetail.naver?marketindexCd=FX_USDKRW').text
             soup = BeautifulSoup(html, 'html.parser')

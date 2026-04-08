@@ -1,22 +1,7 @@
 
-def get_label_text(ui, real, gubun, code, is_min, xpoint, factor, hms):
+def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
     def fi(fname):
-        if real:
-            if is_min:
-                if gubun == 'S':    return ui.dict_findex_stock_min[fname]
-                else:               return ui.dict_findex_coin_min[fname]
-            else:
-                if gubun == 'S':    return ui.dict_findex_stock_tick[fname]
-                else:               return ui.dict_findex_coin_tick[fname]
-        else:
-            if is_min:
-                if gubun == 'S':    return ui.dict_findex_stock_min2[fname]
-                elif 'KRW' in code: return ui.dict_findex_coin_min2[fname]
-                else:               return ui.dict_findex_future_min2[fname]
-            else:
-                if gubun == 'S':    return ui.dict_findex_stock_tick2[fname]
-                elif 'KRW' in code: return ui.dict_findex_coin_tick2[fname]
-                else:               return ui.dict_findex_future_tick2[fname]
+        return ui.dict_findex[fname]
 
     if factor == '현재가':
         if gubun == 'S':

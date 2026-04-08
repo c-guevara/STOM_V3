@@ -4,7 +4,7 @@ from talib import stream
 from utility.static import dt_ymdhms, dt_ymdhm
 
 
-class BaseGlobalsFunc:
+class StrategyGlobalsFunc:
     def __init__(self):
         self.code             = None
         self.name             = None
@@ -99,23 +99,8 @@ class BaseGlobalsFunc:
     def _초당매도수량N(self, pre):
         return self._parameter_previous(self.dict_findex['초당매도수량'], pre)
 
-    def _거래대금증감N(self, pre):
-        return self._parameter_previous(self.dict_findex['거래대금증감'], pre)
-
-    def _전일비N(self, pre):
-        return self._parameter_previous(self.dict_findex['전일비'], pre)
-
-    def _회전율N(self, pre):
-        return self._parameter_previous(self.dict_findex['회전율'], pre)
-
-    def _전일동시간비N(self, pre):
-        return self._parameter_previous(self.dict_findex['전일동시간비'], pre)
-
     def _시가총액N(self, pre):
         return self._parameter_previous(self.dict_findex['시가총액'], pre)
-
-    def _라운드피겨위5호가이내N(self, pre):
-        return self._parameter_previous(self.dict_findex['라운드피겨위5호가이내'], pre)
 
     def _VI해제시간N(self, pre):
         return dt_ymdhms(str(int(self._parameter_previous(self.dict_findex['VI해제시간'], pre))))
@@ -359,9 +344,6 @@ class BaseGlobalsFunc:
 
     def _당일거래대금각도(self, tick, pre=0, calc=False):
         return self._parameter_angle(self.dict_findex['당일거래대금각도'], self.dict_findex['당일거래대금'], tick, pre, self.angle_dtm_cf, calc=calc)
-
-    def _전일비각도(self, tick, pre=0, calc=False):
-        return self._parameter_angle(self.dict_findex['전일비각도'], self.dict_findex['전일비'], tick, pre, 1, calc=calc)
 
     def _경과틱수(self, 조건명):
         if self.code in self.dict_cond_indexn and \
@@ -983,16 +965,10 @@ class BaseGlobalsFunc:
             '누적분당매도수량': self._누적분당매도수량,
             '분당거래대금평균': self._분당거래대금평균,
 
-            '거래대금증감N': self._거래대금증감N,
-            '전일비N': self._전일비N,
-            '회전율N': self._회전율N,
-            '전일동시간비N': self._전일동시간비N,
             '시가총액N': self._시가총액N,
-            '라운드피겨위5호가이내N': self._라운드피겨위5호가이내N,
             'VI해제시간N': self._VI해제시간N,
             'VI가격N': self._VI가격N,
             'VI호가단위N': self._VI호가단위N,
-            '전일비각도': self._전일비각도,
 
             '매도호가5N': self._매도호가5N,
             '매도호가4N': self._매도호가4N,
@@ -1147,7 +1123,7 @@ class BaseGlobalsFunc:
         func_keys = dict_add_func.keys()
         if self.pre_func_keys != func_keys:
             self.pre_func_keys = func_keys
-            self.update_globals_func(dict_add_func)
+            self._update_globals_func(dict_add_func)
 
-    def update_globals_func(self, dict_add_func):
+    def _update_globals_func(self, dict_add_func):
         pass

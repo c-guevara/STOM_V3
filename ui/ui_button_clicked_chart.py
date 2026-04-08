@@ -37,13 +37,13 @@ def indicator_setting_save(ui):
 @error_decorator
 def get_indicator_detail(ui, code):
     k_list = None
-    if not ui.dict_set['주식타임프레임'] or not ui.dict_set['코인타임프레임']:
+    if not ui.dict_set['타임프레임'] or not ui.dict_set['타임프레임']:
         if ui.ft_checkBoxxxxx_44.isChecked():
             buystg = None
             vars_  = None
             try:
                 if 'KRW' not in code and 'USDT' not in code:
-                    gubun = 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future'
+                    gubun = 'stock' if '키움증권' in ui.dict_set['거래소'] else 'future'
                     stg_name = ui.dict_set['주식매수전략']
                     df1 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun}buy').set_index('index')
                     df2 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun}optibuy').set_index('index')

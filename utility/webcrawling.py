@@ -21,8 +21,8 @@ class WebCrawling(QThread):
 
     def __init__(self, qlist):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
-           0        1       2      3       4      5      6      7       8         9         10     11      12
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
+           0        1       2      3       4      5      6      7       8        9       10     11
         """
         super().__init__()
         self.webcQ       = qlist[6]
@@ -44,16 +44,16 @@ class WebCrawling(QThread):
         self.thread_join = 0
 
     def run(self):
-        self.CrawlingHomTapData()
+        self._crawling_homtap_data()
         hometap_crawling_time = timedelta_sec(30)
         while True:
             try:
                 if not self.webcQ.empty():
                     data = self.webcQ.get()
-                    self.Crawling(data)
+                    self._crawling(data)
 
                 if now() > hometap_crawling_time:
-                    self.CrawlingHomTapData()
+                    self._crawling_homtap_data()
                     hometap_crawling_time = timedelta_sec(30)
 
                 if self.thread_join == 16:
@@ -64,27 +64,27 @@ class WebCrawling(QThread):
             except:
                 self.signal.emit((ui_num['시스템로그'], format_exc()))
 
-    def Crawling(self, data):
+    def _crawling(self, data):
         cmd, data = data
         if cmd == '기업정보':
-            self.GugyCrawling(data)
-            self.GugsCrawling(data)
-            self.JmnsCrawling(data)
-            self.JmjpCrawling(data)
+            self._gugy_crawling(data)
+            self._gugs_crawling(data)
+            self._jmns_crawling(data)
+            self._jmjp_crawling(data)
         elif cmd == '트리맵':
             self.treemap = True
-            self.UjTmCrawling()
+            self._ujtm_crawling()
         elif cmd == '트리맵1':
-            self.UjTmCrawlingDetail(data, 1)
+            self._ujtm_crawling_detail(data, 1)
         elif cmd == '트리맵2':
-            self.UjTmCrawlingDetail(data, 2)
+            self._ujtm_crawling_detail(data, 2)
         elif cmd == '트리맵중단':
             self.treemap = False
         elif cmd == '풍경사진요청':
-            self.GetImage()
+            self._get_image()
 
     @thread_decorator
-    def GetImage(self):
+    def _get_image(self):
         try:
             if self.imagelist1 is None:
                 url   = 'https://search.naver.com/search.naver?sm=tab_hty.top&where=image&ssc=tab.image.all&query=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EA%B0%80%EB%A1%9C%EC%82%AC%EC%A7%84&oquery=%EA%B3%A0%ED%99%94%EC%A7%88%ED%92%8D%EA%B2%BD%EA%B0%80%EB%A1%9C%EC%82%AC%EC%A7%84&tqi=iAM7jwqVN8VsslwnmiossssstI4-416434'
@@ -107,7 +107,7 @@ class WebCrawling(QThread):
             pass
 
     @thread_decorator
-    def GugyCrawling(self, code):
+    def _gugy_crawling(self, code):
         url  = f'{self.base_url}/item/coinfo.naver?code={code}'
         resp = self.session.get(url, headers=self.headers)
         soup = BeautifulSoup(resp.text, 'html.parser')
@@ -120,7 +120,7 @@ class WebCrawling(QThread):
         self.signal.emit((ui_num['기업개요'], gugy_result))
 
     @thread_decorator
-    def GugsCrawling(self, code):
+    def _gugs_crawling(self, code):
         date_list, jbjg_list, gygs_list, link_list = [], [], [], []
         for i in (1, 2):
             url  = f'{self.base_url}/item//news_notice.naver?code={code}&page={i}'
@@ -142,7 +142,7 @@ class WebCrawling(QThread):
 
     # noinspection PyUnresolvedReferences
     @thread_decorator
-    def JmnsCrawling(self, code):
+    def _jmns_crawling(self, code):
         data_list = []
         for i in (1, 2):
             url   = f'{self.base_url}/item/news_news.naver?code={code}&page={i}&clusterId='
@@ -169,7 +169,7 @@ class WebCrawling(QThread):
         self.signal.emit((ui_num['기업뉴스'], df))
 
     @thread_decorator
-    def JmjpCrawling(self, code):
+    def _jmjp_crawling(self, code):
         url      = f'{self.base_url}/item/main.naver?code={code}'
         resp     = self.session.get(url, headers=self.headers)
         soup     = BeautifulSoup(resp.text, 'html.parser').select('div.section.cop_analysis > div.sub_section')[0]
@@ -198,7 +198,7 @@ class WebCrawling(QThread):
         self.signal.emit((ui_num['재무분기'], df2))
 
     @thread_decorator
-    def UjTmCrawling(self):
+    def _ujtm_crawling(self):
         url        = f'{self.base_url}/sise/sise_group.naver?type=upjong'
         resp       = self.session.get(url, headers=self.headers)
         soup       = BeautifulSoup(resp.text, 'html.parser')
@@ -235,10 +235,10 @@ class WebCrawling(QThread):
 
         self.signal.emit((ui_num['트리맵'], df1, df2, cl1, cl2))
         if self.treemap:
-            Timer(10, self.UjTmCrawling).start()
+            Timer(10, self._ujtm_crawling).start()
 
     @thread_decorator
-    def UjTmCrawlingDetail(self, url, gubun):
+    def _ujtm_crawling_detail(self, url, gubun):
         resp      = self.session.get(url, headers=self.headers)
         soup      = BeautifulSoup(resp.text, 'html.parser')
         name_list = [item.get_text(strip=True) for item in soup.select('.name_area')]
@@ -254,7 +254,7 @@ class WebCrawling(QThread):
         else:
             self.signal.emit((ui_num['트리맵2'], '', df, '', cl))
 
-    def CrawlingHomTapData(self):
+    def _crawling_homtap_data(self):
         """모든 데이터 수집 (한국주식+암호화폐)"""
         search_time = now()
         weekday = search_time.weekday()

@@ -97,10 +97,8 @@ class SetDialogBack:
         self.ui.sd_dlineEditttt_01 = self.wc.setLineedit(self.ui.sd_groupBoxxxxx_01, style=style_bc_dk)
         self.ui.sd_dpushButtonn_02 = self.wc.setPushbutton('스케쥴 저장', parent=self.ui.sd_groupBoxxxxx_01, click=lambda: sdbutton_clicked_05(self.ui))
 
-        tip = '버튼을 누을때마다 주식, 코인, 해선 순으로 변경됩니다.'
-        self.ui.sd_pushButtonnn_01 = self.wc.setPushbutton('주식', parent=self.ui.sd_groupBoxxxxx_01, click=lambda: sdbutton_clicked_01(self.ui), tip=tip)
-        self.ui.sd_pushButtonnn_02 = self.wc.setPushbutton('시작', parent=self.ui.sd_groupBoxxxxx_01, color=2, click=self.ui.sdButtonClicked_02)
-        self.ui.sd_pushButtonnn_03 = self.wc.setPushbutton('중지', parent=self.ui.sd_groupBoxxxxx_01, color=2, click=lambda: sdbutton_clicked_03(self.ui))
+        self.ui.sd_pushButtonnn_01 = self.wc.setPushbutton('시작', parent=self.ui.sd_groupBoxxxxx_01, color=2, click=self.ui.sdButtonClicked_02)
+        self.ui.sd_pushButtonnn_02 = self.wc.setPushbutton('중지', parent=self.ui.sd_groupBoxxxxx_01, color=2, click=lambda: sdbutton_clicked_03(self.ui))
 
         text = '                           백테유형                           시작일자                   ' \
                '종료일자               시작시간      종료시간     배팅    틱수      ' \
@@ -133,15 +131,8 @@ class SetDialogBack:
         )
 
         if self.ui.dict_set is not None:
-            if self.ui.dict_set['주식에이전트']:
-                if '해외선물' in self.ui.dict_set['증권사'] and self.ui.dict_set['주식타임프레임']:
-                    starttime = '093000'
-                else:
-                    starttime = '090000'
-                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['주식전략종료시간'])))).zfill(6)
-            else:
-                starttime = '000000'
-                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['코인전략종료시간'])))).zfill(6)
+            starttime = str(self.ui.market_info['시작시간']).zfill(6)
+            endtime   = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['전략종료시간'])))).zfill(6)
         else:
             starttime = '090000'
             endtime   = '093000'
@@ -241,9 +232,8 @@ class SetDialogBack:
         self.ui.sd_dlineEditttt_01.setGeometry(860, 7, 140, 30)
         self.ui.sd_dpushButtonn_02.setGeometry(1010, 7, 80, 30)
 
-        self.ui.sd_pushButtonnn_01.setGeometry(1100, 7, 88, 30)
-        self.ui.sd_pushButtonnn_02.setGeometry(1198, 7, 89, 30)
-        self.ui.sd_pushButtonnn_03.setGeometry(1297, 7, 89, 30)
+        self.ui.sd_pushButtonnn_01.setGeometry(1198, 7, 89, 30)
+        self.ui.sd_pushButtonnn_02.setGeometry(1297, 7, 89, 30)
 
         self.ui.sd_labellllllll_01.setGeometry(10, 8, 1380, 30)
 

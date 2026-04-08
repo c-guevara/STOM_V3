@@ -3,7 +3,7 @@ from ui.set_style import color_bf_dk
 from ui.set_widget import PlainTextEdit
 from PyQt5.QtCore import QEvent, QTimer
 from ui.ui_button_clicked_zoom import *
-from ui.ui_button_clicked_editer_unified import *
+from ui.ui_button_clicked_editer import *
 from ui.ui_extend_window import extend_window
 from PyQt5.QtWidgets import QMainWindow, QTextEdit
 from PyQt5.QtGui import QTextCursor, QTextCharFormat
@@ -181,49 +181,48 @@ def event_filter(_ui, widget, event):
                     widget.setTextCursor(cursor)
             return True
 
-    if event.key() == Qt.Key_Escape:
-        if not _ui.svc_pushButton_24.isVisible():
-            if widget in (_ui.ss_textEditttt_01, _ui.ss_textEditttt_03):
-                sz_button_clicked_01(_ui)
-            elif widget in (_ui.ss_textEditttt_02, _ui.ss_textEditttt_04):
-                sz_button_clicked_02(_ui)
-        if not _ui.cvc_pushButton_24.isVisible():
-            if widget in (_ui.cs_textEditttt_01, _ui.cs_textEditttt_03):
-                cz_button_clicked_01(_ui)
-            elif widget in (_ui.cs_textEditttt_02, _ui.cs_textEditttt_04):
-                cz_button_clicked_02(_ui)
-        return True
+    if _ui.main_btn == 2:
+        if event.key() == Qt.Key_Escape:
+            if not _ui.svc_pushButton_24.isVisible():
+                if widget in (_ui.ss_textEditttt_01, _ui.ss_textEditttt_03):
+                    sz_button_clicked_01(_ui)
+                elif widget in (_ui.ss_textEditttt_02, _ui.ss_textEditttt_04):
+                    sz_button_clicked_02(_ui)
+            if not _ui.cvc_pushButton_24.isVisible():
+                if widget in (_ui.cs_textEditttt_01, _ui.cs_textEditttt_03):
+                    cz_button_clicked_01(_ui)
+                elif widget in (_ui.cs_textEditttt_02, _ui.cs_textEditttt_04):
+                    cz_button_clicked_02(_ui)
+            return True
 
-    elif event.key() == Qt.Key_E and (QApplication.keyboardModifiers() & Qt.ShiftModifier):
-        extend_window(_ui)
-        return True
+        elif event.key() == Qt.Key_E and (QApplication.keyboardModifiers() & Qt.ShiftModifier):
+            extend_window(_ui)
+            return True
 
-    elif (QApplication.keyboardModifiers() & Qt.AltModifier) and \
-            event.key() in (Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5,
-                            Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0):
-        if _ui.main_btn in (3, 4):
-            gubun_ = 'stock' if _ui.main_btn == 3 else 'coin'
+        elif (QApplication.keyboardModifiers() & Qt.AltModifier) and \
+                event.key() in (Qt.Key_1, Qt.Key_2, Qt.Key_3, Qt.Key_4, Qt.Key_5,
+                                Qt.Key_6, Qt.Key_7, Qt.Key_8, Qt.Key_9, Qt.Key_0):
             if event.key() == Qt.Key_1:
-                stg_editer(_ui, gubun_)
+                stg_editer(_ui)
             elif event.key() == Qt.Key_2:
-                opti_editer(_ui, gubun_)
+                opti_editer(_ui)
             elif event.key() == Qt.Key_3:
-                opti_test_editer(_ui, gubun_)
+                opti_test_editer(_ui)
             elif event.key() == Qt.Key_4:
-                rwf_test_editer(_ui, gubun_)
+                rwf_test_editer(_ui)
             elif event.key() == Qt.Key_5:
-                opti_ga_editer(_ui, gubun_)
+                opti_ga_editer(_ui)
             elif event.key() == Qt.Key_6:
-                cond_editer(_ui, gubun_)
+                opti_cond_editer(_ui)
             elif event.key() == Qt.Key_7:
-                opti_vars_editer(_ui, gubun_)
+                opti_vars_editer(_ui)
             elif event.key() == Qt.Key_8:
-                vars_editer(_ui, gubun_)
+                opti_gavars_editer(_ui)
             elif event.key() == Qt.Key_9:
-                backtest_log(_ui, gubun_)
+                backtest_log(_ui)
             elif event.key() == Qt.Key_0:
-                backtest_detail(_ui, gubun_)
-        return True
+                backtest_detail(_ui)
+            return True
 
     return QMainWindow.eventFilter(_ui, widget, event)
 

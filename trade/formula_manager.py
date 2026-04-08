@@ -1,15 +1,7 @@
 
-import os
-import sys
 import sqlite3
-try:
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-except:
-    pass
 from utility.static import dt_ymdhms
-from trade.base_globals_func import BaseGlobalsFunc
-from utility.setting_base import list_stock_tick2, list_stock_min2, list_basic_tick2, list_basic_min2, list_future_tick2, \
-    list_future_min2, DB_STRATEGY
+from trade.strategy_globals_func import StrategyGlobalsFunc
 
 dict_fm_count = {
     '선:일반': 1,
@@ -22,6 +14,7 @@ dict_fm_count = {
 
 def get_formula_data(forchart, col_idx):
     import pandas as pd
+    from utility.setting_base import DB_STRATEGY
     con = sqlite3.connect(DB_STRATEGY)
     fm_df = pd.read_sql("SELECT * FROM formula", con)
     con.close()
@@ -60,40 +53,24 @@ def get_formula_data(forchart, col_idx):
     return fm_list, dict_fm, fm_tcnt
 
 
-class FormulaManager(BaseGlobalsFunc):
-    def __init__(self, fm_list):
+class FormulaManager(StrategyGlobalsFunc):
+    def __init__(self, fm_list, dict_set, is_tick, dict_findex):
         super().__init__()
-        self.fm_list   = fm_list
-        self.base_cnt  = None
-        self.check     = None
-        self.buy       = None
-        self.sell      = None
-        self.line      = None
-        self.up        = None
-        self.down      = None
-        self.hold      = False
-        self.set_globals_func()
+        self.fm_list      = fm_list
+        self.dict_set     = dict_set
+        self.is_tick      = is_tick
+        self.dict_findex  = dict_findex
 
-    def update_globals_func(self, dict_add_func):
-        globals().update(dict_add_func)
+        self.base_cnt     = self.dict_findex['관심종목'] + 1
+        self.base_cnt     = None
+        self.check        = None
+        self.buy          = None
+        self.sell         = None
+        self.line         = None
+        self.up           = None
+        self.down         = None
+        self.hold         = False
 
-    # noinspection PyUnboundLocalVariable,PyUnusedLocal
-    def update_all_data(self, code, arry, market, is_tick, w_unit):
-        self.code        = code
-        self.arry_code   = arry
-        self.is_tick     = is_tick
-        self.avg_list    = [w_unit]
-        self.high_low    = {str: []}
-        self.tick_count  = 0
-
-        if market == 1:
-            factor_list = list_stock_tick2 if self.is_tick else list_stock_min2
-        elif market == 3:
-            factor_list = list_basic_tick2 if self.is_tick else list_basic_min2
-        else:
-            factor_list = list_future_tick2 if self.is_tick else list_future_min2
-
-        self.dict_findex = {name: i for i, name in enumerate(factor_list)}
         if self.is_tick:
             self.dict_findex['초당매도수금액'] = self.dict_findex['초당매수금액']
             self.dict_findex['누적초당매도수수량'] = self.dict_findex['누적초당매수수량']
@@ -107,7 +84,18 @@ class FormulaManager(BaseGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.base_cnt = self.dict_findex['관심종목'] + 1
+        self.set_globals_func()
+
+    def _update_globals_func(self, dict_add_func):
+        globals().update(dict_add_func)
+
+    # noinspection PyUnboundLocalVariable,PyUnusedLocal
+    def update_all_data(self, code, arry, market_gubun, w_unit):
+        self.code        = code
+        self.arry_code   = arry
+        self.avg_list    = [w_unit]
+        self.high_low: dict[str, list] = {}
+        self.tick_count  = 0
 
         for fm in self.fm_list:
             fm[8] = compile(fm[-2], '<string>', 'exec')
@@ -117,24 +105,38 @@ class FormulaManager(BaseGlobalsFunc):
             self.indexn = i
             self.tick_count += 1
 
-            if market == 1:
+            if market_gubun < 4:
                 if self.is_tick:
-                    현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
-                        거래대금증감, 전일비, 회전율, 전일동시간비, 시가총액, 라운드피겨위5호가이내, VI해제시간, VI가격, VI호가단위, \
+                    현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
+                        VI해제시간, VI가격, VI호가단위, \
                         초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
                         매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, \
                         매수호가5, 매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                         매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목 = self.arry_code[i, 1:self.base_cnt]
                     VI해제시간 = dt_ymdhms(str(int(VI해제시간)))
                 else:
-                    현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
-                        거래대금증감, 전일비, 회전율, 전일동시간비, 시가총액, 라운드피겨위5호가이내, VI해제시간, VI가격, VI호가단위, \
+                    현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
+                        VI해제시간, VI가격, VI호가단위, \
                         분봉시가, 분봉고가, 분봉저가, \
                         분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
                         매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
                         매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
                         매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목 = self.arry_code[i, 1:self.base_cnt]
                     VI해제시간 = dt_ymdhms(str(int(VI해제시간)))
+            elif market_gubun == 4:
+                if self.is_tick:
+                    현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
+                        초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                        매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, \
+                        매수호가5, 매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                        매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목 = self.arry_code[i, 1:self.base_cnt]
+                else:
+                    현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
+                        분봉시가, 분봉고가, 분봉저가, \
+                        분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                        매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                        매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                        매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목 = self.arry_code[i, 1:self.base_cnt]
             else:
                 if self.is_tick:
                     현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \

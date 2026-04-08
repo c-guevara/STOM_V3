@@ -5,6 +5,7 @@ import pandas as pd
 from ui.ui_etc import chart_clear
 from PyQt5.QtCore import QUrl, Qt
 from multiprocessing import Process
+from utility.setting_base import columns_hc
 from utility.kimp_upbit_binance import Kimp
 from ui.ui_dialog_animation import DialogAnimator
 from ui.ui_chart_count_change import chart_count_change
@@ -14,8 +15,6 @@ from ui.set_style import style_bc_bt, style_bc_bb, style_bc_st
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from PyQt5.QtWidgets import QVBoxLayout, QTableWidgetItem, QMessageBox
 from ui.ui_process_alive import coinkimp_process_alive, strategy_process_alive, receiver_process_alive
-from utility.setting_base import columns_hc, DB_COIN_TICK_BACK, DB_STOCK_TICK_BACK, DB_PATH, DB_COIN_MIN_BACK, \
-    DB_STOCK_MIN_BACK, DB_FUTURE_OS_MIN_BACK, DB_FUTURE_OS_TICK_BACK, DICT_MARKET_INFO, DICT_MARKET_GUBUN
 
 
 class QuietPage(QWebEnginePage):
@@ -74,15 +73,15 @@ def show_dialog(ui, code_or_name, tickcount, searchdate, col):
         if not coin:
             show_dialog_web(ui, True, code)
         else:
-            show_dialog_hoga(ui, True, coin, code)
+            show_dialog_hoga(ui, True, code)
     elif col == 1:
         if not coin:
             show_dialog_web(ui, False, code)
-        show_dialog_hoga(ui, True, coin, code)
+        show_dialog_hoga(ui, True, code)
     elif col < 4 or ui.focusWidget() in (ui.gj_tableWidgettt, ui.cj_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
         if not coin:
             show_dialog_web(ui, False, code)
-        show_dialog_hoga(ui, False, coin, code)
+        show_dialog_hoga(ui, False, code)
         show_dialog_chart(ui, True, coin, code)
     else:
         starttime = ui.ct_lineEdittttt_01.text()
@@ -92,8 +91,8 @@ def show_dialog(ui, code_or_name, tickcount, searchdate, col):
             return
         if not coin:
             show_dialog_web(ui, False, code)
-        show_dialog_hoga(ui, False, coin, code)
-        show_dialog_chart(ui, False, coin, code, tickcount, searchdate, starttime, endtime)
+        show_dialog_hoga(ui, False, code)
+        show_dialog_chart(ui, False, code, tickcount, searchdate, starttime, endtime)
 
 
 @error_decorator
@@ -123,12 +122,12 @@ def webengineview_set(ui):
 
 
 @error_decorator
-def show_dialog_hoga(ui, _show, coin, code):
+def show_dialog_hoga(ui, _show, code):
     if _show and not ui.dialog_hoga.isVisible():
         DialogAnimator.setup_dialog_animation(ui.dialog_hoga, duration=250)
         ui.dialog_hoga.show()
     if ui.dialog_hoga.isVisible():
-        put_hoga_code(ui, coin, code)
+        put_hoga_code(ui, code)
     if ui.dialog_order.isVisible():
         name = ui.dict_name[code] if code in ui.dict_name else code
         if name not in ui.order_combo_name_list:
@@ -137,7 +136,7 @@ def show_dialog_hoga(ui, _show, coin, code):
 
 
 @error_decorator
-def show_dialog_chart(ui, real, coin, code, tickcount=None, searchdate=None, starttime=None, endtime=None,
+def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime=None, endtime=None,
                       detail=None, buytimes=None):
     if not ui.dialog_chart.isVisible():
         dialog_chart_show(ui)
@@ -147,7 +146,7 @@ def show_dialog_chart(ui, real, coin, code, tickcount=None, searchdate=None, sta
             if receiver_process_alive(ui):
                 ui.receivQ.put(('차트종목코드', code))
             if strategy_process_alive(ui):
-                if DICT_MARKET_GUBUN[ui.dict_set['거래소']] < 5:
+                if ui.market_gubun < 5:
                     for q in ui.stgQs:
                         q.put(('차트종목코드', code))
                 else:
@@ -155,7 +154,7 @@ def show_dialog_chart(ui, real, coin, code, tickcount=None, searchdate=None, sta
         else:
             chart_clear(ui)
             cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
-            data = (coin, code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
+            data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
             if detail is not None: data += (detail, buytimes)
             if cf1 and cf2:        data += (float(cf1), float(cf2))
             ui.chartQ.put(data)
@@ -166,8 +165,7 @@ def dialog_chart_show(ui):
     ui.ct_pushButtonnn_05.setText('CHART III')
     chart_count_change(ui)
 
-    is_min = (ui.dict_set['에이전트'] and not ui.dict_set['주식타임프레임']) or \
-             (ui.dict_set['코인리시버'] and not ui.dict_set['코인타임프레임'])
+    is_min = not ui.dict_set['타임프레임']
     if is_min:
         if ui.ft_checkBoxxxxx_02.text() != '분당거래대금': ui.ft_checkBoxxxxx_02.setText('분당거래대금')
         if ui.ft_checkBoxxxxx_03.text() != '분당매도수금액': ui.ft_checkBoxxxxx_03.setText('분당매도수금액')
@@ -179,15 +177,8 @@ def dialog_chart_show(ui):
         if ui.ft_checkBoxxxxx_08.text() != '초당체결수량': ui.ft_checkBoxxxxx_08.setText('초당체결수량')
         if ui.ft_checkBoxxxxx_16.text() != '누적초당매도수수량': ui.ft_checkBoxxxxx_16.setText('누적초당매도수수량')
 
-    if ui.dict_set['주식에이전트']:
-        if '키움증권' in ui.dict_set['증권사']:
-            starttime = '090000'
-        else:
-            starttime = '093000'
-        endtime = str_hms(dt_hms(str(ui.dict_set['주식전략종료시간']))).zfill(6)
-    else:
-        starttime = '000000'
-        endtime = str_hms(dt_hms(str(ui.dict_set['코인전략종료시간']))).zfill(6)
+    starttime = str(ui.market_info['시작시간']).zfill(6)
+    endtime = str_hms(dt_hms(str(ui.dict_set['전략종료시간']))).zfill(6)
 
     ui.ct_lineEdittttt_01.setText(starttime)
     ui.ct_lineEdittttt_02.setText(endtime)
@@ -289,12 +280,10 @@ def show_db(ui):
 
     ui.db_tableWidgett_01.clearContents()
     ui.db_tableWidgett_02.clearContents()
-    ui.db_tableWidgett_03.clearContents()
-    ui.db_tableWidgett_04.clearContents()
     ui.db_tableWidgett_05.clearContents()
 
-    gubun = 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future'
-    stock_stg_list = [f'{gubun}buy', f'{gubun}sell', f'{gubun}optibuy', f'{gubun}optisell']
+    stock_stg_list = [f'{ui.market_sname}_buy', f'{ui.market_sname}_sell',
+                      f'{ui.market_sname}_optibuy', f'{ui.market_sname}_optisell']
     maxlow = 0
     for i, stock_stg in enumerate(stock_stg_list):
         df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {stock_stg}')
@@ -310,7 +299,8 @@ def show_db(ui):
     if maxlow < 8:
         ui.db_tableWidgett_01.setRowCount(8)
 
-    stock_stg_list = [f'{gubun}optivars', f'{gubun}vars', f'{gubun}buyconds', f'{gubun}sellconds']
+    stock_stg_list = [f'{ui.market_sname}_optivars', f'{ui.market_sname}_optigavars',
+                      f'{ui.market_sname}_buyconds', f'{ui.market_sname}_sellconds']
     maxlow = 0
     for i, stock_stg in enumerate(stock_stg_list):
         df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {stock_stg}')
@@ -325,38 +315,6 @@ def show_db(ui):
             ui.db_tableWidgett_02.setItem(j, i, item)
     if maxlow < 8:
         ui.db_tableWidgett_02.setRowCount(8)
-
-    maxlow = 0
-    coin_stg_list = ['coinbuy', 'coinsell', 'coinoptibuy', 'coinoptisell']
-    for i, coin_stg in enumerate(coin_stg_list):
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {coin_stg}')
-        stg_names = df['index'].to_list()
-        stg_names.sort()
-        if len(df) > maxlow:
-            maxlow = len(df)
-            ui.db_tableWidgett_03.setRowCount(maxlow)
-        for j, stg_name in enumerate(stg_names):
-            item = QTableWidgetItem(stg_name)
-            item.setTextAlignment(int(Qt.AlignVCenter | Qt.AlignCenter))
-            ui.db_tableWidgett_03.setItem(j, i, item)
-    if maxlow < 8:
-        ui.db_tableWidgett_03.setRowCount(8)
-
-    stock_stg_list = ['coinoptivars', 'coinvars', 'coinbuyconds', 'coinsellconds']
-    maxlow = 0
-    for i, stock_stg in enumerate(stock_stg_list):
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {stock_stg}')
-        stg_names = df['index'].to_list()
-        stg_names.sort()
-        if len(df) > maxlow:
-            maxlow = len(df)
-            ui.db_tableWidgett_04.setRowCount(maxlow)
-        for j, stg_name in enumerate(stg_names):
-            item = QTableWidgetItem(stg_name)
-            item.setTextAlignment(int(Qt.AlignVCenter | Qt.AlignCenter))
-            ui.db_tableWidgett_04.setItem(j, i, item)
-    if maxlow < 8:
-        ui.db_tableWidgett_04.setRowCount(8)
 
     df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM schedule')
     stg_names = df['index'].to_list()
@@ -404,8 +362,6 @@ def show_order(ui):
         tableWidget = None
         if ui.main_btn == 1:
             tableWidget = ui.gj_tableWidgettt
-        elif ui.main_btn == 2:
-            tableWidget = ui.gj_tableWidgettt
 
         if tableWidget is not None:
             ui.od_comboBoxxxxx_01.clear()
@@ -423,13 +379,9 @@ def show_order(ui):
 
 
 @error_decorator
-def put_hoga_code(ui, coin, code):
-    if coin:
-        ui.wdzservQ.put(('agent', ('호가종목코드', '000000')))
-        if receiver_process_alive(ui): ui.creceivQ.put(('호가종목코드', code))
-    else:
-        if receiver_process_alive(ui): ui.creceivQ.put(('호가종목코드', '000000'))
-        ui.wdzservQ.put(('agent', ('호가종목코드', code)))
+def put_hoga_code(ui, code):
+    if receiver_process_alive(ui):
+        ui.receivQ.put(('호가종목코드', code))
 
 
 @error_decorator
@@ -437,38 +389,19 @@ def chart_moneytop_list(ui):
     searchdate = ui.ct_dateEdittttt_02.date().toString('yyyyMMdd')
     starttime  = ui.ct_lineEdittttt_01.text()
     endtime    = ui.ct_lineEdittttt_02.text()
-    coin = True if ui.ct_pushButtonnn_06.text() == '코인' else False
 
-    is_min = False
-    if coin:
-        db_name1 = f'{DB_PATH}/coin_tick_{searchdate}.db' if ui.dict_set['코인타임프레임'] else f'{DB_PATH}/coin_min_{searchdate}.db'
-        db_name2 = DB_COIN_TICK_BACK if ui.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
-        if ui.dict_set['코인타임프레임']:
-            query = f"SELECT * FROM moneytop WHERE " \
-                    f"`index` >= {int(searchdate) * 1000000 + int(starttime)} and " \
-                    f"`index` <= {int(searchdate) * 1000000 + int(endtime)}"
-        else:
-            query = f"SELECT * FROM moneytop WHERE " \
-                    f"`index` >= {int(searchdate) * 10000 + int(int(starttime) / 100)} and " \
-                    f"`index` <= {int(searchdate) * 10000 + int(int(endtime) / 100)}"
-            is_min = True
+    is_tick  = ui.dict_set['타임프레임']
+    db_name1 = f"{ui.market_info['일자디비경로'][is_tick]}_{searchdate}.db"
+    db_name2 = ui.market_info['백테디비'][is_tick]
+
+    if is_tick:
+        query = f"SELECT * FROM moneytop WHERE " \
+                f"`index` >= {int(searchdate) * 1000000 + int(starttime)} and " \
+                f"`index` <= {int(searchdate) * 1000000 + int(endtime)}"
     else:
-        if '키움증권' in ui.dict_set['증권사']:
-            db_name1 = f'{DB_PATH}/stock_tick_{searchdate}.db' if ui.dict_set['주식타임프레임'] else f'{DB_PATH}/stock_min_{searchdate}.db'
-            db_name2 = DB_STOCK_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
-        else:
-            db_name1 = f'{DB_PATH}/future_tick_{searchdate}.db' if ui.dict_set['주식타임프레임'] else f'{DB_PATH}/future_min_{searchdate}.db'
-            db_name2 = DB_FUTURE_OS_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_FUTURE_OS_MIN_BACK
-
-        if ui.dict_set['주식타임프레임']:
-            query = f"SELECT * FROM moneytop WHERE " \
-                    f"`index` >= {int(searchdate) * 1000000 + int(starttime)} and " \
-                    f"`index` <= {int(searchdate) * 1000000 + int(endtime)}"
-        else:
-            query = f"SELECT * FROM moneytop WHERE " \
-                    f"`index` >= {int(searchdate) * 10000 + int(int(starttime) / 100)} and " \
-                    f"`index` <= {int(searchdate) * 10000 + int(int(endtime) / 100)}"
-            is_min = True
+        query = f"SELECT * FROM moneytop WHERE " \
+                f"`index` >= {int(searchdate) * 10000 + int(int(starttime) / 100)} and " \
+                f"`index` <= {int(searchdate) * 10000 + int(int(endtime) / 100)}"
 
     df = None
     try:
@@ -487,10 +420,7 @@ def chart_moneytop_list(ui):
         ui.ct_tableWidgett_01.clearContents()
         return
 
-    if is_min:
-        table_list = list(set(';'.join(df['거래대금순위'].to_list()).split(';')))
-    else:
-        table_list = list(set(';'.join(df['거래대금순위'].to_list()[29:]).split(';')))
+    table_list = list(set(';'.join(df['거래대금순위'].to_list()).split(';')))
     name_list = [ui.dict_name[code] if code in ui.dict_name else code for code in table_list] if not coin else table_list
     name_list.sort()
 

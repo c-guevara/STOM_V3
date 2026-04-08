@@ -95,9 +95,10 @@ except:
 
 
 class RiskAnalyzer:
-    def __init__(self, market_type: str = 'stock'):
+    def __init__(self, market_type: str, columns: list):
         """market_type: 'stock', 'coin', 'future'"""
         self.market_type = market_type
+        self.columns = columns
         self._setup_analysis_parameters()
         self._setup_columns()
 
@@ -105,14 +106,6 @@ class RiskAnalyzer:
         """
         시장 및 데이터 타입에 따른 칼럼 설정
         """
-        # 시장 종류에 따라 칼럼 목록 선택
-        if self.market_type == 'stock':
-            from utility.setting_base import list_stock_tick
-            self.columns = list_stock_tick
-        else:
-            from utility.setting_base import list_basic_tick
-            self.columns = list_basic_tick
-
         # 칼럼 인덱스 매핑 (빠른 접근용)
         col_index = {col: idx for idx, col in enumerate(self.columns)}
         self.idx_curr_price = col_index.get('현재가', 1)

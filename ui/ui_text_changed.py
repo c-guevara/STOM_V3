@@ -57,31 +57,17 @@ def text_changed_05(ui):
     name = ui.hj_tableWidgett_01.item(0, 0).text()
     if name:
         try:
-            if ui.main_btn == 1:
-                row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
-                columns = columns_jg if '키움증권' in ui.dict_set['증권사'] else columns_jgf
-                col_num = columns.index('보유수량')
-            else:
-                row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
-                columns = columns_jg if '업비트' in ui.dict_set['거래소'] else columns_jgcf
-                col_num = columns.index('보유수량')
+            row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
+            columns = columns_jg if ui.market_gubun < 6 else columns_jgf
+            col_num = columns.index('보유수량')
         except:
             order_price = float(ui.od_lineEdittttt_01.text())
-            if ui.main_btn == 1:
-                if '키움증권' in ui.dict_set['증권사']:
-                    order_count = int(ui.dict_set['주식투자금'] * 1_000_000 / order_price)
-                else:
-                    order_count = int(ui.dict_set['주식투자금'])
+            if ui.market_gubun < 4:
+                order_count = int(ui.dict_set['투자금'] * 1_000_000 / order_price)
             else:
-                if 'KRW' in name:
-                    order_count = round(ui.dict_set['코인투자금'] * 1_000_000 / order_price, 8)
-                else:
-                    order_count = round(ui.dict_set['코인투자금'] / order_price, 8)
+                order_count = int(ui.dict_set['투자금'])
         else:
-            if ui.main_btn == 1:
-                order_count = ui.jg_tableWidgettt.item(row_num, col_num).text()
-            else:
-                order_count = ui.jg_tableWidgettt.item(row_num, col_num).text()
+            order_count = ui.jg_tableWidgettt.item(row_num, col_num).text()
 
         if name not in ui.order_combo_name_list:
             ui.od_comboBoxxxxx_01.addItem(name)

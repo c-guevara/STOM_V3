@@ -1,14 +1,7 @@
 
-import os
-import sys
 import numpy as np
 from collections import defaultdict
 from typing import Dict, List, Tuple
-try:
-    sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
-except:
-    pass
-from utility.setting_base import list_stock_tick, list_basic_tick
 
 
 try:
@@ -721,18 +714,20 @@ class HistoryBuffer:
 
 
 class MicrostructureAnalyzer:
-    def __init__(self, market_type: str, data_cnt: int = 1800, history_cnt: int = 30):
+    def __init__(self, market_type: str, columns: list, data_cnt: int = 1800, history_cnt: int = 30):
         """
         초기화
 
         Args:
             market_type: 'stock', 'coin', 'future' (시장 종류)
+            columns: 데이터 칼럼 리스트
             data_cnt: 종목별 최대 히스토리 저장 크기 (슬라이딩 윈도우)
             history_cnt: 전처리 데이터 히스토리 크기
         """
         # 기본 설정
         self._price_risk_cache = {}
         self.market_type = market_type
+        self.columns = columns
         self.data_cnt = data_cnt
         self.history_cnt = history_cnt
         self.curr_data = None
@@ -797,15 +792,6 @@ class MicrostructureAnalyzer:
             }
 
     def _setup_columns(self):
-        """
-        시장 및 데이터 타입에 따른 칼럼 설정
-        """
-        # 시장 종류에 따라 칼럼 목록 선택
-        if self.market_type == 'stock':
-            self.columns = list_stock_tick
-        else:
-            self.columns = list_basic_tick
-
         # 칼럼 인덱스 매핑 (빠른 접근용)
         col_index = {col: idx for idx, col in enumerate(self.columns)}
         self.idx_curr_price = col_index.get('현재가', 0)

@@ -9,8 +9,8 @@ from utility.static import now, str_ymdhms_utc, now_utc, str_hms, str_ymd
 
 
 class BinanceReceiver(BaseReceiver):
-    def __init__(self, qlist, dict_set):
-        super().__init__(qlist, dict_set)
+    def __init__(self, qlist, dict_set, market_info):
+        super().__init__(qlist, dict_set, market_info)
 
         self.binance = binance.Client()
 
@@ -24,26 +24,22 @@ class BinanceReceiver(BaseReceiver):
 
     def _get_code_info(self):
         dict_daym = {}
-        try:
-            datas = self.binance.futures_ticker()
-        except:
-            self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - self.binance.futures_ticker()'))
-        else:
-            datas = [data for data in datas if re.search('USDT$', data['symbol']) is not None]
-            ymd   = str_ymd(now_utc())
-            for data in datas:
-                code = data['symbol']
-                if code not in self.dict_data:
-                    c    = float(data['lastPrice'])
-                    o    = float(data['openPrice'])
-                    h    = float(data['highPrice'])
-                    low  = float(data['lowPrice'])
-                    per  = round(float(data['priceChangePercent']), 2)
-                    dm   = float(data['quoteVolume'])
-                    prec = round(c - float(data['priceChange']), 8)
-                    self.dict_data[code] = [c, o, h, low, per, dm, 0, 0, 0, 0, 0, c, c, c]
-                    self.dict_prec[code] = [ymd, prec]
-                    dict_daym[code] = dm
+        datas = self.binance.futures_ticker()
+        datas = [data for data in datas if re.search('USDT$', data['symbol']) is not None]
+        ymd   = str_ymd(now_utc())
+        for data in datas:
+            code = data['symbol']
+            if code not in self.dict_data:
+                c    = float(data['lastPrice'])
+                o    = float(data['openPrice'])
+                h    = float(data['highPrice'])
+                low  = float(data['lowPrice'])
+                per  = round(float(data['priceChangePercent']), 2)
+                dm   = float(data['quoteVolume'])
+                prec = round(c - float(data['priceChange']), 8)
+                self.dict_data[code] = [c, o, h, low, per, dm, 0, 0, 0, 0, 0, c, c, c]
+                self.dict_prec[code] = [ymd, prec]
+                dict_daym[code] = dm
 
         self.codes = list(self.dict_data)
         self.list_gsjm = [x for x, y in sorted(dict_daym.items(), key=lambda x: x[1], reverse=True)[:10]]

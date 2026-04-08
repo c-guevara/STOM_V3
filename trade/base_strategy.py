@@ -4,68 +4,73 @@ import sqlite3
 import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
+from utility.setting_base import indicator
 from trade.risk_analyzer import RiskAnalyzer
 from trade.formula_manager import get_formula_data
-from trade.base_globals_func import BaseGlobalsFunc
+from trade.strategy_globals_func import StrategyGlobalsFunc
 from utility.static import get_ema_list, now, get_profile_text
-from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
 from trade.microstructure_analyzer import MicrostructureAnalyzer
-from utility.setting_base import indicator, DICT_MARKET_GUBUN, DICT_MARKET_INFO
+from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
 
 
-class BaseStrategy(BaseGlobalsFunc):
-    def __init__(self, gubun, qlist, dict_set):
+class BaseStrategy(StrategyGlobalsFunc):
+    def __init__(self, gubun, qlist, dict_set, market_info):
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
         """
         super().__init__()
-        self.gubun            = gubun
-        self.windowQ          = qlist[0]
-        self.teleQ            = qlist[3]
-        self.straderQ         = qlist[9]
-        self.stgQs            = qlist[10]
-        self.stgQ             = qlist[10][self.gubun]
-        self.dict_set         = dict_set
-        self.indicator        = indicator
+        self.gubun           = gubun
+        self.windowQ         = qlist[0]
+        self.teleQ           = qlist[3]
+        self.traderQ         = qlist[9]
+        self.stgQs           = qlist[10]
+        self.stgQ            = qlist[10][self.gubun]
+        self.dict_set        = dict_set
+        self.indicator       = indicator
+        self.market_gubun    = market_info[0]
+        self.market_info     = market_info[2]
 
-        self.buystrategy      = None
-        self.sellstrategy     = None
-        self.chart_code       = None
-        self.arry_code        = None
-        self.info_for_buy     = None
-        self.info_for_sell    = None
+        self.buystrategy     = None
+        self.sellstrategy    = None
+        self.chart_code      = None
+        self.arry_code       = None
+        self.info_for_buy    = None
+        self.info_for_sell   = None
 
         self.dict_data: dict[str, list] = {}
         self.dict_gj: dict[str, dict[str, int | float]] = {}
         self.dict_jg: dict[str, dict[str, int | float]] = {}
         self.dict_profit: dict[str, list] = {}
 
-        self.dict_info        = {}
-        self.dict_signal      = {}
-        self.dict_buy_num     = {}
-        self.dict_signal_num  = {}
-        self.indi_settings    = []
+        self.dict_info       = {}
+        self.dict_signal     = {}
+        self.dict_buy_num    = {}
+        self.dict_signal_num = {}
+        self.indi_settings   = []
 
-        self.jgrv_count       = 0
-        self.int_tujagm       = 0
-        self.비중조절기준        = 0
+        self.jgrv_count      = 0
+        self.int_tujagm      = 0
+        self.비중조절기준       = 0
 
-        self.is_tick          = self.dict_set['타임프레임']
-        self.avg_list         = [self.dict_set['평균값계산틱수']]
-        self.buy_hj_limit     = self.dict_set['매수시장가잔량범위']
-        self.sell_hj_limit    = self.dict_set['매도시장가잔량범위']
-        self.sma_list         = get_ema_list(self.is_tick)
-        market                = self.dict_set['거래소']
-        self.market_gubun     = DICT_MARKET_GUBUN[market]
-        self.market_info      = DICT_MARKET_INFO[self.market_gubun]
-        self.ma_round_unit    = self.market_info['반올림단위']
-        self.data_cnt         = self.market_info['데이터수'][self.is_tick]
-        self.dict_findex      = self.market_info['데이터수'][self.is_tick]
-        self.base_cnt         = self.dict_findex['관심종목'] + 1
-        self.area_cnt         = self.dict_findex['전일비각도' if self.market_gubun == 1 else '당일거래대금각도'] + 1
-        self.angle_pct_cf     = self.market_info['각도계수'][self.is_tick][0]
-        self.angle_dtm_cf     = self.market_info['각도계수'][self.is_tick][1]
+        self.avg_list        = [self.dict_set['평균값계산틱수']]
+        self.rolling_window  = self.dict_set['평균값계산틱수']
+
+        self.is_tick         = self.dict_set['타임프레임']
+        self.buy_hj_limit    = self.dict_set['매수시장가잔량범위']
+        self.sell_hj_limit   = self.dict_set['매도시장가잔량범위']
+        self.set_weight      = self.dict_set['비중조절']
+        self.sma_list        = get_ema_list(self.is_tick)
+
+        self.ma_round_unit   = self.market_info['반올림단위']
+        self.angle_pct_cf    = self.market_info['각도계수'][self.is_tick][0]
+        self.angle_dtm_cf    = self.market_info['각도계수'][self.is_tick][1]
+        factor_list          = self.market_info['팩터목록'][self.is_tick]
+        self.dict_findex     = {factor: i for i, factor in enumerate(factor_list)}
+        self.data_cnt        = self.market_info['팩터개수'][self.is_tick]
+
+        self.base_cnt        = self.dict_findex['관심종목'] + 1
+        self.area_cnt        = self.dict_findex['당일거래대금각도'] + 1
 
         if self.is_tick:
             self.dict_findex['초당매도수금액'] = self.dict_findex['초당매수금액']
@@ -80,8 +85,8 @@ class BaseStrategy(BaseGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.ms_analyzer = MicrostructureAnalyzer(self.market_info['마켓구분'])
-        self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'])
+        self.ms_analyzer = MicrostructureAnalyzer(self.market_info['마켓구분'], factor_list)
+        self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'], factor_list)
 
         if self.dict_set['전략연산프로파일링']:
             import cProfile
@@ -96,16 +101,30 @@ class BaseStrategy(BaseGlobalsFunc):
                 fm[8] = compile(fm[-2], '<string>', 'exec')
 
     def _update_stringategy(self):
-        table_name_stg_buy      = self.market_info['매수전략디비']
-        table_name_stg_sell     = self.market_info['매도전략디비']
-        table_name_stg_optibuy  = self.market_info['최적화매수전략디비']
-        table_name_stg_optisell = self.market_info['최적화매도전략디비']
+        table_name_stg_buy       = f"{self.market_info['전략구분']}_buy"
+        table_name_stg_sell      = f"{self.market_info['전략구분']}_sell"
+        table_name_stg_optibuy   = f"{self.market_info['전략구분']}_optibuy"
+        table_name_stg_optisell  = f"{self.market_info['전략구분']}_optisell"
+        table_name_stg_passticks = f"{self.market_info['전략구분']}_passticks"
         con  = sqlite3.connect(DB_STRATEGY)
         dfb  = pd.read_sql(f'SELECT * FROM {table_name_stg_buy}', con).set_index('index')
         dfs  = pd.read_sql(f'SELECT * FROM {table_name_stg_sell}', con).set_index('index')
         dfob = pd.read_sql(f'SELECT * FROM {table_name_stg_optibuy}', con).set_index('index')
         dfos = pd.read_sql(f'SELECT * FROM {table_name_stg_optisell}', con).set_index('index')
+        dfpt = pd.read_sql(f'SELECT * FROM {table_name_stg_passticks}', con).set_index('index')
         con.close()
+
+        self._set_strategy(dfs, dfos, dfb, dfob)
+        if len(dfpt) > 0:
+            self._set_passticks(dfpt)
+
+        self.set_globals_func()
+
+    def _set_strategy(self, dfs, dfos, dfb, dfob):
+        if self.dict_set['매도전략'] in dfs.index:
+            self.sellstrategy = compile(dfs['전략코드'][self.dict_set['매도전략']], '<string>', 'exec')
+        elif self.dict_set['매도전략'] in dfos.index:
+            self.sellstrategy = compile(dfos['전략코드'][self.dict_set['매도전략']], '<string>', 'exec')
 
         buytxt = ''
         if self.dict_set['매수전략'] in dfb.index:
@@ -119,23 +138,6 @@ class BaseStrategy(BaseGlobalsFunc):
 
         self._set_buy_strategy(buytxt)
 
-        if self.dict_set['매도전략'] in dfs.index:
-            self.sellstrategy = compile(dfs['전략코드'][self.dict_set['매도전략']], '<string>', 'exec')
-        elif self.dict_set['매도전략'] in dfos.index:
-            self.sellstrategy = compile(dfos['전략코드'][self.dict_set['매도전략']], '<string>', 'exec')
-
-        if self.dict_set['경과틱수설정']:
-            def compile_condition(x):
-                return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
-            text_list  = self.dict_set['경과틱수설정'].split(';')
-            half_cnt   = int(len(text_list) / 2)
-            key_list   = text_list[:half_cnt]
-            value_text_list = text_list[half_cnt:]
-            value_comp_list = [compile_condition(x) for x in value_text_list]
-            self.dict_condition = dict(zip(key_list, value_comp_list))
-
-        self.set_globals_func()
-
     def _set_buy_strategy(self, buytxt):
         self.buystrategy, indistg = self.get_buy_indi_stg(buytxt)
         if indistg is not None:
@@ -143,8 +145,6 @@ class BaseStrategy(BaseGlobalsFunc):
                 exec(indistg)
             except:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - indistg'))
-            else:
-                self.windowQ.put((ui_num['기본로그'], f'{self.indicator}'))
         self.indi_settings = list(self.indicator.values())
 
     def get_buy_indi_stg(self, buytxt):
@@ -167,6 +167,15 @@ class BaseStrategy(BaseGlobalsFunc):
             indistg = None
         return buystg, indistg
 
+    def _set_passticks(self, dfpt):
+        def compile_condition(x):
+            return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
+
+        name_list = list(dfpt.index)
+        stg_list  = dfpt['전략코드'].to_list()
+        stg_list  = [compile_condition(x) for x in stg_list]
+        self.dict_condition = dict(zip(name_list, stg_list))
+
     def _main_loop(self):
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 전략 연산 시작'))
         while True:
@@ -183,9 +192,6 @@ class BaseStrategy(BaseGlobalsFunc):
                     self._update_string(data)
             except:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
-
-    def _strategy(self, data):
-        pass
 
     def _update_tuple(self, data):
         gubun, data = data
@@ -303,42 +309,39 @@ class BaseStrategy(BaseGlobalsFunc):
                 self._분당거래대금평균(rw, calc=True), self._등락율각도(rw, calc=True), self._당일거래대금각도(rw, calc=True)
             ]
 
-    def Buy(self):
+    def Buy(self, buy_long=False):
         취소시그널, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_buy
         if 취소시그널:
-            매수수량 = 0
+            주문수량 = 0
         else:
-            매수수량 = self._get_buy_count(분할매수횟수, 매수가, 현재가, 저가대비고가등락율)
+            주문수량 = self._set_buy_count(분할매수횟수, 매수가, 현재가, 저가대비고가등락율)
+
+        if self.market_gubun < 6:
+            signal_gubun = '매수'
+        else:
+            signal_gubun = 'BUY_LONG' if buy_long else 'SELL_SHORT'
 
         if '지정가' in self.dict_set['매수주문구분']:
             기준가격 = 현재가
-            if self.dict_set['매수지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1
-            if self.dict_set['매수지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1
-            self.dict_signal['매수'].append(self.code)
+            if self.dict_set['매수지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1 if self.market_gubun < 6 or buy_long else 매수호가1
+            if self.dict_set['매수지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1 if self.market_gubun < 6 or buy_long else 매도호가1
+            self.dict_signal[signal_gubun].append(self.code)
             self.dict_signal_num[self.code] = self.indexn
-            self.straderQ.put(('매수', self.code, 기준가격, 매수수량, now(), False))
+            self.traderQ.put((signal_gubun, self.code, 기준가격, 주문수량, now(), False))
         else:
-            매수금액 = 0
-            미체결수량 = 매수수량
-            for 매도호가, 매도잔량 in self.shogainfo:
-                if 미체결수량 - 매도잔량 <= 0:
-                    매수금액 += 매도호가 * 미체결수량
-                    미체결수량 -= 매도잔량
-                    break
-                else:
-                    매수금액 += 매도호가 * 매도잔량
-                    미체결수량 -= 매도잔량
-            if 미체결수량 <= 0:
-                if self.market_gubun < 5:
-                    예상체결가 = int(매수금액 / 매수수량) if 매수수량 != 0 else 0
-                elif self.market_gubun == 9:
-                    소숫점자리수 = self.dict_info[self.code]['소숫점자리수']
-                    예상체결가 = round(매수금액 / 매수수량, 소숫점자리수) if 매수수량 != 0 else 0
-                else:
-                    예상체결가 = round(매수금액 / 매수수량, 4) if 매수수량 != 0 else 0
-                self.dict_signal['매수'].append(self.code)
+            if self.market_gubun < 6 or buy_long:
+                호가배열 = self.shogainfo[:self.buy_hj_limit]
+                잔량배열 = self.shreminfo[:self.buy_hj_limit]
+            else:
+                호가배열 = self.bhogainfo[:self.buy_hj_limit]
+                잔량배열 = self.bhreminfo[:self.buy_hj_limit]
+
+            거래금액, 체결완료 = self._calc_fill_amount(주문수량, 호가배열, 잔량배열)
+            if 체결완료:
+                예상체결가 = self._get_order_price(거래금액, 주문수량)
+                self.dict_signal[signal_gubun].append(self.code)
                 self.dict_signal_num[self.code] = self.indexn
-                self.straderQ.put(('매수', self.code, 예상체결가, 매수수량, now(), False))
+                self.traderQ.put((signal_gubun, self.code, 예상체결가, 주문수량, now(), False))
 
     def _get_buy_count(self, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율):
         if self.dict_set['비중조절'][0] == 0:
@@ -367,45 +370,42 @@ class BaseStrategy(BaseGlobalsFunc):
                 betting = self.int_tujagm * self.dict_set['비중조절'][9]
 
         oc_ratio = dict_order_ratio[self.dict_set['매수분할방법']][self.dict_set['매수분할횟수']][분할매수횟수]
-        if self.market_gubun < 5:
-            매수수량 = int(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100)
-        elif self.market_gubun == 9:
-            소숫점자리수 = self.dict_info[self.code]['소숫점자리수']
-            매수수량 = round(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100, 소숫점자리수)
-        else:
-            매수수량 = round(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100, 8)
+        매수수량 = self._set_buy_count(betting, 현재가, 매수가, oc_ratio)
         return 매수수량
 
-    def Sell(self):
+    def Sell(self, sell_long=False):
         취소시그널, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_sell
         if 취소시그널:
-            매도수량 = 0
+            주문수량 = 0
         elif 전량매도:
-            매도수량 = 보유수량
+            주문수량 = 보유수량
         else:
-            매도수량 = self._get_sell_count(분할매도횟수, 보유수량)
+            주문수량 = self._get_sell_count(분할매도횟수, 보유수량)
+
+        if self.market_gubun < 6:
+            signal_gubun = '매도'
+        else:
+            signal_gubun = 'SELL_LONG' if sell_long else 'BUY_SHORT'
 
         if '지정가' in self.dict_set['매도주문구분'] and not 강제청산:
             기준가격 = 현재가
-            if self.dict_set['매도지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1
-            if self.dict_set['매도지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1
-            self.dict_signal['매도'].append(self.code)
-            self.straderQ.put(('매도', self.code, 기준가격, 매도수량, now(), False))
+            if self.dict_set['매도지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1 if self.market_gubun < 6 or sell_long else 매수호가1
+            if self.dict_set['매도지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1 if self.market_gubun < 6 or sell_long else 매도호가1
+            self.dict_signal[signal_gubun].append(self.code)
+            self.traderQ.put((signal_gubun, self.code, 기준가격, 주문수량, now(), False))
         else:
-            매도금액 = 0
-            미체결수량 = 매도수량
-            for 매수호가, 매수잔량 in self.bhogainfo:
-                if 미체결수량 - 매수잔량 <= 0:
-                    매도금액 += 매수호가 * 미체결수량
-                    미체결수량 -= 매수잔량
-                    break
-                else:
-                    매도금액 += 매수호가 * 매수잔량
-                    미체결수량 -= 매수잔량
-            if 미체결수량 <= 0:
-                예상체결가 = round(매도금액 / 매도수량, self.dict_info['소숫점자리수']) if 매도수량 != 0 else 0
-                self.dict_signal['매도'].append(self.code)
-                self.straderQ.put(('매도', self.code, 예상체결가, 매도수량, now(), True if 강제청산 else False))
+            if self.market_gubun < 6 or sell_long:
+                호가배열 = self.bhogainfo[:self.sell_hj_limit]
+                잔량배열 = self.bhreminfo[:self.sell_hj_limit]
+            else:
+                호가배열 = self.shogainfo[:self.sell_hj_limit]
+                잔량배열 = self.shreminfo[:self.sell_hj_limit]
+
+            거래금액, 체결완료 = self._calc_fill_amount(주문수량, 호가배열, 잔량배열)
+            if 체결완료:
+                예상체결가 = self._get_order_price(거래금액, 주문수량)
+                self.dict_signal[signal_gubun].append(self.code)
+                self.traderQ.put((signal_gubun, self.code, 예상체결가, 주문수량, now(), True if 강제청산 else False))
 
     def _get_sell_count(self, 분할매도횟수, 보유수량):
         if self.dict_set['매도분할횟수'] == 1:
@@ -413,27 +413,10 @@ class BaseStrategy(BaseGlobalsFunc):
         else:
             dict_ratio = dict_order_ratio[self.dict_set['매도분할방법']][self.dict_set['매도분할횟수']]
             oc_ratio = dict_ratio[분할매도횟수]
-            if 분할매도횟수 == 0:
-                if self.market_gubun < 5:
-                    매도수량 = int(보유수량 * oc_ratio / 100)
-                elif self.market_gubun == 9:
-                    소숫점자리수 = self.dict_info[self.code]['소숫점자리수']
-                    매도수량 = round(보유수량 * oc_ratio / 100, 소숫점자리수)
-                else:
-                    매도수량 = round(보유수량 * oc_ratio / 100, 8)
-            else:
-                보유비율 = sum(비율 for 횟수, 비율 in dict_ratio.items() if 횟수 >= 분할매도횟수)
-                if self.market_gubun < 5:
-                    매도수량 = int(보유수량 / 보유비율 * oc_ratio)
-                elif self.market_gubun == 9:
-                    소숫점자리수 = self.dict_info[self.code]['소숫점자리수']
-                    매도수량 = round(보유수량 / 보유비율 * oc_ratio, 소숫점자리수)
-                else:
-                    매도수량 = round(보유수량 / 보유비율 * oc_ratio, 8)
-
+            보유비율 = sum(비율 for 횟수, 비율 in dict_ratio.items() if 횟수 >= 분할매도횟수)
+            매도수량 = self._set_sell_count(보유수량, 보유비율, oc_ratio)
             if 매도수량 > 보유수량 or 분할매도횟수 + 1 == self.dict_set['매도분할횟수']:
                 매도수량 = 보유수량
-
             return 매도수량
 
     def _put_gsjm_and_delete_hilo(self):
@@ -453,7 +436,7 @@ class BaseStrategy(BaseGlobalsFunc):
                 del self.dict_data[code]
 
         last = len(self.dict_data)
-        columns_ = self.market_info['데이터릿'][self.is_tick][:self.base_cnt]
+        columns_ = self.market_info['팩터목록'][self.is_tick][:self.base_cnt]
         con = sqlite3.connect(self.market_info['당일디비'][self.is_tick])
         if last > 0:
             start = now()
@@ -475,3 +458,15 @@ class BaseStrategy(BaseGlobalsFunc):
                 self.stgQs[self.gubun].put('프로세스종료')
         else:
             self.stgQ.put('프로세스종료')
+
+    def _strategy(self, data):
+        pass
+
+    def _get_order_price(self, 거래금액, 주문수량):
+        return 0
+
+    def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
+        return 0
+
+    def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
+        return 0

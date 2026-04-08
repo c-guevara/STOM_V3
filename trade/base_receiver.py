@@ -5,10 +5,10 @@ import sqlite3
 import numpy as np
 import pandas as pd
 from trade.restapi_ls import LsRestData
+from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from utility.setting_base import ui_num, DICT_MARKET_GUBUN, DICT_MARKET_INFO
-from utility.static import now, timedelta_sec, str_ymdhms, GetVIPrice, roundfigure_upper5
+from utility.static import now, timedelta_sec, str_ymdhms, get_vi_price
 
 
 class Updater(QThread):
@@ -29,23 +29,26 @@ class Updater(QThread):
 
 
 class BaseReceiver:
-    def __init__(self, qlist, dict_set):
+    def __init__(self, qlist, dict_set, market_infos):
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
         """
         app = QApplication(sys.argv)
 
-        self.windowQ  = qlist[0]
-        self.soundQ   = qlist[1]
-        self.queryQ   = qlist[2]
-        self.teleQ    = qlist[3]
-        self.hogaQ    = qlist[5]
-        self.receivQ  = qlist[8]
-        self.traderQ  = qlist[9]
-        self.stgQs    = qlist[10]
-        self.stgQ     = qlist[10][0]
-        self.dict_set = dict_set
+        self.windowQ      = qlist[0]
+        self.soundQ       = qlist[1]
+        self.queryQ       = qlist[2]
+        self.teleQ        = qlist[3]
+        self.hogaQ        = qlist[5]
+        self.receivQ      = qlist[8]
+        self.traderQ      = qlist[9]
+        self.stgQs        = qlist[10]
+        self.stgQ         = qlist[10][0]
+        self.dict_set     = dict_set
+        self.market_gubun = market_infos[0]
+        self.market_name  = market_infos[1]
+        self.market_info  = market_infos[3]
 
         self.dict_dtdm: dict[str, list]        = {}
         self.dict_data: dict[str, list]        = {}
@@ -88,24 +91,20 @@ class BaseReceiver:
         self.last_gsjm    = None
         self.ws_thread    = None
 
-        market            = self.dict_set['거래소']
-        self.market_gubun = DICT_MARKET_GUBUN[market]
-        self.market_name  = market[:3] if '업' in market else market[:6] if '바' in market else market[:4]
-        self.market_info  = DICT_MARKET_INFO[self.market_gubun]
-        self.market_open  = self.market_info['시작시간']
-        self.market_close = self.market_info['종료시간']
-        self.mtop_rank    = self.market_info['거래대금순위']
         self.is_tick      = self.dict_set['타임프레임']
+        acc_no            = self.dict_set['거래소'][-2:]
+        self.access       = self.dict_set[f'access_key{acc_no}']
+        self.secret       = self.dict_set[f'secret_key{acc_no}']
 
-        acc_no      = int(market[-2:])
-        self.access = self.dict_set[f'access_key{acc_no}']
-        self.secret = self.dict_set[f'secret_key{acc_no}']
+        self.market_open  = self.market_info['시작시간']
+        self.market_close = self.market_info['프로세스종료시간']
+        self.mtop_rank    = self.market_info['거래대금순위']
 
-        self.str_today   = LsRestData.당일일자
-        self.tr_cd_trade = LsRestData.실시간거래코드[f'{self.market_name}체결']
-        self.tr_cd_hoga  = LsRestData.실시간거래코드[f'{self.market_name}호가']
-        self.tr_cd_oper  = LsRestData.실시간거래코드['장운영정보']
-        self.oper_gubun  = LsRestData.장구분[self.market_gubun]
+        self.str_today    = LsRestData.당일일자
+        self.tr_cd_trade  = LsRestData.실시간거래코드[f'{self.market_name}체결']
+        self.tr_cd_hoga   = LsRestData.실시간거래코드[f'{self.market_name}호가']
+        self.tr_cd_oper   = LsRestData.실시간거래코드['장운영정보']
+        self.oper_gubun   = LsRestData.장구분[self.market_gubun]
 
         self.updater = Updater(self.receivQ)
         self.updater.signal1.connect(self._update_tuple)
@@ -137,7 +136,7 @@ class BaseReceiver:
             self._update_vi_price(code, name)
 
     def _insert_vi_price(self, code, o):
-        uvi, dvi, vi_hgunit = GetVIPrice(code in self.tuple_kosd, o, self.int_hgtime)
+        uvi, dvi, vi_hgunit = get_vi_price(o)
         self.dict_vipr[code] = [True, timedelta_sec(-3600), uvi, dvi, vi_hgunit]
 
     def _update_vi_price(self, code, key):
@@ -148,7 +147,7 @@ class BaseReceiver:
                 self.dict_vipr[code] = [False, timedelta_sec(5), 0, 0, 0]
             self.windowQ.put((ui_num['기본로그'], f'변동성 완화 장치 발동 - [{code}] {key}'))
         elif key.__class__ == int:
-            uvi, dvi, vi_hgunit = GetVIPrice(code in self.tuple_kosd, key, self.int_hgtime)
+            uvi, dvi, vi_hgunit = get_vi_price(key)
             self.dict_vipr[code] = [True, timedelta_sec(5), uvi, dvi, vi_hgunit]
 
     def _check_vi(self, code, c, o):
@@ -203,12 +202,17 @@ class BaseReceiver:
 
         if self.market_gubun < 4:
             sgta = int(c * self.dict_info[code]['상장주식수'])
-            rf = roundfigure_upper5(c, dt)
             _, vi_dt, uvi, _, vi_hgunit = self.dict_vipr[code]
             if self.is_tick:
-                self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, rf, vi_dt, uvi, vi_hgunit]
+                self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, vi_dt, uvi, vi_hgunit]
             else:
-                self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, rf, vi_dt, uvi, vi_hgunit, mo, mh, ml]
+                self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, vi_dt, uvi, vi_hgunit, mo, mh, ml]
+        elif self.market_gubun == 4:
+            sgta = int(c * self.dict_info[code]['상장주식수'])
+            if self.is_tick:
+                self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta]
+            else:
+                self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks, sgta, mo, mh, ml]
         else:
             if self.is_tick:
                 self.dict_data[code] = [c, o, h, low, per, dm, ch, bids, asks, tbids, tasks]
@@ -453,7 +457,7 @@ class BaseReceiver:
         name = self.dict_info.get(code, {}).get('종목명', code)
         logt = now() if self.int_logt < dt_min else 0
         if self.is_tick:
-            if self.market_gubun < 4:
+            if self.market_gubun < 5:
                 tick_data = code_data[:9] + code_data[11:]
             else:
                 tick_data = code_data[:9]

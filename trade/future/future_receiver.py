@@ -7,8 +7,8 @@ from trade.restapi_ls import LsRestAPI, LsRestData, WebSocketReceiver
 
 
 class FutureReceiver(BaseReceiver):
-    def __init__(self, qlist, dict_set):
-        super().__init__(qlist, dict_set)
+    def __init__(self, qlist, dict_set, market_infos):
+        super().__init__(qlist, dict_set, market_infos)
 
         self.ls = LsRestAPI(self.windowQ, self.access, self.secret)
         self.token = self.ls.create_token()
@@ -22,7 +22,10 @@ class FutureReceiver(BaseReceiver):
         self.ws_thread.start()
 
     def _get_code_info(self):
-        self.dict_info, self.codes = self.ls.get_code_info_future()
+        if '지수선물' in self.dict_set['거래소']:
+            self.dict_info, self.codes = self.ls.get_code_info_future()
+        else:
+            self.dict_info, self.codes = self.ls.get_code_info_future_night()
         self.traderQ.put(('종목정보', self.dict_info))
 
     def _get_inthms(self):

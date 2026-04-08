@@ -1,6 +1,5 @@
 
 from ui.ui_etc import chart_clear
-from utility.setting_base import DICT_MARKET_GUBUN
 from utility.static import error_decorator
 from ui.ui_draw_chart_base import DrawChartBase
 from utility.static import from_timestamp, dt_ymdhms
@@ -15,7 +14,7 @@ class DrawRealChart(DrawChartBase):
 
         if 'KRW' in self.code or 'USDT' in self.code:
             self.gubun = 'C'
-        elif '키움증권' in self.ui.dict_set['증권사']:
+        elif '키움증권' in self.ui.dict_set['거래소']:
             self.gubun = 'S'
         else:
             self.gubun = 'F'
@@ -25,7 +24,7 @@ class DrawRealChart(DrawChartBase):
             if receiver_process_alive(self.ui):
                 self.ui.receivQ.put(('차트종목코드', None))
             if strategy_process_alive(self.ui):
-                if DICT_MARKET_GUBUN[self.ui.dict_set['거래소']] < 5:
+                if self.ui.market_gubun < 5:
                     for q in self.ui.stgQs:
                         q.put(('차트종목코드', None))
                 else:

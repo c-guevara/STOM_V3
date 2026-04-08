@@ -1,11 +1,11 @@
 
-from utility.static import GetIndicator
+from utility.static import get_indicator
 from backtest.backengine_future_tick import BackEngineFutureTick
 
 
 class BackEngineFutureMin(BackEngineFutureTick):
     # noinspection PyUnusedLocal
-    def Strategy(self):
+    def _strategy(self):
         현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
@@ -23,7 +23,7 @@ class BackEngineFutureMin(BackEngineFutureTick):
         self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
         self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
 
-        self.UpdateHighLow(분봉고가, 분봉저가)
+        self._update_highlow(분봉고가, 분봉저가)
 
         start, end = self.indexn+1-self.tick_count, self.indexn+1
         arry_indi = self.arry_code[start:end, :]
@@ -51,7 +51,7 @@ class BackEngineFutureMin(BackEngineFutureTick):
                         exec(self.indistg)
                     self.k = list(self.indicator.values())
                     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
-                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = GetIndicator(self.mc, self.mh, self.ml, self.mv, self.k)
+                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = get_indicator(self.mc, self.mh, self.ml, self.mv, self.k)
 
                     if self.dict_condition:
                         if 종목코드 not in self.dict_cond_indexn:
@@ -98,7 +98,7 @@ class BackEngineFutureMin(BackEngineFutureTick):
                         if not 관심종목: continue
                         exec(self.buystg)
                     else:
-                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                         self.profit, self.hold_time = 수익률, 보유시간
                         exec(self.sellstg)
 
@@ -125,7 +125,7 @@ class BackEngineFutureMin(BackEngineFutureTick):
                         exec(self.indistg)
                     self.k = list(self.indicator.values())
                     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
-                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = GetIndicator(self.mc, self.mh, self.ml, self.mv, self.k)
+                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = get_indicator(self.mc, self.mh, self.ml, self.mv, self.k)
 
                     if self.dict_condition:
                         if 종목코드 not in self.dict_cond_indexn:
@@ -175,7 +175,7 @@ class BackEngineFutureMin(BackEngineFutureTick):
                         else:
                             exec(self.dict_buystg[index_])
                     else:
-                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                         self.profit, self.hold_time = 수익률, 보유시간
                         if self.back_type != '조건최적화':
                             exec(self.sellstg)
@@ -198,7 +198,7 @@ class BackEngineFutureMin(BackEngineFutureTick):
                 exec(self.indistg)
             self.k = list(self.indicator.values())
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
-                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = GetIndicator(self.mc, self.mh, self.ml, self.mv, self.k)
+                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = get_indicator(self.mc, self.mh, self.ml, self.mv, self.k)
 
             if self.dict_condition:
                 if 종목코드 not in self.dict_cond_indexn:
@@ -278,9 +278,9 @@ class BackEngineFutureMin(BackEngineFutureTick):
                 if not 관심종목: return
                 exec(self.buystg)
             else:
-                포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                 self.profit, self.hold_time = 수익률, 보유시간
                 exec(self.sellstg)
 
-    def update_globals_func(self, dict_add_func):
+    def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)

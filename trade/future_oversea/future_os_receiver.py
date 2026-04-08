@@ -6,9 +6,9 @@ from utility.static import now, str_hms, now_cme
 from trade.restapi_ls import LsRestAPI, WebSocketReceiver
 
 
-class FutureOverseaReceiver(BaseReceiver):
-    def __init__(self, qlist, dict_set):
-        super().__init__(qlist, dict_set)
+class FutureOsReceiver(BaseReceiver):
+    def __init__(self, qlist, dict_set, market_infos):
+        super().__init__(qlist, dict_set, market_infos)
 
         self.ls = LsRestAPI(self.windowQ, self.access, self.secret)
         self.token = self.ls.create_token()

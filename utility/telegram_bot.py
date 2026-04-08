@@ -14,15 +14,14 @@ from telegram.ext import ApplicationBuilder, MessageHandler, filters, ContextTyp
 class TelegramBot(QThread):
     def __init__(self, qlist, dict_set):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, creceivQ, ctraderQ,  cstgQ, liveQ, wdzservQ
-           0        1       2      3       4      5      6      7       8         9         10     11      12
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
+           0        1       2      3       4      5      6      7       8        9       10     11
         """
         super().__init__()
         self.windowQ       = qlist[0]
         self.teleQ         = qlist[3]
-        self.ctraderQ      = qlist[9]
-        self.cstgQ         = qlist[10]
-        self.wdzservQ      = qlist[12]
+        self.traderQ       = qlist[9]
+        self.stgQ          = qlist[10][0]
         self.dict_set      = dict_set
 
         self.token         = None
@@ -40,9 +39,9 @@ class TelegramBot(QThread):
         Thread(target=self.moniter_queue, daemon=True).start()
         self.loop.create_task(self.process_messages())
 
-        gubun = self.dict_set['증권사'][4:]
+        gubun = self.dict_set['거래소'][-2:]
         self.token = self.dict_set[f'텔레그램봇토큰{gubun}']
-        self.chat_id = self.dict_set[f'텔레그램사용자아이디{gubun}']
+        self.chat_id = self.dict_set[f'텔레그램아이디{gubun}']
 
         if self.token and self.chat_id:
             request = HTTPXRequest(
@@ -105,7 +104,7 @@ class TelegramBot(QThread):
         if cmd in ('주식전략중지', '해선전략중지'):
             self.wdzservQ.put(('strategy', '매수전략중지'))
         elif cmd == '코인전략중지':
-            self.cstgQ.put('매수전략중지')
+            self.stgQ.put('매수전략중지')
         elif '라이브' in cmd:
             self.windowQ.put(cmd)
         elif '주식' in cmd:
@@ -116,7 +115,7 @@ class TelegramBot(QThread):
             self.wdzservQ.put(('trade', cmd))
         elif '코인' in cmd:
             cmd = cmd.replace('코인', '')
-            self.ctraderQ.put(cmd)
+            self.traderQ.put(cmd)
 
     def moniter_queue(self):
         while True:
@@ -124,6 +123,8 @@ class TelegramBot(QThread):
             if self.running or data.__class__ == tuple:
                 self.loop.call_soon_threadsafe(self.message_queue.put_nowait, data)
             elif data.__class__ in (str, pd.DataFrame):
+                if data == '스레드종료':
+                    break
                 self.windowQ.put((ui_num['시스템로그'], '텔레그램봇 토큰 및 아이디가 설정되지 않아 메세지를 보낼 수 없습니다'))
 
     async def process_messages(self):
@@ -143,12 +144,12 @@ class TelegramBot(QThread):
 
     async def restart_bot(self):
         change = False
-        gubun = self.dict_set['증권사'][4:]
+        gubun = self.dict_set['거래소'][4:]
         if self.token != self.dict_set[f'텔레그램봇토큰{gubun}'] or \
-                self.chat_id != self.dict_set[f'텔레그램사용자아이디{gubun}']:
+                self.chat_id != self.dict_set[f'텔레그램아이디{gubun}']:
             change = True
             self.token = self.dict_set[f'텔레그램봇토큰{gubun}']
-            self.chat_id = self.dict_set[f'텔레그램사용자아이디{gubun}']
+            self.chat_id = self.dict_set[f'텔레그램아이디{gubun}']
 
         if change:
             try:
@@ -191,5 +192,6 @@ class TelegramBot(QThread):
             )
 
     def stop(self):
+        self.teleQ.put('스레드종료')
         if self.loop and self.loop.is_running():
             self.loop.stop()

@@ -6,8 +6,8 @@ from PyQt5.QtGui import QPixmap
 from PyQt5.QtCore import QSize, Qt
 from ui.set_text import famous_saying
 from PyQt5.QtWidgets import QApplication, QMessageBox
+from utility.setting_base import columns_dt, columns_dd, ui_num
 from ui.ui_button_clicked_shortcut import mnbutton_c_clicked_01
-from utility.setting_base import columns_dt, columns_dd, ui_num, DICT_MARKET_GUBUN, DICT_MARKET_INFO
 from ui.ui_backtest_engine import backengine_start, backengine_show
 from ui.ui_button_clicked_dialog_backengine import backtest_engine_kill, sdbutton_clicked_04
 from utility.static import thread_decorator, qtest_qwait, str_ymdhmsf, str_ymdhms, error_decorator
@@ -28,11 +28,6 @@ def update_image(ui, data):
     ui.image_label2.setPixmap(qpix)
 
 
-@error_decorator
-def update_sqsize(ui, data):
-    ui.saqsize, ui.stqsize, ui.ssqsize = data
-
-
 @thread_decorator
 def update_cpuper(ui):
     ui.cpu_per = int(psutil.cpu_percent(interval=1))
@@ -45,18 +40,17 @@ def auto_back_schedule(ui, gubun):
         if ui.dict_set['알림소리'] or ui.dict_set['코인알림소리']:
             ui.soundQ.put('예약된 백테스트 스케쥴러를 시작합니다.')
         if not ui.dialog_backengine.isVisible():
-            backengine_show(ui, ui.dict_set['백테스케쥴구분'])
+            backengine_show(ui)
         qtest_qwait(2)
         backtest_engine_kill(ui)
         qtest_qwait(3)
-        backengine_start(ui, ui.dict_set['백테스케쥴구분'])
+        backengine_start(ui)
     elif gubun == 2:
         if not ui.dialog_scheduler.isVisible():
             ui.dialog_scheduler.show()
         qtest_qwait(2)
         sdbutton_clicked_04(ui)
         qtest_qwait(2)
-        ui.sd_pushButtonnn_01.setText(ui.dict_set['백테스케쥴구분'])
         ui.sd_dcomboBoxxxx_01.setCurrentText(ui.dict_set['백테스케쥴명'])
         qtest_qwait(2)
         ui.sdButtonClicked_02()
@@ -69,16 +63,40 @@ def auto_back_schedule(ui, gubun):
 
 @error_decorator
 def update_dictset(ui):
-    if ui.proc_manager is not None and ui.proc_manager.poll() is None:
-        ui.wdzservQ.put(('manager', ('설정변경', ui.dict_set)))
-    if receiver_process_alive(ui): ui.creceivQ.put(('설정변경', ui.dict_set))
-    if trader_process_alive(ui):   ui.ctraderQ.put(('설정변경', ui.dict_set))
-    if strategy_process_alive(ui): ui.cstgQ.put(('설정변경', ui.dict_set))
-    if ui.proc_chqs.is_alive():         ui.chartQ.put(('설정변경', ui.dict_set))
-    if ui.telegram.isRunning():         ui.teleQ.put(('설정변경', ui.dict_set))
+    update_market_gubun(ui)
+
+    if receiver_process_alive(ui):
+        ui.receivQ.put(('설정변경', ui.dict_set))
+    if trader_process_alive(ui):
+        ui.traderQ.put(('설정변경', ui.dict_set))
+    if strategy_process_alive(ui):
+        if ui.market_gubun < 5:
+            for q in ui.stgQs:
+                q.put(('설정변경', ui.dict_set))
+        else:
+            ui.stgQ.put(('설정변경', ui.dict_set))
+
+    if ui.proc_chqs.is_alive():
+        ui.chartQ.put(('설정변경', ui.dict_set))
+    if ui.telegram.isRunning():
+        ui.teleQ.put(('설정변경', ui.dict_set))
+
     if ui.backtest_engine:
         for bpq in ui.back_eques:
             bpq.put(('설정변경', ui.dict_set))
+
+
+@error_decorator
+def update_market_gubun(ui):
+    from utility.setting_market import DICT_MARKET_GUBUN, DICT_MARKET_INFO
+    market = ui.dict_set['거래소']
+    ui.market_gubun = DICT_MARKET_GUBUN[market]
+    ui.market_name  = market[:3] if '업' in market else market[:6] if '바' in market else market[:4]
+    ui.market_info  = DICT_MARKET_INFO[ui.market_gubun]
+    ui.market_sname = ui.market_info['전략구분']
+    ui.market_infos = [ui.market_gubun, ui.market_name, ui.market_sname, ui.market_info]
+    factor_list     = ui.market_info['팩터목록'][ui.dict_set['타임프레임']]
+    ui.dict_findex  = {factor: i for i, factor in enumerate(factor_list)}
 
 
 @error_decorator
@@ -97,8 +115,7 @@ def chart_clear(ui):
 
 @error_decorator
 def calendar_clicked(ui):
-    market_gubun = DICT_MARKET_GUBUN[ui.dict_set['거래소']]
-    table = DICT_MARKET_INFO[market_gubun]['거래디비']
+    table = ui.market_info['거래디비']
     searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
     df1 = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table} WHERE 체결시간 LIKE '{searchday}%'").set_index('index')
     if len(df1) > 0:
@@ -178,10 +195,23 @@ def manual_save_and_exit(ui):
     )
     if buttonReply == QMessageBox.Yes:
         if receiver_process_alive(ui):
-            ui.creceivQ.put(('수동데이터저장', 'dummy'))
-        else:
-            ui.wdzservQ.put(('agent', ('수동데이터저장', 'dummy')))
+            ui.receivQ.put(('수동데이터저장', 'dummy'))
 
 
 def stom_public_use_limit(ui):
     QMessageBox.critical(ui, 'STOM PUBLIC', '현재의 권한으로 사용할 수 없는 기능입니다.\n구독문의: https://cafe.naver.com/stom')
+
+
+def strategy_setting_label_change(ui):
+    if ui.market_gubun < 4 or ui.market_gubun == 5:
+        ui.sj_strgy_label_02.setText(
+            '종목당투자금                          백만원                                  전략중지 및 잔고청산   |')
+    elif ui.market_gubun in (6, 7, 8):
+        ui.sj_strgy_label_02.setText(
+            '종목당투자금                          계약수                                  전략중지 및 잔고청산   |')
+    elif ui.market_gubun == 4:
+        ui.sj_strgy_label_02.setText(
+            '종목당투자금                          USD                                     전략중지 및 잔고청산   |')
+    else:
+        ui.sj_strgy_label_02.setText(
+            '종목당투자금                          USDT                                   전략중지 및 잔고청산   |')

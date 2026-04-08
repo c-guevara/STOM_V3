@@ -791,7 +791,7 @@ class WidgetCreater:
         if clicked is not None:
             tableWidget.cellClicked.connect(clicked)
         if columns[-1] == 'chh':
-            if parent == self.ui.st_tab:
+            if parent == self.ui.td_tab:
                 tableWidget.setColumnWidth(0, 122)
                 tableWidget.setColumnWidth(1, 68)
                 tableWidget.setColumnWidth(2, 68)
@@ -873,35 +873,16 @@ class WidgetCreater:
             tableWidget.setColumnWidth(15, 54)
             tableWidget.setColumnWidth(16, 97)
             tableWidget.setColumnWidth(17, 55)
-        elif columns == columns_td and parent == self.ui.ct_tab:
-            tableWidget.setColumnWidth(0, 96)
+        elif columns == columns_jg:
+            tableWidget.setColumnWidth(0, 126)
             tableWidget.setColumnWidth(1, 90)
             tableWidget.setColumnWidth(2, 90)
-            tableWidget.setColumnWidth(3, 140)
-            tableWidget.setColumnWidth(4, 70)
+            tableWidget.setColumnWidth(3, 90)
+            tableWidget.setColumnWidth(4, 90)
             tableWidget.setColumnWidth(5, 90)
             tableWidget.setColumnWidth(6, 90)
-        elif columns == columns_jg:
-            if parent == self.ui.ct_tab:
-                tableWidget.setColumnWidth(0, 96)
-                tableWidget.setColumnWidth(1, 115)
-                tableWidget.setColumnWidth(2, 115)
-                tableWidget.setColumnWidth(3, 80)
-                tableWidget.setColumnWidth(4, 80)
-                tableWidget.setColumnWidth(5, 90)
-                tableWidget.setColumnWidth(6, 90)
-                tableWidget.setColumnWidth(7, 90)
-                tableWidget.setColumnWidth(8, 90)
-            else:
-                tableWidget.setColumnWidth(0, 126)
-                tableWidget.setColumnWidth(1, 90)
-                tableWidget.setColumnWidth(2, 90)
-                tableWidget.setColumnWidth(3, 90)
-                tableWidget.setColumnWidth(4, 90)
-                tableWidget.setColumnWidth(5, 90)
-                tableWidget.setColumnWidth(6, 90)
-                tableWidget.setColumnWidth(7, 90)
-                tableWidget.setColumnWidth(8, 90)
+            tableWidget.setColumnWidth(7, 90)
+            tableWidget.setColumnWidth(8, 90)
             tableWidget.setColumnWidth(9, 90)
             tableWidget.setColumnWidth(10, 90)
             tableWidget.setColumnWidth(11, 90)
@@ -913,26 +894,15 @@ class WidgetCreater:
             tableWidget.setColumnWidth(3, 90)
             tableWidget.setColumnWidth(4, 90)
         elif columns == columns_cj:
-            if parent == self.ui.ct_tab:
-                tableWidget.setColumnWidth(0, 96)
-                tableWidget.setColumnWidth(1, 90)
-                tableWidget.setColumnWidth(2, 125)
-                tableWidget.setColumnWidth(3, 125)
-                tableWidget.setColumnWidth(4, 55)
-                tableWidget.setColumnWidth(5, 105)
-                tableWidget.setColumnWidth(6, 70)
-                tableWidget.setColumnWidth(7, 90)
-                tableWidget.setColumnWidth(8, 90)
-            else:
-                tableWidget.setColumnWidth(0, 126)
-                tableWidget.setColumnWidth(1, 90)
-                tableWidget.setColumnWidth(2, 90)
-                tableWidget.setColumnWidth(3, 90)
-                tableWidget.setColumnWidth(4, 90)
-                tableWidget.setColumnWidth(5, 90)
-                tableWidget.setColumnWidth(6, 90)
-                tableWidget.setColumnWidth(7, 90)
-                tableWidget.setColumnWidth(8, 90)
+            tableWidget.setColumnWidth(0, 126)
+            tableWidget.setColumnWidth(1, 90)
+            tableWidget.setColumnWidth(2, 90)
+            tableWidget.setColumnWidth(3, 90)
+            tableWidget.setColumnWidth(4, 90)
+            tableWidget.setColumnWidth(5, 90)
+            tableWidget.setColumnWidth(6, 90)
+            tableWidget.setColumnWidth(7, 90)
+            tableWidget.setColumnWidth(8, 90)
         elif columns == columns_hj:
             tableWidget.setColumnWidth(0, 140)
             tableWidget.setColumnWidth(1, 140)
@@ -997,16 +967,10 @@ class WidgetCreater:
         else:
             if parent in (self.ui.slv_tab, self.ui.clv_tab, self.ui.flv_tab):
                 tableWidget.setColumnWidth(0, 121)
-            elif parent == self.ui.ct_tab:
-                tableWidget.setColumnWidth(0, 96)
             else:
                 tableWidget.setColumnWidth(0, 126)
-            if parent == self.ui.ct_tab:
-                tableWidget.setColumnWidth(1, 105)
-                tableWidget.setColumnWidth(2, 105)
-            else:
-                tableWidget.setColumnWidth(1, 90)
-                tableWidget.setColumnWidth(2, 90)
+            tableWidget.setColumnWidth(1, 90)
+            tableWidget.setColumnWidth(2, 90)
             tableWidget.setColumnWidth(3, 90)
             tableWidget.setColumnWidth(4, 90)
             tableWidget.setColumnWidth(5, 90)

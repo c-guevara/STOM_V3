@@ -3,26 +3,33 @@ import sqlite3
 import pandas as pd
 from PyQt5.QtWidgets import QCompleter
 from utility.static import error_decorator
-from utility.setting_base import DB_CODE_INFO, DB_COIN_TICK_BACK, list_stock_tick, list_stock_min, list_basic_tick, \
-    list_basic_min, list_stock_tick2, list_stock_min2, list_basic_tick2, list_basic_min2, list_future_tick2, \
-    list_future_min2
+from utility.setting_base import DB_CODE_INFO
 
 
 @error_decorator
 def load_database(ui):
     con = sqlite3.connect(DB_CODE_INFO)
-    df = pd.read_sql('SELECT * FROM stockinfo', con).set_index('index')
+    df = pd.read_sql('SELECT * FROM stock_info', con).set_index('index')
     ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM futureinfo', con).set_index('index')
+    df = pd.read_sql('SELECT * FROM stock_etf_info', con).set_index('index')
+    ui.dict_name.update(df['종목명'].to_dict())
+    df = pd.read_sql('SELECT * FROM stock_etn_info', con).set_index('index')
+    ui.dict_name.update(df['종목명'].to_dict())
+    df = pd.read_sql('SELECT * FROM stock_usa_info', con).set_index('index')
+    ui.dict_name.update(df['종목명'].to_dict())
+    df = pd.read_sql('SELECT * FROM upbit_info', con).set_index('index')
+    ui.dict_name.update(df['종목명'].to_dict())
+    df = pd.read_sql('SELECT * FROM future_info', con).set_index('index')
+    ui.dict_name.update(df['종목명'].to_dict())
+    df = pd.read_sql('SELECT * FROM future_os_info', con).set_index('index')
+    ui.dict_name.update(df['종목명'].to_dict())
+    df = pd.read_sql('SELECT * FROM binance_info', con).set_index('index')
     ui.dict_name.update(df['종목명'].to_dict())
     con.close()
     ui.dict_code = {name: code for code, name in ui.dict_name.items()}
 
-    con = sqlite3.connect(DB_COIN_TICK_BACK)
-    df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
-    con.close()
     ui.ct_lineEdittttt_04.setCompleter(QCompleter(list(ui.dict_code.values())))
-    ui.ct_lineEdittttt_05.setCompleter(QCompleter(list(ui.dict_name.values()) + df['name'].to_list()))
+    ui.ct_lineEdittttt_05.setCompleter(QCompleter(list(ui.dict_name.values())))
 
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM custombutton").set_index('index')
     if len(df) > 0:
@@ -39,14 +46,3 @@ def load_database(ui):
             else:
                 button = getattr(ui, f'cvjs_pushButon_{index - 221:02d}')
             button.setText(df['버튼명'][index])
-
-    ui.dict_findex_stock_tick   = {name: i for i, name in enumerate(list_stock_tick)}
-    ui.dict_findex_stock_min    = {name: i for i, name in enumerate(list_stock_min)}
-    ui.dict_findex_coin_tick    = {name: i for i, name in enumerate(list_basic_tick)}
-    ui.dict_findex_coin_min     = {name: i for i, name in enumerate(list_basic_min)}
-    ui.dict_findex_stock_tick2  = {name: i for i, name in enumerate(list_stock_tick2)}
-    ui.dict_findex_stock_min2   = {name: i for i, name in enumerate(list_stock_min2)}
-    ui.dict_findex_coin_tick2   = {name: i for i, name in enumerate(list_basic_tick2)}
-    ui.dict_findex_coin_min2    = {name: i for i, name in enumerate(list_basic_min2)}
-    ui.dict_findex_future_tick2 = {name: i for i, name in enumerate(list_future_tick2)}
-    ui.dict_findex_future_min2  = {name: i for i, name in enumerate(list_future_min2)}

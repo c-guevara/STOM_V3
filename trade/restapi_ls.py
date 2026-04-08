@@ -908,15 +908,15 @@ if __name__ == "__main__":
 
     conn = sqlite3.connect('code_info.db')
     if gubun_ == '국내주식':
-        dict_info, symbols_ = ls.get_code_info_stock(etfgubun=0)
+        dict_info, symbols_ = ls.get_code_info_stock(0)
         df = pd.DataFrame.from_dict(dict_info, orient='index')
         df.to_sql('stock_info', conn, if_exists='replace')
     elif gubun_ == '국내주식ETF':
-        dict_info, symbols_ = ls.get_code_info_stock(etfgubun=1)
+        dict_info, symbols_ = ls.get_code_info_stock(1)
         df = pd.DataFrame.from_dict(dict_info, orient='index')
         df.to_sql('stock_etf_info', conn, if_exists='replace')
     elif gubun_ == '국내주식ETN':
-        dict_info, symbols_ = ls.get_code_info_stock(etfgubun=2)
+        dict_info, symbols_ = ls.get_code_info_stock(2)
         df = pd.DataFrame.from_dict(dict_info, orient='index')
         df.to_sql('stock_etn_info', conn, if_exists='replace')
     elif gubun_ == '지수선물':

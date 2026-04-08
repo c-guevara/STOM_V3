@@ -6,101 +6,57 @@ from ui.ui_strategy_version import strategy_version
 
 # UI 타입별 설정 매핑
 UI_ACTIBATED_CONFIG = {
-    'coin': {
-        'gubun_fn': lambda ui: 'upbit' if '업비트' in ui.dict_set['거래소'] else 'binance',
-        'tables': [
-            'coinbuy', 'coinsell', 'coinoptibuy', 'coinoptivars',
-            'coinoptisell', 'coinvars', 'coinbuyconds', 'coinsellconds'
-        ],
-        'widgets': {
-            'text_01': 'cs_textEditttt_01', 'text_02': 'cs_textEditttt_02',
-            'text_03': 'cs_textEditttt_03', 'text_04': 'cs_textEditttt_05',
-            'text_05': 'cs_textEditttt_04', 'text_06': 'cs_textEditttt_06',
-            'text_07': 'cs_textEditttt_07', 'text_08': 'cs_textEditttt_08',
-            'combo_01': 'cvjb_comboBoxx_01', 'line_01': 'cvjb_lineEditt_01',
-            'combo_02': 'cvjs_comboBoxx_01', 'line_02': 'cvjs_lineEditt_01',
-            'combo_03': 'cvc_comboBoxxx_01', 'line_03': 'cvc_lineEdittt_01',
-            'combo_04': 'cvc_comboBoxxx_02', 'line_04': 'cvc_lineEdittt_02',
-            'combo_05': 'cvc_comboBoxxx_08', 'line_05': 'cvc_lineEdittt_03',
-            'combo_06': 'cva_comboBoxxx_01', 'line_06': 'cva_lineEdittt_01',
-            'combo_07': 'cvo_comboBoxxx_01', 'line_07': 'cvo_lineEdittt_01',
-            'combo_08': 'cvo_comboBoxxx_02', 'line_08': 'cvo_lineEdittt_02',
-            'combo_09': 'sj_coin_comBox_01',
-            'push_41': 'cs_pushButtonn_41',
-        },
-        'types': ['basic', 'basic', 'opti', 'opti', 'opti', 'opti', 'cond', 'cond'],
-        'buysell': ['buy', 'sell', 'buy', 'vars', 'sell', 'gavars', 'buy', 'sell'],
-        'errors': [
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '범위가 DB에 존재하지 않습니다.\n범위을 다시 로딩하십시오.\n',
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '범위가 DB에 존재하지 않습니다.\n범위을 다시 로딩하십시오.\n',
-            '조건이 DB에 존재하지 않습니다.\n조건을 다시 로딩하십시오.\n',
-            '조건이 DB에 존재하지 않습니다.\n조건을 다시 로딩하십시오.\n'
-        ]
+    'tables': [
+        '{market_sname}_buy', '{market_sname}_sell', '{market_sname}_optibuy', '{market_sname}_optivars',
+        '{market_sname}_optisell', '{market_sname}_vars', '{market_sname}_buyconds', '{market_sname}_sellconds'
+    ],
+    'widgets': {
+        'text_01': 'ss_textEditttt_01', 'text_02': 'ss_textEditttt_02',
+        'text_03': 'ss_textEditttt_03', 'text_04': 'ss_textEditttt_05',
+        'text_05': 'ss_textEditttt_04', 'text_06': 'ss_textEditttt_06',
+        'text_07': 'ss_textEditttt_07', 'text_08': 'ss_textEditttt_08',
+        'combo_01': 'svjb_comboBoxx_01', 'line_01': 'svjb_lineEditt_01',
+        'combo_02': 'svjs_comboBoxx_01', 'line_02': 'svjs_lineEditt_01',
+        'combo_03': 'svc_comboBoxxx_01', 'line_03': 'svc_lineEdittt_01',
+        'combo_04': 'svc_comboBoxxx_02', 'line_04': 'svc_lineEdittt_02',
+        'combo_05': 'svc_comboBoxxx_08', 'line_05': 'svc_lineEdittt_03',
+        'combo_06': 'sva_comboBoxxx_01', 'line_06': 'sva_lineEdittt_01',
+        'combo_07': 'svo_comboBoxxx_01', 'line_07': 'svo_lineEdittt_01',
+        'combo_08': 'svo_comboBoxxx_02', 'line_08': 'svo_lineEdittt_02',
+        'combo_09': 'sj_strgy_cbBox_01',
+        'push_41': 'ss_pushButtonn_41',
     },
-    'stock': {
-        'gubun_fn': lambda ui: 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future',
-        'tables': [
-            '{gubun}buy', '{gubun}sell', '{gubun}optibuy', '{gubun}optivars',
-            '{gubun}optisell', '{gubun}vars', '{gubun}buyconds', '{gubun}sellconds'
-        ],
-        'widgets': {
-            'text_01': 'ss_textEditttt_01', 'text_02': 'ss_textEditttt_02',
-            'text_03': 'ss_textEditttt_03', 'text_04': 'ss_textEditttt_05',
-            'text_05': 'ss_textEditttt_04', 'text_06': 'ss_textEditttt_06',
-            'text_07': 'ss_textEditttt_07', 'text_08': 'ss_textEditttt_08',
-            'combo_01': 'svjb_comboBoxx_01', 'line_01': 'svjb_lineEditt_01',
-            'combo_02': 'svjs_comboBoxx_01', 'line_02': 'svjs_lineEditt_01',
-            'combo_03': 'svc_comboBoxxx_01', 'line_03': 'svc_lineEdittt_01',
-            'combo_04': 'svc_comboBoxxx_02', 'line_04': 'svc_lineEdittt_02',
-            'combo_05': 'svc_comboBoxxx_08', 'line_05': 'svc_lineEdittt_03',
-            'combo_06': 'sva_comboBoxxx_01', 'line_06': 'sva_lineEdittt_01',
-            'combo_07': 'svo_comboBoxxx_01', 'line_07': 'svo_lineEdittt_01',
-            'combo_08': 'svo_comboBoxxx_02', 'line_08': 'svo_lineEdittt_02',
-            'combo_09': 'sj_strat_cbBox_01',
-            'push_41': 'ss_pushButtonn_41',
-        },
-        'types': ['basic', 'basic', 'opti', 'opti', 'opti', 'opti', 'cond', 'cond'],
-        'buysell': ['buy', 'sell', 'buy', 'vars', 'sell', 'gavars', 'buy', 'sell'],
-        'errors': [
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '범위가 DB에 존재하지 않습니다.\n범위을 다시 로딩하십시오.\n',
-            '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
-            '범위가 DB에 존재하지 않습니다.\n범위을 다시 로딩하십시오.\n',
-            '조건이 DB에 존재하지 않습니다.\n조건을 다시 로딩하십시오.\n',
-            '조건이 DB에 존재하지 않습니다.\n조건을 다시 로딩하십시오.\n'
-        ]
-    }
+    'types': ['basic', 'basic', 'opti', 'opti', 'opti', 'opti', 'cond', 'cond'],
+    'buysell': ['buy', 'sell', 'buy', 'vars', 'sell', 'gavars', 'buy', 'sell'],
+    'errors': [
+        '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
+        '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
+        '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
+        '범위가 DB에 존재하지 않습니다.\n범위을 다시 로딩하십시오.\n',
+        '전략이 DB에 존재하지 않습니다.\n전략을 다시 로딩하십시오.\n',
+        '범위가 DB에 존재하지 않습니다.\n범위을 다시 로딩하십시오.\n',
+        '조건이 DB에 존재하지 않습니다.\n조건을 다시 로딩하십시오.\n',
+        '조건이 DB에 존재하지 않습니다.\n조건을 다시 로딩하십시오.\n'
+    ]
 }
 
 
 # noinspection PyUnresolvedReferences
-def _activated_common(ui, ui_type, idx):
+def _activated_common(ui, idx):
     """공통 activated 로직"""
-    config = UI_ACTIBATED_CONFIG[ui_type]
-    widgets = config['widgets']
-    table = config['tables'][idx - 1]
+    widgets = UI_ACTIBATED_CONFIG['widgets']
+    table = UI_ACTIBATED_CONFIG['tables'][idx - 1]
 
     combo_name = f'combo_{idx:02d}'
     line_name = f'line_{idx:02d}'
     text_name = f'text_{idx:02d}'
 
     strategy_name = getattr(ui, widgets[combo_name]).currentText()
-
     if not strategy_name:
         return
 
-    # gubun 계산 (stock/future 또는 upbit/binance)
-    gubun = config['gubun_fn'](ui)
-
-    # 테이블명 동적 치환 (stock의 경우)
     if '{' in table:
-        table = table.format(gubun=gubun)
+        table = table.format(market_sname=ui.market_sname)
 
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')
 
@@ -110,67 +66,63 @@ def _activated_common(ui, ui_type, idx):
         getattr(ui, widgets[line_name]).setText(strategy_name)
 
         if getattr(ui, widgets['push_41']).isVisible():
-            stg_type = config['types'][idx - 1]
-            buysell = config['buysell'][idx - 1]
-            strategy_version(ui, gubun, stg_type, buysell, strategy_name)
+            stg_type = UI_ACTIBATED_CONFIG['types'][idx - 1]
+            buysell = UI_ACTIBATED_CONFIG['buysell'][idx - 1]
+            strategy_version(ui, stg_type, buysell, strategy_name)
     else:
-        QMessageBox.critical(ui, '오류 알림', config['errors'][idx - 1])
+        QMessageBox.critical(ui, '오류 알림', UI_ACTIBATED_CONFIG['errors'][idx - 1])
 
 
 @error_decorator
-def activated_01(ui, ui_type):
-    _activated_common(ui, ui_type, 1)
+def activated_01(ui):
+    _activated_common(ui, 1)
 
 
 @error_decorator
-def activated_02(ui, ui_type):
-    _activated_common(ui, ui_type, 2)
+def activated_02(ui):
+    _activated_common(ui, 2)
 
 
 @error_decorator
-def activated_03(ui, ui_type):
-    _activated_common(ui, ui_type, 3)
+def activated_03(ui):
+    _activated_common(ui, 3)
 
 
 @error_decorator
-def activated_04(ui, ui_type):
-    _activated_common(ui, ui_type, 4)
+def activated_04(ui):
+    _activated_common(ui, 4)
 
 
 @error_decorator
-def activated_05(ui, ui_type):
-    _activated_common(ui, ui_type, 5)
+def activated_05(ui):
+    _activated_common(ui, 5)
 
 
 @error_decorator
-def activated_06(ui, ui_type):
-    _activated_common(ui, ui_type, 6)
+def activated_06(ui):
+    _activated_common(ui, 6)
 
 
 @error_decorator
-def activated_07(ui, ui_type):
-    _activated_common(ui, ui_type, 7)
+def activated_07(ui):
+    _activated_common(ui, 7)
 
 
 @error_decorator
-def activated_08(ui, ui_type):
-    _activated_common(ui, ui_type, 8)
+def activated_08(ui):
+    _activated_common(ui, 8)
 
 
 # noinspection PyUnresolvedReferences
 @error_decorator
-def activated_09(ui, ui_type):
+def activated_09(ui):
     """최적화용 전략 선택시 경고 메시지 (09번 공통)"""
-    config = UI_ACTIBATED_CONFIG[ui_type]
-    widgets = config['widgets']
-
+    widgets = UI_ACTIBATED_CONFIG['widgets']
     strategy_name = getattr(ui, widgets['combo_09']).currentText()
     if not strategy_name:
         return
 
-    gubun = config['gubun_fn'](ui)
-    table = config['tables'][2].format(gubun=gubun) if ui_type == 'stock' else config['tables'][2]
-
+    table = UI_ACTIBATED_CONFIG['tables'][2].format(market_sname=ui.market_sname)
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')
 
     if len(df) > 0:

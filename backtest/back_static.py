@@ -68,7 +68,7 @@ def get_trade_info(gubun):
     return v
 
 
-def GetBackloadCodeQuery(is_tick, code, days, starttime, endtime):
+def get_back_load_code_query(is_tick, code, days, starttime, endtime):
     conditions = []
     for day in days:
         if is_tick:
@@ -83,14 +83,10 @@ def GetBackloadCodeQuery(is_tick, code, days, starttime, endtime):
     return query
 
 
-def GetMoneytopQuery(is_tick, gubun, startday, endday, starttime, endtime):
+def get_moneytop_query(is_tick, startday, endday, starttime, endtime):
     if is_tick:
-        if gubun == 'S' and starttime < 90030:
-            sindex = startday * 1000000 + 90030
-            eindex = endday * 1000000 + endtime
-        else:
-            sindex = startday * 1000000 + starttime
-            eindex = endday * 1000000 + endtime
+        sindex = startday * 1000000 + starttime
+        eindex = endday * 1000000 + endtime
     else:
         sindex = startday * 10000 + int(starttime / 100)
         eindex = endday * 10000 + int(endtime / 100)
@@ -98,7 +94,7 @@ def GetMoneytopQuery(is_tick, gubun, startday, endday, starttime, endtime):
     return query
 
 
-def GetBuyStg(buytxt, gubun, wq):
+def get_buy_stg(buytxt, gubun, wq):
     lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
     buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
     indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
@@ -120,9 +116,9 @@ def GetBuyStg(buytxt, gubun, wq):
     return buystg, indistg
 
 
-def GetSellStg(sellstg, gubun, wq):
+def get_sell_stg(sellstg, gubun, wq):
     sellstg = 'self.sell_cond = 0\n' + sellstg
-    sellstg, dict_cond = SetSellCond(sellstg.split('\n'))
+    sellstg, dict_cond = set_sell_cond(sellstg.split('\n'))
     try:
         sellstg = compile(sellstg, '<string>', 'exec')
     except:
@@ -131,7 +127,7 @@ def GetSellStg(sellstg, gubun, wq):
     return sellstg, dict_cond
 
 
-def GetBuyConds(buy_conds, gubun, wq):
+def get_buy_conds(buy_conds, gubun, wq):
     buy_conds = 'if not (' + \
                 '):\n    매수 = False\nelif not ('.join(buy_conds) + \
                 '):\n    매수 = False\nif 매수:\n    self.Buy()'
@@ -143,11 +139,11 @@ def GetBuyConds(buy_conds, gubun, wq):
     return buy_conds
 
 
-def GetSellConds(sell_conds, gubun, wq):
+def get_sell_conds(sell_conds, gubun, wq):
     sell_conds = 'self.sell_cond = 0\nif not (' + \
                  '):\n    매도 = True\nelif not ('.join(sell_conds) + \
                  '):\n    매도 = True\nif 매도:\n    self.Sell()'
-    sell_conds, dict_cond = SetSellCond(sell_conds.split('\n'))
+    sell_conds, dict_cond = set_sell_cond(sell_conds.split('\n'))
     try:
         sell_conds = compile(sell_conds, '<string>', 'exec')
     except:
@@ -156,7 +152,7 @@ def GetSellConds(sell_conds, gubun, wq):
     return sell_conds, dict_cond
 
 
-def SetSellCond(selllist):
+def set_sell_cond(selllist):
     count = 1
     sellstg = ''
     dict_cond = {0: '전략종료청산', 1000: '분할매도', 1001: '익절청산', 1002: '손절청산'}
@@ -170,7 +166,7 @@ def SetSellCond(selllist):
     return sellstg, dict_cond
 
 
-def GetBuyStgFuture(buystg, gubun, wq):
+def get_buy_stg_future(buystg, gubun, wq):
     lines   = [line for line in buystg.split('\n') if line and line[0] != '#']
     buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
     indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
@@ -192,9 +188,9 @@ def GetBuyStgFuture(buystg, gubun, wq):
     return buystg, indistg
 
 
-def GetSellStgFuture(sellstg, gubun, wq):
+def get_sell_stg_future(sellstg, gubun, wq):
     sellstg = 'self.sell_cond = 0\n' + sellstg
-    sellstg, dict_cond = SetSellCondFuture(sellstg.split('\n'))
+    sellstg, dict_cond = set_sell_cond_future(sellstg.split('\n'))
     try:
         sellstg = compile(sellstg, '<string>', 'exec')
     except:
@@ -203,7 +199,7 @@ def GetSellStgFuture(sellstg, gubun, wq):
     return sellstg, dict_cond
 
 
-def GetBuyCondsFuture(is_long, buy_conds, gubun, wq):
+def get_buy_conds_future(is_long, buy_conds, gubun, wq):
     if is_long:
         buy_conds = 'if not (' + \
                     '):\n    BUY_LONG = False\nelif not ('.join(buy_conds) + \
@@ -220,14 +216,14 @@ def GetBuyCondsFuture(is_long, buy_conds, gubun, wq):
     return buy_conds
 
 
-def GetSellCondsFuture(is_long, sell_conds, gubun, wq):
+def get_sell_conds_future(is_long, sell_conds, gubun, wq):
     if is_long:
         sell_conds = 'self.sell_cond = 0\nif ' + ':\n    SELL_LONG = True\nelif '.join(
             sell_conds) + ':\n    SELL_LONG = True\nif SELL_LONG:\n    self.Sell(SELL_LONG)'
     else:
         sell_conds = 'self.sell_cond = 0\nif ' + ':\n    BUY_SHORT = True\nelif '.join(
             sell_conds) + ':\n    BUY_SHORT = True\nif BUY_SHORT:\n    self.Sell(SELL_LONG)'
-    sell_conds, dict_cond = SetSellCondFuture(sell_conds.split('\n'))
+    sell_conds, dict_cond = set_sell_cond_future(sell_conds.split('\n'))
     try:
         sell_conds = compile(sell_conds, '<string>', 'exec')
     except:
@@ -236,7 +232,7 @@ def GetSellCondsFuture(is_long, sell_conds, gubun, wq):
     return sell_conds, dict_cond
 
 
-def SetSellCondFuture(selllist):
+def set_sell_cond_future(selllist):
     count = 1
     sellstg = ''
     dict_cond = {0: '전략종료청산', 1000: '분할매도', 1001: '익절청산', 1002: '손절청산'}
@@ -255,8 +251,8 @@ def SetSellCondFuture(selllist):
     return sellstg, dict_cond
 
 
-def SendResult(result, dict_train, dict_valid=None, exponential=False):
-    gubun, ui_gubun, wq, mq, pre_hstd, optistd, opti_kind, vturn, vkey, vars_list, _, _, std_list, _ = result
+def send_result(result, dict_train, dict_valid=None, exponential=False):
+    gubun, wq, mq, pre_hstd, optistd, opti_kind, vturn, vkey, vars_list, _, _, std_list, _ = result
     if gubun in ('최적화', '최적화테스트'):
         if opti_kind == 1:
             text1 = f"<font color=#ffffa0> self.vars[{vturn}] = {vars_list[vturn]} {'-' * 50}</font>\n"
@@ -276,38 +272,38 @@ def SendResult(result, dict_train, dict_valid=None, exponential=False):
         valid_stds = []
 
         for k, v in tuple_train:
-            text3, std = GetText3(f'TRAIN{k + 1}', optistd, std_list, v)
+            text3, std = get_text3(f'TRAIN{k + 1}', optistd, std_list, v)
             train_text.append(text3)
             train_stds.append(std)
         for k, v in tuple_valid:
-            text3, std = GetText3(f'VALID{k + 1}', optistd, std_list, v)
+            text3, std = get_text3(f'VALID{k + 1}', optistd, std_list, v)
             valid_text.append(text3)
             valid_stds.append(std)
 
-        from backtest.back_static_numba import GetOptiValidStd
+        from backtest.back_static_numba import get_opti_valid_std
         train_stds = np.array(train_stds, dtype=np.float64)
         valid_stds = np.array(valid_stds, dtype=np.float64)
-        std = GetOptiValidStd(train_stds, valid_stds, exponential)
-        text2, hstd, sendtext = GetText2(std, pre_hstd)
+        std = get_opti_valid_std(train_stds, valid_stds, exponential)
+        text2, hstd, sendtext = get_text2(std, pre_hstd)
 
         if sendtext or opti_kind in (0, 4):
-            wq.put((ui_num[f'{ui_gubun}백테스트'], f'{text1}{text2}'))
+            wq.put((ui_num['백테스트'], f'{text1}{text2}'))
             for text3 in train_text:
-                wq.put((ui_num[f'{ui_gubun}백테스트'], text3))
+                wq.put((ui_num['백테스트'], text3))
             for text3 in valid_text:
-                wq.put((ui_num[f'{ui_gubun}백테스트'], text3))
+                wq.put((ui_num['백테스트'], text3))
 
     elif dict_train is not None:
         if gubun == '최적화테스트':
-            text3, std  = GetText3('TEST', optistd, std_list, dict_train)
+            text3, std  = get_text3('TEST', optistd, std_list, dict_train)
             text2, hstd, sendtext = '', pre_hstd, False
         else:
-            text3, std  = GetText3('TOTAL', optistd, std_list, dict_train)
-            text2, hstd, sendtext = GetText2(std, pre_hstd)
+            text3, std  = get_text3('TOTAL', optistd, std_list, dict_train)
+            text2, hstd, sendtext = get_text2(std, pre_hstd)
 
         if sendtext or opti_kind in (2, 4):
-            wq.put((ui_num[f'{ui_gubun}백테스트'], f'{text1}{text2}'))
-            wq.put((ui_num[f'{ui_gubun}백테스트'], text3))
+            wq.put((ui_num['백테스트'], f'{text1}{text2}'))
+            wq.put((ui_num['백테스트'], text3))
 
     else:
         hstd = pre_hstd
@@ -319,7 +315,7 @@ def SendResult(result, dict_train, dict_valid=None, exponential=False):
     return hstd
 
 
-def GetText2(std, pre_hstd):
+def get_text2(std, pre_hstd):
     text = f'<font color=#ffffa0> MERGE[{std:,.2f}]</font>'
     if std > pre_hstd:
         text = f'{text}<font color=#54d2f9> [기준값갱신]</font>'
@@ -331,7 +327,7 @@ def GetText2(std, pre_hstd):
         return text, pre_hstd, False
 
 
-def GetText3(gubun, optistd, std_list, result):
+def get_text3(gubun, optistd, std_list, result):
     tc, atc, pc, mc, wr, ah, app, tpp, tsg, mhct, seed, cagr, tpi, mdd, mdd_ = result
     if tpp < 0 < tsg: tsg = -float('inf')
     mddt  = f'{mdd_:,.0f}' if 'G' in optistd and optistd != 'CAGR' else f'{mdd:,.2f}%'
@@ -339,11 +335,11 @@ def GetText3(gubun, optistd, std_list, result):
     text  = f"<font color={color}>{gubun}</font>"
     text  = f"{text} <font color={color if tsg >= 0 else '#96969b'}>TC[{tc:,.0f}] ATC[{atc:,.1f}] MH[{mhct}] " \
             f"WR[{wr:,.2f}%] AP[{app:,.2f}%] TP[{tpp:,.2f}%] TG[{tsg:,.0f}] MDD[{mddt}] TPI[{tpi:,.2f}] CAGR[{cagr:,.2f}]"
-    text, std = GetOptiStdText(optistd, std_list, result, text)
+    text, std = get_optistd_text(optistd, std_list, result, text)
     return text, std
 
 
-def GetOptiStdText(optistd, std_list, result, pre_text):
+def get_optistd_text(optistd, std_list, result, pre_text):
     mdd_low, mdd_high, mhct_low, mhct_high, wr_low, wr_high, ap_low, ap_high, atc_low, atc_high, cagr_low, cagr_high, tpi_low, tpi_high = std_list
     tc, atc, pc, mc, wr, ah, app, tpp, tsg, mhct, seed, cagr, tpi, mdd, mdd_ = result
     std_true = (mdd_low <= mdd <= mdd_high and mhct_low <= mhct <= mhct_high and wr_low <= wr <= wr_high and
@@ -412,8 +408,9 @@ def get_interval(total_sec):
     return '30min'
 
 
-def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday, endday, starttime, endtime, list_days,
-             backname, back_text, label_text, save_file_name, schedul, notplotshow, buy_vars=None, sell_vars=None):
+def plot_show(gubun, is_tick, teleQ, df_tsg, df_bct, market_gubun, seed, mdd, startday, endday, starttime, endtime,
+              list_days, backname, back_text, label_text, save_file_name, schedul, notplotshow,
+              buy_vars=None, sell_vars=None):
 
     from utility.setting_base import GRAPH_PATH
     from matplotlib import pyplot as plt, font_manager, gridspec
@@ -427,14 +424,18 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     plt.rcParams['figure.autolayout'] = True
     plt.rcParams['figure.constrained_layout.use'] = True
 
-    df_kp, df_kd, df_nd, df_bc = None, None, None, None
+    df_kp, df_kd, df_nd, df_kpf, df_ndf, df_bc = None, None, None, None, None, None
     if startday != endday:
         try:
-            if dict_cn is not None and '005930' in dict_cn:
+            if market_gubun < 4:
                 df_kp = get_yf_ticker('^KS11', startday, endday)
                 df_kd = get_yf_ticker('^KQ11', startday, endday)
-            elif dict_cn is not None and '005930' not in dict_cn:
-                df_nd = get_yf_ticker('QQQ', startday, endday)
+            elif market_gubun == 4:
+                df_nd = get_yf_ticker('^IXIC', startday, endday)
+            elif market_gubun in (6, 7):
+                df_kpf = get_yf_ticker('^KS200', startday, endday)
+            elif market_gubun == 8:
+                df_ndf = get_yf_ticker('QQQ', startday, endday)
             else:
                 df_bc = get_yf_ticker('BTC-USD', startday, endday)
         except:
@@ -474,7 +475,7 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     weekday_sums = df_wt.groupby('요일')['수익금'].sum()
     wt_index = ['월', '화', '수', '목', '금']
     wt_data = [weekday_sums.get(i, 0) for i in range(5)]
-    if dict_cn is None:
+    if market_gubun in (5, 9):
         wt_index += ['토', '일']
         wt_data += [weekday_sums.get(5, 0), weekday_sums.get(6, 0)]
     wt_data_array = np.array(wt_data)
@@ -525,9 +526,13 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
         ax2.plot(df_kp.index, df_kp['종가'], linewidth=0.5, label='코스피', color='r')
         ax2.plot(df_kd.index, df_kd['종가'], linewidth=0.5, label='코스닥', color='b')
     elif df_nd is not None:
-        ax2.plot(df_nd.index, df_nd['종가'], linewidth=0.5, label='NQ', color='r')
+        ax2.plot(df_nd.index, df_nd['종가'], linewidth=0.5, label='나스닥', color='r')
+    elif df_kpf is not None:
+        ax2.plot(df_kpf.index, df_kpf['종가'], linewidth=0.5, label='코스피200', color='r')
+    elif df_ndf is not None:
+        ax2.plot(df_ndf.index, df_ndf['종가'], linewidth=0.5, label='나스닥선물', color='r')
     elif df_bc is not None:
-        ax2.plot(df_bc.index, df_bc['종가'], linewidth=0.5, label='KRW-BTC', color='r')
+        ax2.plot(df_bc.index, df_bc['종가'], linewidth=0.5, label='비트코인', color='r')
     ax2.set_title('지수비교')
     step = max(1, len(df_ts) // 15)
     xticks = df_ts.index[::step]
@@ -602,13 +607,13 @@ def PlotShow(gubun, is_tick, teleQ, df_tsg, df_bct, dict_cn, seed, mdd, startday
     teleQ.put(f"{GRAPH_PATH}/{save_file_name}.png")
 
 
-def GetResultDataframe(ui_gubun, list_tsg, arry_bct):
+def get_result_dataframe(market_gubun, list_tsg, arry_bct):
     columns1 = [
-        'index', '종목명', '포지션' if ui_gubun in ('SF', 'CF') else '시가총액', '매수시간', '매도시간',
+        'index', '종목명', '포지션' if market_gubun > 5 else '시가총액', '매수시간', '매도시간',
         '보유시간', '매수가', '매도가', '매수금액', '매도금액', '수익률', '수익금', '매도조건', '추가매수시간'
     ]
     columns2 = [
-        '종목명', '포지션' if ui_gubun in ('SF', 'CF') else '시가총액', '매수시간', '매도시간',
+        '종목명', '포지션' if market_gubun > 5 else '시가총액', '매수시간', '매도시간',
         '보유시간', '매수가', '매도가', '매수금액', '매도금액', '수익률', '수익금', '수익금합계', '매도조건', '추가매수시간'
     ]
     df_tsg = pd.DataFrame(list_tsg, columns=columns1)
@@ -622,7 +627,7 @@ def GetResultDataframe(ui_gubun, list_tsg, arry_bct):
     return df_tsg, df_bct
 
 
-def AddMdd(arry_tsg, result):
+def add_mdd(arry_tsg, result):
     """
     arry_tsg
     보유시간, 매도시간, 수익률, 수익금, 수익금합계

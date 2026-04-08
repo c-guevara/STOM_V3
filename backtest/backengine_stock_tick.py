@@ -1,15 +1,15 @@
 
 from backtest.backengine_base import BackEngineBase
-from utility.static import GetKiwoomPgSgSp, dt_ymdhms, GetHogaunit
+from utility.static import get_stock_profit, dt_ymdhms, get_stock_hogaunit
 # noinspection PyUnresolvedReferences
 from utility.static import timedelta_sec
 
 
-class BackEngineKiwoomTick(BackEngineBase):
+class BackEngineStockTick(BackEngineBase):
     # noinspection PyUnusedLocal
-    def Strategy(self):
-        현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
-            거래대금증감, 전일비, 회전율, 전일동시간비, 시가총액, 라운드피겨위5호가이내, VI해제시간, VI가격, VI호가단위, \
+    def _strategy(self):
+        현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
+            VI해제시간, VI가격, VI호가단위, \
             초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
             매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, \
             매수호가5, 매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
@@ -24,14 +24,14 @@ class BackEngineKiwoomTick(BackEngineBase):
 
         VI해제시간, 순매수금액 = dt_ymdhms(str(int(VI해제시간))), 초당매수금액 - 초당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:])
-        self.hoga_unit = 호가단위 = GetHogaunit(self.dict_kosd.get(종목코드, False), 현재가, 체결시간)
+        self.hoga_unit = 호가단위 = get_stock_hogaunit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
         self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
         self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
 
-        self.UpdateHighLow(현재가)
+        self._update_highlow(현재가)
 
         if self.dict_condition:
             if 종목코드 not in self.dict_cond_indexn:
@@ -89,7 +89,7 @@ class BackEngineKiwoomTick(BackEngineBase):
                         if not 관심종목: continue
                         exec(self.buystg)
                     else:
-                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                         self.profit, self.hold_time = 수익률, 보유시간
                         exec(self.sellstg)
 
@@ -120,7 +120,7 @@ class BackEngineKiwoomTick(BackEngineBase):
                         else:
                             exec(self.dict_buystg[index_])
                     else:
-                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                         self.profit, self.hold_time = 수익률, 보유시간
                         if self.back_type != '조건최적화':
                             exec(self.sellstg)
@@ -145,26 +145,20 @@ class BackEngineKiwoomTick(BackEngineBase):
                 if not 관심종목: return
                 exec(self.buystg)
             else:
-                포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                 self.profit, self.hold_time = 수익률, 보유시간
                 exec(self.sellstg)
 
-    def UpdateMarketGubun(self):
-        self.market_gubun = 1
-
-    def update_globals_func(self, dict_add_func):
+    def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
-    def GetOrderCount(self, betting, 현재가, 보유중, 매수가, oc_ratio):
+    def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         return int(betting / 현재가)
 
-    def GetBuyPrice(self, 매수금액, 주문수량):
-        return int(매수금액 / 주문수량 + 0.5)
+    def _get_order_price(self, 거래금액, 주문수량):
+        return int(거래금액 / 주문수량 + 0.5)
 
-    def GetSellPrice(self, 매도금액, 주문수량):
-        return int(매도금액 / 주문수량 + 0.5)
-
-    def GetLastSellPrice(self, 매도금액, 보유수량, 미체결수량):
+    def _get_last_sell_price(self, 매도금액, 보유수량, 미체결수량):
         if 미체결수량 <= 0:
             매도가 = int(매도금액 / 보유수량 + 0.5)
         elif 매도금액 == 0:
@@ -173,7 +167,7 @@ class BackEngineKiwoomTick(BackEngineBase):
             매도가 = int(매도금액 / (보유수량 - 미체결수량) + 0.5)
         return 매도가
 
-    def GetProfitInfo(self, 현재가, 매수가, 보유수량):
+    def _get_profit_info(self, 현재가, 매수가, 보유수량):
         시가총액 = int(self.arry_code[self.indexn, self.dict_findex['시가총액']])
-        평가금액, 수익금, 수익률 = GetKiwoomPgSgSp(보유수량 * 매수가, 보유수량 * 현재가)
+        평가금액, 수익금, 수익률 = get_stock_profit(보유수량 * 매수가, 보유수량 * 현재가)
         return 시가총액, 평가금액, 수익금, 수익률

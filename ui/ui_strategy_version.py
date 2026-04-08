@@ -7,13 +7,13 @@ from utility.static import qtest_qwait
 from PyQt5.QtWidgets import QMessageBox
 from utility.static import error_decorator
 from utility.strategy_version_manager import StrategyVersionManager
-from ui.ui_button_clicked_editer_unified import change_pre_button_edit, change_version_button_color
+from ui.ui_button_clicked_editer import change_pre_button_edit, change_version_button_color
 
 
 SVM = StrategyVersionManager('stock', 'basic', 'buy', 'dummy')
 
 
-def stock_visible_false(ui):
+def visible_false(ui):
     ui.ss_textEditttt_01.setVisible(False)
     ui.ss_textEditttt_02.setVisible(False)
     ui.ss_textEditttt_03.setVisible(False)
@@ -24,19 +24,6 @@ def stock_visible_false(ui):
     ui.ss_textEditttt_08.setVisible(False)
     ui.szoo_pushButon_01.setVisible(False)
     ui.szoo_pushButon_02.setVisible(False)
-
-
-def coin_visible_false(ui):
-    ui.cs_textEditttt_01.setVisible(False)
-    ui.cs_textEditttt_02.setVisible(False)
-    ui.cs_textEditttt_03.setVisible(False)
-    ui.cs_textEditttt_04.setVisible(False)
-    ui.cs_textEditttt_05.setVisible(False)
-    ui.cs_textEditttt_06.setVisible(False)
-    ui.cs_textEditttt_07.setVisible(False)
-    ui.cs_textEditttt_08.setVisible(False)
-    ui.czoo_pushButon_01.setVisible(False)
-    ui.czoo_pushButon_02.setVisible(False)
 
 
 def comboBox_reload(comboBox1, comboBox2):
@@ -50,44 +37,38 @@ def comboBox_reload(comboBox1, comboBox2):
             comboBox2.addItem(item)
 
 
-def get_widget(ui, sorc, gubun1, gubun2):
+def get_widget(ui, gubun1, gubun2):
     if gubun1 == 'basic':
         if gubun2 == 'buy':
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_01')
+            textEdit1 = getattr(ui, 'ss_textEditttt_01')
         else:
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_02')
+            textEdit1 = getattr(ui, 'ss_textEditttt_02')
     elif gubun1 == 'opti':
         if gubun2 == 'buy':
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_03')
+            textEdit1 = getattr(ui, 'ss_textEditttt_03')
         elif gubun2 == 'sell':
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_04')
+            textEdit1 = getattr(ui, 'ss_textEditttt_04')
         elif gubun2 == 'vars':
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_05')
+            textEdit1 = getattr(ui, 'ss_textEditttt_05')
         else:
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_06')
+            textEdit1 = getattr(ui, 'ss_textEditttt_06')
     else:
         if gubun2 == 'buy':
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_07')
+            textEdit1 = getattr(ui, 'ss_textEditttt_07')
         else:
-            textEdit1 = getattr(ui, f'{sorc}s_textEditttt_08')
-    textEdit2 = getattr(ui, f'{sorc}s_textEditttt_10')
-    comboBox1 = getattr(ui, f'{sorc}s_comboBoxxxx_41')
-    comboBox2 = getattr(ui, f'{sorc}s_comboBoxxxx_42')
+            textEdit1 = getattr(ui, 'ss_textEditttt_08')
+    textEdit2 = getattr(ui, 'ss_textEditttt_10')
+    comboBox1 = getattr(ui, 'ss_comboBoxxxx_41')
+    comboBox2 = getattr(ui, 'ss_comboBoxxxx_42')
     return textEdit1, textEdit2, comboBox1, comboBox2
 
 
 @error_decorator
-def strategy_version(ui, market, gubun1, gubun2, strategy_name):
-    if market in ('stock', 'future'):
-        not_visible_widjet1 = getattr(ui, 'svc_pushButton_21')
-        not_visible_widjet2 = getattr(ui, 'svc_pushButton_24')
-        not_visible_widjet3 = getattr(ui, 'ss_pushButtonn_08')
-        not_visible_widjet4 = getattr(ui, 'ss_pushButtonn_07')
-    else:
-        not_visible_widjet1 = getattr(ui, 'cvc_pushButton_21')
-        not_visible_widjet2 = getattr(ui, 'cvc_pushButton_24')
-        not_visible_widjet3 = getattr(ui, 'cs_pushButtonn_08')
-        not_visible_widjet4 = getattr(ui, 'cs_pushButtonn_07')
+def strategy_version(ui, gubun1, gubun2, strategy_name):
+    not_visible_widjet1 = getattr(ui, 'svc_pushButton_21')
+    not_visible_widjet2 = getattr(ui, 'svc_pushButton_24')
+    not_visible_widjet3 = getattr(ui, 'ss_pushButtonn_08')
+    not_visible_widjet4 = getattr(ui, 'ss_pushButtonn_07')
 
     if not_visible_widjet1.isVisible():
         QMessageBox.critical(ui, '오류 알림', '변수편집기 상태에서는 사용할 수 없습니다.\n')
@@ -103,18 +84,14 @@ def strategy_version(ui, market, gubun1, gubun2, strategy_name):
         return
 
     global SVM
+    market = ui.market_info['전략구분']
     SVM = StrategyVersionManager(market, gubun1, gubun2, strategy_name)
 
-    if market in ('stock', 'future'):
-        stock_visible_false(ui)
-        version_widget_list = getattr(ui, 'stock_version_list')
-        version_delete_btn  = getattr(ui, 'ss_pushButtonn_41')
-    else:
-        coin_visible_false(ui)
-        version_widget_list = getattr(ui, 'coin_version_list')
-        version_delete_btn  = getattr(ui, 'cs_pushButtonn_41')
+    visible_false(ui)
+    version_widget_list = getattr(ui, 'stock_version_list')
+    version_delete_btn  = getattr(ui, 'ss_pushButtonn_41')
 
-    textEdit1, textEdit2, comboBox1, comboBox2 = get_widget(ui, SVM.sorc, gubun1, gubun2)
+    textEdit1, textEdit2, comboBox1, comboBox2 = get_widget(ui, gubun1, gubun2)
     textEdit1.setGeometry(7, 40, 497, 1307 if ui.extend_window else 700)
     textEdit2.setGeometry(509, 40, 497, 1307 if ui.extend_window else 700)
     textEdit1.setVisible(True)
@@ -126,9 +103,8 @@ def strategy_version(ui, market, gubun1, gubun2, strategy_name):
     for widget in version_widget_list:
         widget.setVisible(True)
 
-    gubun = 'stock' if SVM.sorc == 's' else 'coin'
-    change_pre_button_edit(ui, gubun)
-    change_version_button_color(ui, gubun)
+    change_pre_button_edit(ui)
+    change_version_button_color(ui)
 
     comboBox_reload(comboBox1, comboBox2)
 
@@ -143,8 +119,8 @@ def sync_scroll(version_delete_btn, target_edit, value):
 def strategy_version_delete(ui):
     """버전 삭제 버튼 호출"""
     global SVM
-    comboBox1 = getattr(ui, f'{SVM.sorc}s_comboBoxxxx_41')
-    comboBox2 = getattr(ui, f'{SVM.sorc}s_comboBoxxxx_42')
+    comboBox1 = getattr(ui, 'ss_comboBoxxxx_41')
+    comboBox2 = getattr(ui, 'ss_comboBoxxxx_42')
     version = comboBox2.currentText()
     if version:
         SVM.delete_version(version)
@@ -157,7 +133,7 @@ def strategy_version_delete(ui):
 def dactivated_04(ui):
     """버전 콤보박스 변경 시 호출 diff 표시"""
     global SVM
-    textEdit1, textEdit2, comboBox1, comboBox2 = get_widget(ui, SVM.sorc, SVM.gubun1, SVM.gubun2)
+    textEdit1, textEdit2, comboBox1, comboBox2 = get_widget(ui, SVM.gubun1, SVM.gubun2)
     version1   = comboBox1.currentText()
     version2   = comboBox2.currentText()
     stg_text1  = SVM.load_version(version1)

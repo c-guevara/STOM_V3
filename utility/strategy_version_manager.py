@@ -15,13 +15,12 @@ class StrategyVersionManager:
     def __init__(self, market: str, gubun1: str, gubun2: str, strategy_name: str):
         """
         Args:
-            market: 거래소 구분 ('stock', 'future', 'upbit', 'binance')
+            market: 거래소 구분
             gubun1: 전략 구분 ('basic', 'opti', 'cond')
             gubun2: 매수, 매도, 최적화범위, GA범위 구분 ('buy', 'sell', 'vars', 'gavars')
             strategy_name: 전략 이름
         """
 
-        self.sorc   = 's' if market in ('stock', 'future') else 'c'
         self.market = market
         self.gubun1 = gubun1
         self.gubun2 = gubun2

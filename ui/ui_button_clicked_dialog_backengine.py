@@ -10,13 +10,13 @@ from multiprocessing import Process, shared_memory
 from ui.ui_process_alive import backtest_process_alive
 from utility.static import qtest_qwait, error_decorator
 from backtest.optimiz_conditions import OptimizeConditions
-from ui.ui_button_clicked_editer_unified import backtest_log
+from ui.ui_button_clicked_editer import backtest_log
 from ui.ui_button_clicked_shortcut import mnbutton_c_clicked_01
 from PyQt5.QtWidgets import QLineEdit, QMessageBox, QApplication
+from ui.ui_button_clicked_editer_backlog import ssbutton_clicked_06
 from backtest.rolling_walk_forward_test import RollingWalkForwardTest
 from backtest.optimiz_genetic_algorithm import OptimizeGeneticAlgorithm
 from ui.ui_backtest_engine import clear_backtestQ, backengine_start, backengine_show
-from ui.ui_button_clicked_editer_backlog import csbutton_clicked_06, ssbutton_clicked_06
 
 
 @error_decorator
@@ -25,32 +25,17 @@ def bebutton_clicked_01(ui):
         QMessageBox.critical(ui.dialog_backengine, '오류 알림', '백테엔진 구동 중...\n')
         return
 
-    if ui.main_btn == 3 or (ui.dialog_scheduler.isVisible() and ui.sd_pushButtonnn_01.text() == '주식'):
-        gubun = '주식' if '키움증권' in ui.dict_set['증권사'] else '해선'
-        if not ui.backtest_engine:
-            backengine_start(ui, gubun)
-        else:
-            buttonReply = QMessageBox.question(
-                ui.dialog_backengine, '백테엔진', '이미 백테스트 엔진이 구동중입니다.\n엔진을 재시작하시겠습니까?\n',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-            )
-            if buttonReply == QMessageBox.Yes:
-                backtest_engine_kill(ui)
-                qtest_qwait(3)
-                backengine_start(ui, gubun)
-
-    elif ui.main_btn == 4 or (ui.dialog_scheduler.isVisible() and ui.sd_pushButtonnn_01.text() == '코인'):
-        if not ui.backtest_engine:
-            backengine_start(ui, '코인')
-        else:
-            buttonReply = QMessageBox.question(
-                ui.dialog_backengine, '백테엔진', '이미 백테스트 엔진이 구동중입니다.\n엔진을 재시작하시겠습니까?\n',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-            )
-            if buttonReply == QMessageBox.Yes:
-                backtest_engine_kill(ui)
-                qtest_qwait(3)
-                backengine_start(ui, '코인')
+    if not ui.backtest_engine:
+        backengine_start(ui)
+    else:
+        buttonReply = QMessageBox.question(
+            ui.dialog_backengine, '백테엔진', '이미 백테스트 엔진이 구동중입니다.\n엔진을 재시작하시겠습니까?\n',
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
+        if buttonReply == QMessageBox.Yes:
+            backtest_engine_kill(ui)
+            qtest_qwait(3)
+            backengine_start(ui)
 
 
 @error_decorator
@@ -102,23 +87,11 @@ def backtest_engine_kill(ui):
     ui.back_sprocs = []
     ui.back_eques  = []
     ui.back_sques  = []
-    ui.dict_cn     = None
     ui.back_count  = 0
     ui.back_engining   = False
     ui.backtest_engine = False
     if ui.dialog_backengine.isVisible():
         ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>백테스트 엔진 종료 완료</font>'))
-
-
-@error_decorator
-def sdbutton_clicked_01(ui):
-    if ui.dialog_scheduler.focusWidget().__class__ != QLineEdit:
-        if ui.sd_pushButtonnn_01.text() == '주식':
-            ui.sd_pushButtonnn_01.setText('코인')
-        elif ui.sd_pushButtonnn_01.text() == '코인':
-            ui.sd_pushButtonnn_01.setText('해선')
-        else:
-            ui.sd_pushButtonnn_01.setText('주식')
 
 
 @error_decorator
@@ -129,15 +102,13 @@ def sdbutton_clicked_02(ui):
         if ui.back_engining:
             QMessageBox.critical(ui.dialog_backengine, '오류 알림', '백테엔진 구동 중...\n')
             return
-        bt_gubun = ui.sd_pushButtonnn_01.text()
+
         if not ui.backtest_engine or (QApplication.keyboardModifiers() & Qt.ControlModifier):
-            backengine_show(ui, bt_gubun)
+            backengine_show(ui)
             return
 
-        if bt_gubun == '주식' and ui.main_btn != 3:
-            mnbutton_c_clicked_01(ui, 3)
-        elif bt_gubun == '코인' and ui.main_btn != 4:
-            mnbutton_c_clicked_01(ui, 4)
+        if ui.main_btn != 2:
+            mnbutton_c_clicked_01(ui, 2)
 
         clear_backtestQ(ui)
         if ui.back_schedul:
@@ -171,32 +142,24 @@ def sdbutton_clicked_02(ui):
                 for q in ui.back_eques:
                     q.put(('백테유형', '백테스트'))
 
-                if bt_gubun == '주식':
-                    gubun = 'S' if '키움증권' in ui.dict_set['증권사'] else 'SF'
+                if ui.market_gubun not in (5, 9):
                     ui.proc_backtester_bs = Process(
                         target=BackTest,
-                        args=(ui.shared_cnt, ui.windowQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, back_name, gubun, ui.dict_set, betting, avgtime,
-                              startday, endday, starttime, endtime, buystg, sellstg, ui.dict_cn, ui.back_count,
-                              bl, True, False)
+                        args=(ui.shared_cnt, ui.windowQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ, ui.back_eques,
+                              ui.back_sques, back_name, ui.dict_set, ui.market_infos, betting, avgtime, startday,
+                              endday, starttime, endtime, buystg, sellstg, ui.back_count, bl, True, False)
                     )
-                    ui.proc_backtester_bs.start()
-                    backtest_log(ui, 'stock')
-                    ui.ss_progressBar_01.setValue(0)
-                    ui.ssicon_alert = True
                 else:
-                    gubun = 'C' if ui.dict_set['거래소'] == '업비트' else 'CF'
                     ui.proc_backtester_bs = Process(
                         target=BackTest,
-                        args=(ui.shared_cnt, ui.windowQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, back_name, gubun, ui.dict_set, betting, avgtime,
-                              startday, endday, starttime, endtime, buystg, sellstg, None, ui.back_count,
-                              bl, True, False)
+                        args=(ui.shared_cnt, ui.windowQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ, ui.back_eques,
+                              ui.back_sques, back_name, ui.dict_set, ui.market_infos, betting, avgtime, startday,
+                              endday, starttime, endtime, buystg, sellstg, ui.back_count, bl, True, False)
                     )
-                    ui.proc_backtester_bs.start()
-                    backtest_log(ui, 'coin')
-                    ui.cs_progressBar_01.setValue(0)
-                    ui.csicon_alert = True
+                ui.proc_backtester_bs.start()
+                backtest_log(ui)
+                ui.ss_progressBar_01.setValue(0)
+                ui.ssicon_alert = True
 
             elif '조건' in back_name:
                 starttime   = ui.list_slineEdittttt[ui.back_scount].text()
@@ -223,41 +186,32 @@ def sdbutton_clicked_02(ui):
                     bcount, scount, rcount, ui.back_count, weeks_train, weeks_valid, weeks_test, benginesday,
                     bengineeday
                 ))
-                if bt_gubun == '주식':
-                    gubun = 'S' if '키움증권' in ui.dict_set['증권사'] else 'SF'
-                else:
-                    gubun = 'C' if ui.dict_set['거래소'] == '업비트' else 'CF'
 
                 if back_name == '조건 최적화':
                     ui.proc_backtester_oc = Process(
                         target=OptimizeConditions,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.back_eques,
-                              ui.back_sques, ui.multi, '최적화OC', gubun, ui.dict_set)
+                              ui.back_sques, ui.multi, '최적화OC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_oc.start()
                 elif back_name == '검증 조건 최적화':
                     ui.proc_backtester_ocv = Process(
                         target=OptimizeConditions,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.back_eques,
-                              ui.back_sques, ui.multi, '최적화OCV', gubun, ui.dict_set)
+                              ui.back_sques, ui.multi, '최적화OCV', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ocv.start()
                 elif back_name == '교차검증 조건 최적화':
                     ui.proc_backtester_ocvc = Process(
                         target=OptimizeConditions,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.back_eques,
-                              ui.back_sques, ui.multi, '최적화OCVC', gubun, ui.dict_set)
+                              ui.back_sques, ui.multi, '최적화OCVC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ocvc.start()
 
-                if bt_gubun == '주식':
-                    backtest_log(ui, 'stock')
-                    ui.ss_progressBar_01.setValue(0)
-                    ui.ssicon_alert = True
-                else:
-                    backtest_log(ui, 'coin')
-                    ui.cs_progressBar_01.setValue(0)
-                    ui.csicon_alert = True
+                backtest_log(ui)
+                ui.ss_progressBar_01.setValue(0)
+                ui.ssicon_alert = True
 
             elif 'GA' in back_name:
                 starttime   = ui.list_slineEdittttt[ui.back_scount].text()
@@ -276,49 +230,42 @@ def sdbutton_clicked_02(ui):
                 for q in ui.back_eques:
                     q.put(('백테유형', 'GA최적화'))
 
-                if bt_gubun == '주식':
+                if ui.market_gubun not in (5, 9):
                     ui.backQ.put((
-                        betting, starttime, endtime, buystg, sellstg, optivars, ui.dict_cn, ui.dict_set['최적화기준값제한'],
+                        betting, starttime, endtime, buystg, sellstg, optivars, ui.dict_set['최적화기준값제한'],
                         optistd, ui.back_count, weeks_train, weeks_valid, weeks_test, benginesday, bengineeday
                     ))
-                    gubun = 'S' if '키움증권' in ui.dict_set['증권사'] else 'SF'
                 else:
                     ui.backQ.put((
-                        betting, starttime, endtime, buystg, sellstg, optivars, None, ui.dict_set['최적화기준값제한'],
+                        betting, starttime, endtime, buystg, sellstg, optivars, ui.dict_set['최적화기준값제한'],
                         optistd, ui.back_count, weeks_train, weeks_valid, weeks_test, benginesday, benginesday
                     ))
-                    gubun = 'C' if ui.dict_set['거래소'] == '업비트' else 'CF'
 
                 if back_name == 'GA 최적화':
                     ui.proc_backtester_og = Process(
                         target=OptimizeGeneticAlgorithm,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.back_eques,
-                              ui.back_sques, ui.multi, '최적화OG', gubun, ui.dict_set)
+                              ui.back_sques, ui.multi, '최적화OG', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_og.start()
                 elif back_name == '검증 GA 최적화':
                     ui.proc_backtester_ogv = Process(
                         target=OptimizeGeneticAlgorithm,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.back_eques,
-                              ui.back_sques, ui.multi, '최적화OGV', gubun, ui.dict_set)
+                              ui.back_sques, ui.multi, '최적화OGV', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ogv.start()
                 elif back_name == '교차검증 GA 최적화':
                     ui.proc_backtester_ogvc = Process(
                         target=OptimizeGeneticAlgorithm,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.back_eques,
-                              ui.back_sques, ui.multi, '최적화OGVC', gubun, ui.dict_set)
+                              ui.back_sques, ui.multi, '최적화OGVC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ogvc.start()
 
-                if bt_gubun == '주식':
-                    backtest_log(ui, 'stock')
-                    ui.ss_progressBar_01.setValue(0)
-                    ui.ssicon_alert = True
-                else:
-                    backtest_log(ui, 'coin')
-                    ui.cs_progressBar_01.setValue(0)
-                    ui.csicon_alert = True
+                backtest_log(ui)
+                ui.ss_progressBar_01.setValue(0)
+                ui.ssicon_alert = True
 
             elif '전진분석' in back_name:
                 startday    = ui.list_sdateEdittttt[ui.back_scount].date().toString('yyyyMMdd')
@@ -344,73 +291,65 @@ def sdbutton_clicked_02(ui):
                 for q in ui.back_eques:
                     q.put(('백테유형', '전진분석'))
 
-                if bt_gubun == '주식':
+                if ui.market_gubun not in (5, 9):
                     ui.backQ.put((
-                        betting, startday, endday, starttime, endtime, buystg, sellstg, optivars, ui.dict_cn,
-                        ccount, ui.dict_set['최적화기준값제한'], optistd, ui.back_count, True, weeks_train,
-                        weeks_valid, weeks_test, benginesday, bengineeday, optunasampl, optunafixv, optunacount,
-                        optunaautos, False
-                    ))
-                    gubun = 'S' if '키움증권' in ui.dict_set['증권사'] else 'SF'
-                else:
-                    ui.backQ.put((
-                        betting, startday, endday, starttime, endtime, buystg, sellstg, optivars, None, ccount,
+                        betting, startday, endday, starttime, endtime, buystg, sellstg, optivars, ccount,
                         ui.dict_set['최적화기준값제한'], optistd, ui.back_count, True, weeks_train, weeks_valid,
                         weeks_test, benginesday, bengineeday, optunasampl, optunafixv, optunacount, optunaautos, False
                     ))
-                    gubun = 'C' if ui.dict_set['거래소'] == '업비트' else 'CF'
+                else:
+                    ui.backQ.put((
+                        betting, startday, endday, starttime, endtime, buystg, sellstg, optivars, ccount,
+                        ui.dict_set['최적화기준값제한'], optistd, ui.back_count, True, weeks_train, weeks_valid,
+                        weeks_test, benginesday, bengineeday, optunasampl, optunafixv, optunacount, optunaautos, False
+                    ))
 
                 if back_name == '그리드 최적화 전진분석':
                     ui.proc_backtester_or = Process(
                         target=RollingWalkForwardTest,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '전진분석OR', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '전진분석OR', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_or.start()
                 elif back_name == '그리드 검증 최적화 전진분석':
                     ui.proc_backtester_orv = Process(
                         target=RollingWalkForwardTest,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '전진분석ORV', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '전진분석ORV', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_orv.start()
                 elif back_name == '그리드 교차검증 최적화 전진분석':
                     ui.proc_backtester_orvc = Process(
                         target=RollingWalkForwardTest,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '전진분석ORVC', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '전진분석ORVC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_orvc.start()
                 elif back_name == '베이지안 최적화 전진분석':
                     ui.proc_backtester_br = Process(
                         target=RollingWalkForwardTest,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '전진분석BR', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '전진분석BR', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_br.start()
                 elif back_name == '베이지안 검증 최적화 전진분석':
                     ui.proc_backtester_brv = Process(
                         target=RollingWalkForwardTest,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '전진분석BRV', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '전진분석BRV', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_brv.start()
                 elif back_name == '베이지안 교차검증 최적화 전진분석':
                     ui.proc_backtester_brvc = Process(
                         target=RollingWalkForwardTest,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '전진분석BRVC', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '전진분석BRVC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_brvc.start()
 
-                if bt_gubun == '주식':
-                    backtest_log(ui, 'stock')
-                    ui.ss_progressBar_01.setValue(0)
-                    ui.ssicon_alert = True
-                else:
-                    backtest_log(ui, 'coin')
-                    ui.cs_progressBar_01.setValue(0)
-                    ui.csicon_alert = True
+                backtest_log(ui)
+                ui.ss_progressBar_01.setValue(0)
+                ui.ssicon_alert = True
 
             elif '최적화' in back_name:
                 starttime   = ui.list_slineEdittttt[ui.back_scount].text()
@@ -434,116 +373,107 @@ def sdbutton_clicked_02(ui):
                 for q in ui.back_eques:
                     q.put(('백테유형', '최적화'))
 
-                if bt_gubun == '주식':
+                if ui.market_gubun not in (5, 9):
                     ui.backQ.put((
-                        betting, starttime, endtime, buystg, sellstg, optivars, ui.dict_cn, ccount,
-                        ui.dict_set['최적화기준값제한'], optistd, ui.back_count, True, weeks_train, weeks_valid,
-                        weeks_test, benginesday, bengineeday, optunasampl, optunafixv, optunacount, optunaautos,
-                        False, False, False
+                        betting, starttime, endtime, buystg, sellstg, optivars, ccount, ui.dict_set['최적화기준값제한'],
+                        optistd, ui.back_count, True, weeks_train, weeks_valid, weeks_test, benginesday, bengineeday,
+                        optunasampl, optunafixv, optunacount, optunaautos, False, False, False
                     ))
-                    gubun = 'S' if '키움증권' in ui.dict_set['증권사'] else 'SF'
                 else:
                     ui.backQ.put((
-                        betting, starttime, endtime, buystg, sellstg, optivars, None, ccount,
-                        ui.dict_set['최적화기준값제한'], optistd, ui.back_count, True, weeks_train, weeks_valid,
-                        weeks_test, benginesday, bengineeday, optunasampl, optunafixv, optunacount, optunaautos,
-                        False, False, False
+                        betting, starttime, endtime, buystg, sellstg, optivars, ccount, ui.dict_set['최적화기준값제한'],
+                        optistd, ui.back_count, True, weeks_train, weeks_valid, weeks_test, benginesday, bengineeday,
+                        optunasampl, optunafixv, optunacount, optunaautos, False, False, False
                     ))
-                    gubun = 'C' if ui.dict_set['거래소'] == '업비트' else 'CF'
 
                 if back_name == '그리드 최적화':
                     ui.proc_backtester_o = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화O', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화O', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_o.start()
                 elif back_name == '그리드 검증 최적화':
                     ui.proc_backtester_ov = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화OV', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화OV', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ov.start()
                 elif back_name == '그리드 교차검증 최적화':
                     ui.proc_backtester_ovc = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화OVC', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화OVC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ovc.start()
                 elif back_name == '베이지안 최적화':
                     ui.proc_backtester_b = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화B', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화B', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_b.start()
                 elif back_name == '베이지안 검증 최적화':
                     ui.proc_backtester_bv = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화BV', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화BV', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_bv.start()
                 elif back_name == '베이지안 교차검증 최적화':
                     ui.proc_backtester_bvc = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화BVC', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화BVC', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_bvc.start()
                 elif back_name == '그리드 최적화 테스트':
                     ui.proc_backtester_ot = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화OT', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화OT', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ot.start()
                 elif back_name == '그리드 검증 최적화 테스트':
                     ui.proc_backtester_ovt = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화OVT', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화OVT', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ovt.start()
                 elif back_name == '그리드 교차검증 최적화 테스트':
                     ui.proc_backtester_ovct = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화OVCT', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화OVCT', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_ovct.start()
                 elif back_name == '베이지안 최적화 테스트':
                     ui.proc_backtester_bt = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화BT', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화BT', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_bt.start()
                 elif back_name == '베이지안 검증 최적화 테스트':
                     ui.proc_backtester_bvt = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화BVT', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화BVT', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_bvt.start()
                 elif back_name == '베이지안 교차검증 최적화 테스트':
                     ui.proc_backtester_bvct = Process(
                         target=Optimize,
                         args=(ui.shared_cnt, ui.windowQ, ui.backQ, ui.soundQ, ui.totalQ, ui.liveQ, ui.teleQ,
-                              ui.back_eques, ui.back_sques, ui.multi, '최적화BVCT', gubun, ui.dict_set)
+                              ui.back_eques, ui.back_sques, ui.multi, '최적화BVCT', ui.dict_set, ui.market_infos)
                     )
                     ui.proc_backtester_bvct.start()
 
-                if bt_gubun == '주식':
-                    backtest_log(ui, 'stock')
-                    ui.ss_progressBar_01.setValue(0)
-                    ui.ssicon_alert = True
-                else:
-                    backtest_log(ui, 'coin')
-                    ui.cs_progressBar_01.setValue(0)
-                    ui.csicon_alert = True
+                backtest_log(ui)
+                ui.ss_progressBar_01.setValue(0)
+                ui.ssicon_alert = True
 
             ui.list_progressBarrr[ui.back_scount].setValue(0)
             ui.back_schedul = True
@@ -565,10 +495,7 @@ def StopScheduler(ui, gubun=False):
 
 @error_decorator
 def sdbutton_clicked_03(ui):
-    if ui.sd_pushButtonnn_01.text() in ('주식', '해선'):
-        ssbutton_clicked_06(ui)
-    else:
-        csbutton_clicked_06(ui)
+    ssbutton_clicked_06(ui)
     for progressBar in ui.list_progressBarrr:
         progressBar.setValue(0)
 

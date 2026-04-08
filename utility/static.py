@@ -52,12 +52,11 @@ def get_ema_list(is_tick):
     return (60, 150, 300, 600, 1200) if is_tick else (5, 10, 20, 60, 120)
 
 
-def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
+def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None, cf2=None):
     import numpy as np
-    from utility.setting_base import DICT_MARKET_INFO
 
     for window in get_ema_list(is_tick):
-        df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(3 if market == 1 else 8)
+        df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(round_unit)
 
     for avg in avg_list:
         rolling_data = df['현재가'].rolling(window=avg)
@@ -91,7 +90,7 @@ def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
             df[f'분당거래대금평균{avg}'] = df['분당거래대금'].rolling(window=avg).mean().round(0)
 
         if cf1 is None:
-            cf1, cf2 = DICT_MARKET_INFO[market]['각도계수'][is_tick]
+            cf1, cf2 = angle_cf_list
 
         df2 = df[['등락율', '당일거래대금']].copy()
         df2[f'등락율N{avg}'] = df2['등락율'].shift(avg - 1)
@@ -100,12 +99,6 @@ def add_rolling_data(df, market, is_tick, avg_list, cf1=None, cf2=None):
         df2['당일거래대금차이'] = df2['당일거래대금'] - df2[f'당일거래대금N{avg}']
         df['등락율각도'] = round(np.arctan2(df2['등락율차이'] * cf1, avg) / (2 * np.pi) * 360, 2)
         df['당일거래대금각도'] = round(np.arctan2(df2['당일거래대금차이'] * cf2, avg) / (2 * np.pi) * 360, 2)
-
-        if market == 1:
-            df2['전일비'] = df['전일비']
-            df2[f'전일비N{avg}'] = df2['전일비'].shift(avg - 1)
-            df2['전일비차이'] = df2['전일비'] - df2[f'전일비N{avg}']
-            df['전일비각도'] = round(np.arctan2(df2['전일비차이'], avg) / (2 * np.pi) * 360, 2)
 
     arry = np.array(df)
     return np.nan_to_num(arry)
@@ -489,100 +482,81 @@ _UPBIT_HOGA_KEYS = (0.01, 1, 10, 100, 1000, 10000, 100000, 500000, 1000000, 2000
 _UPBIT_HOGA_VALS = (0.0001, 0.001, 0.01, 0.1, 1, 5, 10, 50, 100, 500, 1000)
 
 
-def GetUpbitHogaunit(price):
+def get_upbit_hoga_unit(price):
     idx = bisect.bisect_right(_UPBIT_HOGA_KEYS, price)
     return _UPBIT_HOGA_VALS[idx]
 
 
-_HOGA_OLD_KOSD_KEYS = (1000, 5000, 10000, 50000, float('inf'))
-_HOGA_OLD_KOSD_VALS = (1, 5, 10, 50, 100)
-_HOGA_OLD_KOSPI_KEYS = (1000, 5000, 10000, 50000, 100000, 500000, float('inf'))
-_HOGA_OLD_KOSPI_VALS = (1, 5, 10, 50, 100, 500, 1000)
 _HOGA_NEW_KEYS = (2000, 5000, 20000, 50000, 200000, 500000, float('inf'))
 _HOGA_NEW_VALS = (1, 5, 10, 50, 100, 500, 1000)
 
 
-def GetHogaunit(kosd, price, index):
-    if index < 20230125000000:
-        if kosd:
-            idx = bisect.bisect_right(_HOGA_OLD_KOSD_KEYS, price)
-            return _HOGA_OLD_KOSD_VALS[idx]
-        else:
-            idx = bisect.bisect_right(_HOGA_OLD_KOSPI_KEYS, price)
-            return _HOGA_OLD_KOSPI_VALS[idx]
-    else:
-        idx = bisect.bisect_right(_HOGA_NEW_KEYS, price)
-        return _HOGA_NEW_VALS[idx]
+def get_stock_hogaunit(price):
+    idx = bisect.bisect_right(_HOGA_NEW_KEYS, price)
+    return _HOGA_NEW_VALS[idx]
 
 
-_ROUND_UPPER_OLD_BASES = (1000, 5000, 10000, 50000, 100000, 500000)
-_ROUND_UPPER_OLD_RANGES = (5, 10, 50, 100, 500, 1000)
-_ROUND_UPPER_NEW_BASES = (2000, 5000, 20000, 50000, 200000, 500000)
-_ROUND_UPPER_NEW_RANGES = (5, 10, 50, 100, 500, 1000)
-
-
-def roundfigure_upper(price, unit, index):
-    if index < 20230125000000:
-        bases = _ROUND_UPPER_OLD_BASES
-        ranges = _ROUND_UPPER_OLD_RANGES
-    else:
-        bases = _ROUND_UPPER_NEW_BASES
-        ranges = _ROUND_UPPER_NEW_RANGES
-    idx = bisect.bisect_right(bases, price) - 1
-    if idx >= 0:
-        return bases[idx] <= price <= bases[idx] + ranges[idx] * unit
-    return False
-
-
-_ROUND_LOWER_OLD_BASES = (1000, 5000, 10000, 50000, 100000, 500000)
-_ROUND_LOWER_OLD_RANGES = (1, 5, 10, 50, 100, 500)
-_ROUND_LOWER_NEW_BASES = (2000, 5000, 20000, 50000, 200000, 500000)
-_ROUND_LOWER_NEW_RANGES = (1, 5, 10, 50, 100, 500)
-
-
-def roundfigure_lower(price, unit, index):
-    if index < 20230125000000:
-        bases = _ROUND_LOWER_OLD_BASES
-        ranges = _ROUND_LOWER_OLD_RANGES
-    else:
-        bases = _ROUND_LOWER_NEW_BASES
-        ranges = _ROUND_LOWER_NEW_RANGES
-    idx = bisect.bisect_right(bases, price) - 1
-    if idx >= 0:
-        return bases[idx] - ranges[idx] * unit <= price <= bases[idx]
-    return False
-
-
-_ROUND_UPPER5_OLD_BASES = (1000, 5000, 10000, 50000, 100000, 500000)
-_ROUND_UPPER5_OLD_MAXS = (1025, 5050, 10250, 50500, 102500, 505000)
-_ROUND_UPPER5_NEW_BASES = (2000, 5000, 20000, 50000, 200000, 500000)
-_ROUND_UPPER5_NEW_MAXS = (2025, 5050, 20250, 50500, 202500, 505000)
-
-
-def roundfigure_upper5(price, index):
-    if index < 20230125000000:
-        bases = _ROUND_UPPER5_OLD_BASES
-        maxs = _ROUND_UPPER5_OLD_MAXS
-    else:
-        bases = _ROUND_UPPER5_NEW_BASES
-        maxs = _ROUND_UPPER5_NEW_MAXS
-    idx = bisect.bisect_right(bases, price) - 1
-    if idx >= 0:
-        return bases[idx] <= price <= maxs[idx]
-    return False
-
-
-def GetKiwoomPgSgSp(bg, cg):
+def get_stock_profit(bg, cg):
     texs = int(cg * 0.0018)
     bfee = int(bg * 0.00015 / 10) * 10
     sfee = int(cg * 0.00015 / 10) * 10
-    pg = int(cg - texs - bfee - sfee)
+    pg = int(cg - texs - bfee - sfee + 0.5)
     sg = int(pg - bg + 0.5)
     sp = round(sg / bg * 100, 2)
     return pg, sg, sp
 
 
-def GetUpbitPgSgSp(bg, cg):
+def get_stock_os_profit(bg, cg):
+    texs = int(cg * 0.0018)
+    bfee = int(bg * 0.00015 / 10) * 10
+    sfee = int(cg * 0.00015 / 10) * 10
+    pg = int(cg - texs - bfee - sfee + 0.5)
+    sg = int(pg - bg + 0.5)
+    sp = round(sg / bg * 100, 2)
+    return pg, sg, sp
+
+
+def get_future_long_profit(bg, cg):
+    texs = int(cg * 0.0018)
+    bfee = int(bg * 0.00015 / 10) * 10
+    sfee = int(cg * 0.00015 / 10) * 10
+    pg = int(cg - texs - bfee - sfee + 0.5)
+    sg = int(pg - bg + 0.5)
+    sp = round(sg / bg * 100, 2)
+    return pg, sg, sp
+
+
+def get_future_short_profit(bg, cg):
+    texs = int(cg * 0.0018)
+    bfee = int(bg * 0.00015 / 10) * 10
+    sfee = int(cg * 0.00015 / 10) * 10
+    pg = int(cg - texs - bfee - sfee + 0.5)
+    sg = int(pg - bg + 0.5)
+    sp = round(sg / bg * 100, 2)
+    return pg, sg, sp
+
+
+def get_future_os_long_profit(bg, cg):
+    texs = int(cg * 0.0018)
+    bfee = int(bg * 0.00015 / 10) * 10
+    sfee = int(cg * 0.00015 / 10) * 10
+    pg = int(cg - texs - bfee - sfee + 0.5)
+    sg = int(pg - bg + 0.5)
+    sp = round(sg / bg * 100, 2)
+    return pg, sg, sp
+
+
+def get_future_os_short_profit(bg, cg):
+    texs = int(cg * 0.0018)
+    bfee = int(bg * 0.00015 / 10) * 10
+    sfee = int(cg * 0.00015 / 10) * 10
+    pg = int(cg - texs - bfee - sfee + 0.5)
+    sg = int(pg - bg + 0.5)
+    sp = round(sg / bg * 100, 2)
+    return pg, sg, sp
+
+
+def get_upbit_profit(bg, cg):
     bfee = bg * 0.0005
     sfee = cg * 0.0005
     pg = round(cg - bfee - sfee, 4)
@@ -591,7 +565,7 @@ def GetUpbitPgSgSp(bg, cg):
     return pg, sg, sp
 
 
-def GetBinanceLongPgSgSp(bg, cg, market1, market2):
+def get_binance_long_profit(bg, cg, market1, market2):
     bfee = bg * (0.0004 if market1 else 0.0002)
     sfee = (cg - bfee) * (0.0004 if market2 else 0.0002)
     pg = round(cg - bfee - sfee, 4)
@@ -600,7 +574,7 @@ def GetBinanceLongPgSgSp(bg, cg, market1, market2):
     return pg, sg, sp
 
 
-def GetBinanceShortPgSgSp(bg, cg, market1, market2):
+def get_binance_short_profit(bg, cg, market1, market2):
     bfee = bg * (0.0004 if market1 else 0.0002)
     sfee = (cg - bfee) * (0.0004 if market2 else 0.0002)
     pg = round(bg + bg - cg - bfee - sfee, 4)
@@ -609,47 +583,31 @@ def GetBinanceShortPgSgSp(bg, cg, market1, market2):
     return pg, sg, sp
 
 
-def GetFutureLongPgSgSp(mini, bg, cg):
-    fee = 2 if mini else 7.5
-    pg = round(cg - fee * 2, 1)
-    sg = round(pg - bg, 1)
-    sp = round(sg / bg * 100, 2)
-    return pg, sg, sp
-
-
-def GetFutureShortPgSgSp(mini, bg, cg):
-    fee = 2 if mini else 7.5
-    pg = round(bg + bg - cg - fee * 2, 1)
-    sg = round(pg - bg, 1)
-    sp = round(sg / bg * 100, 2)
-    return pg, sg, sp
-
-
-def GetVIPrice(kosd, std_price, index):
+def get_vi_price(std_price):
     uvi = int(std_price * 1.1)
-    x = GetHogaunit(kosd, uvi, index)
+    x = get_stock_hogaunit(uvi)
     if uvi % x != 0:
         uvi += x - uvi % x
     dvi = int(std_price * 0.9)
-    y = GetHogaunit(kosd, dvi, index)
+    y = get_stock_hogaunit(dvi)
     if dvi % y != 0:
         dvi -= dvi % y
     return int(uvi), int(dvi), int(x)
 
 
-def GetSangHahanga(kosd, predayclose, index):
+def get_limit_price(predayclose):
     uplimitprice = int(predayclose * 1.30)
-    x = GetHogaunit(kosd, uplimitprice, index)
+    x = get_stock_hogaunit(uplimitprice)
     if uplimitprice % x != 0:
         uplimitprice -= uplimitprice % x
     downlimitprice = int(predayclose * 0.70)
-    x = GetHogaunit(kosd, downlimitprice, index)
+    x = get_stock_hogaunit(downlimitprice)
     if downlimitprice % x != 0:
         downlimitprice += x - downlimitprice % x
     return int(uplimitprice), int(downlimitprice)
 
 
-def GetIndicator(mc, mh, ml, mv, k):
+def get_indicator(mc, mh, ml, mv, k):
     from talib import stream
     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, OBV, PPO, \
         ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = \

@@ -45,7 +45,7 @@ def strategy_custom_dialog_show(ui):
 
 @error_decorator
 def button_clicked_strategy(ui, cmd):
-    if ui.main_btn not in (3, 4):
+    if ui.main_btn != 2:
         QMessageBox.critical(ui.dialog_strategy, '오류 알림', '전략버튼은 전략탭에서만 사용할 수 있습니다.')
         return
 
@@ -66,21 +66,13 @@ def button_clicked_strategy(ui, cmd):
             textEdit = ui.ss_textEditttt_01
         elif ui.focusWidget() == ui.ss_textEditttt_02:
             textEdit = ui.ss_textEditttt_02
-        elif ui.focusWidget() == ui.cs_textEditttt_01:
-            textEdit = ui.cs_textEditttt_01
-        elif ui.focusWidget() == ui.cs_textEditttt_02:
-            textEdit = ui.cs_textEditttt_02
         if textEdit is None:
             QMessageBox.critical(ui.dialog_strategy, '오류 알림', '텍스트에디터가 포커싱되지 않았습니다.\n매수 또는 매도 전략입력 덱스트에디터에 마우스 클릭한 후에 재시도하십시오.')
             return
     elif cmd <= 211:
         textEdit = ui.ss_textEditttt_01
-    elif cmd <= 219:
-        textEdit = ui.ss_textEditttt_02
-    elif cmd <= 225:
-        textEdit = ui.cs_textEditttt_01
     else:
-        textEdit = ui.cs_textEditttt_02
+        textEdit = ui.ss_textEditttt_02
 
     stg_text = ui.dict_stg_btn[cmd]
     if stg_text[-1] != '\n': stg_text = f'{stg_text}\n'

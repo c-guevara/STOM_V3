@@ -5,7 +5,7 @@ from ui.ui_button_clicked_order import *
 from ui.ui_return_press import return_press_02
 from ui.ui_text_changed import text_changed_05
 from ui.ui_button_clicked_dialog_database import *
-from ui.ui_button_clicked_dialog_elapsed_tick_number import *
+from ui.ui_button_clicked_dialog_pass_ticks import *
 from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
 from ui.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
 from ui.ui_cell_clicked import cell_clicked_09, cell_clicked_10, cell_clicked_08
@@ -56,32 +56,20 @@ class SetDialogEtc:
         self.ui.dialog_db = self.wc.setDialog('STOM DATABASE')
         self.ui.dialog_db.geometry().center()
 
-        self.ui.sdb_tapWidgettt_01 = QTabWidget(self.ui.dialog_db)
-        self.ui.sdb_tab = QWidget()
-        self.ui.cdb_tab = QWidget()
-        self.ui.sdb_index1 = self.ui.sdb_tapWidgettt_01.addTab(self.ui.sdb_tab, '주식DB')
-        self.ui.sdb_index2 = self.ui.sdb_tapWidgettt_01.addTab(self.ui.cdb_tab, '코인DB')
-
-        self.ui.stg_tapWidgettt_02 = QTabWidget(self.ui.dialog_db)
+        self.ui.stg_tapWidgettt_01 = QTabWidget(self.ui.dialog_db)
         self.ui.ssg_tab1 = QWidget()
         self.ui.ssg_tab2 = QWidget()
-        self.ui.csg_tab1 = QWidget()
-        self.ui.csg_tab2 = QWidget()
         self.ui.bsd_tab0 = QWidget()
-        self.ui.stg_tapWidgettt_02.addTab(self.ui.ssg_tab1, '주식전략')
-        self.ui.stg_tapWidgettt_02.addTab(self.ui.ssg_tab2, '주식범위')
-        self.ui.stg_tapWidgettt_02.addTab(self.ui.csg_tab1, '코인전략')
-        self.ui.stg_tapWidgettt_02.addTab(self.ui.csg_tab2, '코인범위')
-        self.ui.stg_tapWidgettt_02.addTab(self.ui.bsd_tab0, '백스케쥴')
+        self.ui.stg_tapWidgettt_01.addTab(self.ui.ssg_tab1, '전략')
+        self.ui.stg_tapWidgettt_01.addTab(self.ui.ssg_tab2, '범위')
+        self.ui.stg_tapWidgettt_01.addTab(self.ui.bsd_tab0, '백스케쥴')
 
         self.ui.db_labellllllll_00 = QLabel('셀클릭 시 데이터 삭제', self.ui.dialog_db)
-
-        self.ui.db_groupBoxxxxx_01 = QGroupBox('', self.ui.sdb_tab)
-        self.ui.db_groupBoxxxxx_02 = QGroupBox('', self.ui.cdb_tab)
+        self.ui.db_groupBoxxxxx_01 = QGroupBox('', self.ui.dialog_db)
 
         self.ui.db_labellllllll_18 = QLabel('백테DB의 지정일자 데이터 삭제하기 (일자입력 예: 20220131)', self.ui.db_groupBoxxxxx_01)
         self.ui.db_lineEdittttt_16 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_01, style=style_bc_dk)
-        self.ui.db_pushButtonnn_18 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_18(self.ui))
+        self.ui.db_pushButtonnn_18 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_10(self.ui))
         self.ui.db_labellllllll_01 = QLabel('일자DB의 지정일자 데이터 삭제하기 (일자입력)', self.ui.db_groupBoxxxxx_01)
         self.ui.db_lineEdittttt_01 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_01, style=style_bc_dk)
         self.ui.db_pushButtonnn_01 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_01(self.ui))
@@ -109,37 +97,8 @@ class SetDialogEtc:
         self.ui.db_labellllllll_09 = QLabel('거래기록 테이블 모두 삭제 (체결목록, 잔고목록, 거래목록, 일별실현손익)', self.ui.db_groupBoxxxxx_01)
         self.ui.db_pushButtonnn_09 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_09(self.ui))
 
-        self.ui.db_labellllllll_19 = QLabel('백테DB의 지정일자 데이터 삭제하기 (일자입력 예: 20220131)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_lineEdittttt_17 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_pushButtonnn_19 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_19(self.ui))
-        self.ui.db_labellllllll_10 = QLabel('일자DB의 지정일자 데이터 삭제하기 (일자입력)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_lineEdittttt_09 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_pushButtonnn_10 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_10(self.ui))
-        self.ui.db_labellllllll_11 = QLabel('일자DB의 지정시간이후 데이터 삭제하기 (시간입력 예: 93000)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_lineEdittttt_10 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_pushButtonnn_11 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_11(self.ui))
-        self.ui.db_labellllllll_12 = QLabel('당일DB의 지정시간이후 데이터 삭제하기 (시간입력)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_lineEdittttt_11 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_pushButtonnn_12 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_12(self.ui))
-        self.ui.db_labellllllll_13 = QLabel('일자DB로 백테DB 생성하기 (일자 입력)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_lineEdittttt_12 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_lineEdittttt_13 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_pushButtonnn_13 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_13(self.ui))
-        self.ui.db_labellllllll_14 = QLabel('백테DB에 일자DB의 데이터 추가하기', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_lineEdittttt_14 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_lineEdittttt_15 = self.wc.setLineedit(self.ui.db_groupBoxxxxx_02, style=style_bc_dk)
-        self.ui.db_pushButtonnn_14 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_14(self.ui))
-        self.ui.db_labellllllll_15 = QLabel('백테DB에 당일DB의 데이터 추가하기 (추가 후 당일DB는 삭제됨)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_pushButtonnn_15 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_15(self.ui))
-        self.ui.db_labellllllll_16 = QLabel('당일DB를 일자DB로 분리하기', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_pushButtonnn_16 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_16(self.ui))
-        self.ui.db_labellllllll_17 = QLabel('거래기록 테이블 모두 삭제 (체결목록, 잔고목록, 거래목록, 일별실현손익)', self.ui.db_groupBoxxxxx_02)
-        self.ui.db_pushButtonnn_17 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_02, click=lambda: dbbutton_clicked_17(self.ui))
-
         self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.ssg_tab1, columns_stg1, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.ssg_tab2, columns_stg2, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
-        self.ui.db_tableWidgett_03 = self.wc.setTablewidget(self.ui.csg_tab1, columns_stg1, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
-        self.ui.db_tableWidgett_04 = self.wc.setTablewidget(self.ui.csg_tab2, columns_stg2, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.db_tableWidgett_05 = self.wc.setTablewidget(self.ui.bsd_tab0, ['백테스트 스케쥴'], 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.db_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_db, vscroll=True)
 
@@ -307,34 +266,6 @@ class SetDialogEtc:
             self.ui.set_lineEdittt_19, self.ui.set_lineEdittt_20
         ]
 
-        self.ui.dialog_cetsj = self.wc.setDialog('STOM CETSJ', parent=self.ui)
-        self.ui.dialog_cetsj.geometry().center()
-        self.ui.cet_pushButton_01 = self.wc.setPushbutton('설정예제', parent=self.ui.dialog_cetsj, click=lambda: setting_coin_elapsed_tick_number_sample(self.ui))
-        self.ui.cet_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_cetsj, click=lambda: setting_coin_elapsed_tick_number_load(self.ui))
-        self.ui.cet_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_cetsj, click=lambda: setting_coin_elapsed_tick_number_save(self.ui))
-        self.ui.cet_groupBoxxx_01 = QGroupBox('', self.ui.dialog_cetsj)
-        text = '''
-        ▣ 백테 및 전략연산에서 사용할 "경과틱수('조건명')"를 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며
-        경과틱수 괄호안에 조건명을 넣어서 사용합니다. 조건은 전략탭에서 사용하는 전략(잔고종목변수제외)과 문법이 동일합니다.
-        예제에서 사용한 조건명 이평60데드는 경과틱수('이평60데드') 형태로 사용합니다. 반드시 조건명에 따옴표를 붙여야합니다.'''
-        self.ui.cet_labellllll_01 = QLabel(text, self.ui.cet_groupBoxxx_01)
-        self.ui.cet_labellllll_02 = QLabel('              조건명                                 조건', self.ui.cet_groupBoxxx_01)
-        for i in range(20):
-            lineEdit = self.wc.setLineedit(self.ui.cet_groupBoxxx_01, aleft=True, style=style_bc_dk)
-            setattr(self.ui, f'cet_lineEdittt_{i+1:02d}', lineEdit)
-
-        self.ui.ccn_lineedit_list = [
-            self.ui.cet_lineEdittt_01, self.ui.cet_lineEdittt_02, self.ui.cet_lineEdittt_03, self.ui.cet_lineEdittt_04,
-            self.ui.cet_lineEdittt_05, self.ui.cet_lineEdittt_06, self.ui.cet_lineEdittt_07, self.ui.cet_lineEdittt_08,
-            self.ui.cet_lineEdittt_09, self.ui.cet_lineEdittt_10
-        ]
-
-        self.ui.ccc_lineedit_list = [
-            self.ui.cet_lineEdittt_11, self.ui.cet_lineEdittt_12, self.ui.cet_lineEdittt_13, self.ui.cet_lineEdittt_14,
-            self.ui.cet_lineEdittt_15, self.ui.cet_lineEdittt_16, self.ui.cet_lineEdittt_17, self.ui.cet_lineEdittt_18,
-            self.ui.cet_lineEdittt_19, self.ui.cet_lineEdittt_20
-        ]
-
         self.ui.dialog_hoga.setFixedSize(572, 355)
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
@@ -381,14 +312,9 @@ class SetDialogEtc:
         self.ui.dialog_graph.setFixedSize(1403, 1010)
 
         self.ui.dialog_db.setFixedSize(525, 670)
-
-        self.ui.sdb_tapWidgettt_01.setGeometry(5, 5, 515, 300)
-        self.ui.stg_tapWidgettt_02.setGeometry(5, 310, 515, 250)
-
+        self.ui.stg_tapWidgettt_01.setGeometry(5, 310, 515, 250)
         self.ui.db_labellllllll_00.setGeometry(355, 312, 300, 20)
-
         self.ui.db_groupBoxxxxx_01.setGeometry(5, 5, 500, 260)
-        self.ui.db_groupBoxxxxx_02.setGeometry(5, 5, 500, 260)
 
         self.ui.db_labellllllll_18.setGeometry(10, 10, 320, 20)
         self.ui.db_lineEdittttt_16.setGeometry(330, 10, 80, 20)
@@ -420,37 +346,8 @@ class SetDialogEtc:
         self.ui.db_labellllllll_09.setGeometry(10, 235, 400, 20)
         self.ui.db_pushButtonnn_09.setGeometry(415, 235, 80, 20)
 
-        self.ui.db_labellllllll_19.setGeometry(10, 10, 320, 20)
-        self.ui.db_lineEdittttt_17.setGeometry(330, 10, 80, 20)
-        self.ui.db_pushButtonnn_19.setGeometry(415, 10, 80, 20)
-        self.ui.db_labellllllll_10.setGeometry(10, 35, 320, 20)
-        self.ui.db_lineEdittttt_09.setGeometry(330, 35, 80, 20)
-        self.ui.db_pushButtonnn_10.setGeometry(415, 35, 80, 20)
-        self.ui.db_labellllllll_11.setGeometry(10, 60, 320, 20)
-        self.ui.db_lineEdittttt_10.setGeometry(330, 60, 80, 20)
-        self.ui.db_pushButtonnn_11.setGeometry(415, 60, 80, 20)
-        self.ui.db_labellllllll_12.setGeometry(10, 85, 300, 20)
-        self.ui.db_lineEdittttt_11.setGeometry(330, 85, 80, 20)
-        self.ui.db_pushButtonnn_12.setGeometry(415, 85, 80, 20)
-        self.ui.db_labellllllll_13.setGeometry(10, 110, 300, 20)
-        self.ui.db_lineEdittttt_12.setGeometry(245, 110, 80, 20)
-        self.ui.db_lineEdittttt_13.setGeometry(330, 110, 80, 20)
-        self.ui.db_pushButtonnn_13.setGeometry(415, 110, 80, 20)
-        self.ui.db_labellllllll_14.setGeometry(10, 135, 300, 20)
-        self.ui.db_lineEdittttt_14.setGeometry(245, 135, 80, 20)
-        self.ui.db_lineEdittttt_15.setGeometry(330, 135, 80, 20)
-        self.ui.db_pushButtonnn_14.setGeometry(415, 135, 80, 20)
-        self.ui.db_labellllllll_15.setGeometry(10, 160, 400, 20)
-        self.ui.db_pushButtonnn_15.setGeometry(415, 160, 80, 20)
-        self.ui.db_labellllllll_16.setGeometry(10, 185, 400, 20)
-        self.ui.db_pushButtonnn_16.setGeometry(415, 185, 80, 20)
-        self.ui.db_labellllllll_17.setGeometry(10, 210, 400, 20)
-        self.ui.db_pushButtonnn_17.setGeometry(415, 210, 80, 20)
-
         self.ui.db_tableWidgett_01.setGeometry(5, 5, 500, 210)
         self.ui.db_tableWidgett_02.setGeometry(5, 5, 500, 210)
-        self.ui.db_tableWidgett_03.setGeometry(5, 5, 500, 210)
-        self.ui.db_tableWidgett_04.setGeometry(5, 5, 500, 210)
         self.ui.db_tableWidgett_05.setGeometry(5, 5, 500, 210)
         self.ui.db_textEdittttt_01.setGeometry(5, 565, 515, 100)
 
@@ -551,17 +448,3 @@ class SetDialogEtc:
             y = 100 + i % 10 * 30
             xw = 100 if i < 10 else 675
             getattr(self.ui, f'set_lineEdittt_{i+1:02d}').setGeometry(x, y, xw, 25)
-
-        self.ui.dialog_cetsj.setFixedSize(800, 435)
-        self.ui.cet_pushButton_01.setGeometry(5, 5, 100, 25)
-        self.ui.cet_pushButton_02.setGeometry(590, 5, 100, 25)
-        self.ui.cet_pushButton_03.setGeometry(695, 5, 100, 25)
-        self.ui.cet_groupBoxxx_01.setGeometry(5, 30, 790, 400)
-        self.ui.cet_labellllll_01.setGeometry(0, 5, 790, 60)
-        self.ui.cet_labellllll_02.setGeometry(0, 70, 790, 25)
-
-        for i in range(20):
-            x = 5 if i < 10 else 110
-            y = 100 + i % 10 * 30
-            xw = 100 if i < 10 else 675
-            getattr(self.ui, f'cet_lineEdittt_{i+1:02d}').setGeometry(x, y, xw, 25)

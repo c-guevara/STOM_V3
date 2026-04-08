@@ -22,7 +22,7 @@ def cell_clicked_01(ui, row, col):
     name       = item.text()
     linetext   = ui.ct_lineEdittttt_03.text()
     tickcount  = int(linetext) if linetext else 30
-    searchdate = str_ymd(now_utc()) if not stock else str_ymd() if '키움증권' in ui.dict_set['증권사'] else str_ymd(now_cme())
+    searchdate = str_ymd(now_utc()) if not stock else str_ymd() if '키움증권' in ui.dict_set['거래소'] else str_ymd(now_cme())
     code       = ui.dict_code[name] if name in ui.dict_code else name
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
@@ -36,7 +36,7 @@ def cell_clicked_02(ui, row, col):
     if item is None:
         return
     name = item.text()
-    gubun = '주식' if '키움증권' in ui.dict_set['증권사'] else '해선'
+    gubun = '주식' if '키움증권' in ui.dict_set['거래소'] else '해선'
     columns = columns_jg if gubun == '주식' else columns_jgf
     oc = comma2int(ui.jg_tableWidgettt.item(row, columns.index('보유수량')).text())
     c = comma2int(ui.jg_tableWidgettt.item(row, columns.index('현재가')).text())
@@ -45,12 +45,12 @@ def cell_clicked_02(ui, row, col):
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
-        if gubun == '주식':
-            ui.wdzservQ.put(('trade', ('매도', ui.dict_code[name], name, c, oc, now(), True)))
+        if '선물' in ui.dict_set['거래소']:
+            position = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
+            position = 'SELL_LONG' if position == 'LONG' else 'BUY_SHORT'
+            ui.traderQ.put((position, ui.dict_code[name], name, c, oc, now(), True))
         else:
-            p = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
-            p = 'SELL_LONG' if p == 'LONG' else 'BUY_SHORT'
-            ui.wdzservQ.put(('trade', (p, ui.dict_code[name], name, c, oc, now(), True)))
+            ui.traderQ.put(('매도', ui.dict_code[name], name, c, oc, now(), True))
 
 
 # noinspection PyUnusedLocal
@@ -70,11 +70,11 @@ def cell_clicked_03(ui, row, col):
     if buttonReply == QMessageBox.Yes:
         if trader_process_alive(ui):
             if 'KRW' in code:
-                ui.ctraderQ.put(('매도', code, c, oc, now(), True))
+                ui.traderQ.put(('매도', code, c, oc, now(), True))
             else:
                 p = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
                 p = 'SELL_LONG' if p == 'LONG' else 'BUY_SHORT'
-                ui.ctraderQ.put((p, code, c, oc, now(), True))
+                ui.traderQ.put((p, code, c, oc, now(), True))
 
 
 # noinspection PyUnusedLocal
@@ -101,27 +101,22 @@ def cell_clicked_04(ui, row, col):
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_05(ui, row, col):
-    gubun = '주식'
-    if ui.focusWidget() == ui.cns_tableWidgettt:
-        gubun = '코인'
     item = ui.focusWidget().item(row, 0)
     if item is None:
         return
+
     date = item.text()
     date = date.replace('.', '')
-    if gubun == '주식':
-        table_name = 's_tradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_tradelist'
-    else:
-        table_name = 'c_tradelist' if ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'
-
+    table_name = ui.market_info['거래디비']
     df = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name} WHERE 체결시간 LIKE '{date}%'")
 
-    if len(date) == 6 and gubun == '코인':
+    if len(date) == 6:
         df['구분용체결시간'] = df['index'].str[:6]
         df = df[df['구분용체결시간'] == date]
-    elif len(date) == 4 and gubun == '코인':
+    elif len(date) == 4:
         df['구분용체결시간'] = df['index'].str[:4]
         df = df[df['구분용체결시간'] == date]
+
     df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
     df.set_index('index', inplace=True)
 
@@ -153,10 +148,10 @@ def cell_clicked_06(ui, row, col):
     buytimes   = tableWidget.item(row, 13).text()
 
     coin = True if 'KRW' in name or 'USDT' in name else False
-    if len(str(buytime)) > 12 and (coin and not ui.dict_set['코인타임프레임'] or not coin and not ui.dict_set['주식타임프레임']):
+    if len(str(buytime)) > 12 and (coin and not ui.dict_set['타임프레임'] or not coin and not ui.dict_set['타임프레임']):
         QMessageBox.critical(ui, '오류 알림', '현재 전략설정의 데이터타입은 1분봉 상태입니다.\n1초스냅샷용 백테결과는 차트를 표시할 수 없습니다.\n')
         return
-    elif len(str(buytime)) < 14 and (coin and ui.dict_set['코인타임프레임'] or not coin and ui.dict_set['주식타임프레임']):
+    elif len(str(buytime)) < 14 and (coin and ui.dict_set['타임프레임'] or not coin and ui.dict_set['타임프레임']):
         QMessageBox.critical(ui, '오류 알림', '현재 전략설정의 데이터타입은 1초스냅샷 상태입니다.\n1분봉용 백테결과는 차트를 표시할 수 없습니다.\n')
         return
 
@@ -171,7 +166,7 @@ def cell_clicked_06(ui, row, col):
         QMessageBox.critical(ui.dialog_chart, '오류 알림', '차트의 시작 및 종료시간은 초단위까지로 입력하십시오.\n(예: 000000, 090000, 152000)\n')
         return
 
-    show_dialog_chart(ui, False, coin, code, tickcount, searchdate, starttime, endtime, detail, buytimes)
+    show_dialog_chart(ui, False, code, tickcount, searchdate, starttime, endtime, detail, buytimes)
 
 
 # noinspection PyUnusedLocal
@@ -181,7 +176,6 @@ def cell_clicked_07(ui, row, col):
     if item is None:
         return
     name       = item.text()
-    coin       = True if 'KRW' in name or 'USDT' in name else False
     code       = ui.dict_code[name] if name in ui.dict_code else name
     searchdate = ui.ct_dateEdittttt_02.date().toString('yyyyMMdd')
     linetext   = ui.ct_lineEdittttt_03.text()
@@ -194,7 +188,7 @@ def cell_clicked_07(ui, row, col):
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-    data = (coin, code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
+    data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
     cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
     if cf1 and cf2: data += (float(cf1), float(cf2))
     ui.chartQ.put(data)
@@ -218,13 +212,13 @@ def cell_clicked_09(ui, row, col):
         if item is None:
             return
         stg_name = item.text()
-        gubun = '주식' if '키움증권' in ui.dict_set['증권사'] else '해선'
+        gubun = '주식' if '키움증권' in ui.dict_set['거래소'] else '해선'
         buttonReply = QMessageBox.question(
             ui.dialog_db, '전략 삭제', f'{gubun}전략 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply == QMessageBox.Yes:
-            gubun = 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future'
+            gubun = 'stock' if '키움증권' in ui.dict_set['거래소'] else 'future'
             if col == 0:
                 query = f'DELETE FROM {gubun}buy WHERE "index" = "{stg_name}"'
             elif col == 1:
@@ -240,13 +234,13 @@ def cell_clicked_09(ui, row, col):
         if item is None:
             return
         stg_name = item.text()
-        gubun = '주식' if '키움증권' in ui.dict_set['증권사'] else '해선'
+        gubun = '주식' if '키움증권' in ui.dict_set['거래소'] else '해선'
         buttonReply = QMessageBox.question(
             ui.dialog_db, '범위 또는 조건 삭제', f'{gubun} 범위 또는 조건 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply == QMessageBox.Yes:
-            gubun = 'stock' if '키움증권' in ui.dict_set['증권사'] else 'future'
+            gubun = 'stock' if '키움증권' in ui.dict_set['거래소'] else 'future'
             if col == 0:
                 query = f'DELETE FROM {gubun}optivars WHERE "index" = "{stg_name}"'
             elif col == 1:
@@ -332,7 +326,7 @@ def cell_clicked_10(ui, row, col):
 @error_decorator
 def cell_clicked_11(ui, row, col):
     if ui.focusWidget() == ui.nt_tableWidgetttt:
-        table_name = 's_tradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_tradelist'
+        table_name = 's_tradelist' if '키움증권' in ui.dict_set['거래소'] else 'f_tradelist'
     else:
         table_name = 'c_tradelist' if ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'
     df = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name}")

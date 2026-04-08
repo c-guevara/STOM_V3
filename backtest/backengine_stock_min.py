@@ -1,15 +1,15 @@
 
-from backtest.backengine_kiwoom_tick import BackEngineKiwoomTick
-from utility.static import dt_ymdhms, GetIndicator, GetHogaunit
+from backtest.backengine_stock_tick import BackEngineStockTick
+from utility.static import dt_ymdhms, get_indicator, get_stock_hogaunit
 # noinspection PyUnresolvedReferences
 from utility.static import timedelta_sec
 
 
-class BackEngineKiwoomMin(BackEngineKiwoomTick):
+class BackEngineStockMin(BackEngineStockTick):
     # noinspection PyUnusedLocal
-    def Strategy(self):
+    def _strategy(self):
         현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
-            거래대금증감, 전일비, 회전율, 전일동시간비, 시가총액, 라운드피겨위5호가이내, VI해제시간, VI가격, VI호가단위, \
+            시가총액, VI해제시간, VI가격, VI호가단위, \
             분봉시가, 분봉고가, 분봉저가, \
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
             매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
@@ -18,14 +18,14 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
 
         VI해제시간, 순매수금액 = dt_ymdhms(str(int(VI해제시간))), 분당매수금액 - 분당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:] + '00')
-        self.hoga_unit = 호가단위 = GetHogaunit(self.dict_kosd.get(종목코드, False), 현재가, 체결시간)
+        self.hoga_unit = 호가단위 = get_stock_hogaunit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
         self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
         self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
 
-        self.UpdateHighLow(분봉고가, 분봉저가)
+        self._update_highlow(분봉고가, 분봉저가)
 
         start, end = self.indexn+1-self.tick_count, self.indexn+1
         arry_indi = self.arry_code[start:end, :]
@@ -53,7 +53,7 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
                         exec(self.indistg)
                     self.k = list(self.indicator.values())
                     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
-                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = GetIndicator(self.mc, self.mh, self.ml, self.mv, self.k)
+                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = get_indicator(self.mc, self.mh, self.ml, self.mv, self.k)
 
                     if self.dict_condition:
                         if 종목코드 not in self.dict_cond_indexn:
@@ -99,7 +99,7 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
                         if not 관심종목: continue
                         exec(self.buystg)
                     else:
-                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                         self.profit, self.hold_time = 수익률, 보유시간
                         exec(self.sellstg)
 
@@ -126,7 +126,7 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
                         exec(self.indistg)
                     self.k = list(self.indicator.values())
                     AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
-                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = GetIndicator(self.mc, self.mh, self.ml, self.mv, self.k)
+                        OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = get_indicator(self.mc, self.mh, self.ml, self.mv, self.k)
 
                     if self.dict_condition:
                         if 종목코드 not in self.dict_cond_indexn:
@@ -175,7 +175,7 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
                         else:
                             exec(self.dict_buystg[index_])
                     else:
-                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                        포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                         self.profit, self.hold_time = 수익률, 보유시간
                         if self.back_type != '조건최적화':
                             exec(self.sellstg)
@@ -199,7 +199,7 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
                 exec(self.indistg)
             self.k = list(self.indicator.values())
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
-                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = GetIndicator(self.mc, self.mh, self.ml, self.mv, self.k)
+                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = get_indicator(self.mc, self.mh, self.ml, self.mv, self.k)
 
             if self.dict_condition:
                 if 종목코드 not in self.dict_cond_indexn:
@@ -245,9 +245,9 @@ class BackEngineKiwoomMin(BackEngineKiwoomTick):
                 if not 관심종목: return
                 exec(self.buystg)
             else:
-                포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self.GetHoldInfo(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
+                포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간 = self._get_hold_info(보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간)
                 self.profit, self.hold_time = 수익률, 보유시간
                 exec(self.sellstg)
 
-    def update_globals_func(self, dict_add_func):
+    def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)

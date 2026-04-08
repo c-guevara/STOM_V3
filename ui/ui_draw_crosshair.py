@@ -168,13 +168,12 @@ class CrossHair:
 
                 xpoint = self.ui.ctpg_xticks.index(int_mpx)
                 hms_   = from_timestamp(int_mpx).strftime('%H:%M' if is_min else '%H:%M:%S')
-                code   = self.ui.ctpg_code
                 for n, labell in enumerate(self.ui.ctpg_labels):
                     foctor = self.ui.ctpg_factors[n]
                     if index == n:
-                        text = f'Y: {round(mousePoint.y(), 2):,}\n{get_label_text(self.ui, real, gubun, code, is_min, xpoint, foctor, hms_)}'
+                        text = f'Y: {round(mousePoint.y(), 2):,}\n{get_label_text(self.ui, gubun, is_min, xpoint, foctor, hms_)}'
                     else:
-                        text = get_label_text(self.ui, real, gubun, code, is_min, xpoint, foctor, hms_)
+                        text = get_label_text(self.ui, gubun, is_min, xpoint, foctor, hms_)
 
                     labell.setText(text)
 

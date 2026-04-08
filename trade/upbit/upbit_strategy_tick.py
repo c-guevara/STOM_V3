@@ -2,13 +2,13 @@
 import numpy as np
 from utility.setting_base import ui_num
 from trade.base_strategy import BaseStrategy
-from utility.static import now, now_utc, GetUpbitHogaunit, GetUpbitPgSgSp, dt_ymdhms, set_builtin_print
+from utility.static import now, now_utc, get_upbit_hoga_unit, get_upbit_profit, dt_ymdhms, set_builtin_print
 
 
 class UpbitStrategyTick(BaseStrategy):
-    def __init__(self, gubun, qlist, dict_set):
-        super().__init__(gubun, qlist, dict_set)
-        self.dict_signal     = {
+    def __init__(self, gubun, qlist, dict_set, market_info):
+        super().__init__(gubun, qlist, dict_set, market_info)
+        self.dict_signal = {
             '매수': [],
             '매도': []
         }
@@ -18,8 +18,17 @@ class UpbitStrategyTick(BaseStrategy):
         self._update_stringategy()
         self._main_loop()
 
-    def update_globals_func(self, dict_add_func):
+    def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
+
+    def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
+        return round(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100, 8)
+
+    def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
+        return round(보유수량 / 보유비율 * oc_ratio, 8)
+
+    def _get_order_price(self, 거래금액, 주문수량):
+        return round(거래금액 / 주문수량, 4) if 주문수량 != 0 else 0
 
     # noinspection PyUnusedLocal
     def _strategy(self, data):
@@ -30,9 +39,8 @@ class UpbitStrategyTick(BaseStrategy):
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, _, 틱수신시간 = data
 
         시분초 = int(str(체결시간)[8:])
-        rw = 평균값계산틱수 = self.dict_set['평균값계산틱수']
         순매수금액 = 초당매수금액 - 초당매도금액
-        self.hoga_unit = 호가단위 = GetUpbitHogaunit(현재가)
+        self.hoga_unit = 호가단위 = get_upbit_hoga_unit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -53,8 +61,8 @@ class UpbitStrategyTick(BaseStrategy):
         self.code, self.index, self.indexn = 종목코드, 체결시간, 데이터길이 - 1
 
         리스크점수 = 0
-        if 데이터길이 >= 평균값계산틱수:
-            self.arry_code[-1, self.base_cnt:self.data_cnt] = self._get_parameter_area(rw)
+        if 데이터길이 >= self.rolling_window:
+            self.arry_code[-1, self.base_cnt:self.data_cnt] = self._get_parameter_area(self.rolling_window)
 
             if self.dict_set['시장미시구조분석']:
                 self.ms_analyzer.update_data(self.code, self.arry_code)
@@ -78,7 +86,7 @@ class UpbitStrategyTick(BaseStrategy):
             for k, v in self.dict_condition.items():
                 exec(v)
 
-        if 데이터길이 >= 평균값계산틱수 and self.fm_list:
+        if 데이터길이 >= self.rolling_window and self.fm_list:
             for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
                 self.check, self.line, self.up, self.down = None, None, None, None
 
@@ -108,14 +116,14 @@ class UpbitStrategyTick(BaseStrategy):
                         price = self.arry_code[self.indexn, self.dict_findex[fname]]
                         self.arry_code[self.indexn, col_idx] = price
 
-        if 데이터길이 >= 평균값계산틱수:
+        if 데이터길이 >= self.rolling_window:
             jg_data = self.dict_jg.get(종목코드)
             if jg_data:
                 if 종목코드 not in self.dict_buy_num:
                     self.dict_buy_num[종목코드] = self.indexn
                 # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
                 _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
-                _, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 보유수량 * 현재가)
+                _, 수익금, 수익률 = get_upbit_profit(매입금액, 보유수량 * 현재가)
                 profit_data = self.dict_profit.get(종목코드)
                 if profit_data:
                     if 수익률 > profit_data[0]:
@@ -211,7 +219,7 @@ class UpbitStrategyTick(BaseStrategy):
                 'sm': 당일매도금액
             }
 
-        if self.chart_code == 종목코드 and 데이터길이 >= 평균값계산틱수:
+        if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
             self.windowQ.put((ui_num['실시간차트'], 종목코드, self.arry_code))
 
         if 틱수신시간 != 0:

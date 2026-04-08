@@ -50,18 +50,7 @@ class DrawChartBase:
         ]
 
     def fi(self, fname):
-        if self.real:
-            if self.gubun == 'S':
-                return self.ui.dict_findex_stock_min[fname] if self.is_min else self.ui.dict_findex_stock_tick[fname]
-            else:
-                return self.ui.dict_findex_coin_min[fname] if self.is_min else self.ui.dict_findex_coin_tick[fname]
-        else:
-            if self.gubun == 'S':
-                return self.ui.dict_findex_stock_min2[fname] if self.is_min else self.ui.dict_findex_stock_tick2[fname]
-            elif 'KRW' in self.code:
-                return self.ui.dict_findex_coin_min2[fname] if self.is_min else self.ui.dict_findex_coin_tick2[fname]
-            else:
-                return self.ui.dict_findex_future_min2[fname] if self.is_min else self.ui.dict_findex_future_tick2[fname]
+        return self.ui.dict_findex[fname]
 
     def update_factor_list(self):
         if not self.same_time:
@@ -466,11 +455,11 @@ class DrawChartBase:
             if self.ui.ct_checkBoxxxxx_01.isChecked():
                 self.ui.ctpg_labels[i].setPos(self.ui.ctpg_cvb[i].state['viewRange'][0][0], self.ui.ctpg_cvb[i].state['viewRange'][1][0])
             self.ui.ctpg_legend[i].setPos(self.ui.ctpg_cvb[i].state['viewRange'][0][0], self.ui.ctpg_cvb[i].state['viewRange'][1][1])
-            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, True, self.gubun, self.code, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
+            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, self.gubun, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
         else:
             if self.real or self.ui.ct_checkBoxxxxx_02.isChecked():
                 legend = pg.TextItem(anchor=(0, 0), color=color_fg_bt, border=color_bg_bt, fill=color_bg_ld)
-                legend.setText(get_label_text(self.ui, True, self.gubun, self.code, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
+                legend.setText(get_label_text(self.ui, self.gubun, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
                 legend.setFont(qfont12)
                 legend.setPos(self.xmax, self.ymax)
                 legend.setZValue(30)

@@ -7,8 +7,8 @@ from trade.upbit.upbit_restapi import WebSocketReceiver, get_symbols_info
 
 
 class UpbitReceiver(BaseReceiver):
-    def __init__(self, qlist, dict_set):
-        super().__init__(qlist, dict_set)
+    def __init__(self, qlist, dict_set, market_info):
+        super().__init__(qlist, dict_set, market_info)
 
         self._get_code_info()
         self._start_notification()

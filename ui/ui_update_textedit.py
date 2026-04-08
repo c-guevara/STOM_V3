@@ -5,7 +5,7 @@ from ui.ui_etc import auto_back_schedule
 from utility.static import now, qtest_qwait
 from ui.ui_button_clicked_dialog_database import *
 from ui.ui_backtest_engine import backtest_process_kill
-from ui.ui_button_clicked_editer_unified import backtest_detail
+from ui.ui_button_clicked_editer import backtest_detail
 from ui.set_style import color_fg_rt, color_fg_dk, color_fg_bt, color_bt_yl
 from ui.ui_process_alive import strategy_process_alive, receiver_process_alive, trader_process_alive
 
@@ -28,7 +28,7 @@ class UpdateTextedit:
             self.ui.trading = True
 
         else:
-            time_ = str(now())[:-7] if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트'], ui_num['C백테스트'], ui_num['CF백테스트']) else str(now())
+            time_ = str(now())[:-7] if data[0] in (ui_num['백테스트'], ui_num['백테스트'], ui_num['백테스트'], ui_num['백테스트']) else str(now())
             if '오류' in data[1] or '주문실패' in data[1] or 'Traceback' in data[1] or 'Error' in data[1]:
                 self.ui.lgicon_alert = True
                 log_ = f'<font color=#ffffa0>{data[1]}</font>'
@@ -39,7 +39,7 @@ class UpdateTextedit:
             if data[0] in (ui_num['기본로그'], ui_num['타임로그'], ui_num['시스템로그']):
                 self.ui.log.info(re.sub('(<([^>]+)>)', '', text))
 
-            elif data[0] in (ui_num['S백테스트'], ui_num['SF백테스트'], ui_num['C백테스트'], ui_num['CF백테스트']):
+            elif data[0] in (ui_num['백테스트'], ui_num['백테스트'], ui_num['백테스트'], ui_num['백테스트']):
                 if not self.ui.dict_set['백테스트로그기록안함']:
                     self.ui.log.info(re.sub('(<([^>]+)>)', '', text))
 
@@ -63,7 +63,7 @@ class UpdateTextedit:
                         qtest_qwait(2)
                         auto_back_schedule(self.ui, 2)
 
-            elif data[0] in (ui_num['S백테스트'], ui_num['SF백테스트'], ui_num['C백테스트'], ui_num['CF백테스트']):
+            elif data[0] in (ui_num['백테스트'], ui_num['백테스트'], ui_num['백테스트'], ui_num['백테스트']):
                 if 'START' in data[1] or '그리드 최적화 시작' in data[1]:
                     self.ui.back_start_time = now()
                 elif 'OPTUNA INFO' in data[1]:
@@ -81,7 +81,7 @@ class UpdateTextedit:
                 else:
                     color = color_fg_bt
 
-                if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
+                if data[0] in (ui_num['백테스트'], ui_num['백테스트']):
                     if '텍스트에디터 클리어' in data[1]:
                         self.ui.ss_textEditttt_09.clear()
                     self.ui.ss_textEditttt_09.setTextColor(color)
@@ -93,7 +93,7 @@ class UpdateTextedit:
                     self.ui.cs_textEditttt_09.append(text)
 
                 if '오류, 자동 중지 중 ...' in data[1]:
-                    if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
+                    if data[0] in (ui_num['백테스트'], ui_num['백테스트']):
                         backtest_process_kill(self.ui, False, False)
                     else:
                         backtest_process_kill(self.ui, True, False)
@@ -101,13 +101,13 @@ class UpdateTextedit:
                 if 'COMPLETE' in data[1] or 'STOP' in data[1]:
                     if data[1] in ('최적화O COMPLETE', '최적화OV COMPLETE', '최적화OVC COMPLETE', '최적화B COMPLETE',
                                    '최적화BV COMPLETE', '최적화BVC COMPLETE'):
-                        if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
+                        if data[0] in (ui_num['백테스트'], ui_num['백테스트']):
                             ui_activated_stg.activated_04(self.ui, 'stock')
                         else:
                             ui_activated_stg.activated_04(self.ui, 'coin')
 
                     if data[1] in ('최적화OG COMPLETE', '최적화OGV COMPLETE', '최적화OGVC COMPLETE'):
-                        if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
+                        if data[0] in (ui_num['백테스트'], ui_num['백테스트']):
                             ui_activated_stg.activated_06(self.ui, 'stock')
                         else:
                             ui_activated_stg.activated_06(self.ui, 'coin')
@@ -115,17 +115,13 @@ class UpdateTextedit:
                     if not self.ui.dict_set['그래프띄우지않기'] and 'STOP' not in data[1] and data[1] not in \
                             ('백파인더 COMPLETE', '최적화OG COMPLETE', '최적화OGV COMPLETE', '최적화OGVC COMPLETE',
                              '최적화OC COMPLETE', '최적화OCV COMPLETE', '최적화OCVC COMPLETE'):
-                        if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
-                            backtest_detail(self.ui, 'stock')
+                        if data[0] in (ui_num['백테스트'], ui_num['백테스트']):
+                            backtest_detail(self.ui)
                         else:
-                            backtest_detail(self.ui, 'coin')
+                            backtest_detail(self.ui)
 
-                    if data[0] in (ui_num['S백테스트'], ui_num['SF백테스트']):
-                        self.ui.ssicon_alert = False
-                        self.ui.main_btn_list[3].setIcon(self.ui.icon_stocks)
-                    else:
-                        self.ui.csicon_alert = False
-                        self.ui.main_btn_list[4].setIcon(self.ui.icon_coins)
+                    self.ui.ssicon_alert = False
+                    self.ui.main_btn_list[2].setIcon(self.ui.icon_stgs)
 
                     if self.ui.back_schedul:
                         qtest_qwait(3)
@@ -143,35 +139,24 @@ class UpdateTextedit:
                 self.data_save = True
 
             elif data[0] == ui_num['기본로그'] and \
-                    ('에이전트 종료' in data[1] or '리시버 종료' in data[1] or '트레이더 종료' in data[1] or '전략연산 종료' in data[1]):
-                if self.ui.dict_set['에이전트']:
-                    if '에이전트 종료' in data[1]:
-                        self.ui.wdzservQ.put(('manager', '에이전트 종료'))
-                    elif '트레이더 종료' in data[1]:
-                        self.ui.wdzservQ.put(('manager', '트레이더 종료'))
-                    elif '전략연산 종료' in data[1]:
-                        self.ui.wdzservQ.put(('manager', '전략연산 종료'))
-                        if self.data_save and self.ui.dict_set['디비자동관리']:
-                            self.AutoDataBase(1)
-                        else:
-                            self.StockShutDownCheck()
-                else:
-                    if '리시버 종료' in data[1]:
-                        if receiver_process_alive(self.ui):
-                            self.ui.proc_receiver_coin.kill()
-                    elif '트레이더 종료' in data[1]:
-                        if trader_process_alive(self.ui):
-                            self.ui.proc_trader_coin.kill()
-                    elif '전략연산 종료' in data[1]:
-                        if strategy_process_alive(self.ui):
-                            self.ui.proc_strategy_coin.kill()
-                        if self.data_save and self.ui.dict_set['디비자동관리']:
-                            self.AutoDataBase(4)
-                        else:
-                            self.CoinShutDownCheck()
+                    ('리시버 종료' in data[1] or '트레이더 종료' in data[1] or '전략연산 종료' in data[1]):
+                if '리시버 종료' in data[1]:
+                    if receiver_process_alive(self.ui):
+                        self.ui.proc_receiver.kill()
+                elif '트레이더 종료' in data[1]:
+                    if trader_process_alive(self.ui):
+                        self.ui.proc_trader.kill()
+                elif '전략연산 종료' in data[1]:
+                    if strategy_process_alive(self.ui):
+                        for p in self.ui.proc_strategys:
+                            p.kill()
+                    if self.data_save and self.ui.dict_set['디비자동관리']:
+                        self.AutoDataBase(1)
+                    else:
+                        self.ShutDownCheck()
 
             elif '해외선물 휴무 종료' in data[1]:
-                self.StockShutDownCheck()
+                self.ShutDownCheck()
 
             elif data[0] == ui_num['DB관리']:
                 if data[1] == 'DB업데이트완료':
@@ -191,7 +176,7 @@ class UpdateTextedit:
     def AutoDataBase(self, gubun):
         if gubun == 1:
             self.ui.auto_mode = True
-            if self.ui.dict_set['주식알림소리']:
+            if self.ui.dict_set['알림소리']:
                 self.ui.soundQ.put('데이터베이스 자동관리를 시작합니다.')
             if not self.ui.dialog_db.isVisible():
                 self.ui.dialog_db.show()
@@ -226,34 +211,19 @@ class UpdateTextedit:
             self.ui.windowQ.put((ui_num['기본로그'], '데이터베이스 자동관리 완료'))
             qtest_qwait(2)
             self.ui.auto_mode = False
-            if gubun == 3:
-                self.StockShutDownCheck()
-            else:
-                self.CoinShutDownCheck()
+            self.ShutDownCheck()
 
-    def StockShutDownCheck(self):
+    def ShutDownCheck(self):
         from utility.static import str_hms
         if self.ui.dict_set['백테스케쥴실행'] and now().weekday() == self.ui.dict_set['백테스케쥴요일']:
-            if self.ui.dict_set['주식알림소리']:
+            if self.ui.dict_set['알림소리']:
                 self.ui.soundQ.put('오늘은 백테 스케쥴러의 실행이 예약되어 있어 프로그램을 종료하지 않습니다.')
         else:
             if self.ui.dict_set['프로그램종료']:
                 from PyQt5.QtCore import QTimer
                 QTimer.singleShot(180 * 1000, self.ui.ProcessKill)
-            if self.ui.dict_set['주식컴퓨터종료'] or \
-                    ('키움증권' in self.ui.dict_set['증권사'] and 90000 < int(str_hms()) < 90500 and self.ui.dict_set['휴무컴퓨터종료']) or \
-                    ('해외선물' in self.ui.dict_set['증권사'] and 213000 < int(str_hms()) < 233000 and self.ui.dict_set['휴무컴퓨터종료']):
-                import os
-                os.system('shutdown /s /t 300')
-
-    def CoinShutDownCheck(self):
-        if self.ui.dict_set['백테스케쥴실행'] and now().weekday() == self.ui.dict_set['백테스케쥴요일']:
-            if self.ui.dict_set['코인알림소리']:
-                self.ui.soundQ.put('오늘은 백테 스케쥴러의 실행이 예약되어 있어 프로그램을 종료하지 않습니다.')
-        else:
-            if self.ui.dict_set['프로그램종료']:
-                from PyQt5.QtCore import QTimer
-                QTimer.singleShot(180 * 1000, self.ui.ProcessKill)
-            if self.ui.dict_set['코인컴퓨터종료']:
+            if self.ui.dict_set['컴퓨터종료'] or \
+                    ('키움증권' in self.ui.dict_set['거래소'] and 90000 < int(str_hms()) < 90500 and self.ui.dict_set['휴무컴퓨터종료']) or \
+                    ('해외선물' in self.ui.dict_set['거래소'] and 213000 < int(str_hms()) < 233000 and self.ui.dict_set['휴무컴퓨터종료']):
                 import os
                 os.system('shutdown /s /t 300')

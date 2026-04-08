@@ -7,8 +7,8 @@ from PyQt5.QtWidgets import QMessageBox
 from utility.static import error_decorator
 from ui.ui_draw_chart_base import DrawChartBase
 from ui.ui_button_clicked_etc import hg_button_clicked_02
+from utility.winapi import leftClick, enter_keys, press_keys
 from utility.static import from_timestamp, thread_decorator, str_ymd
-from trade.stock_korea.login_kiwoom.manuallogin import leftClick, enter_keys, press_keys
 
 
 class DrawDBChart(DrawChartBase):

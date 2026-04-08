@@ -4,7 +4,7 @@ from numba import njit, prange
 
 
 @njit(cache=True, parallel=True)
-def GetOptiValidStd(train_stds, valid_stds, exponential):
+def get_opti_valid_std(train_stds, valid_stds, exponential):
     """
     가중치(weight) 예제 : 최고 1.3, 최저 0.7
     10개 : 1.300, 1.233, 1.166, 1.100, 1.033, 0.966, 0.900, 0.833, 0.766, 0.700
@@ -23,7 +23,7 @@ def GetOptiValidStd(train_stds, valid_stds, exponential):
 
 
 @njit(cache=True)
-def GetResult(arry_tsg, arry_bct, betting, ui_gubun, day_count):
+def get_result(arry_tsg, arry_bct, betting, market_gubun, day_count):
     """
     arry_tsg dtype 'float64'
     보유시간, 매도시간, 수익률, 수익금, 수익금합계
@@ -61,7 +61,7 @@ def GetResult(arry_tsg, arry_bct, betting, ui_gubun, day_count):
     if seed < betting: seed = betting
 
     tpp  = tsg / seed * 100
-    cagr = tpp / day_count * (365 if 'C' in ui_gubun else 250)
+    cagr = tpp / day_count * (365 if market_gubun in (5, 9) else 250)
     tpi  = wr / 100 * (1 + appp / ampp) if ampp != 0 else 1.0
 
     return (

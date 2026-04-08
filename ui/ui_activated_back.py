@@ -10,7 +10,6 @@ def bactivated_01(ui):
         gubun = ui.list_checkBoxxxxxx.index(ui.dialog_scheduler.focusWidget())
     except:
         gubun = ui.list_gcomboBoxxxxx.index(ui.dialog_scheduler.focusWidget())
-    gubun2 = 'coin' if ui.sd_pushButtonnn_01.text() == '코인' else 'stock' if ui.sd_pushButtonnn_01.text() == '주식' else 'future'
 
     ui.list_bcomboBoxxxxx[gubun].clear()
     ui.list_scomboBoxxxxx[gubun].clear()
@@ -20,16 +19,17 @@ def bactivated_01(ui):
     ui.list_p3comboBoxxxx[gubun].clear()
     ui.list_p4comboBoxxxx[gubun].clear()
     ui.list_tcomboBoxxxxx[gubun].clear()
+
     back_name = ui.list_gcomboBoxxxxx[gubun].currentText()
     if back_name == '백테스트':
-        df  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}buy').set_index('index')
+        df  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buy').set_index('index')
         if len(df) > 0:
             indexs = list(df.index)
             indexs.sort()
             for i, index in enumerate(indexs):
                 ui.list_bcomboBoxxxxx[gubun].addItem(index)
 
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}sell').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sell').set_index('index')
         if len(df) > 0:
             indexs = list(df.index)
             indexs.sort()
@@ -38,14 +38,14 @@ def bactivated_01(ui):
         ui.list_alineEdittttt[gubun].setText('30')
     else:
         if '조건' in back_name:
-            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}buyconds').set_index('index')
+            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buyconds').set_index('index')
             if len(df) > 0:
                 indexs = list(df.index)
                 indexs.sort()
                 for i, index in enumerate(indexs):
                     ui.list_bcomboBoxxxxx[gubun].addItem(index)
 
-            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}sellconds').set_index('index')
+            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sellconds').set_index('index')
             if len(df) > 0:
                 indexs = list(df.index)
                 indexs.sort()
@@ -53,14 +53,14 @@ def bactivated_01(ui):
                     ui.list_scomboBoxxxxx[gubun].addItem(index)
             ui.list_alineEdittttt[gubun].setText('30')
         else:
-            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}optibuy').set_index('index')
+            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
             if len(df) > 0:
                 indexs = list(df.index)
                 indexs.sort()
                 for i, index in enumerate(indexs):
                     ui.list_bcomboBoxxxxx[gubun].addItem(index)
 
-            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}optisell').set_index('index')
+            df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optisell').set_index('index')
             if len(df) > 0:
                 indexs = list(df.index)
                 indexs.sort()
@@ -68,9 +68,9 @@ def bactivated_01(ui):
                     ui.list_scomboBoxxxxx[gubun].addItem(index)
 
             if 'GA' in back_name:
-                df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}vars').set_index('index')
+                df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optigavars').set_index('index')
             else:
-                df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun2}optivars').set_index('index')
+                df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optivars').set_index('index')
             if len(df) > 0:
                 indexs = list(df.index)
                 indexs.sort()

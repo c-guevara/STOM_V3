@@ -7,8 +7,8 @@ from trade.restapi_ls import LsRestAPI, LsRestData, WebSocketReceiver
 
 
 class StockUsaReceiver(BaseReceiver):
-    def __init__(self, qlist, dict_set):
-        super().__init__(qlist, dict_set)
+    def __init__(self, qlist, dict_set, market_infos):
+        super().__init__(qlist, dict_set, market_infos)
 
         self.ls = LsRestAPI(self.windowQ, self.access, self.secret)
         self.token = self.ls.create_token()

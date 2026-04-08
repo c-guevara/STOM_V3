@@ -30,7 +30,7 @@ def dactivated_02(ui):
 def dactivated_03(ui):
     name = ui.od_comboBoxxxxx_01.currentText()
     ui.od_comboBoxxxxx_02.clear()
-    if 'KRW' in name or '해외선물' in ui.dict_set['증권사']:
+    if 'KRW' in name or '해외선물' in ui.dict_set['거래소']:
         items = ['시장가', '지정가']
     elif 'USDT' in name:
         items = ['시장가', '지정가', '지정가IOC', '지정가FOK']

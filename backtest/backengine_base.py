@@ -5,19 +5,17 @@ import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.risk_analyzer import RiskAnalyzer
-from trade.base_globals_func import BaseGlobalsFunc
 from trade.formula_manager import get_formula_data
+from trade.strategy_globals_func import StrategyGlobalsFunc
 from trade.microstructure_analyzer import MicrostructureAnalyzer
-from backtest.back_static import GetBuyStg, GetSellStg, GetBuyConds, GetSellConds, GetBackloadCodeQuery, \
-    get_trade_info, GetBuyStgFuture, GetSellStgFuture, GetBuyCondsFuture, GetSellCondsFuture
-from utility.setting_base import DB_STOCK_TICK_BACK, BACK_TEMP, ui_num, DB_STOCK_MIN_BACK, indicator, \
-    DB_FUTURE_OS_TICK_BACK, DB_FUTURE_OS_MIN_BACK, DB_COIN_TICK_BACK, DB_COIN_MIN_BACK, list_stock_tick, \
-    list_stock_min, list_basic_tick, list_basic_min
-from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_angle_cf, get_ema_list, \
-    add_rolling_data, set_builtin_print, get_profile_text
+from utility.setting_base import indicator, ui_num, BACK_TEMP, DB_STRATEGY
+from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
+    set_builtin_print, get_profile_text
+from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
+    get_trade_info, get_buy_stg_future, get_sell_stg_future, get_buy_conds_future, get_sell_conds_future
 
 
-class BackEngineBase(BaseGlobalsFunc):
+class BackEngineBase(StrategyGlobalsFunc):
     def __init__(self, gubun, shared_cnt, lock, wq, tq, bq, beq_list, bstq_list, dict_set, profile=False):
         super().__init__()
         self.gubun           = gubun
@@ -53,19 +51,16 @@ class BackEngineBase(BaseGlobalsFunc):
         self.buystg          = None
         self.sellstg         = None
         self.indistg         = None
-        self.dict_cn         = None
         self.unit            = None
         self.hour            = None
         self.pr              = None
         self.info_for_order  = None
 
         self.market_gubun    = None
-        self.market_text     = None
-        self.ui_num_txt      = None
+        self.market_info     = None
         self.is_oms          = None
         self.buy_hj_limit    = None
         self.sell_hj_limit   = None
-        self.set_dict_cond   = None
         self.set_weight      = None
         self.base_cnt        = None
         self.add_cnt         = None
@@ -97,38 +92,32 @@ class BackEngineBase(BaseGlobalsFunc):
         self.비중조절기준       = 0
 
         set_builtin_print(True, self.wq)
-        self.UpdateMarketGubun()
-        self.MainLoop()
+        self._main_loop()
 
-    def UpdateSubVars(self):
-        self.market_text   = '주식' if self.market_gubun < 3 else ''
-        self.ui_num_txt    = 'S백테스트' if self.market_gubun < 3 else 'C백테스트'
+    def _update_sub_vars(self):
+        from utility.setting_market import DICT_MARKET_GUBUN, DICT_MARKET_INFO
+
+        self.market_gubun  = DICT_MARKET_GUBUN[self.dict_set['거래소']]
+        self.market_info   = DICT_MARKET_INFO[self.market_gubun]
+
         self.is_oms        = self.dict_set['백테주문관리적용']
-        self.is_tick       = self.dict_set[f'{self.market_text}타임프레임']
-        self.buy_hj_limit  = self.dict_set[f'{self.market_text}매수시장가잔량범위']
-        self.sell_hj_limit = self.dict_set[f'{self.market_text}매도시장가잔량범위']
-        self.set_dict_cond = self.dict_set[f'{self.market_text}경과틱수설정']
-        self.set_weight    = self.dict_set[f'{self.market_text}비중조절']
+
+        self.is_tick       = self.dict_set['타임프레임']
+        self.buy_hj_limit  = self.dict_set['매수시장가잔량범위']
+        self.sell_hj_limit = self.dict_set['매도시장가잔량범위']
+        self.set_weight    = self.dict_set['비중조절']
         self.sma_list      = get_ema_list(self.is_tick)
 
-        if self.market_gubun == 1:   gubun = 'stock'
-        elif self.market_gubun == 2: gubun = 'future'
-        else:                        gubun = 'coin'
-        self.ms_analyzer = MicrostructureAnalyzer(gubun)
-        self.rk_analyzer = RiskAnalyzer(gubun)
+        self.ma_round_unit = self.market_info['반올림단위']
+        self.angle_pct_cf  = self.market_info['각도계수'][self.is_tick][0]
+        self.angle_dtm_cf  = self.market_info['각도계수'][self.is_tick][1]
+        factor_list        = self.market_info['팩터목록'][self.is_tick]
+        self.dict_findex   = {factor: i for i, factor in enumerate(factor_list)}
+        self.base_cnt      = self.dict_findex['관심종목'] + 1
 
-        if self.market_gubun == 1:
-            factor_list = list_stock_tick if self.is_tick else list_stock_min
-        else:
-            factor_list = list_basic_tick if self.is_tick else list_basic_min
-        self.dict_findex = {name: i for i, name in enumerate(factor_list)}
-
-        self.base_cnt     = self.dict_findex['관심종목'] + 1
-        self.hoga_sidex   = self.dict_findex['매도호가5']
-        self.hoga_eidex   = self.dict_findex['매수잔량5'] + 1
-        self.add_cnt      = len(self.dict_findex) - self.dict_findex['최고현재가']
-        self.angle_pct_cf = get_angle_cf(self.market_gubun, self.is_tick, 0)
-        self.angle_dtm_cf = get_angle_cf(self.market_gubun, self.is_tick, 1)
+        self.hoga_sidex    = self.dict_findex['매도호가5']
+        self.hoga_eidex    = self.dict_findex['매수잔량5'] + 1
+        self.add_cnt       = len(self.dict_findex) - self.dict_findex['최고현재가']
 
         if self.is_tick:
             self.dict_findex['초당매도수금액'] = self.dict_findex['초당매수금액']
@@ -143,21 +132,30 @@ class BackEngineBase(BaseGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        if self.set_dict_cond:
-            def compile_condition(x):
-                if self.is_tick:
-                    return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
-                else:
-                    return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k+str(vturn)+str(vkey)] = self.indexn', '<string>', 'exec')
+        self.ms_analyzer = MicrostructureAnalyzer(self.market_info['마켓구분'], factor_list)
+        self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'], factor_list)
 
-            text_list = self.set_dict_cond.split(';')
-            half_cnt = int(len(text_list) / 2)
-            key_list = text_list[:half_cnt]
-            value_text_list = text_list[half_cnt:]
-            value_comp_list = [compile_condition(x) for x in value_text_list]
-            self.dict_condition = dict(zip(key_list, value_comp_list))
+        self._set_passticks()
 
-    def MainLoop(self):
+    def _set_passticks(self):
+        def compile_condition(x):
+            if self.is_tick:
+                return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
+            else:
+                return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k+str(vturn)+str(vkey)] = self.indexn', '<string>', 'exec')
+
+        table_name_stg_passticks = f"{self.market_info['전략구분']}_passticks"
+        con  = sqlite3.connect(DB_STRATEGY)
+        dfpt = pd.read_sql(f'SELECT * FROM {table_name_stg_passticks}', con).set_index('index')
+        con.close()
+
+        if len(dfpt) > 0:
+            name_list = list(dfpt.index)
+            stg_list  = dfpt['전략코드'].to_list()
+            stg_list  = [compile_condition(x) for x in stg_list]
+            self.dict_condition = dict(zip(name_list, stg_list))
+
+    def _main_loop(self):
         while True:
             data = self.beq.get()
             try:
@@ -171,21 +169,21 @@ class BackEngineBase(BaseGlobalsFunc):
                             self.starttime = data[5]
                             self.endtime   = data[6]
                             if self.market_gubun in (1, 3):
-                                self.buystg, self.indistg = GetBuyStg(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStg(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
-                                self.buystg, self.indistg = GetBuyStgFuture(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStgFuture(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg_future(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg_future(data[8], self.gubun, self.wq)
                             if self.buystg is None or self.sellstg is None:
-                                self.BackStop()
+                                self._back_stop()
                             else:
-                                self.CheckAvglist(avg_list)
-                                self.CheckDayAndTime()
+                                self._check_avg_list(avg_list)
+                                self._check_day_and_time()
                         elif data[0] == '변수정보':
                             self.vars_list = data[1]
                             self.opti_kind = data[2]
                             self.vars      = [var[1] for var in self.vars_list]
-                            self.BackTest()
+                            self._back_test()
                     elif self.back_type == '전진분석':
                         if data[0] == '백테정보':
                             self.betting   = data[1]
@@ -195,24 +193,24 @@ class BackEngineBase(BaseGlobalsFunc):
                             self.starttime = data[5]
                             self.endtime   = data[6]
                             if self.market_gubun in (1, 3):
-                                self.buystg, self.indistg = GetBuyStg(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStg(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
-                                self.buystg, self.indistg = GetBuyStgFuture(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStgFuture(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg_future(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg_future(data[8], self.gubun, self.wq)
                             if self.buystg is None or self.sellstg is None:
-                                self.BackStop()
+                                self._back_stop()
                             else:
-                                self.CheckAvglist(avg_list)
-                                self.CheckDayAndTime()
+                                self._check_avg_list(avg_list)
+                                self._check_day_and_time()
                         elif data[0] == '변수정보':
                             self.vars_list = data[1]
                             self.opti_kind = data[2]
                             self.vars      = [var[1] for var in self.vars_list]
                             self.startday  = data[3]
                             self.endday    = data[4]
-                            self.CheckDayAndTime()
-                            self.BackTest()
+                            self._check_day_and_time()
+                            self._back_test()
                     elif self.back_type == 'GA최적화':
                         if data[0] == '백테정보':
                             self.betting   = data[1]
@@ -222,20 +220,20 @@ class BackEngineBase(BaseGlobalsFunc):
                             self.starttime = data[5]
                             self.endtime   = data[6]
                             if self.market_gubun in (1, 3):
-                                self.buystg, self.indistg = GetBuyStg(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStg(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
-                                self.buystg, self.indistg = GetBuyStgFuture(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStgFuture(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg_future(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg_future(data[8], self.gubun, self.wq)
                             if self.buystg is None or self.sellstg is None:
-                                self.BackStop()
+                                self._back_stop()
                             else:
-                                self.CheckAvglist(avg_list)
-                                self.CheckDayAndTime()
+                                self._check_avg_list(avg_list)
+                                self._check_day_and_time()
                         elif data[0] == '변수정보':
                             self.vars_lists = data[1]
                             self.opti_kind  = data[2]
-                            self.BackTest()
+                            self._back_test()
                     elif self.back_type == '조건최적화':
                         if data[0] == '백테정보':
                             self.betting   = data[1]
@@ -244,7 +242,7 @@ class BackEngineBase(BaseGlobalsFunc):
                             self.endday    = data[4]
                             self.starttime = data[5]
                             self.endtime   = data[6]
-                            self.CheckDayAndTime()
+                            self._check_day_and_time()
                         elif data[0] == '조건정보':
                             self.dict_buystg  = {}
                             self.dict_sellstg = {}
@@ -252,20 +250,20 @@ class BackEngineBase(BaseGlobalsFunc):
                             error = False
                             for i in range(20):
                                 if self.market_gubun in (1, 3):
-                                    buystg = GetBuyConds(data[2][i], self.gubun, self.wq)
-                                    sellstg, dict_cond = GetSellConds(data[3][i], self.gubun, self.wq)
+                                    buystg = get_buy_conds(data[2][i], self.gubun, self.wq)
+                                    sellstg, dict_cond = get_sell_conds(data[3][i], self.gubun, self.wq)
                                 else:
-                                    buystg = GetBuyCondsFuture(data[1], data[2][i], self.gubun, self.wq)
-                                    sellstg, dict_cond = GetSellCondsFuture(data[1], data[3][i], self.gubun, self.wq)
+                                    buystg = get_buy_conds_future(data[1], data[2][i], self.gubun, self.wq)
+                                    sellstg, dict_cond = get_sell_conds_future(data[1], data[3][i], self.gubun, self.wq)
                                 self.dict_buystg[i]  = buystg
                                 self.dict_sellstg[i] = sellstg
                                 self.dict_sconds[i]  = dict_cond
                                 if buystg is None or sellstg is None: error = True
                             if error:
-                                self.BackStop()
+                                self._back_stop()
                             else:
                                 self.opti_kind = data[4]
-                                self.BackTest()
+                                self._back_test()
                     elif self.back_type == '백테스트':
                         if data[0] == '백테정보':
                             self.betting   = data[1]
@@ -275,17 +273,17 @@ class BackEngineBase(BaseGlobalsFunc):
                             self.starttime = data[5]
                             self.endtime   = data[6]
                             if self.market_gubun in (1, 3):
-                                self.buystg, self.indistg = GetBuyStg(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStg(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
-                                self.buystg, self.indistg = GetBuyStgFuture(data[7], self.gubun, self.wq)
-                                self.sellstg, self.dict_sconds = GetSellStgFuture(data[8], self.gubun, self.wq)
+                                self.buystg, self.indistg = get_buy_stg_future(data[7], self.gubun, self.wq)
+                                self.sellstg, self.dict_sconds = get_sell_stg_future(data[8], self.gubun, self.wq)
                             if self.buystg is None or self.sellstg is None:
-                                self.BackStop()
+                                self._back_stop()
                             else:
                                 self.opti_kind = data[9]
-                                self.CheckDayAndTime()
-                                self.BackTest()
+                                self._check_day_and_time()
+                                self._back_test()
                     elif self.back_type == '백파인더':
                         if data[0] == '백테정보':
                             self.avgtime   = data[1]
@@ -297,11 +295,11 @@ class BackEngineBase(BaseGlobalsFunc):
                                 self.buystg = compile(data[6], '<string>', 'exec')
                             except:
                                 if self.gubun == 0: self.wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
-                                self.BackStop()
+                                self._back_stop()
                             else:
                                 self.opti_kind = data[7]
-                                self.CheckDayAndTime()
-                                self.BackTest()
+                                self._check_day_and_time()
+                                self._back_test()
 
                 elif data[0] == '백테유형':
                     self.back_type = data[1]
@@ -310,34 +308,29 @@ class BackEngineBase(BaseGlobalsFunc):
                         self.ms_analyzer.clear_data()
                 elif data[0] == '설정변경':
                     self.dict_set = data[1]
-                    self.UpdateSubVars()
+                    self._update_sub_vars()
                 elif data[0] == '종목명':
-                    if self.market_gubun == 1:
-                        self.dict_cn   = data[1]
-                        self.dict_kosd = data[2]
-                    else:
-                        self.dict_info = data[1]
+                    self.dict_info = data[1]
                 elif data[0] == '데이터로딩':
-                    self.DataLoad(data)
+                    self._data_load(data)
                 elif data[0] == '공유데이터':
                     self.shared_count = data[1]
                     self.shared_info  = data[2]
                 elif data == '백테중지':
-                    self.BackStop(2)
+                    self._back_stop(2)
             except:
                 if self.gubun == 0:
                     self.wq.put((ui_num['시스템로그'], format_exc()))
 
-    # noinspection PyUnresolvedReferences
-    def DataLoad(self, data):
-        def data_load(days):
+    def _data_load(self, data):
+        def load(days):
             try:
-                df = pd.read_sql(GetBackloadCodeQuery(self.is_tick, code, days, starttime, endtime), con)
+                df = pd.read_sql(get_back_load_code_query(self.is_tick, code, days, starttime, endtime), con)
             except:
                 pass
             else:
                 if len(df) > 0:
-                    arry = add_rolling_data(df, self.market_gubun, self.is_tick, avg_list)
+                    arry = add_rolling_data(df, round_unit, angle_cf_list, self.is_tick, avg_list)
                     all_data.append({
                         'code': code,
                         'data': arry,
@@ -346,32 +339,30 @@ class BackEngineBase(BaseGlobalsFunc):
                         'size': arry.shape[0] * arry.shape[1] * arry.dtype.itemsize
                     })
 
-        self.UpdateSubVars()
+        self._update_sub_vars()
 
-        if self.market_gubun == 1:
-            con = sqlite3.connect(DB_STOCK_TICK_BACK if self.is_tick else DB_STOCK_MIN_BACK)
-        elif self.market_gubun == 2:
-            con = sqlite3.connect(DB_FUTURE_OS_TICK_BACK if self.is_tick else DB_FUTURE_OS_MIN_BACK)
-        else:
-            con = sqlite3.connect(DB_COIN_TICK_BACK if self.is_tick else DB_COIN_MIN_BACK)
+        round_unit = self.market_info['반올림단위']
+        angle_cf_list = self.market_info['각도계수'][self.is_tick]
+
+        con = sqlite3.connect(self.market_info['백테디비'][self.is_tick])
 
         all_data = []
         divid_mode = data[-1]
         if divid_mode == '종목코드별 분류':
             _, startday, endday, starttime, endtime, code_list, avg_list, code_days, _, _, _ = data
             for i, code in enumerate(code_list):
-                data_load(code_days[code])
+                load(code_days[code])
         elif divid_mode == '일자별 분류':
             _, startday, endday, starttime, endtime, day_list, avg_list, _, day_codes, _, _ = data
             code_list = set()
             for day in day_list:
                 code_list.update(day_codes[day])
             for i, code in enumerate(code_list):
-                data_load(day_list)
+                load(day_list)
         else:
             _, startday, endday, starttime, endtime, day_list, avg_list, _, _, code, _ = data
             for i, day in enumerate(day_list):
-                data_load([day])
+                load([day])
         con.close()
 
         if self.dict_set['백테일괄로딩'] and all_data:
@@ -382,6 +373,7 @@ class BackEngineBase(BaseGlobalsFunc):
             shared_info = []
             offset = 0
             for item in all_data:
+                # noinspection PyUnresolvedReferences
                 shared_array = np.ndarray(
                     item['shape'],
                     dtype=item['dtype'],
@@ -416,14 +408,14 @@ class BackEngineBase(BaseGlobalsFunc):
 
         self.set_globals_func()
 
-    def CheckAvglist(self, avg_list):
+    def _check_avg_list(self, avg_list):
         not_in_list = [x for x in avg_list if x not in self.avg_list]
         if len(not_in_list) > 0 and self.gubun == 0:
-            self.wq.put((ui_num[self.ui_num_txt], '백테엔진 구동 시 포함되지 않은 평균값 틱수를 사용하여 중지되었습니다.'))
-            self.wq.put((ui_num[self.ui_num_txt], '누락된 평균값 틱수를 추가하여 백테엔진을 재시작하십시오.'))
-            self.BackStop()
+            self.wq.put((ui_num['백테스트'], '백테엔진 구동 시 포함되지 않은 평균값 틱수를 사용하여 중지되었습니다.'))
+            self.wq.put((ui_num['백테스트'], '누락된 평균값 틱수를 추가하여 백테엔진을 재시작하십시오.'))
+            self._back_stop()
 
-    def CheckDayAndTime(self):
+    def _check_day_and_time(self):
         self.same_days = self.startday_ == self.startday and self.endday_ == self.endday
         self.same_time = self.starttime_ == self.starttime and self.endtime_ == self.endtime
 
@@ -434,16 +426,16 @@ class BackEngineBase(BaseGlobalsFunc):
             self.unit = 10000
             self.hour = 2400
 
-    def BackStop(self, gubun=0):
+    def _back_stop(self, gubun=0):
         self.back_type = None
         if gubun in (0, 1):
-            if self.gubun == 0: self.wq.put((ui_num[self.ui_num_txt], '백테스트 엔진 중지 중 ...'))
+            if self.gubun == 0: self.wq.put((ui_num['백테스트'], '백테스트 엔진 중지 중 ...'))
         if gubun in (1, 2):
             self.bq.put('백테중지완료')
         if gubun == 3:
-            if self.gubun == 0: self.wq.put((ui_num[self.ui_num_txt], '백테스트 엔진 전략연산 오류, 자동 중지 중 ...'))
+            if self.gubun == 0: self.wq.put((ui_num['백테스트'], '백테스트 엔진 전략연산 오류, 자동 중지 중 ...'))
 
-    def InitTradeInfo(self):
+    def _init_trade_info(self):
         self.high_low = []
         self.tick_count = 0
         self.dict_cond_indexn = {}
@@ -473,7 +465,7 @@ class BackEngineBase(BaseGlobalsFunc):
                 self.trade_info = {0: {0: v}}
 
     # noinspection PyUnresolvedReferences
-    def GetArrayData(self):
+    def _get_array_data(self):
         shared_info = None
         with self.shared_lock:
             shared_cnt = self.shared_cnt.value
@@ -519,7 +511,7 @@ class BackEngineBase(BaseGlobalsFunc):
         self.arry_code = arry_code
         return code
 
-    def UpdateFormulaData(self):
+    def _update_formula_data(self):
         total_cnt = self.base_cnt + 5 + self.add_cnt * len(self.avg_list)
         self.fm_list, _, self.fm_tcnt = get_formula_data(False, total_cnt)
         if self.fm_list:
@@ -527,38 +519,38 @@ class BackEngineBase(BaseGlobalsFunc):
                 fm[8] = compile(fm[-2], '<string>', 'exec')
             self.set_globals_func()
 
-    def BackTest(self):
+    def _back_test(self):
         if self.gubun == 0 and self.profile:
             import cProfile
             self.pr = cProfile.Profile()
             self.pr.enable()
 
         if not self.update_formula:
-            self.UpdateFormulaData()
+            self._update_formula_data()
             self.update_formula = True
 
-        self.InitTradeInfo()
+        self._init_trade_info()
         self.sell_count = 0
 
         j = 0
         while True:
-            code = self.GetArrayData()
+            code = self._get_array_data()
             if code is None:
                 break
 
             if not self.beq.empty() and self.beq.get() == '백테중지':
-                self.BackStop(1)
+                self._back_stop(1)
                 return
 
             if self.is_oms:
-                if self.dict_set[f'{self.market_text}매수금지블랙리스트'] and \
-                        code in self.dict_set[f'{self.market_text}블랙리스트'] and self.back_type != '백파인더':
+                if self.dict_set['매수금지블랙리스트'] and \
+                        code in self.dict_set['블랙리스트'] and self.back_type != '백파인더':
                     self.tq.put('백테완료')
                     continue
 
             if self.market_gubun == 1:
                 self.code = code
-                self.name = self.dict_cn.get(self.code, self.code)
+                self.name = self.dict_info.get(self.code, {}).get('종목명', self.code)
             elif self.market_gubun == 2:
                 self.code = code
                 self.name = self.dict_info[code]['종목명']
@@ -581,36 +573,36 @@ class BackEngineBase(BaseGlobalsFunc):
                         self.tick_count += 1
 
                         try:
-                            self.Strategy()
+                            self._strategy()
                         except:
                             if self.gubun == 0: self.wq.put((ui_num['시스템로그'], format_exc()))
-                            self.BackStop(3)
+                            self._back_stop(3)
                             return
 
                         j += 1
                         if j == 1000:
                             j = 0
                             if not self.beq.empty() and self.beq.get() == '백테중지':
-                                self.BackStop(1)
+                                self._back_stop(1)
                                 return
 
                     self.index = indexs[end_idx]
                     self.indexn = end_idx
                     self.tick_count += 1
-                    self.LastSell()
-                    self.InitTradeInfo()
+                    self._last_sell()
+                    self._init_trade_info()
                     start_idx = end_idx + 1
 
             self.tq.put('백테완료')
 
         if not self.beq.empty() and self.beq.get() == '백테중지':
-            self.BackStop(1)
+            self._back_stop(1)
             return
 
         if self.gubun == 0 and self.profile:
             self.wq.put((ui_num['시스템로그'], get_profile_text(self.pr)))
 
-    def UpdateHighLow(self, 현재가또는분봉고가=None, 분봉저가=None):
+    def _update_highlow(self, 현재가또는분봉고가=None, 분봉저가=None):
         if 분봉저가 is None:
             if self.high_low:
                 if 현재가또는분봉고가 >= self.high_low[0]:
@@ -633,7 +625,7 @@ class BackEngineBase(BaseGlobalsFunc):
                 self.high_low = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
 
     def Buy(self, buy_long=False):
-        self.SetBuyCount()
+        self._get_buy_count()
         주문수량 = self.curr_trade_info['주문수량']
         if 주문수량 > 0:
             if self.market_gubun in (1, 3) or buy_long:
@@ -646,7 +638,7 @@ class BackEngineBase(BaseGlobalsFunc):
             거래금액, 체결완료 = self._calc_fill_amount(주문수량, 호가배열, 잔량배열)
             if 체결완료:
                 보유중 = 1 if self.market_gubun in (1, 3) or buy_long else 2
-                매수가 = self.GetBuyPrice(거래금액, 주문수량)
+                매수가 = self._get_order_price(거래금액, 주문수량)
                 매수시간 = dt_ymdhms(str(self.index)) if self.is_tick else dt_ymdhm(str(self.index))
                 self.curr_trade_info.update({
                     '보유중': 보유중,
@@ -660,7 +652,7 @@ class BackEngineBase(BaseGlobalsFunc):
                     '매수시간': 매수시간
                 })
 
-    def SetBuyCount(self):
+    def _get_buy_count(self):
         현재가, 저가대비고가등락율 = self.info_for_order[:-2]
         if self.set_weight[0] == 0:
             betting = self.betting
@@ -686,10 +678,10 @@ class BackEngineBase(BaseGlobalsFunc):
                 betting = self.betting * self.set_weight[8]
             else:
                 betting = self.betting * self.set_weight[9]
-        self.curr_trade_info['주문수량'] = self.GetOrderCount(betting, 현재가, False, 0, 100)
+        self.curr_trade_info['주문수량'] = self._set_buy_count(betting, 현재가, 0, 100)
 
-    def GetHoldInfo(self, 보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간):
-        포지션, _, 수익금, 수익률 = self.GetProfitInfo(현재가, 매수가, 보유수량)
+    def _get_hold_info(self, 보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간):
+        포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
         if 수익률 > 최고수익률:   self.curr_trade_info['최고수익률'] = 최고수익률 = 수익률
         elif 수익률 < 최저수익률: self.curr_trade_info['최저수익률'] = 최저수익률 = 수익률
         now_time = self._now()
@@ -710,10 +702,10 @@ class BackEngineBase(BaseGlobalsFunc):
 
             거래금액, 체결완료 = self._calc_fill_amount(주문수량, 호가배열, 잔량배열)
             if 체결완료:
-                self.curr_trade_info['매도가'] = self.GetSellPrice(거래금액, 주문수량)
-                self.CalculationEyun()
+                self.curr_trade_info['매도가'] = self._get_order_price(거래금액, 주문수량)
+                self._calculation_eyun()
 
-    def LastSell(self):
+    def _last_sell(self):
         호가데이터 = self.arry_code[self.indexn, self.hoga_sidex:self.hoga_eidex]
         매도호가배열 = 호가데이터[:5][::-1]
         매수호가배열 = 호가데이터[5:10]
@@ -736,12 +728,12 @@ class BackEngineBase(BaseGlobalsFunc):
                     거래금액, 체결완료 = self._calc_fill_amount(주문수량, 호가배열, 잔량배열)
                     if not 체결완료:
                         거래금액 = 주문수량 * 호가배열[0]
-                    self.curr_trade_info['매도가'] = self.GetLastSellPrice(거래금액, 주문수량, 0)
+                    self.curr_trade_info['매도가'] = self._get_last_sell_price(거래금액, 주문수량, 0)
                     self.curr_trade_info['주문수량'] = 주문수량
                     self.sell_cond = 0
-                    self.CalculationEyun()
+                    self._calculation_eyun()
 
-    def CalculationEyun(self):
+    def _calculation_eyun(self):
         """
         보유중, 매수가, 매도가, 주문수량, 보유수량, 최고수익률, 최저수익률, 매수틱번호, 매수시간 = self.curr_trade_info.values()
         """
@@ -752,7 +744,7 @@ class BackEngineBase(BaseGlobalsFunc):
         else:
             보유시간 = int((dt_ymdhm(str(self.index)) - 매수시간).total_seconds() / 60)
         매수시간, 매도시간, 매입금액 = int(self.arry_code[매수틱번호, 0]), self.index, 주문수량 * 매수가
-        시가총액또는포지션, 평가금액, 수익금, 수익률 = self.GetProfitInfo(매도가, 매수가, 주문수량)
+        시가총액또는포지션, 평가금액, 수익금, 수익률 = self._get_profit_info(매도가, 매수가, 주문수량)
         매도조건 = self.dict_sconds[self.sell_cond] if self.back_type != '조건최적화' else self.dict_sconds[vkey][self.sell_cond]
         추가매수시간, 잔고없음 = '', True
         data = ('백테결과', self.name, 시가총액또는포지션, 매수시간, 매도시간, 보유시간, 매수가, 매도가, 매입금액, 평가금액, 수익률, 수익금, 매도조건, 추가매수시간, 잔고없음, vturn, vkey)
@@ -760,23 +752,17 @@ class BackEngineBase(BaseGlobalsFunc):
         self.sell_count += 1
         self.trade_info[vturn][vkey] = get_trade_info(1)
 
-    def Strategy(self):
+    def _strategy(self):
         pass
 
-    def UpdateMarketGubun(self):
-        pass
-
-    def GetOrderCount(self, betting, 현재가, 보유중, 매수가, oc_ratio):
+    def _get_order_price(self, 거래금액, 주문수량):
         return 0
 
-    def GetBuyPrice(self, 매수금액, 주문수량):
+    def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         return 0
 
-    def GetSellPrice(self, 매도금액, 주문수량):
+    def _get_last_sell_price(self, 매도금액, 보유수량, 미체결수량):
         return 0
 
-    def GetLastSellPrice(self, 매도금액, 보유수량, 미체결수량):
-        return 0
-
-    def GetProfitInfo(self, 현재가, 매수가, 보유수량):
+    def _get_profit_info(self, 현재가, 매수가, 보유수량):
         return None, 0, 0, 0

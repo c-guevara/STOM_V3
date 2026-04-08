@@ -36,7 +36,7 @@ def ttbutton_clicked_01(ui, cmd):
     if '집계' in cmd:
         gubun = 'S' if 'S' in cmd else 'C'
         if 'S' in cmd:
-            table = 's_totaltradelist' if '키움증권' in ui.dict_set['증권사'] else 'f_totaltradelist'
+            table = 's_totaltradelist' if '키움증권' in ui.dict_set['거래소'] else 'f_totaltradelist'
         else:
             table = 'c_totaltradelist'
         df = ui.dbreader.read_sql('거래디비', f'SELECT * FROM {table}')

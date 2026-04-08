@@ -19,4 +19,4 @@ if '%errorlevel%' NEQ '0' (
 :gotAdmin
     pushd "%CD%"
     CD /D "%~dp0"
-    python stom.py stock
+    python stom.py login

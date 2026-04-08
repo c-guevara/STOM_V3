@@ -31,7 +31,6 @@ def return_press_01(ui):
         if item is None:
             return
         name       = item.text()
-        coin       = True if 'KRW' in name or 'USDT' in name else False
         code       = ui.dict_code[name] if name in ui.dict_code else name
         searchdate = ui.ct_dateEdittttt_02.date().toString('yyyyMMdd')
         linetext   = ui.ct_lineEdittttt_03.text()
@@ -44,7 +43,7 @@ def return_press_01(ui):
         ui.ct_lineEdittttt_04.setText(code)
         ui.ct_lineEdittttt_05.setText(name)
         ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-        data = (coin, code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
+        data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
         cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
         if cf1 and cf2: data += (float(cf1), float(cf2))
         ui.chartQ.put(data)

@@ -3,10 +3,10 @@ import pyqtgraph as pg
 from ui.ui_etc import chart_screenshot2
 from ui.set_widget import error_decorator
 from utility.setting_base import indi_base
+from utility.static import str_hms, dt_hms
 from ui.ui_return_press import return_press_01
 from ui.ui_cell_clicked import cell_clicked_07
 from ui.ui_chart_count_change import chart_count_change
-from utility.static import str_hms, dt_hms, timedelta_sec
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout
 from ui.set_style import style_bc_dk, style_ck_bx, color_bg_bk
 from ui.ui_checkbox_changed import checkbox_changed_10, checkbox_changed_18
@@ -29,15 +29,8 @@ class SetDialogChart:
         self.ui.ct_groupBoxxxxx_02 = QGroupBox(' ', self.ui.dialog_chart)
 
         if self.ui.dict_set is not None:
-            if self.ui.dict_set['에이전트']:
-                if '해외선물' in self.ui.dict_set['증권사'] and self.ui.dict_set['타임프레임']:
-                    starttime = '093000'
-                else:
-                    starttime = '090000'
-                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['전략종료시간'])))).zfill(6)
-            else:
-                starttime = '000000'
-                endtime = str_hms(timedelta_sec(-120, dt_hms(str(self.ui.dict_set['코인전략종료시간'])))).zfill(6)
+            starttime = str(self.ui.market_info['시작시간']).zfill(6)
+            endtime   = str_hms(dt_hms(str(self.ui.dict_set['전략종료시간']))).zfill(6)
         else:
             starttime = '090000'
             endtime   = '093000'
@@ -88,8 +81,7 @@ class SetDialogChart:
         self.ui.ctpg_cvb = {}
         pg.setConfigOption('background', color_bg_bk)
         self.ui.ctpg_layout = pg.GraphicsLayoutWidget()
-        if self.ui.dict_set is not None and \
-                ((self.ui.dict_set['에이전트'] and not self.ui.dict_set['주식타임프레임']) or (self.ui.dict_set['코인리시버'] and not self.ui.dict_set['코인타임프레임'])):
+        if self.ui.dict_set is not None and not self.ui.dict_set['타임프레임']:
             self.ui.ctpg[0], self.ui.ctpg_cvb[0] = self.wc.setaddPlot(self.ui.ctpg_layout, 0, 0, colspan=2)
             self.ui.ctpg[1], self.ui.ctpg_cvb[1] = self.wc.setaddPlot(self.ui.ctpg_layout, 1, 0, colspan=2)
             self.ui.ctpg[2], self.ui.ctpg_cvb[2] = self.wc.setaddPlot(self.ui.ctpg_layout, 2, 0)
@@ -120,8 +112,7 @@ class SetDialogChart:
         self.ui.jp_groupBoxxxxx_01 = QGroupBox(' ', self.ui.dialog_factor)
 
         if self.ui.dict_set is not None:
-            is_min = (self.ui.dict_set['주식에이전트'] and not self.ui.dict_set['주식타임프레임']) or \
-                     (self.ui.dict_set['코인리시버'] and not self.ui.dict_set['코인타임프레임'])
+            is_min = not self.ui.dict_set['타임프레임']
             checkbox_choice = [int(x) for x in self.ui.dict_set['팩터선택'].split(';')]
         else:
             is_min = False
@@ -149,11 +140,6 @@ class SetDialogChart:
             ('누적분당매도수수량' if is_min else '누적초당매도수수량', 18),
             ('등락율각도', 18),
             ('당일거래대금각도', 18),
-            ('거래대금증감', 18),
-            ('전일비', 18),
-            ('회전율', 18),
-            ('전일동시간비', 18),
-            ('전일비각도', 18),
             ('AD', 18),
             ('ADOSC', 18),
             ('ADXR', 18),
@@ -327,11 +313,10 @@ class SetDialogChart:
         self.ui.ft_checkBoxxxxx_20.setGeometry(150, 100, 120, 20)
         self.ui.ft_checkBoxxxxx_21.setGeometry(290, 100, 120, 20)
         self.ui.ft_checkBoxxxxx_22.setGeometry(430, 100, 120, 20)
-        self.ui.ft_checkBoxxxxx_23.setGeometry(570, 100, 120, 20)
 
-        for i in range(20):
+        for i in range(16):
             y = 125 + i * 25
-            getattr(self.ui, f'ft_checkBoxxxxx_{i+24}').setGeometry(10, y, 380, 20)
+            getattr(self.ui, f'ft_checkBoxxxxx_{i+23}').setGeometry(10, y, 380, 20)
 
         for i in range(18):
             y = 150 + i * 25 if i < 10 else 175 + i * 25

@@ -39,8 +39,8 @@ class SetDialogFormula:
         items = [
             '현재가', '초당거래대금', '분당거래대금', '초당매도수금액', '분당매도수금액', '당일매도수금액', '최고매도수금액', '최고매도수가격',
             '체결강도', '초당체결수량', '분당체결수량', '등락율', '고저평균대비등락율', '저가대비고가등락율', '호가총잔량', '매도수호가잔량1',
-            '매도수5호가잔량합', '당일거래대금', '누적초당매도수수량', '누적분당매도수수량', '등락율각도', '당일거래대금각도', '거래대금증감',
-            '전일비', '회전율', '전일동시간비', '전일비각도', 'AD', 'ADOSC', 'ADXR', 'APO', 'AROON', 'ATR', 'BBAND', 'CCI',
+            '매도수5호가잔량합', '당일거래대금', '누적초당매도수수량', '누적분당매도수수량', '등락율각도', '당일거래대금각도',
+            'AD', 'ADOSC', 'ADXR', 'APO', 'AROON', 'ATR', 'BBAND', 'CCI',
             'DMI', 'MACD', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHS', 'STOCHF', 'WILLR'
         ]
         self.ui.fm_comboBoxxxxx_01 = self.wc.setCombobox(self.ui.fm_groupBoxxxxx_02, hover=False, items=items)

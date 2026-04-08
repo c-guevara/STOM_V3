@@ -10,9 +10,8 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 if __name__ == '__main__':
     auto_run = 0
     if len(sys.argv) > 1:
-        if sys.argv[1] == 'stock':    auto_run = 1
-        elif sys.argv[1] == 'coin':   auto_run = 2
-        elif sys.argv[1] == 'future': auto_run = 3
+        if sys.argv[1] == 'login':
+            auto_run = 1
 
     QApplication.setAttribute(Qt.AA_ShareOpenGLContexts)
 

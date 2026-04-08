@@ -10,7 +10,7 @@ from ui.ui_process_alive import trader_process_alive
 def checkbox_changed_01(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
-            id_num = ui.dict_set['증권사'][4:]
+            id_num = ui.dict_set['거래소'][4:]
             if ui.dict_set[f'아이디{id_num}'] is None:
                 ui.sj_main_cheBox_01.nextCheckState()
                 QMessageBox.critical(ui, '오류 알림', '계정이 설정되지 않아 리시버를 선택할 수 없습니다.\n계정 설정 후 다시 선택하십시오.\n')
@@ -25,7 +25,7 @@ def checkbox_changed_01(ui, state):
 def checkbox_changed_02(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
-            id_num = ui.dict_set['증권사'][4:]
+            id_num = ui.dict_set['거래소'][4:]
             if ui.dict_set[f'아이디{id_num}'] is None:
                 ui.sj_main_cheBox_02.nextCheckState()
                 QMessageBox.critical(ui, '오류 알림', '계정이 설정되지 않아 트레이더를 선택할 수 없습니다.\n계정 설정 후 다시 선택하십시오.\n')
@@ -77,30 +77,10 @@ def checkbox_changed_06(ui, state):
 
 
 @error_decorator
-def checkbox_changed_07(ui, state):
-    if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked:
-        buttonReply = QMessageBox.question(
-            ui, '경고', '트레이더 실행 중에 모의모드를 해제하면\n바로 실매매로 전환됩니다. 해제하시겠습니까?',
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-        )
-        if buttonReply != QMessageBox.Yes:
-            ui.sj_strat_ckBox_01.nextCheckState()
-
-
-@error_decorator
 def checkbox_changed_08(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked and trader_process_alive(ui):
-        ui.sj_coin_cheBox_01.nextCheckState()
+        ui.sj_main_cheBox_01.nextCheckState()
         QMessageBox.critical(ui, '오류 알림', '트레이더 실행 중에는 모의모드를 해제할 수 없습니다.\n')
-
-
-@error_decorator
-def checkbox_changed_09(ui, state):
-    if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
-        for widget in ui.com_exit_list:
-            if widget != ui.focusWidget():
-                if widget.isChecked():
-                    widget.nextCheckState()
 
 
 @error_decorator
@@ -122,22 +102,22 @@ def checkbox_changed_11(ui, state):
 @error_decorator
 def checkbox_changed_12(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
-        if not ui.sj_back_cheBox_11.isChecked():
-            ui.sj_back_cheBox_11.nextCheckState()
+        if not ui.sj_back_cheBox_13.isChecked():
+            ui.sj_back_cheBox_13.nextCheckState()
 
 
 @error_decorator
 def checkbox_changed_13(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked:
-        if ui.sj_back_cheBox_10.isChecked():
-            ui.sj_back_cheBox_10.nextCheckState()
+        if ui.sj_back_cheBox_12.isChecked():
+            ui.sj_back_cheBox_12.nextCheckState()
 
 
 @error_decorator
 def checkbox_changed_14(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state != Qt.Checked:
-        if ui.sj_back_cheBox_09.isChecked():
-            ui.sj_back_cheBox_09.nextCheckState()
+        if ui.sj_back_cheBox_10.isChecked():
+            ui.sj_back_cheBox_10.nextCheckState()
 
 
 @error_decorator
@@ -170,22 +150,22 @@ def checkbox_changed_15(ui, state):
 def checkbox_changed_16(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
-            if ui.sj_back_cheBox_15.isChecked():
-                ui.sj_back_cheBox_15.nextCheckState()
+            if ui.sj_back_cheBox_16.isChecked():
+                ui.sj_back_cheBox_16.nextCheckState()
         else:
-            if not ui.sj_back_cheBox_15.isChecked():
-                ui.sj_back_cheBox_15.nextCheckState()
+            if not ui.sj_back_cheBox_16.isChecked():
+                ui.sj_back_cheBox_16.nextCheckState()
 
 
 @error_decorator
 def checkbox_changed_17(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
-            if ui.sj_back_cheBox_14.isChecked():
-                ui.sj_back_cheBox_14.nextCheckState()
+            if ui.sj_back_cheBox_15.isChecked():
+                ui.sj_back_cheBox_15.nextCheckState()
         else:
-            if not ui.sj_back_cheBox_14.isChecked():
-                ui.sj_back_cheBox_14.nextCheckState()
+            if not ui.sj_back_cheBox_15.isChecked():
+                ui.sj_back_cheBox_15.nextCheckState()
 
 
 # noinspection PyUnusedLocal

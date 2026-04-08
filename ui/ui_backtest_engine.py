@@ -5,48 +5,24 @@ import pandas as pd
 from ui.set_style import style_bc_dk
 from backtest.back_subtotal import BackSubTotal
 from backtest.back_code_test import BackCodeTest
-from backtest.back_static import GetMoneytopQuery
 from concurrent.futures import ThreadPoolExecutor
 from ui.ui_dialog_animation import DialogAnimator
+from backtest.back_static import get_moneytop_query
+from utility.setting_base import ui_num, DB_STRATEGY
 from multiprocessing import Process, Queue, Value, Lock
-from backtest.backengine_kiwoom_tick import BackEngineKiwoomTick
-from backtest.backengine_kiwoom_tick2 import BackEngineKiwoomTick2
-from backtest.backengine_kiwoom_min import BackEngineKiwoomMin
-from backtest.backengine_kiwoom_min2 import BackEngineKiwoomMin2
-from backtest.backengine_future_tick import BackEngineFutureTick
-from backtest.backengine_future_tick2 import BackEngineFutureTick2
-from backtest.backengine_future_min import BackEngineFutureMin
-from backtest.backengine_future_min2 import BackEngineFutureMin2
-from backtest.backengine_upbit_tick import BackEngineUpbitTick
-from backtest.backengine_upbit_tick2 import BackEngineUpbitTick2
-from backtest.backengine_upbit_min import BackEngineUpbitMin
-from backtest.backengine_upbit_min2 import BackEngineUpbitMin2
-from backtest.backengine_binance_tick import BackEngineBinanceTick
-from backtest.backengine_binance_tick2 import BackEngineBinanceTick2
-from backtest.backengine_binance_min import BackEngineBinanceMin
-from backtest.backengine_binance_min2 import BackEngineBinanceMin2
 from utility.static import thread_decorator, str_hms, dt_hms, timedelta_sec, error_decorator
-from utility.setting_base import DB_STOCK_TICK_BACK, DB_COIN_TICK_BACK, ui_num, DB_STOCK_MIN_BACK, DB_COIN_MIN_BACK, \
-    DB_FUTURE_OS_MIN_BACK, DB_FUTURE_OS_TICK_BACK, DB_STRATEGY
 
 
 @error_decorator
-def backengine_show(ui, gubun):
+def backengine_show(ui):
     table_list = []
-    if gubun == '주식':
-        if '키움증권' in ui.dict_set['증권사']:
-            db = DB_STOCK_TICK_BACK if ui.dict_set['타임프레임'] else DB_STOCK_MIN_BACK
-        else:
-            db = DB_FUTURE_OS_TICK_BACK if ui.dict_set['타임프레임'] else DB_FUTURE_OS_MIN_BACK
-    else:
-        db = DB_COIN_TICK_BACK if ui.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
-    con = sqlite3.connect(db)
+    con = sqlite3.connect(ui.market_info['백테디비'][ui.dict_set['타임프레임']])
     try:
         df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
         table_list = df['name'].to_list()
         table_list.remove('moneytop')
-        table_list.remove('stockinfo')
-        table_list.remove('futureinfo')
+        table_list.remove('stock_info')
+        table_list.remove('future_info')
     except:
         pass
     con.close()
@@ -58,15 +34,8 @@ def backengine_show(ui, gubun):
         for name in name_list:
             ui.be_comboBoxxxxx_02.addItem(name)
 
-    if gubun == '주식':
-        if '해외선물' in ui.dict_set['증권사'] and ui.dict_set['타임프레임']:
-            starttime = '093000'
-        else:
-            starttime = '090000'
-        endtime = str_hms(timedelta_sec(-120, dt_hms(str(ui.dict_set['전략종료시간'])))).zfill(6)
-    else:
-        starttime = '000000'
-        endtime = str_hms(timedelta_sec(-120, dt_hms(str(ui.dict_set['코인전략종료시간'])))).zfill(6)
+    starttime = str(ui.market_info['시작시간']).zfill(6)
+    endtime = str_hms(timedelta_sec(-120, dt_hms(str(ui.dict_set['전략종료시간'])))).zfill(6)
 
     ui.be_lineEdittttt_01.setText(starttime)
     ui.be_lineEdittttt_02.setText(endtime)
@@ -79,7 +48,7 @@ def backengine_show(ui, gubun):
 
 # noinspection PyUnresolvedReferences
 @thread_decorator
-def backengine_start(ui, gubun):
+def backengine_start(ui):
     from ui.ui_button_clicked_dialog_backengine import backtest_engine_kill
     ui.back_engining = True
     ui.startday   = int(ui.be_dateEdittttt_01.date().toString('yyyyMMdd'))
@@ -105,27 +74,7 @@ def backengine_start(ui, gubun):
         beq = Queue()
         ui.back_eques.append(beq)
 
-    if gubun == '주식':
-        if not ui.dict_set['백테주문관리적용']:
-            target = BackEngineKiwoomTick if ui.dict_set['타임프레임'] else BackEngineKiwoomMin
-        else:
-            target = BackEngineKiwoomTick2 if ui.dict_set['타임프레임'] else BackEngineKiwoomMin2
-    elif gubun == '해선':
-        if not ui.dict_set['백테주문관리적용']:
-            target = BackEngineFutureTick if ui.dict_set['타임프레임'] else BackEngineFutureMin
-        else:
-            target = BackEngineFutureTick2 if ui.dict_set['주식타임프레임'] else BackEngineFutureMin2
-    else:
-        if ui.dict_set['거래소'] == '업비트':
-            if not ui.dict_set['백테주문관리적용']:
-                target = BackEngineUpbitTick if ui.dict_set['코인타임프레임'] else BackEngineUpbitMin
-            else:
-                target = BackEngineUpbitTick2 if ui.dict_set['코인타임프레임'] else BackEngineUpbitMin2
-        else:
-            if not ui.dict_set['백테주문관리적용']:
-                target = BackEngineBinanceTick if ui.dict_set['코인타임프레임'] else BackEngineBinanceMin
-            else:
-                target = BackEngineBinanceTick2 if ui.dict_set['코인타임프레임'] else BackEngineBinanceMin2
+    target = ui.market_info[ui.dict_set['백테주문관리적용']][ui.dict_set['타임프레임']]
 
     def create_backsubtotal_process(j):
         proc = Process(
@@ -155,33 +104,14 @@ def backengine_start(ui, gubun):
     with ThreadPoolExecutor(max_workers=multi) as executor:
         [executor.submit(create_backengine_process, i) for i in range(multi)]
 
-    dict_info = None
+    dict_info, df_mt = None, None
     try:
-        if gubun == '주식':
-            db = DB_STOCK_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_STOCK_MIN_BACK
-            is_tick = ui.dict_set['주식타임프레임']
-        elif gubun == '해선':
-            db = DB_FUTURE_OS_TICK_BACK if ui.dict_set['주식타임프레임'] else DB_FUTURE_OS_MIN_BACK
-            is_tick = ui.dict_set['주식타임프레임']
-        else:
-            db = DB_COIN_TICK_BACK if ui.dict_set['코인타임프레임'] else DB_COIN_MIN_BACK
-            is_tick = ui.dict_set['코인타임프레임']
-
-        con = sqlite3.connect(db)
-        if gubun == '주식':
-            try:
-                df_info = pd.read_sql('SELECT * FROM stockinfo', con).set_index('index')
-            except:
-                df_info = pd.read_sql('SELECT * FROM codename', con).set_index('index')
-            dict_info  = df_info['코스닥'].to_dict()
-            ui.dict_cn = df_info['종목명'].to_dict()
-        elif gubun == '해선':
-            df_info = pd.read_sql('SELECT * FROM futureinfo', con).set_index('index')
-            dict_info  = df_info.to_dict('index')
-            ui.dict_cn = df_info['종목명'].to_dict()
-
-        gubun_ = 'S' if gubun == '주식' else 'X'
-        query = GetMoneytopQuery(is_tick, gubun_, ui.startday, ui.endday, ui.starttime, ui.endtime)
+        is_tick = ui.dict_set['타임프레임']
+        con = sqlite3.connect(ui.market_info['백테디비'][is_tick])
+        code_info_table_name = ui.market_info['종목디비']
+        df = pd.read_sql(f'SELECT * FROM {code_info_table_name}', con).set_index('index')
+        dict_info = df.to_dict('index')
+        query = get_moneytop_query(is_tick, ui.startday, ui.endday, ui.starttime, ui.endtime)
         df_mt = pd.read_sql(query, con)
         if is_tick:
             df_mt['일자'] = (df_mt['index'].values // 1000000).astype(np.int64)
@@ -190,13 +120,8 @@ def backengine_start(ui, gubun):
         df_mt.set_index('index', inplace=True)
         con.close()
     except:
-        if gubun in ('주식', '해선'):
-            if ui.dict_cn is None:
-                ui.windowQ.put((ui_num['백테엔진'], '백테디비에 데이터가 존재하지 않습니다. 디비관리창(Alt + D)에서 백테디비를 생성하십시오.'))
-            elif gubun == '주식' and len(ui.dict_cn) < 100:
-                ui.windowQ.put((ui_num['백테엔진'], '종목명 테이블이 갱신되지 않았습니다. 수동로그인(Alt + S)을 1회 실행하시오.'))
-            else:
-                ui.windowQ.put((ui_num['백테엔진'], '백테디비에 데이터가 존재하지 않습니다. 디비관리창(Alt + D)에서 백테디비를 생성하십시오.'))
+        if ui.market_gubun < 5 and len(dict_info) < 100:
+            ui.windowQ.put((ui_num['백테엔진'], '종목명 테이블이 갱신되지 않았습니다. 수동로그인(Alt + S)을 1회 실행하시오.'))
         else:
             ui.windowQ.put((ui_num['백테엔진'], '백테디비에 데이터가 존재하지 않습니다. 디비관리창(Alt + D)에서 백테디비를 생성하십시오.'))
         backtest_engine_kill(ui)
@@ -245,21 +170,16 @@ def backengine_start(ui, gubun):
         backtest_engine_kill(ui)
         return
 
-    ui.wdzservQ.put(('manager', '백테엔진구동'))
-
-    if gubun in ('주식', '해선'):
-        for i in range(multi):
-            if gubun == '주식':
-                ui.back_eques[i].put(('종목명', ui.dict_cn, dict_info))
-            else:
-                ui.back_eques[i].put(('종목명', dict_info))
+    for q in ui.back_eques:
+        q.put(('종목명', dict_info))
     ui.windowQ.put((ui_num['백테엔진'], '거래대금순위 및 종목코드 추출 완료'))
 
     log_gubun = divid_mode.split()[0]
-    if log_gubun == '한종목': log_gubun = f'{log_gubun} 일자별'
+    if log_gubun == '한종목':
+        log_gubun = f'{log_gubun} 일자별'
 
     ui.windowQ.put((ui_num['백테엔진'], f'{log_gubun} 데이터 로딩 시작'))
-    data_list  = code_set if log_gubun == '종목코드별' else day_list if log_gubun == '일자별' else code_days[one_code]
+    data_list = code_set if log_gubun == '종목코드별' else day_list if log_gubun == '일자별' else code_days[one_code]
     data_lists = []
     for i in range(multi):
         data_lists.append([data for j, data in enumerate(data_list) if j % multi == i])
@@ -271,6 +191,7 @@ def backengine_start(ui, gubun):
         shared_info_ = ui.backQ.get()
         ui.shared_info += shared_info_
         ui.windowQ.put((ui_num['백테엔진'], f'{log_gubun} 데이터 로딩 중 ... [{i+1}/{multi}]'))
+
     ui.shared_info = sorted(ui.shared_info, key=lambda x: x['shape'][0], reverse=True)
     ui.back_tick_cunsum = [x['shape'][0] for x in ui.shared_info]
     ui.back_tick_cunsum = np.cumsum(ui.back_tick_cunsum)
@@ -383,19 +304,12 @@ def backtest_process_kill(ui, coin, enginekill):
             if count == ui.multi:
                 break
 
-    ui.windowQ.put((ui_num['C백테스트' if coin else 'S백테스트'], '백테스트 중지 완료'))
-    if not coin:
-        ui.ss_pushButtonn_08.setStyleSheet(style_bc_dk)
-        ui.ssicon_alert = False
-        ui.main_btn_list[3].setIcon(ui.icon_stocks)
-        ui.ss_progressBar_01.setValue(0)
-        ui.ss_progressBar_01.setFormat('%p%')
-    else:
-        ui.cs_pushButtonn_08.setStyleSheet(style_bc_dk)
-        ui.csicon_alert = False
-        ui.main_btn_list[4].setIcon(ui.icon_coins)
-        ui.cs_progressBar_01.setValue(0)
-        ui.cs_progressBar_01.setFormat('%p%')
+    ui.windowQ.put((ui_num['백테스트' if coin else '백테스트'], '백테스트 중지 완료'))
+    ui.ss_pushButtonn_08.setStyleSheet(style_bc_dk)
+    ui.ssicon_alert = False
+    ui.main_btn_list[3].setIcon(ui.icon_stgs)
+    ui.ss_progressBar_01.setValue(0)
+    ui.ss_progressBar_01.setFormat('%p%')
 
     ui.back_scount = 0
     ui.back_schedul = False

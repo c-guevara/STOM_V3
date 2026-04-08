@@ -3,15 +3,15 @@ import numpy as np
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
-from utility.static import now, now_utc, GetUpbitHogaunit, GetUpbitPgSgSp, dt_ymdhms, GetIndicator
+from utility.static import now, now_utc, get_upbit_hoga_unit, get_upbit_profit, dt_ymdhms, get_indicator
 
 
 class UpbitStrategyMin(UpbitStrategyTick):
-    def update_globals_func(self, dict_add_func):
+    def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
-    def Strategy(self, data):
+    def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
@@ -20,9 +20,8 @@ class UpbitStrategyMin(UpbitStrategyTick):
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, _, 틱수신시간, 전략연산 = data
 
         시분초 = int(str(체결시간)[8:] + '00')
-        rw = 평균값계산틱수 = self.dict_set['평균값계산틱수']
         순매수금액 = 분당매수금액 - 분당매도금액
-        self.hoga_unit = 호가단위 = GetUpbitHogaunit(현재가)
+        self.hoga_unit = 호가단위 = get_upbit_hoga_unit(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -43,10 +42,10 @@ class UpbitStrategyMin(UpbitStrategyTick):
             self.tick_count = 데이터길이 = len(self.arry_code)
             self.code, self.index, self.indexn = 종목코드, 체결시간, 데이터길이 - 1
 
-            if 데이터길이 >= 평균값계산틱수:
-                self.arry_code[-1, self.base_cnt:self.area_cnt] = self.GetParameterArea(rw)
+            if 데이터길이 >= self.rolling_window:
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
-            indicator_list = GetIndicator(
+            indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],
                 self.arry_code[:, self.dict_findex['분봉고가']],
                 self.arry_code[:, self.dict_findex['분봉저가']],
@@ -78,7 +77,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
                     except:
                         self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 경과틱수 연산오류'))
 
-            if 데이터길이 >= 평균값계산틱수 and self.fm_list:
+            if 데이터길이 >= self.rolling_window and self.fm_list:
                 for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
                     self.check, self.line, self.up, self.down = None, None, None, None
 
@@ -111,14 +110,14 @@ class UpbitStrategyMin(UpbitStrategyTick):
                                 price = self.arry_code[self.indexn, self.dict_findex[fname]]
                             self.arry_code[self.indexn, col_idx] = price
 
-            if 데이터길이 >= 평균값계산틱수:
+            if 데이터길이 >= self.rolling_window:
                 jg_data = self.dict_jg.get(종목코드)
                 if jg_data:
                     if 종목코드 not in self.dict_buy_num:
                         self.dict_buy_num[종목코드] = self.indexn
                     # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
                     _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
-                    _, 수익금, 수익률 = GetUpbitPgSgSp(매입금액, 보유수량 * 현재가)
+                    _, 수익금, 수익률 = get_upbit_profit(매입금액, 보유수량 * 현재가)
                     profit_data = self.dict_profit.get(종목코드)
                     if profit_data:
                         if 수익률 > profit_data[0]:
@@ -228,13 +227,13 @@ class UpbitStrategyMin(UpbitStrategyTick):
                 'sm': 당일매도금액
             }
 
-        if self.chart_code == 종목코드 and 데이터길이 >= 평균값계산틱수:
+        if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
             if not 전략연산:
                 new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
                 new_data_tick[:self.base_cnt] = data[:self.base_cnt]
                 self.arry_code = np.concatenate([pre_data, [new_data_tick]])
-                self.arry_code[-1, self.base_cnt:self.area_cnt] = self.GetParameterArea(rw)
-                self.arry_code[-1, self.area_cnt:self.data_cnt] = GetIndicator(
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
+                self.arry_code[-1, self.area_cnt:self.data_cnt] = get_indicator(
                     self.arry_code[:, self.dict_findex['현재가']],
                     self.arry_code[:, self.dict_findex['분봉고가']],
                     self.arry_code[:, self.dict_findex['분봉저가']],

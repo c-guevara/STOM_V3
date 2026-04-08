@@ -4,17 +4,17 @@ from utility.static import error_decorator
 
 @error_decorator
 def receiver_process_alive(ui):
-    return ui.proc_receiver_coin is not None and ui.proc_receiver_coin.is_alive()
+    return ui.proc_receiver is not None and ui.proc_receiver.is_alive()
 
 
 @error_decorator
 def trader_process_alive(ui):
-    return ui.proc_trader_coin is not None and ui.proc_trader_coin.is_alive()
+    return ui.proc_trader is not None and ui.proc_trader.is_alive()
 
 
 @error_decorator
 def strategy_process_alive(ui):
-    return ui.proc_strategy_coin is not None and ui.proc_strategy_coin.is_alive()
+    return ui.proc_strategys and ui.proc_strategys[0].is_alive()
 
 
 @error_decorator
