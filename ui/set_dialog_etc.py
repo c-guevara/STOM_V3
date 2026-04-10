@@ -188,7 +188,7 @@ class SetDialogEtc:
         self.ui.dialog_pass = self.wc.setDialog('STOM PASSWARD', parent=self.ui)
         self.ui.dialog_pass.geometry().center()
         self.ui.pa_groupBoxxxx_01 = QGroupBox(' ', self.ui.dialog_pass)
-        self.ui.pa_labelllllll_01 = QLabel('주식 첫번째 계좌의\n비밀번호을 입력하십시오.\n계정이 없을 경우 입력X\n', self.ui.pa_groupBoxxxx_01)
+        self.ui.pa_labelllllll_01 = QLabel('프로그램 비밀번호을 입력하십시오.\n미설정 시 입력없이 엔터!!\n', self.ui.pa_groupBoxxxx_01)
         self.ui.pa_labelllllll_01.setAlignment(Qt.AlignCenter)
         self.ui.pa_lineEditttt_01 = self.wc.setLineedit(self.ui.pa_groupBoxxxx_01, enter=lambda: return_press_02(self.ui), style=style_fc_dk)
 

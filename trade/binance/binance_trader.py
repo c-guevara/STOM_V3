@@ -42,15 +42,15 @@ class BinanceTrader:
         """
         app = QApplication(sys.argv)
 
-        self.windowQ   = qlist[0]
-        self.soundQ    = qlist[1]
-        self.queryQ    = qlist[2]
-        self.teleQ     = qlist[3]
-        self.receivQ   = qlist[8]
-        self.traderQ   = qlist[9]
-        self.stgQ      = qlist[10][0]
-        self.liveQ     = qlist[11]
-        self.dict_set  = dict_set
+        self.windowQ  = qlist[0]
+        self.soundQ   = qlist[1]
+        self.queryQ   = qlist[2]
+        self.teleQ    = qlist[3]
+        self.receivQ  = qlist[8]
+        self.traderQ  = qlist[9]
+        self.stgQ     = qlist[10][0]
+        self.liveQ    = qlist[11]
+        self.dict_set = dict_set
 
         self.dict_cj: dict[str, dict[str, int | float]] = {}  # 체결목록
         self.dict_jg: dict[str, dict[str, int | float]] = {}  # 잔고목록

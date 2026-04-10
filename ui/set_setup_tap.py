@@ -40,12 +40,15 @@ class SetSetupTap:
 
         from utility.setting_market import DICT_MARKET_GUBUN
         self.ui.sj_main_comBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=list(DICT_MARKET_GUBUN.keys()), tip='사용할 거래소를 선택하십시오.')
-        self.ui.sj_main_comBox_02 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['1초스냅샷', '1분봉'], tip='사용할 타임프레임을 설정한다.')
         self.ui.sj_main_cheBox_01 = self.wc.setCheckBox('모의투자', self.ui.sj_bs_groupBox_01, changed=lambda state: checkbox_changed_01(self.ui, state), tip='체크 해제 시 실매매')
         self.ui.sj_main_cheBox_02 = self.wc.setCheckBox('데이터저장', self.ui.sj_bs_groupBox_01, tip='전략종료 후 데이터 저장 여부를 설정한다.')
         self.ui.sj_main_cheBox_03 = self.wc.setCheckBox('알림소리', self.ui.sj_bs_groupBox_01, tip='시스템 이벤트를 tts를 통해 소리로 알려준다.')
+        self.ui.sj_main_comBox_02 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['1초스냅샷', '1분봉'], tip='사용할 타임프레임을 설정한다.')
+        self.ui.sj_main_labell_01 = QLabel('▣  프로그램 비밀번호', self.ui.sj_bs_groupBox_01)
+        self.ui.sj_main_labell_01.setToolTip('계정 텍스트 보기용 비밀번호를 설정한다.')
+        self.ui.sj_main_liEdit_01 = self.wc.setLineedit(self.ui.sj_bs_groupBox_01, passhide=True)
 
-        self.ui.sj_main_labell_01 = QLabel('바이낸스 선물   |                                                         마진타입                     포지션', self.ui.sj_bs_groupBox_01)
+        self.ui.sj_main_labell_02 = QLabel('바이낸스 선물   |                                                         마진타입                     포지션', self.ui.sj_bs_groupBox_01)
         self.ui.sj_lvrg_Button_01 = self.wc.setPushbutton('레버리지 유형 및 수치 설정', parent=self.ui.sj_bs_groupBox_01, click=lambda: lvbutton_clicked_01(self.ui), tip='바이낸스 선물 레버리지를 고정, 변동 형태 중 선택하여 설정한다.')
         self.ui.sj_main_comBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['격리', '교차'], activated=ui_activated_stg.activated_10)
         self.ui.sj_main_comBox_04 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['단방향', '양방향'], activated=ui_activated_stg.activated_11)
@@ -169,12 +172,14 @@ class SetSetupTap:
         self.ui.sj_bs_groupBox_06.setGeometry(5, 600, 1326, 107)
 
         self.ui.sj_main_comBox_01.setGeometry(10, 25, 140, 20)
-        self.ui.sj_main_comBox_02.setGeometry(500, 25, 140, 20)
         self.ui.sj_main_cheBox_01.setGeometry(170, 25, 90, 20)
         self.ui.sj_main_cheBox_02.setGeometry(270, 25, 90, 20)
         self.ui.sj_main_cheBox_03.setGeometry(370, 25, 90, 20)
+        self.ui.sj_main_comBox_02.setGeometry(500, 25, 140, 20)
+        self.ui.sj_main_labell_01.setGeometry(650, 25, 140, 20)
+        self.ui.sj_main_liEdit_01.setGeometry(800, 25, 100, 20)
 
-        self.ui.sj_main_labell_01.setGeometry(500, 50, 500, 20)
+        self.ui.sj_main_labell_02.setGeometry(500, 50, 500, 20)
         self.ui.sj_lvrg_Button_01.setGeometry(590, 50, 150, 20)
         self.ui.sj_main_comBox_03.setGeometry(800, 50, 50, 20)
         self.ui.sj_main_comBox_04.setGeometry(900, 50, 50, 20)

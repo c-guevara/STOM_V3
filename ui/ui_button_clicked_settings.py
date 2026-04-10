@@ -16,10 +16,11 @@ from utility.static import de_text, en_text, qtest_qwait, error_decorator
 def setting_load_01(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM main').set_index('index')
     ui.sj_main_comBox_01.setCurrentText(df['거래소'][0])
-    ui.sj_main_comBox_02.setCurrentText('1초스냅샷' if df['타임프레임'][0] else '1분봉')
     ui.sj_main_cheBox_01.setChecked(True) if df['모의투자'][0] else ui.sj_main_cheBox_01.setChecked(False)
     ui.sj_main_cheBox_02.setChecked(True) if df['데이터저장'][0] else ui.sj_main_cheBox_02.setChecked(False)
     ui.sj_main_cheBox_03.setChecked(True) if df['알림소리'][0] else ui.sj_main_cheBox_04.setChecked(False)
+    ui.sj_main_comBox_02.setCurrentText('1초스냅샷' if df['타임프레임'][0] else '1분봉')
+    ui.sj_main_liEdit_01.setText(de_text(ui.dict_set['키'], df['프로그램비밀번호'][0]) if df['프로그램비밀번호'][0] else '')
     ui.sj_main_comBox_03.setCurrentText('격리' if df['바이낸스선물마진타입'][0] == 'ISOLATED' else '교차')
     ui.sj_main_comBox_04.setCurrentText('단방향' if df['바이낸스선물포지션'][0] == 'false' else '양방향')
 
@@ -167,11 +168,13 @@ def setting_save_01(ui):
     타임프레임 = 1 if ui.sj_main_comBox_02.currentText() == '1초스냅샷' else 0
     모의투자 = 1 if ui.sj_main_cheBox_01.isChecked() else 0
     데이터저장 = 1 if ui.sj_main_cheBox_02.isChecked() else 0
+    프로그램비밀번호_ = ui.sj_main_liEdit_01.text()
     바이낸스선물마진타입 = 'ISOLATED' if ui.sj_main_comBox_03.currentText() == '격리' else 'CROSSED'
     바이낸스선물포지션 = 'false' if ui.sj_main_comBox_04.currentText() == '단방향' else 'true'
 
     if ui.proc_chqs.is_alive():
-        columns = ['거래소', '모의투자', '데이터저장', '타임프레임', '바이낸스선물마진타입', '바이낸스선물포지션']
+        프로그램비밀번호 = en_text(ui.dict_set['키'], 프로그램비밀번호_) if 프로그램비밀번호_ else ''
+        columns = ['거래소', '모의투자', '데이터저장', '타임프레임', '프로그램비밀번호', '바이낸스선물마진타입', '바이낸스선물포지션']
         set_txt = ', '.join([f'{col} = ?' for col in columns])
         query = f'UPDATE main SET {set_txt}'
         localvs = locals()
@@ -181,6 +184,7 @@ def setting_save_01(ui):
         prev_sg = ui.dict_set['거래소']
         for column, value in zip(columns, values):
             ui.dict_set[column] = value
+        ui.dict_set['프로그램비밀번호'] = 프로그램비밀번호_
 
         update_dictset(ui)
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
@@ -196,20 +200,19 @@ def setting_save_02(ui):
 
     if '' in (access_key, secret_key):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
-    else:
-        if ui.proc_chqs.is_alive():
-            no = ui.sj_main_comBox_02.currentText()[-2:]
-            index = int(no)
-            en_access_key = en_text(ui.dict_set['키'], access_key)
-            en_secret_key = en_text(ui.dict_set['키'], secret_key)
-            query  = 'UPDATE account SET access_key = ?, secret_key = ? WHERE `index` = ?'
-            values = (en_access_key, en_secret_key, index)
-            ui.queryQ.put(('설정디비', query, values))
+    elif ui.proc_chqs.is_alive():
+        no = ui.sj_main_comBox_01.currentText()[-2:]
+        index = int(no)
+        en_access_key = en_text(ui.dict_set['키'], access_key)
+        en_secret_key = en_text(ui.dict_set['키'], secret_key)
+        query  = 'UPDATE account SET access_key = ?, secret_key = ? WHERE `index` = ?'
+        values = (en_access_key, en_secret_key, index)
+        ui.queryQ.put(('설정디비', query, values))
 
-            ui.dict_set[f'access_key{no}'] = access_key
-            ui.dict_set[f'secret_key{no}'] = secret_key
+        ui.dict_set[f'access_key{no}'] = access_key
+        ui.dict_set[f'secret_key{no}'] = secret_key
 
-            QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
+        QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
 @error_decorator
@@ -219,21 +222,20 @@ def setting_save_03(ui):
 
     if '' in (bot_token, chatingid):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
-    else:
-        if ui.proc_chqs.is_alive():
-            no = ui.sj_main_comBox_02.currentText()[-2:]
-            index = int(no)
-            en_bot_token = en_text(ui.dict_set['키'], bot_token)
-            en_chatingid = en_text(ui.dict_set['키'], chatingid)
-            query  = 'UPDATE telegram SET bot_token = ?, chatingid = ? WHERE `index` = ?'
-            values = (en_bot_token, en_chatingid, index)
-            ui.queryQ.put(('설정디비', query, values))
+    elif ui.proc_chqs.is_alive():
+        no = ui.sj_main_comBox_01.currentText()[-2:]
+        index = int(no)
+        en_bot_token = en_text(ui.dict_set['키'], bot_token)
+        en_chatingid = en_text(ui.dict_set['키'], chatingid)
+        query  = 'UPDATE telegram SET bot_token = ?, chatingid = ? WHERE `index` = ?'
+        values = (en_bot_token, en_chatingid, index)
+        ui.queryQ.put(('설정디비', query, values))
 
-            ui.dict_set[f'텔레그램봇토큰{no}'] = bot_token
-            ui.dict_set[f'텔레그램아이디{no}'] = int(chatingid)
+        ui.dict_set[f'텔레그램봇토큰{no}'] = bot_token
+        ui.dict_set[f'텔레그램아이디{no}'] = int(chatingid)
 
-            update_dictset(ui)
-            QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
+        update_dictset(ui)
+        QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
 @error_decorator
@@ -379,10 +381,7 @@ def setting_acc_view(ui):
         ui.pa_lineEditttt_01.clear()
         ui.dialog_pass.show() if not ui.dialog_pass.isVisible() else ui.dialog_pass.close()
     else:
-        ui.sj_sacc_liEdit_01.setEchoMode(QLineEdit.Password)
-        ui.sj_sacc_liEdit_02.setEchoMode(QLineEdit.Password)
-        ui.sj_sacc_liEdit_03.setEchoMode(QLineEdit.Password)
-        ui.sj_sacc_liEdit_04.setEchoMode(QLineEdit.Password)
+        ui.sj_main_liEdit_01.setEchoMode(QLineEdit.Password)
         ui.sj_accc_liEdit_01.setEchoMode(QLineEdit.Password)
         ui.sj_accc_liEdit_02.setEchoMode(QLineEdit.Password)
         ui.sj_tele_liEdit_01.setEchoMode(QLineEdit.Password)

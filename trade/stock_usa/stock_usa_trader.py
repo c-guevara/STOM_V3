@@ -23,7 +23,7 @@ class Updater(QThread):
         while True:
             data = self.traderQ.get()
             if data.__class__ == tuple:
-                if len(data) in (6, 7):
+                if len(data) in (7, 8):
                     self.signal1.emit(data)
                 else:
                     self.signal2.emit(data)
@@ -39,15 +39,15 @@ class StockUsaTrader:
         """
         app = QApplication(sys.argv)
 
-        self.windowQ       = qlist[0]
-        self.soundQ        = qlist[1]
-        self.queryQ        = qlist[2]
-        self.teleQ         = qlist[3]
-        self.receivQ       = qlist[8]
-        self.traderQ       = qlist[9]
-        self.stgQ          = qlist[10][0]
-        self.liveQ         = qlist[11]
-        self.dict_set      = dict_set
+        self.windowQ  = qlist[0]
+        self.soundQ   = qlist[1]
+        self.queryQ   = qlist[2]
+        self.teleQ    = qlist[3]
+        self.receivQ  = qlist[8]
+        self.traderQ  = qlist[9]
+        self.stgQs    = qlist[10]
+        self.liveQ    = qlist[11]
+        self.dict_set = dict_set
 
         self.dict_cj: dict[str, dict[str, int | float]] = {}  # 체결목록
         self.dict_jg: dict[str, dict[str, int | float]] = {}  # 잔고목록
@@ -57,6 +57,7 @@ class StockUsaTrader:
         self.dict_tt    = {}  # 평가손익
         self.dict_info  = {}
         self.dict_curc  = {}
+        self.dict_sgbn  = {}
         self.dict_order = {
             '매수': {},
             '매도': {},
@@ -169,7 +170,9 @@ class StockUsaTrader:
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 트레이더 시작'))
 
     def _scheduler1(self):
-        self.stgQ.put(('잔고목록', self.dict_jg.copy()))
+        data = ('잔고목록', self.dict_jg.copy())
+        for q in self.stgQs:
+            q.put(data)
 
     def _scheduler2(self):
         inthms = int(str_hms(now_cme()))
@@ -181,17 +184,17 @@ class StockUsaTrader:
 
     @error_decorator
     def _check_order(self, data):
-        if len(data) == 6:
-            주문구분, 종목코드, 주문가격, 주문수량, 시그널시간, 잔고청산 = data
+        if len(data) == 7:
+            주문구분, 종목코드, 종목명, 주문가격, 주문수량, 시그널시간, 잔고청산 = data
             수동주문유형 = None
         else:
-            주문구분, 종목코드, 주문가격, 주문수량, 시그널시간, 잔고청산, 수동주문유형 = data
+            주문구분, 종목코드, 종목명, 주문가격, 주문수량, 시그널시간, 잔고청산, 수동주문유형 = data
 
         잔고없음 = 종목코드 not in self.dict_jg
         매수주문중 = 종목코드 in self.dict_order['매수']
         매도주문중 = 종목코드 in self.dict_order['매도']
 
-        주문번호 = ''
+        원주문번호 = ''
         주문취소 = False
         현재시간 = now()
         if 잔고청산:
@@ -235,17 +238,20 @@ class StockUsaTrader:
 
         if 주문취소:
             if '취소' not in 주문구분:
-                self.stgQ.put((f'{주문구분}취소', 종목코드))
+                self._put_order_complete(f'{주문구분}취소', 종목코드)
         else:
             if 주문수량 > 0:
-                if 잔고청산: self.stgQ.put((f'{주문구분}주문', 종목코드))
-                self._create_order(주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 0, 수동주문유형)
+                if 잔고청산: self._put_order_complete(f'{주문구분}주문', 종목코드)
+                self._create_order(주문구분, 종목코드, 종목명, 주문가격, 주문수량, 원주문번호, 시그널시간, 잔고청산, 수동주문유형)
             else:
                 if 주문구분 == '매수':
                     if self.dict_set['매도취소매수시그널'] and 매도주문중: self._cancel_order(종목코드, 주문구분)
                 elif 주문구분 == '매도':
                     if self.dict_set['매수취소매도시그널'] and 매수주문중: self._cancel_order(종목코드, 주문구분)
-                self.stgQ.put((f'{주문구분}취소', 종목코드))
+                self._put_order_complete(f'{주문구분}취소', 종목코드)
+
+    def _put_order_complete(self, cmsg, code):
+        self.stgQs[self.dict_sgbn[code]].put((cmsg, code))
 
     def _create_order(self, 주문구분, 종목코드, 주문가격, 주문수량, 주문번호, 시그널시간, 잔고청산, 정정횟수, 수동주문유형):
         if 주문구분 == '매수' and 정정횟수 == 0:
@@ -293,7 +299,7 @@ class StockUsaTrader:
                 self._update_chegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, od_no)
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
             else:
-                self.stgQ.put(('매수취소', 종목코드))
+                self._put_order_complete('매수취소', 종목코드)
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [주문실패] {종목코드} | {주문가격} | {주문수량}'))
 
         elif 주문구분 == '매도':
@@ -308,7 +314,7 @@ class StockUsaTrader:
                 self._update_chegeollist(dt, 종목코드, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, dt[:14], 주문가격, od_no)
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목코드} | {주문가격} | {주문수량}'))
             else:
-                self.stgQ.put(('매도취소', 종목코드))
+                self._put_order_complete('매도취소', 종목코드)
                 self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [주문실패] {종목코드} | {주문가격} | {주문수량} | {주문구분}'))
 
         elif 주문구분 == '매수취소':
@@ -560,7 +566,8 @@ class StockUsaTrader:
 
             self.dict_jg = dict(sorted(self.dict_jg.items(), key=lambda x: x[1]['매입금액'], reverse=True))
 
-            if 미체결수량 == 0: self.stgQ.put((주문구분 + '완료', 종목코드))
+            if 미체결수량 == 0:
+                self._put_order_complete(주문구분 + '완료', 종목코드)
             self._update_chegeollist(index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, index[:14], 주문가격, 주문번호)
 
             if 주문구분 == '매수':
@@ -587,7 +594,7 @@ class StockUsaTrader:
             elif 종목코드 in self.dict_order[주문구분]:
                 del self.dict_order[주문구분][종목코드]
 
-            self.stgQ.put((주문구분, 종목코드))
+            self._put_order_complete(주문구분, 종목코드)
             self._update_chegeollist(index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, index[:14], 주문가격, 주문번호)
 
             if self.dict_set['알림소리']: self.soundQ.put(f"{종목코드} {주문구분}하였습니다.")
@@ -645,7 +652,7 @@ class StockUsaTrader:
         if self.dict_set['스톰라이브']:
             수익률 = round(수익금합계 / 총매수금액 * 100, 2)
             data_list = [거래횟수, 총매수금액, 총매도금액, 총수익금액, 총손실금액, 수익률, 수익금합계]
-            self.liveQ.put(('주식', data_list))
+            self.liveQ.put(('', data_list))
 
     def _update_chegeollist(self, index, 종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호):
         # ['종목명', '주문구분', '주문수량', '체결수량', '미체결수량', '체결가', '체결시간', '주문가격', '주문번호']
@@ -707,7 +714,8 @@ class StockUsaTrader:
 
         if self.dict_intg['종목당투자금'] != 종목당투자금:
             self.dict_intg['종목당투자금'] = 종목당투자금
-            self.stgQ.put(('종목당투자금', self.dict_intg['종목당투자금']))
+            for q in self.stgQs:
+                q.put(('종목당투자금', self.dict_intg['종목당투자금']))
 
         if self.dict_jg:
             df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
@@ -718,5 +726,6 @@ class StockUsaTrader:
         self.windowQ.put((ui_num['잔고평가'], df_tj))
 
     def _strategy_stop(self):
-        self.stgQ.put('매수전략중지')
+        for q in self.stgQs:
+            q.put('매수전략중지')
         self._jango_cheongsan('수동')

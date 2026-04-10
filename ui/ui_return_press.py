@@ -51,12 +51,8 @@ def return_press_01(ui):
 
 @error_decorator
 def return_press_02(ui):
-    if ui.pa_lineEditttt_01.text() == ui.dict_set['계좌비밀번호1'] or \
-            (ui.pa_lineEditttt_01.text() == '' and ui.dict_set['계좌비밀번호1'] is None):
-        ui.sj_sacc_liEdit_01.setEchoMode(QLineEdit.Normal)
-        ui.sj_sacc_liEdit_02.setEchoMode(QLineEdit.Normal)
-        ui.sj_sacc_liEdit_03.setEchoMode(QLineEdit.Normal)
-        ui.sj_sacc_liEdit_04.setEchoMode(QLineEdit.Normal)
+    if ui.pa_lineEditttt_01.text() == ui.dict_set['프로그램비밀번호']:
+        ui.sj_main_liEdit_01.setEchoMode(QLineEdit.Normal)
         ui.sj_accc_liEdit_01.setEchoMode(QLineEdit.Normal)
         ui.sj_accc_liEdit_02.setEchoMode(QLineEdit.Normal)
         ui.sj_tele_liEdit_01.setEchoMode(QLineEdit.Normal)

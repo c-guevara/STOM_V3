@@ -45,8 +45,7 @@ class UpbitTrader:
         self.teleQ    = qlist[3]
         self.receivQ  = qlist[8]
         self.traderQ  = qlist[9]
-        self.stgQs    = qlist[10]
-        self.stgQ     = self.stgQs[0]
+        self.stgQ     = qlist[10][0]
         self.liveQ    = qlist[11]
         self.dict_set = dict_set
 
