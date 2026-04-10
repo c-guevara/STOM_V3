@@ -10,7 +10,7 @@ class CrossHair:
     def __init__(self, ui):
         self.ui = ui
 
-    def crosshair(self, real, gubun, is_min, pg01, pg02, pg03, pg04, pg05, pg06, pg07=None, pg08=None,
+    def crosshair(self, real, is_min, pg01, pg02, pg03, pg04, pg05, pg06, pg07=None, pg08=None,
                   pg09=None, pg10=None, pg11=None, pg12=None, pg13=None):
         def setInfiniteLine(angle=None):
             if angle is None:
@@ -171,9 +171,9 @@ class CrossHair:
                 for n, labell in enumerate(self.ui.ctpg_labels):
                     foctor = self.ui.ctpg_factors[n]
                     if index == n:
-                        text = f'Y: {round(mousePoint.y(), 2):,}\n{get_label_text(self.ui, gubun, is_min, xpoint, foctor, hms_)}'
+                        text = f'Y: {round(mousePoint.y(), 2):,}\n{get_label_text(self.ui, is_min, xpoint, foctor, hms_)}'
                     else:
-                        text = get_label_text(self.ui, gubun, is_min, xpoint, foctor, hms_)
+                        text = get_label_text(self.ui, is_min, xpoint, foctor, hms_)
 
                     labell.setText(text)
 

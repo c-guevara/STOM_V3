@@ -24,9 +24,6 @@ def key_press_event(_ui, event):
                     backtest_start(_ui)
 
         elif _ui.focusWidget() in (_ui.td_tableWidgettt, _ui.gj_tableWidgettt, _ui.cj_tableWidgettt, _ui.td_tableWidgettt, _ui.gj_tableWidgettt, _ui.cj_tableWidgettt):
-            stock = True
-            if _ui.focusWidget() in (_ui.td_tableWidgettt, _ui.gj_tableWidgettt, _ui.cj_tableWidgettt):
-                stock = False
             row  = _ui.focusWidget().currentIndex().row()
             col  = _ui.focusWidget().currentIndex().column()
             item = _ui.focusWidget().item(row, 0)
@@ -34,8 +31,13 @@ def key_press_event(_ui, event):
                 name       = item.text()
                 linetext   = _ui.ct_lineEdittttt_03.text()
                 tickcount  = int(linetext) if linetext else 30
-                searchdate = str_ymd(now_utc()) if not stock else str_ymd() if '키움증권' in _ui.dict_set['거래소'] else str_ymd(now_cme())
-                code       = _ui.dict_code[name] if name in _ui.dict_code else name
+                if _ui.market_gubun < 4 or _ui.market_gubun in (6, 7):
+                    searchdate = str_ymd()
+                elif _ui.market_gubun in (4, 8):
+                    searchdate = str_ymd(now_cme())
+                else:
+                    searchdate = str_ymd(now_utc())
+                code = _ui.dict_code.get(name, name)
                 _ui.ct_lineEdittttt_04.setText(code)
                 _ui.ct_lineEdittttt_05.setText(name)
                 show_dialog(_ui, name, tickcount, searchdate, col)
@@ -51,33 +53,28 @@ def key_press_event(_ui, event):
                 name      = item.text()
                 linetext  = _ui.ct_lineEdittttt_03.text()
                 tickcount = int(linetext) if linetext else 30
-                code      = _ui.dict_code[name] if name in _ui.dict_code else name
+                code = _ui.dict_code.get(name, name)
                 _ui.ct_lineEdittttt_04.setText(code)
                 _ui.ct_lineEdittttt_05.setText(name)
                 _ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
                 show_dialog(_ui, name, tickcount, searchdate, 4)
 
         elif _ui.focusWidget() in (_ui.ns_tableWidgetttt, _ui.cns_tableWidgettt):
-            if _ui.focusWidget() == _ui.ns_tableWidgetttt:
-                gubun_ = '주식'
-            else:
-                gubun_ = '코인'
             row  = _ui.focusWidget().currentIndex().row()
             item = _ui.focusWidget().item(row, 0)
             if item is not None:
                 date = item.text()
                 date = date.replace('.', '')
-                if gubun_ == '주식':
-                    table_name = 's_tradelist' if '키움증권' in _ui.dict_set['거래소'] else 'f_tradelist'
-                else:
-                    table_name = 'c_tradelist' if _ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'
+                table_name = _ui.market_info['거래디비']
                 df = _ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name} WHERE 체결시간 LIKE '{date}%'")
-                if len(date) == 6 and gubun_ == '코인':
+
+                if len(date) == 6:
                     df['구분용체결시간'] = df['체결시간'].str[:6]
                     df = df[df['구분용체결시간'] == date]
-                elif len(date) == 4 and gubun_ == '코인':
+                elif len(date) == 4:
                     df['구분용체결시간'] = df['체결시간'].str[:4]
                     df = df[df['구분용체결시간'] == date]
+
                 df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
                 df.set_index('index', inplace=True)
                 show_dialog_graph(_ui, df)
@@ -90,21 +87,20 @@ def key_press_event(_ui, event):
                 name       = item.text()
                 searchdate = tableWidget.item(row, 2).text()[:8]
                 buytime    = comma2int(tableWidget.item(row, 2).text())
+                if len(str(buytime)) > 12 and not _ui.dict_set['타임프레임']:
+                    QMessageBox.critical(_ui, '오류 알림', '현재 데이터 형식의 설정은 1분봉 상태입니다.\n1초스냅샷용 백테결과는 차트에 표시할 수 없습니다.\n')
+                    return
+                if len(str(buytime)) < 14 and _ui.dict_set['타임프레임']:
+                    QMessageBox.critical(_ui, '오류 알림', '현재 데이터 형식의 설정은 1초스냅샷 상태입니다.\n1분봉용 백테결과는 차트에 표시할 수 없습니다.\n')
+                    return
                 selltime   = comma2int(tableWidget.item(row, 3).text())
                 buyprice   = comma2float(tableWidget.item(row, 5).text())
                 sellprice  = comma2float(tableWidget.item(row, 6).text())
                 detail     = [buytime, buyprice, selltime, sellprice]
                 buytimes   = tableWidget.item(row, 13).text()
-                coin       = True if 'KRW' in name or 'USDT' in name else False
-                code       = _ui.dict_code[name] if name in _ui.dict_code else name
+                code       = _ui.dict_code.get(name, name)
                 starttime  = _ui.ct_lineEdittttt_01.text()
                 endtime    = _ui.ct_lineEdittttt_02.text()
-                if len(str(buytime)) > 12 and (coin and not _ui.dict_set['타임프레임'] or not coin and not _ui.dict_set['타임프레임']):
-                    QMessageBox.critical(_ui, '오류 알림', '현재 전략설정의 데이터타입은 1분봉 상태입니다.\n1초스냅샷용 백테결과는 차트를 표시할 수 없습니다.\n')
-                    return
-                if len(str(buytime)) < 14 and (coin and _ui.dict_set['타임프레임'] or not coin and _ui.dict_set['타임프레임']):
-                    QMessageBox.critical(_ui, '오류 알림', '현재 전략설정의 데이터타입은 1초스냅샷 상태입니다.\n1분봉용 백테결과는 차트를 표시할 수 없습니다.\n')
-                    return
                 if len(starttime) < 6 or len(endtime) < 6:
                     QMessageBox.critical(_ui.dialog_chart, '오류 알림', '차트의 시작 및 종료시간은 초단위까지로 입력하십시오.\n(예: 000000, 090000, 152000)\n')
                     return

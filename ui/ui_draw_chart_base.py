@@ -19,7 +19,6 @@ class DrawChartBase:
         self.chart_cnt  = 0
 
         self.code       = None
-        self.gubun      = None
         self.hms        = None
         self.len_list   = None
         self.dict_idxs  = None
@@ -77,13 +76,12 @@ class DrawChartBase:
         if self.ui.ft_checkBoxxxxx_16.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_16.text())
         if self.ui.ft_checkBoxxxxx_17.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_17.text())
         if self.ui.ft_checkBoxxxxx_18.isChecked():     self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_18.text())
-        if self.gubun == 'S':
+        if self.is_min:
             if self.ui.ft_checkBoxxxxx_19.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_19.text())
             if self.ui.ft_checkBoxxxxx_20.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_20.text())
             if self.ui.ft_checkBoxxxxx_21.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_21.text())
             if self.ui.ft_checkBoxxxxx_22.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_22.text())
             if self.ui.ft_checkBoxxxxx_23.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_23.text())
-        if self.is_min:
             if self.ui.ft_checkBoxxxxx_24.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_24.text())
             if self.ui.ft_checkBoxxxxx_25.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_25.text())
             if self.ui.ft_checkBoxxxxx_26.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_26.text())
@@ -99,11 +97,6 @@ class DrawChartBase:
             if self.ui.ft_checkBoxxxxx_36.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_36.text())
             if self.ui.ft_checkBoxxxxx_37.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_37.text())
             if self.ui.ft_checkBoxxxxx_38.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_38.text())
-            if self.ui.ft_checkBoxxxxx_39.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_39.text())
-            if self.ui.ft_checkBoxxxxx_40.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_40.text())
-            if self.ui.ft_checkBoxxxxx_41.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_41.text())
-            if self.ui.ft_checkBoxxxxx_42.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_42.text())
-            if self.ui.ft_checkBoxxxxx_43.isChecked(): self.ui.ctpg_factors.append(self.ui.ft_checkBoxxxxx_43.text())
 
     def update_dict_idxs(self):
         if self.dict_idxs is not None:
@@ -348,12 +341,7 @@ class DrawChartBase:
             else:
                 fidx1 = self.fi(factor)
                 if len(self.ui.ctpg_data[fidx1]) > 0:
-                    color = self.rgb_green
-                    if self.is_min:
-                        if self.gubun != 'S' and fidx1 > 57:
-                            color = self.rgb_cyan
-                        elif self.gubun == 'S' and fidx1 > 67:
-                            color = self.rgb_cyan
+                    color = self.rgb_cyan if self.is_min and fidx1 > self.fi('AD') else self.rgb_green
                     self.get_optimized_min_max(fidx1)
                     self.draw_area(i)
                     self.draw_formula(i, factor)
@@ -385,7 +373,7 @@ class DrawChartBase:
                 arrow.setPos(self.ui.ctpg_xticks[j], price)
                 self.ui.ctpg[i].addItem(arrow)
 
-        if self.gubun == 'F':
+        if self.ui.market_gubun > 5:
             buy_arrow_list = [(j, price) for j, price in enumerate(self.ui.ctpg_arry[:, self.fi('매수가2')]) if price > 0]
             sell_arrow_list = [(j, price) for j, price in enumerate(self.ui.ctpg_arry[:, self.fi('매도가2')]) if price > 0]
             if buy_arrow_list:
@@ -455,11 +443,11 @@ class DrawChartBase:
             if self.ui.ct_checkBoxxxxx_01.isChecked():
                 self.ui.ctpg_labels[i].setPos(self.ui.ctpg_cvb[i].state['viewRange'][0][0], self.ui.ctpg_cvb[i].state['viewRange'][1][0])
             self.ui.ctpg_legend[i].setPos(self.ui.ctpg_cvb[i].state['viewRange'][0][0], self.ui.ctpg_cvb[i].state['viewRange'][1][1])
-            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, self.gubun, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
+            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
         else:
             if self.real or self.ui.ct_checkBoxxxxx_02.isChecked():
                 legend = pg.TextItem(anchor=(0, 0), color=color_fg_bt, border=color_bg_bt, fill=color_bg_ld)
-                legend.setText(get_label_text(self.ui, self.gubun, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
+                legend.setText(get_label_text(self.ui, self.is_min, -1, self.ui.ctpg_factors[i], self.hms))
                 legend.setFont(qfont12)
                 legend.setPos(self.xmax, self.ymax)
                 legend.setZValue(30)
@@ -612,27 +600,27 @@ class DrawChartBase:
     def insert_crosshair(self):
         if self.chart_cnt == 6:
             self.crosshair.crosshair(
-                self.real, self.gubun, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
+                self.real, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
                 self.ui.ctpg[4], self.ui.ctpg[5]
             )
         elif self.chart_cnt == 7:
             self.crosshair.crosshair(
-                self.real, self.gubun, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
+                self.real, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
                 self.ui.ctpg[4], self.ui.ctpg[5], self.ui.ctpg[6]
             )
         elif self.chart_cnt == 8:
             self.crosshair.crosshair(
-                self.real, self.gubun, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
+                self.real, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
                 self.ui.ctpg[4], self.ui.ctpg[5], self.ui.ctpg[6], self.ui.ctpg[7]
             )
         elif self.chart_cnt == 10:
             self.crosshair.crosshair(
-                self.real, self.gubun, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
+                self.real, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
                 self.ui.ctpg[4], self.ui.ctpg[5], self.ui.ctpg[6], self.ui.ctpg[7], self.ui.ctpg[8], self.ui.ctpg[9]
             )
         elif self.chart_cnt == 13:
             self.crosshair.crosshair(
-                self.real, self.gubun, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
+                self.real, self.is_min, self.ui.ctpg[0], self.ui.ctpg[1], self.ui.ctpg[2], self.ui.ctpg[3],
                 self.ui.ctpg[4], self.ui.ctpg[5], self.ui.ctpg[6], self.ui.ctpg[7], self.ui.ctpg[8], self.ui.ctpg[9],
                 self.ui.ctpg[10], self.ui.ctpg[11], self.ui.ctpg[12]
             )

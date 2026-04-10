@@ -7,12 +7,12 @@ from backtest.optimiz import Optimize
 from backtest.backtest import BackTest
 from utility.setting_base import ui_num
 from multiprocessing import Process, shared_memory
+from ui.ui_button_clicked_editer import backtest_log
+from PyQt5.QtWidgets import QMessageBox, QApplication
 from ui.ui_process_alive import backtest_process_alive
 from utility.static import qtest_qwait, error_decorator
 from backtest.optimiz_conditions import OptimizeConditions
-from ui.ui_button_clicked_editer import backtest_log
 from ui.ui_button_clicked_shortcut import mnbutton_c_clicked_01
-from PyQt5.QtWidgets import QLineEdit, QMessageBox, QApplication
 from ui.ui_button_clicked_editer_backlog import ssbutton_clicked_06
 from backtest.rolling_walk_forward_test import RollingWalkForwardTest
 from backtest.optimiz_genetic_algorithm import OptimizeGeneticAlgorithm
@@ -135,8 +135,11 @@ def sdbutton_clicked_02(ui):
 
                 if int(avgtime) not in ui.avg_list:
                     ui.StopScheduler()
-                    QMessageBox.critical(ui.dialog_scheduler, '오류 알림',
-                                         '백테엔진 시작 시 포함되지 않은 평균값틱수를 사용하였습니다.\n현재의 틱수로 백테스팅하려면 백테엔진을 다시 시작하십시오.\n')
+                    QMessageBox.critical(
+                        ui.dialog_scheduler,
+                        '오류 알림',
+                        '백테엔진 시작 시 포함되지 않은 평균값틱수를 사용하였습니다.\n현재의 틱수로 백테스팅하려면 백테엔진을 다시 시작하십시오.\n'
+                    )
                     return
 
                 for q in ui.back_eques:

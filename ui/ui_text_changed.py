@@ -58,7 +58,7 @@ def text_changed_05(ui):
     if name:
         try:
             row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
-            columns = columns_jg if ui.market_gubun < 6 else columns_jgf
+            columns = columns_jg if ui.market_gubun < 6 else columns_jgf if ui.market_gubun < 9 else columns_jgcf
             col_num = columns.index('보유수량')
         except:
             order_price = float(ui.od_lineEdittttt_01.text())

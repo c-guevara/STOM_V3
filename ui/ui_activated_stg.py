@@ -140,7 +140,6 @@ def activated_09(ui):
         )
 
 
-# 코인 전용 추가 함수
 @error_decorator
 def activated_10(ui):
     """바이낸스 선물 마진타입 경고"""

@@ -1,6 +1,6 @@
 
+from utility.static import now
 from traceback import format_exc
-from utility.static import now, str_hms
 from utility.setting_base import ui_num
 from trade.base_receiver import BaseReceiver
 from trade.restapi_ls import LsRestAPI, LsRestData, WebSocketReceiver
@@ -27,9 +27,6 @@ class FutureReceiver(BaseReceiver):
         else:
             self.dict_info, self.codes = self.ls.get_code_info_future_night()
         self.traderQ.put(('종목정보', self.dict_info))
-
-    def _get_inthms(self):
-        return int(str_hms())
 
     def _convert_real_data(self, data):
         start = now()

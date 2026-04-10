@@ -3,7 +3,7 @@ import psutil
 from PyQt5.QtCore import QDate
 from PyQt5.QtWidgets import QGroupBox, QLabel
 from ui.ui_button_clicked_dialog_backengine import *
-from ui.ui_checkbox_changed import checkbox_changed_15
+from ui.ui_checkbox_changed import checkbox_changed_06
 from utility.static import str_hms, dt_hms, timedelta_sec
 from ui.set_style import style_ck_bx, style_pgbar, style_bc_dk
 from ui.ui_button_clicked_etc import change_back_sdate, change_back_edate
@@ -107,7 +107,7 @@ class SetDialogBack:
         self.ui.sd_labellllllll_01 = QLabel(text, self.ui.sd_groupBoxxxxx_02)
 
         self.ui.list_checkBoxxxxxx = self._create_widget_list(
-            16, 'sd_checkBoxxxxx', 'checkbox', self.ui.sd_groupBoxxxxx_02, text='    ', changed=lambda state: checkbox_changed_15(self.ui, state), style=style_ck_bx
+            16, 'sd_checkBoxxxxx', 'checkbox', self.ui.sd_groupBoxxxxx_02, text='    ', changed=lambda state: checkbox_changed_06(self.ui, state), style=style_ck_bx
         )
 
         self.ui.list_gcomboBoxxxxx = self._create_widget_list(

@@ -17,8 +17,7 @@ def gavars_load(ui):
             return
         strategy_version(ui, 'opti', 'gavars', strategy_name)
     else:
-        market = ui.market_info['전략구분']
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {market}_optigavars').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optigavars').set_index('index')
         if len(df) > 0:
             ui.sva_comboBoxxx_01.clear()
             indexs = list(df.index)
@@ -42,13 +41,12 @@ def gavars_save(ui):
     else:
         if (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest2(strategy, ga=True):
             if ui.proc_chqs.is_alive():
-                market = ui.market_info['전략구분']
-                delete_query  = f"DELETE FROM {market}_optigavars WHERE `index` = '{strategy_name}'"
-                insert_query  = f"INSERT INTO {market}_optigavars VALUES (?, ?)"
+                delete_query  = f"DELETE FROM {ui.market_sname}_optigavars WHERE `index` = '{strategy_name}'"
+                insert_query  = f"INSERT INTO {ui.market_sname}_optigavars VALUES (?, ?)"
                 insert_values = (strategy_name, strategy)
                 ui.queryQ.put(('전략디비', delete_query))
                 ui.queryQ.put(('전략디비', insert_query, insert_values))
-                stg_save_version(market, 'opti', 'gavars', strategy_name, strategy)
+                stg_save_version(ui.market_sname, 'opti', 'gavars', strategy_name, strategy)
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
@@ -61,8 +59,7 @@ def condbuy_load(ui):
             return
         strategy_version(ui, 'cond', 'buy', strategy_name)
     else:
-        market = ui.market_info['전략구분']
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {market}_buyconds').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buyconds').set_index('index')
         if len(df) > 0:
             ui.svo_comboBoxxx_01.clear()
             indexs = list(df.index)
@@ -86,13 +83,12 @@ def condbuy_save(ui):
     else:
         if ui.BackCodeTest3('매수', strategy):
             if ui.proc_chqs.is_alive():
-                market = ui.market_info['전략구분']
-                delete_query  = f"DELETE FROM {market}_buyconds WHERE `index` = '{strategy_name}'"
-                insert_query  = f"INSERT INTO {market}_buyconds VALUES (?, ?)"
+                delete_query  = f"DELETE FROM {ui.market_sname}_buyconds WHERE `index` = '{strategy_name}'"
+                insert_query  = f"INSERT INTO {ui.market_sname}_buyconds VALUES (?, ?)"
                 insert_values = (strategy_name, strategy)
                 ui.queryQ.put(('전략디비', delete_query))
                 ui.queryQ.put(('전략디비', insert_query, insert_values))
-                stg_save_version(market, 'cond', 'buy', strategy_name, strategy)
+                stg_save_version(ui.market_sname, 'cond', 'buy', strategy_name, strategy)
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
@@ -105,8 +101,7 @@ def condsell_load(ui):
             return
         strategy_version(ui, 'cond', 'sell', strategy_name)
     else:
-        market = ui.market_info['전략구분']
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {market}_sellconds').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sellconds').set_index('index')
         if len(df) > 0:
             ui.svo_comboBoxxx_02.clear()
             indexs = list(df.index)
@@ -130,11 +125,10 @@ def condsell_save(ui):
     else:
         if ui.BackCodeTest3('매도', strategy):
             if ui.proc_chqs.is_alive():
-                market = ui.market_info['전략구분']
-                delete_query  = f"DELETE FROM {market}_sellconds WHERE `index` = '{strategy_name}'"
-                insert_query  = f"INSERT INTO {market}_sellconds VALUES (?, ?)"
+                delete_query  = f"DELETE FROM {ui.market_sname}_sellconds WHERE `index` = '{strategy_name}'"
+                insert_query  = f"INSERT INTO {ui.market_sname}_sellconds VALUES (?, ?)"
                 insert_values = (strategy_name, strategy)
                 ui.queryQ.put(('전략디비', delete_query))
                 ui.queryQ.put(('전략디비', insert_query, insert_values))
-                stg_save_version(market, 'cond', 'sell', strategy_name, strategy)
+                stg_save_version(ui.market_sname, 'cond', 'sell', strategy_name, strategy)
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))

@@ -35,22 +35,16 @@ def indicator_setting_save(ui):
 
 
 @error_decorator
-def get_indicator_detail(ui, code):
+def get_indicator_detail(ui):
     k_list = None
-    if not ui.dict_set['타임프레임'] or not ui.dict_set['타임프레임']:
+    if not ui.dict_set['타임프레임']:
         if ui.ft_checkBoxxxxx_44.isChecked():
             buystg = None
             vars_  = None
             try:
-                if 'KRW' not in code and 'USDT' not in code:
-                    gubun = 'stock' if '키움증권' in ui.dict_set['거래소'] else 'future'
-                    stg_name = ui.dict_set['주식매수전략']
-                    df1 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun}buy').set_index('index')
-                    df2 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {gubun}optibuy').set_index('index')
-                else:
-                    stg_name = ui.dict_set['코인매수전략']
-                    df1 = ui.dbreader.read_sql('전략디비', 'SELECT * FROM coinbuy').set_index('index')
-                    df2 = ui.dbreader.read_sql('전략디비', 'SELECT * FROM coinoptibuy').set_index('index')
+                stg_name = ui.dict_set['매수전략']
+                df1 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buy').set_index('index')
+                df2 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
                 if stg_name in df1.index:
                     buystg = df1['전략코드'][stg_name]
                 elif stg_name in df2.index:
@@ -65,14 +59,17 @@ def get_indicator_detail(ui, code):
                 if buystg is not None:
                     # noinspection PyUnresolvedReferences
                     for line in buystg.split('\n'):
-                        if 'self.indicator' in line:
+                        if 'self.indicator' in line and line[0] != '#':
                             indistg += f"{line.replace('self.indicator', 'indicator_')}\n"
                 if indistg:
                     indicator_ = indicator
-                    if vars_ is not None: indistg = indistg.replace('self.vars', 'vars_')
+                    if vars_ is not None:
+                        indistg = indistg.replace('self.vars', 'vars_')
                     exec(compile(indistg, '<string>', 'exec'))
                     k_list = list(indicator_.values())
+
         if k_list is None:
             k_list = [linedit.text() for linedit in ui.factor_linedit_list]
             k_list = [int(x) if '.' not in x else float(x) for x in k_list]
+
     return k_list

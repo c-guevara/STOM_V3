@@ -1,8 +1,8 @@
 
+from utility.static import now
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.base_receiver import BaseReceiver
-from utility.static import now, str_hms, now_cme
 from trade.restapi_ls import LsRestAPI, LsRestData, WebSocketReceiver
 
 
@@ -25,9 +25,6 @@ class StockUsaReceiver(BaseReceiver):
         self.dict_info, self.codes = self.ls.get_code_info_stock_usa()
         self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.codes)}
         self.traderQ.put(('종목정보', (self.dict_sgbn, self.dict_info)))
-
-    def _get_inthms(self):
-        return int(str_hms(now_cme()))
 
     def _convert_real_data(self, data):
         start = now()

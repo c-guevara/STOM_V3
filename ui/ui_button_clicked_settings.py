@@ -57,114 +57,108 @@ def setting_load_04(ui):
     dfs  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sell').set_index('index')
     dfob = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
     dfos = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optisell').set_index('index')
-    if len(df) > 0:
-        ui.sj_strgy_ckBox_01.setChecked(True) if df['잔고청산'][0] else ui.sj_strgy_ckBox_01.setChecked(False)
-        ui.sj_strgy_ckBox_02.setChecked(True) if df['프로세스종료'][0] else ui.sj_strgy_ckBox_02.setChecked(False)
-        ui.sj_strgy_ckBox_03.setChecked(True) if df['컴퓨터종료'][0] else ui.sj_strgy_ckBox_03.setChecked(False)
-        ui.sj_strgy_ckBox_04.setChecked(True) if df['투자금고정'][0] else ui.sj_strgy_ckBox_04.setChecked(False)
-        ui.sj_strgy_ckBox_05.setChecked(True) if df['손실중지'][0] else ui.sj_strgy_ckBox_05.setChecked(False)
-        ui.sj_strgy_ckBox_06.setChecked(True) if df['수익중지'][0] else ui.sj_strgy_ckBox_06.setChecked(False)
-        ui.sj_strgy_lEdit_01.setText(str(df['평균값계산틱수'][0]))
-        ui.sj_strgy_lEdit_02.setText(str(df['최대매수종목수'][0]))
-        ui.sj_strgy_lEdit_03.setText(str(df['전략종료시간'][0]))
-        ui.sj_strgy_cbBox_01.clear()
-        ui.sj_strgy_cbBox_02.clear()
-        ui.sj_strgy_cbBox_01.addItem('사용안함')
-        ui.sj_strgy_cbBox_02.addItem('사용안함')
-        if len(dfb) > 0:
-            stg_list = list(dfb.index)
-            stg_list.sort()
-            for stg in stg_list:
-                ui.sj_strgy_cbBox_01.addItem(stg)
-        if len(dfob) > 0:
-            stg_list = list(dfob.index)
-            stg_list.sort()
-            for stg in stg_list:
-                ui.sj_strgy_cbBox_01.addItem(stg)
-        if df['매수전략'][0]:
-            ui.sj_strgy_cbBox_01.setCurrentText(df['매수전략'][0])
-        if len(dfs) > 0:
-            stg_list = list(dfs.index)
-            stg_list.sort()
-            for stg in stg_list:
-                ui.sj_strgy_cbBox_02.addItem(stg)
-        if len(dfos) > 0:
-            stg_list = list(dfos.index)
-            stg_list.sort()
-            for stg in stg_list:
-                ui.sj_strgy_cbBox_02.addItem(stg)
-        if df['매도전략'][0]:
-            ui.sj_strgy_cbBox_02.setCurrentText(df['매도전략'][0])
-        ui.sj_strgy_lEdit_04.setText(str(df['투자금'][0]))
-        ui.sj_strgy_lEdit_05.setText(str(df['손실중지수익률'][0]))
-        ui.sj_strgy_lEdit_06.setText(str(df['수익중지수익률'][0]))
-        time_limit = ui.market_info['프로세스종료시간'] - 30
-        if ui.market_gubun != 7 and df['전략종료시간'][0] > time_limit:
-            QMessageBox.critical(ui, '오류 알림', f'{ui.market_name} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n')
-    else:
-        QMessageBox.critical(ui, '오류 알림', '주식 전략 설정값이\n존재하지 않습니다.\n')
+
+    ui.sj_strgy_ckBox_01.setChecked(True) if df['잔고청산'][0] else ui.sj_strgy_ckBox_01.setChecked(False)
+    ui.sj_strgy_ckBox_02.setChecked(True) if df['프로세스종료'][0] else ui.sj_strgy_ckBox_02.setChecked(False)
+    ui.sj_strgy_ckBox_03.setChecked(True) if df['컴퓨터종료'][0] else ui.sj_strgy_ckBox_03.setChecked(False)
+    ui.sj_strgy_ckBox_04.setChecked(True) if df['투자금고정'][0] else ui.sj_strgy_ckBox_04.setChecked(False)
+    ui.sj_strgy_ckBox_05.setChecked(True) if df['손실중지'][0] else ui.sj_strgy_ckBox_05.setChecked(False)
+    ui.sj_strgy_ckBox_06.setChecked(True) if df['수익중지'][0] else ui.sj_strgy_ckBox_06.setChecked(False)
+    ui.sj_strgy_lEdit_01.setText(str(df['평균값계산틱수'][0]))
+    ui.sj_strgy_lEdit_02.setText(str(df['최대매수종목수'][0]))
+    ui.sj_strgy_lEdit_03.setText(str(df['전략종료시간'][0]))
+    ui.sj_strgy_cbBox_01.clear()
+    ui.sj_strgy_cbBox_02.clear()
+    ui.sj_strgy_cbBox_01.addItem('사용안함')
+    ui.sj_strgy_cbBox_02.addItem('사용안함')
+    if len(dfb) > 0:
+        stg_list = list(dfb.index)
+        stg_list.sort()
+        for stg in stg_list:
+            ui.sj_strgy_cbBox_01.addItem(stg)
+    if len(dfob) > 0:
+        stg_list = list(dfob.index)
+        stg_list.sort()
+        for stg in stg_list:
+            ui.sj_strgy_cbBox_01.addItem(stg)
+    if df['매수전략'][0]:
+        ui.sj_strgy_cbBox_01.setCurrentText(df['매수전략'][0])
+    if len(dfs) > 0:
+        stg_list = list(dfs.index)
+        stg_list.sort()
+        for stg in stg_list:
+            ui.sj_strgy_cbBox_02.addItem(stg)
+    if len(dfos) > 0:
+        stg_list = list(dfos.index)
+        stg_list.sort()
+        for stg in stg_list:
+            ui.sj_strgy_cbBox_02.addItem(stg)
+    if df['매도전략'][0]:
+        ui.sj_strgy_cbBox_02.setCurrentText(df['매도전략'][0])
+    ui.sj_strgy_lEdit_04.setText(str(df['투자금'][0]))
+    ui.sj_strgy_lEdit_05.setText(str(df['손실중지수익률'][0]))
+    ui.sj_strgy_lEdit_06.setText(str(df['수익중지수익률'][0]))
+    time_limit = ui.market_info['프로세스종료시간'] - 30
+    if ui.market_gubun != 7 and df['전략종료시간'][0] > time_limit:
+        QMessageBox.critical(ui, '오류 알림', f'{ui.market_name} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n')
 
 
 @error_decorator
 def setting_load_05(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM back').set_index('index')
-    if len(df) > 0:
-        ui.sj_back_cheBox_01.setChecked(True) if df['블랙리스트추가'][0] else ui.sj_back_cheBox_01.setChecked(False)
-        ui.sj_back_cheBox_02.setChecked(True) if df['백테일괄로딩'][0] else ui.sj_back_cheBox_02.setChecked(False)
-        ui.sj_back_cheBox_03.setChecked(True) if not df['백테일괄로딩'][0] else ui.sj_back_cheBox_03.setChecked(False)
-        ui.sj_back_cheBox_04.setChecked(True) if df['디비자동관리'][0] else ui.sj_back_cheBox_04.setChecked(False)
-        ui.sj_back_cheBox_05.setChecked(True) if df['백테주문관리적용'][0] else ui.sj_back_cheBox_05.setChecked(False)
-        ui.sj_back_cheBox_06.setChecked(True) if df['교차검증가중치'][0] else ui.sj_back_cheBox_06.setChecked(False)
-        ui.sj_back_cheBox_07.setChecked(True) if df['범위자동관리'][0] else ui.sj_back_cheBox_07.setChecked(False)
-        ui.sj_back_cheBox_08.setChecked(True) if df['시장미시구조분석'][0] else ui.sj_back_cheBox_08.setChecked(False)
-        ui.sj_back_cheBox_09.setChecked(True) if df['시장리스크분석'][0] else ui.sj_back_cheBox_09.setChecked(False)
-        ui.sj_back_cheBox_10.setChecked(True) if df['백테매수시간기준'][0] else ui.sj_back_cheBox_10.setChecked(False)
-        ui.sj_back_liEdit_01.setText(str(df['기준값최소상승률'][0]))
-        ui.sj_back_cheBox_12.setChecked(True) if df['그래프저장하지않기'][0] else ui.sj_back_cheBox_12.setChecked(False)
-        ui.sj_back_cheBox_13.setChecked(True) if df['그래프띄우지않기'][0] else ui.sj_back_cheBox_13.setChecked(False)
-        ui.sj_back_cheBox_11.setChecked(True) if df['백테스트로그기록안함'][0] else ui.sj_back_cheBox_11.setChecked(False)
-        ui.sj_back_cheBox_14.setChecked(True) if df['백테스케쥴실행'][0] else ui.sj_back_cheBox_14.setChecked(False)
-        ui.sj_back_cheBox_15.setChecked(True) if not df['백테날짜고정'][0] else ui.sj_back_cheBox_15.setChecked(False)
-        ui.sj_back_cheBox_16.setChecked(True) if df['백테날짜고정'][0] else ui.sj_back_cheBox_16.setChecked(False)
-        ui.sj_back_comBox_03.clear()
-        dfs = ui.dbreader.read_sql('전략디비', 'SELECT * FROM schedule').set_index('index')
-        indexs = list(dfs.index)
-        indexs.sort()
-        for index in indexs:
-            ui.sj_back_comBox_03.addItem(index)
-        if df['백테스케쥴요일'][0] == 4:
-            ui.sj_back_comBox_01.setCurrentText('금')
-        elif df['백테스케쥴요일'][0] == 5:
-            ui.sj_back_comBox_01.setCurrentText('토')
-        elif df['백테스케쥴요일'][0] == 6:
-            ui.sj_back_comBox_01.setCurrentText('일')
 
-        ui.sj_back_liEdit_02.setText(str(df['백테스케쥴시간'][0]))
-        ui.sj_back_comBox_02.setCurrentText(df['백테스케쥴구분'][0])
-        ui.sj_back_comBox_03.setCurrentText(df['백테스케쥴명'][0])
-        if df['백테날짜고정'][0]:
-            ui.sj_back_daEdit_01.setDate(QDate.fromString(ui.dict_set['백테날짜'], 'yyyyMMdd'))
-        else:
-            ui.sj_back_liEdit_03.setText(df['백테날짜'][0])
+    ui.sj_back_cheBox_01.setChecked(True) if df['블랙리스트추가'][0] else ui.sj_back_cheBox_01.setChecked(False)
+    ui.sj_back_cheBox_02.setChecked(True) if df['백테일괄로딩'][0] else ui.sj_back_cheBox_02.setChecked(False)
+    ui.sj_back_cheBox_03.setChecked(True) if not df['백테일괄로딩'][0] else ui.sj_back_cheBox_03.setChecked(False)
+    ui.sj_back_cheBox_04.setChecked(True) if df['디비자동관리'][0] else ui.sj_back_cheBox_04.setChecked(False)
+    ui.sj_back_cheBox_05.setChecked(True) if df['백테주문관리적용'][0] else ui.sj_back_cheBox_05.setChecked(False)
+    ui.sj_back_cheBox_06.setChecked(True) if df['교차검증가중치'][0] else ui.sj_back_cheBox_06.setChecked(False)
+    ui.sj_back_cheBox_07.setChecked(True) if df['범위자동관리'][0] else ui.sj_back_cheBox_07.setChecked(False)
+    ui.sj_back_cheBox_08.setChecked(True) if df['시장미시구조분석'][0] else ui.sj_back_cheBox_08.setChecked(False)
+    ui.sj_back_cheBox_09.setChecked(True) if df['시장리스크분석'][0] else ui.sj_back_cheBox_09.setChecked(False)
+    ui.sj_back_cheBox_10.setChecked(True) if df['백테매수시간기준'][0] else ui.sj_back_cheBox_10.setChecked(False)
+    ui.sj_back_liEdit_01.setText(str(df['기준값최소상승률'][0]))
+    ui.sj_back_cheBox_12.setChecked(True) if df['그래프저장하지않기'][0] else ui.sj_back_cheBox_12.setChecked(False)
+    ui.sj_back_cheBox_13.setChecked(True) if df['그래프띄우지않기'][0] else ui.sj_back_cheBox_13.setChecked(False)
+    ui.sj_back_cheBox_11.setChecked(True) if df['백테스트로그기록안함'][0] else ui.sj_back_cheBox_11.setChecked(False)
+    ui.sj_back_cheBox_14.setChecked(True) if df['백테스케쥴실행'][0] else ui.sj_back_cheBox_14.setChecked(False)
+    ui.sj_back_cheBox_15.setChecked(True) if not df['백테날짜고정'][0] else ui.sj_back_cheBox_15.setChecked(False)
+    ui.sj_back_cheBox_16.setChecked(True) if df['백테날짜고정'][0] else ui.sj_back_cheBox_16.setChecked(False)
+    ui.sj_back_comBox_03.clear()
+    dfs = ui.dbreader.read_sql('전략디비', 'SELECT * FROM schedule').set_index('index')
+    indexs = list(dfs.index)
+    indexs.sort()
+    for index in indexs:
+        ui.sj_back_comBox_03.addItem(index)
+    if df['백테스케쥴요일'][0] == 4:
+        ui.sj_back_comBox_01.setCurrentText('금')
+    elif df['백테스케쥴요일'][0] == 5:
+        ui.sj_back_comBox_01.setCurrentText('토')
+    elif df['백테스케쥴요일'][0] == 6:
+        ui.sj_back_comBox_01.setCurrentText('일')
+
+    ui.sj_back_liEdit_02.setText(str(df['백테스케쥴시간'][0]))
+    ui.sj_back_comBox_02.setCurrentText(df['백테스케쥴구분'][0])
+    ui.sj_back_comBox_03.setCurrentText(df['백테스케쥴명'][0])
+    if df['백테날짜고정'][0]:
+        ui.sj_back_daEdit_01.setDate(QDate.fromString(ui.dict_set['백테날짜'], 'yyyyMMdd'))
     else:
-        QMessageBox.critical(ui, '오류 알림', '백테 설정값이\n존재하지 않습니다.\n')
+        ui.sj_back_liEdit_03.setText(df['백테날짜'][0])
 
 
 @error_decorator
 def setting_load_06(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM etc').set_index('index')
-    if len(df) > 0:
-        ui.sj_etc_comBoxx_01.setCurrentText(df['테마'][0])
-        ui.sj_etc_checBox_02.setChecked(True) if df['저해상도'][0] else ui.sj_etc_checBox_02.setChecked(False)
-        ui.sj_etc_checBox_04.setChecked(True) if df['휴무프로세스종료'][0] else ui.sj_etc_checBox_04.setChecked(False)
-        ui.sj_etc_checBox_05.setChecked(True) if df['휴무컴퓨터종료'][0] else ui.sj_etc_checBox_05.setChecked(False)
-        ui.sj_etc_checBox_03.setChecked(True) if df['창위치기억'][0] else ui.sj_etc_checBox_03.setChecked(False)
-        ui.sj_etc_checBox_06.setChecked(True) if df['스톰라이브'][0] else ui.sj_etc_checBox_06.setChecked(False)
-        ui.sj_etc_checBox_07.setChecked(True) if df['프로그램종료'][0] else ui.sj_etc_checBox_07.setChecked(False)
-        if df['시리얼키'][0]:
-            ui.sj_etc_liEditt_01.setText(de_text(ui.dict_set['키'], df['시리얼키'][0]))
-    else:
-        QMessageBox.critical(ui, '오류 알림', '기타 설정값이\n존재하지 않습니다.\n')
+
+    ui.sj_etc_comBoxx_01.setCurrentText(df['테마'][0])
+    ui.sj_etc_checBox_02.setChecked(True) if df['저해상도'][0] else ui.sj_etc_checBox_02.setChecked(False)
+    ui.sj_etc_checBox_04.setChecked(True) if df['휴무프로세스종료'][0] else ui.sj_etc_checBox_04.setChecked(False)
+    ui.sj_etc_checBox_05.setChecked(True) if df['휴무컴퓨터종료'][0] else ui.sj_etc_checBox_05.setChecked(False)
+    ui.sj_etc_checBox_03.setChecked(True) if df['창위치기억'][0] else ui.sj_etc_checBox_03.setChecked(False)
+    ui.sj_etc_checBox_06.setChecked(True) if df['스톰라이브'][0] else ui.sj_etc_checBox_06.setChecked(False)
+    ui.sj_etc_checBox_07.setChecked(True) if df['프로그램종료'][0] else ui.sj_etc_checBox_07.setChecked(False)
+    if df['시리얼키'][0]:
+        ui.sj_etc_liEditt_01.setText(de_text(ui.dict_set['키'], df['시리얼키'][0]))
 
 
 @error_decorator
@@ -400,183 +394,179 @@ def setting_acc_view(ui):
 
 @error_decorator
 def setting_order_load_01(ui):
-    df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM stockbuyorder').set_index('index')
+    df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM buyorder').set_index('index')
 
-    if len(df) > 0:
-        ui.ss_buyy_checkBox_01.setChecked(True) if df['매수주문구분'][0] == '시장가' else ui.ss_buyy_checkBox_01.setChecked(False)
-        ui.ss_buyy_checkBox_02.setChecked(True) if df['매수주문구분'][0] == '지정가' else ui.ss_buyy_checkBox_02.setChecked(False)
-        ui.ss_buyy_checkBox_03.setChecked(True) if df['매수주문구분'][0] == '최유리지정가' else ui.ss_buyy_checkBox_03.setChecked(False)
-        ui.ss_buyy_checkBox_04.setChecked(True) if df['매수주문구분'][0] == '최우선지정가' else ui.ss_buyy_checkBox_04.setChecked(False)
-        ui.ss_buyy_checkBox_05.setChecked(True) if df['매수주문구분'][0] == '지정가IOC' else ui.ss_buyy_checkBox_05.setChecked(False)
-        ui.ss_buyy_checkBox_06.setChecked(True) if df['매수주문구분'][0] == '시장가IOC' else ui.ss_buyy_checkBox_06.setChecked(False)
-        ui.ss_buyy_checkBox_07.setChecked(True) if df['매수주문구분'][0] == '최유리IOC' else ui.ss_buyy_checkBox_07.setChecked(False)
-        ui.ss_buyy_checkBox_08.setChecked(True) if df['매수주문구분'][0] == '지정가FOK' else ui.ss_buyy_checkBox_08.setChecked(False)
-        ui.ss_buyy_checkBox_09.setChecked(True) if df['매수주문구분'][0] == '시장가FOK' else ui.ss_buyy_checkBox_09.setChecked(False)
-        ui.ss_buyy_checkBox_10.setChecked(True) if df['매수주문구분'][0] == '최유리FOK' else ui.ss_buyy_checkBox_10.setChecked(False)
-        ui.ss_buyy_lineEdit_01.setText(str(df['매수분할횟수'][0]))
-        ui.ss_buyy_checkBox_11.setChecked(True) if df['매수분할방법'][0] == 1 else ui.ss_buyy_checkBox_11.setChecked(False)
-        ui.ss_buyy_checkBox_12.setChecked(True) if df['매수분할방법'][0] == 2 else ui.ss_buyy_checkBox_12.setChecked(False)
-        ui.ss_buyy_checkBox_13.setChecked(True) if df['매수분할방법'][0] == 3 else ui.ss_buyy_checkBox_13.setChecked(False)
-        ui.ss_buyy_checkBox_14.setChecked(True) if df['매수분할시그널'][0] else ui.ss_buyy_checkBox_14.setChecked(False)
-        ui.ss_buyy_checkBox_15.setChecked(True) if df['매수분할하방'][0] else ui.ss_buyy_checkBox_15.setChecked(False)
-        ui.ss_buyy_checkBox_16.setChecked(True) if df['매수분할상방'][0] else ui.ss_buyy_checkBox_16.setChecked(False)
-        ui.ss_buyy_lineEdit_02.setText(str(df['매수분할하방수익률'][0]))
-        ui.ss_buyy_lineEdit_03.setText(str(df['매수분할상방수익률'][0]))
-        ui.ss_buyy_checkBox_17.setChecked(True) if df['매수분할고정수익률'][0] else ui.ss_buyy_checkBox_17.setChecked(False)
-        ui.ss_buyy_comboBox_01.setCurrentText(str(df['매수지정가기준가격'][0]))
-        ui.ss_buyy_comboBox_02.setCurrentText(str(df['매수지정가호가번호'][0]))
-        ui.ss_buyy_comboBox_03.setCurrentText(str(df['매수시장가잔량범위'][0]))
-        ui.ss_buyy_checkBox_18.setChecked(True) if df['매수취소관심이탈'][0] else ui.ss_buyy_checkBox_18.setChecked(False)
-        ui.ss_buyy_checkBox_19.setChecked(True) if df['매수취소매도시그널'][0] else ui.ss_buyy_checkBox_19.setChecked(False)
-        ui.ss_buyy_checkBox_20.setChecked(True) if df['매수취소시간'][0] else ui.ss_buyy_checkBox_20.setChecked(False)
-        ui.ss_buyy_lineEdit_04.setText(str(df['매수취소시간초'][0]))
-        ui.ss_buyy_checkBox_21.setChecked(True) if df['매수금지블랙리스트'][0] else ui.ss_buyy_checkBox_21.setChecked(False)
-        ui.ss_buyy_checkBox_22.setChecked(True) if df['매수금지라운드피겨'][0] else ui.ss_buyy_checkBox_22.setChecked(False)
-        ui.ss_buyy_lineEdit_05.setText(str(df['매수금지라운드호가'][0]))
-        ui.ss_buyy_checkBox_23.setChecked(True) if df['매수금지손절횟수'][0] else ui.ss_buyy_checkBox_23.setChecked(False)
-        ui.ss_buyy_lineEdit_06.setText(str(df['매수금지손절횟수값'][0]))
-        ui.ss_buyy_checkBox_24.setChecked(True) if df['매수금지거래횟수'][0] else ui.ss_buyy_checkBox_24.setChecked(False)
-        ui.ss_buyy_lineEdit_07.setText(str(df['매수금지거래횟수값'][0]))
-        ui.ss_buyy_checkBox_25.setChecked(True) if df['매수금지시간'][0] else ui.ss_buyy_checkBox_25.setChecked(False)
-        ui.ss_buyy_lineEdit_08.setText(str(df['매수금지시작시간'][0]))
-        ui.ss_buyy_lineEdit_09.setText(str(df['매수금지종료시간'][0]))
-        ui.ss_buyy_checkBox_26.setChecked(True) if df['매수금지간격'][0] else ui.ss_buyy_checkBox_26.setChecked(False)
-        ui.ss_buyy_lineEdit_10.setText(str(df['매수금지간격초'][0]))
-        ui.ss_buyy_checkBox_27.setChecked(True) if df['매수금지손절간격'][0] else ui.ss_buyy_checkBox_27.setChecked(False)
-        ui.ss_buyy_lineEdit_11.setText(str(df['매수금지손절간격초'][0]))
-        ui.ss_buyy_lineEdit_12.setText(str(df['매수정정횟수'][0]))
-        ui.ss_buyy_comboBox_04.setCurrentText(str(df['매수정정호가차이'][0]))
-        ui.ss_buyy_comboBox_05.setCurrentText(str(df['매수정정호가'][0]))
-        ui.ss_bj_checkBoxxx_01.setChecked(False)
-        ui.ss_bj_checkBoxxx_02.setChecked(False)
-        ui.ss_bj_checkBoxxx_03.setChecked(False)
-        ui.ss_bj_checkBoxxx_04.setChecked(False)
-        ui.ss_bj_checkBoxxx_05.setChecked(False)
-        ui.ss_bj_checkBoxxx_06.setChecked(False)
-        bjjj_list = df['비중조절'][0]
-        bjjj_list = bjjj_list.split(';')
-        if bjjj_list[0] == '0':   ui.ss_bj_checkBoxxx_01.setChecked(True)
-        elif bjjj_list[0] == '1': ui.ss_bj_checkBoxxx_02.setChecked(True)
-        elif bjjj_list[0] == '2': ui.ss_bj_checkBoxxx_03.setChecked(True)
-        elif bjjj_list[0] == '3': ui.ss_bj_checkBoxxx_04.setChecked(True)
-        elif bjjj_list[0] == '4': ui.ss_bj_checkBoxxx_05.setChecked(True)
-        elif bjjj_list[0] == '5': ui.ss_bj_checkBoxxx_06.setChecked(True)
-        ui.ss_bj_lineEdittt_01.setText(bjjj_list[1])
-        ui.ss_bj_lineEdittt_02.setText(bjjj_list[2])
-        ui.ss_bj_lineEdittt_03.setText(bjjj_list[3])
-        ui.ss_bj_lineEdittt_04.setText(bjjj_list[4])
-        ui.ss_bj_lineEdittt_05.setText(bjjj_list[5])
-        ui.ss_bj_lineEdittt_06.setText(bjjj_list[6])
-        ui.ss_bj_lineEdittt_07.setText(bjjj_list[7])
-        ui.ss_bj_lineEdittt_08.setText(bjjj_list[8])
-        ui.ss_bj_lineEdittt_09.setText(bjjj_list[9])
-    else:
-        QMessageBox.critical(ui, '오류 알림', '주문관리 주식매수 설정값이\n존재하지 않습니다.\n')
+    ui.ss_buyy_checkBox_01.setChecked(True) if df['매수주문구분'][0] == '시장가' else ui.ss_buyy_checkBox_01.setChecked(False)
+    ui.ss_buyy_checkBox_02.setChecked(True) if df['매수주문구분'][0] == '지정가' else ui.ss_buyy_checkBox_02.setChecked(False)
+    ui.ss_buyy_checkBox_03.setChecked(True) if df['매수주문구분'][0] == '최유리지정가' else ui.ss_buyy_checkBox_03.setChecked(False)
+    ui.ss_buyy_checkBox_04.setChecked(True) if df['매수주문구분'][0] == '최우선지정가' else ui.ss_buyy_checkBox_04.setChecked(False)
+    ui.ss_buyy_checkBox_05.setChecked(True) if df['매수주문구분'][0] == '지정가IOC' else ui.ss_buyy_checkBox_05.setChecked(False)
+    ui.ss_buyy_checkBox_06.setChecked(True) if df['매수주문구분'][0] == '시장가IOC' else ui.ss_buyy_checkBox_06.setChecked(False)
+    ui.ss_buyy_checkBox_07.setChecked(True) if df['매수주문구분'][0] == '최유리IOC' else ui.ss_buyy_checkBox_07.setChecked(False)
+    ui.ss_buyy_checkBox_08.setChecked(True) if df['매수주문구분'][0] == '지정가FOK' else ui.ss_buyy_checkBox_08.setChecked(False)
+    ui.ss_buyy_checkBox_09.setChecked(True) if df['매수주문구분'][0] == '시장가FOK' else ui.ss_buyy_checkBox_09.setChecked(False)
+    ui.ss_buyy_checkBox_10.setChecked(True) if df['매수주문구분'][0] == '최유리FOK' else ui.ss_buyy_checkBox_10.setChecked(False)
+    ui.ss_buyy_lineEdit_01.setText(str(df['매수분할횟수'][0]))
+    ui.ss_buyy_checkBox_11.setChecked(True) if df['매수분할방법'][0] == 1 else ui.ss_buyy_checkBox_11.setChecked(False)
+    ui.ss_buyy_checkBox_12.setChecked(True) if df['매수분할방법'][0] == 2 else ui.ss_buyy_checkBox_12.setChecked(False)
+    ui.ss_buyy_checkBox_13.setChecked(True) if df['매수분할방법'][0] == 3 else ui.ss_buyy_checkBox_13.setChecked(False)
+    ui.ss_buyy_checkBox_14.setChecked(True) if df['매수분할시그널'][0] else ui.ss_buyy_checkBox_14.setChecked(False)
+    ui.ss_buyy_checkBox_15.setChecked(True) if df['매수분할하방'][0] else ui.ss_buyy_checkBox_15.setChecked(False)
+    ui.ss_buyy_checkBox_16.setChecked(True) if df['매수분할상방'][0] else ui.ss_buyy_checkBox_16.setChecked(False)
+    ui.ss_buyy_lineEdit_02.setText(str(df['매수분할하방수익률'][0]))
+    ui.ss_buyy_lineEdit_03.setText(str(df['매수분할상방수익률'][0]))
+    ui.ss_buyy_checkBox_17.setChecked(True) if df['매수분할고정수익률'][0] else ui.ss_buyy_checkBox_17.setChecked(False)
+    ui.ss_buyy_comboBox_01.setCurrentText(str(df['매수지정가기준가격'][0]))
+    ui.ss_buyy_comboBox_02.setCurrentText(str(df['매수지정가호가번호'][0]))
+    ui.ss_buyy_comboBox_03.setCurrentText(str(df['매수시장가잔량범위'][0]))
+    ui.ss_buyy_checkBox_18.setChecked(True) if df['매수취소관심이탈'][0] else ui.ss_buyy_checkBox_18.setChecked(False)
+    ui.ss_buyy_checkBox_19.setChecked(True) if df['매수취소매도시그널'][0] else ui.ss_buyy_checkBox_19.setChecked(False)
+    ui.ss_buyy_checkBox_20.setChecked(True) if df['매수취소시간'][0] else ui.ss_buyy_checkBox_20.setChecked(False)
+    ui.ss_buyy_lineEdit_04.setText(str(df['매수취소시간초'][0]))
+    ui.ss_buyy_checkBox_21.setChecked(True) if df['매수금지블랙리스트'][0] else ui.ss_buyy_checkBox_21.setChecked(False)
+    ui.ss_buyy_checkBox_22.setChecked(True) if df['매수금지라운드피겨'][0] else ui.ss_buyy_checkBox_22.setChecked(False)
+    ui.ss_buyy_lineEdit_05.setText(str(df['매수금지라운드호가'][0]))
+    ui.ss_buyy_checkBox_23.setChecked(True) if df['매수금지손절횟수'][0] else ui.ss_buyy_checkBox_23.setChecked(False)
+    ui.ss_buyy_lineEdit_06.setText(str(df['매수금지손절횟수값'][0]))
+    ui.ss_buyy_checkBox_24.setChecked(True) if df['매수금지거래횟수'][0] else ui.ss_buyy_checkBox_24.setChecked(False)
+    ui.ss_buyy_lineEdit_07.setText(str(df['매수금지거래횟수값'][0]))
+    ui.ss_buyy_checkBox_25.setChecked(True) if df['매수금지시간'][0] else ui.ss_buyy_checkBox_25.setChecked(False)
+    ui.ss_buyy_lineEdit_08.setText(str(df['매수금지시작시간'][0]))
+    ui.ss_buyy_lineEdit_09.setText(str(df['매수금지종료시간'][0]))
+    ui.ss_buyy_checkBox_26.setChecked(True) if df['매수금지간격'][0] else ui.ss_buyy_checkBox_26.setChecked(False)
+    ui.ss_buyy_lineEdit_10.setText(str(df['매수금지간격초'][0]))
+    ui.ss_buyy_checkBox_27.setChecked(True) if df['매수금지손절간격'][0] else ui.ss_buyy_checkBox_27.setChecked(False)
+    ui.ss_buyy_lineEdit_11.setText(str(df['매수금지손절간격초'][0]))
+    ui.ss_buyy_lineEdit_12.setText(str(df['매수정정횟수'][0]))
+    ui.ss_buyy_comboBox_04.setCurrentText(str(df['매수정정호가차이'][0]))
+    ui.ss_buyy_comboBox_05.setCurrentText(str(df['매수정정호가'][0]))
+    ui.ss_bj_checkBoxxx_01.setChecked(False)
+    ui.ss_bj_checkBoxxx_02.setChecked(False)
+    ui.ss_bj_checkBoxxx_03.setChecked(False)
+    ui.ss_bj_checkBoxxx_04.setChecked(False)
+    ui.ss_bj_checkBoxxx_05.setChecked(False)
+    ui.ss_bj_checkBoxxx_06.setChecked(False)
+    bjjj_list = df['비중조절'][0]
+    bjjj_list = bjjj_list.split(';')
+    if bjjj_list[0] == '0':   ui.ss_bj_checkBoxxx_01.setChecked(True)
+    elif bjjj_list[0] == '1': ui.ss_bj_checkBoxxx_02.setChecked(True)
+    elif bjjj_list[0] == '2': ui.ss_bj_checkBoxxx_03.setChecked(True)
+    elif bjjj_list[0] == '3': ui.ss_bj_checkBoxxx_04.setChecked(True)
+    elif bjjj_list[0] == '4': ui.ss_bj_checkBoxxx_05.setChecked(True)
+    elif bjjj_list[0] == '5': ui.ss_bj_checkBoxxx_06.setChecked(True)
+    ui.ss_bj_lineEdittt_01.setText(bjjj_list[1])
+    ui.ss_bj_lineEdittt_02.setText(bjjj_list[2])
+    ui.ss_bj_lineEdittt_03.setText(bjjj_list[3])
+    ui.ss_bj_lineEdittt_04.setText(bjjj_list[4])
+    ui.ss_bj_lineEdittt_05.setText(bjjj_list[5])
+    ui.ss_bj_lineEdittt_06.setText(bjjj_list[6])
+    ui.ss_bj_lineEdittt_07.setText(bjjj_list[7])
+    ui.ss_bj_lineEdittt_08.setText(bjjj_list[8])
+    ui.ss_bj_lineEdittt_09.setText(bjjj_list[9])
 
 
 @error_decorator
 def setting_order_load_02(ui):
-    df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM stocksellorder').set_index('index')
+    df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM sellorder').set_index('index')
 
-    if len(df) > 0:
-        ui.ss_sell_checkBox_01.setChecked(True) if df['매도주문구분'][0] == '시장가' else ui.ss_sell_checkBox_01.setChecked(False)
-        ui.ss_sell_checkBox_02.setChecked(True) if df['매도주문구분'][0] == '지정가' else ui.ss_sell_checkBox_02.setChecked(False)
-        ui.ss_sell_checkBox_03.setChecked(True) if df['매도주문구분'][0] == '최유리지정가' else ui.ss_sell_checkBox_03.setChecked(False)
-        ui.ss_sell_checkBox_04.setChecked(True) if df['매도주문구분'][0] == '최우선지정가' else ui.ss_sell_checkBox_04.setChecked(False)
-        ui.ss_sell_checkBox_05.setChecked(True) if df['매도주문구분'][0] == '지정가IOC' else ui.ss_sell_checkBox_05.setChecked(False)
-        ui.ss_sell_checkBox_06.setChecked(True) if df['매도주문구분'][0] == '시장가IOC' else ui.ss_sell_checkBox_06.setChecked(False)
-        ui.ss_sell_checkBox_07.setChecked(True) if df['매도주문구분'][0] == '최유리IOC' else ui.ss_sell_checkBox_07.setChecked(False)
-        ui.ss_sell_checkBox_08.setChecked(True) if df['매도주문구분'][0] == '지정가FOK' else ui.ss_sell_checkBox_08.setChecked(False)
-        ui.ss_sell_checkBox_09.setChecked(True) if df['매도주문구분'][0] == '시장가FOK' else ui.ss_sell_checkBox_09.setChecked(False)
-        ui.ss_sell_checkBox_10.setChecked(True) if df['매도주문구분'][0] == '최유리FOK' else ui.ss_sell_checkBox_10.setChecked(False)
-        ui.ss_sell_lineEdit_01.setText(str(df['매도분할횟수'][0]))
-        ui.ss_sell_checkBox_11.setChecked(True) if df['매도분할방법'][0] == 1 else ui.ss_sell_checkBox_11.setChecked(False)
-        ui.ss_sell_checkBox_12.setChecked(True) if df['매도분할방법'][0] == 2 else ui.ss_sell_checkBox_12.setChecked(False)
-        ui.ss_sell_checkBox_13.setChecked(True) if df['매도분할방법'][0] == 3 else ui.ss_sell_checkBox_13.setChecked(False)
-        ui.ss_sell_checkBox_14.setChecked(True) if df['매도분할시그널'][0] else ui.ss_sell_checkBox_14.setChecked(False)
-        ui.ss_sell_checkBox_15.setChecked(True) if df['매도분할하방'][0] else ui.ss_sell_checkBox_15.setChecked(False)
-        ui.ss_sell_checkBox_16.setChecked(True) if df['매도분할상방'][0] else ui.ss_sell_checkBox_16.setChecked(False)
-        ui.ss_sell_lineEdit_02.setText(str(df['매도분할하방수익률'][0]))
-        ui.ss_sell_lineEdit_03.setText(str(df['매도분할상방수익률'][0]))
-        ui.ss_sell_comboBox_01.setCurrentText(str(df['매도지정가기준가격'][0]))
-        ui.ss_sell_comboBox_02.setCurrentText(str(df['매도지정가호가번호'][0]))
-        ui.ss_sell_comboBox_03.setCurrentText(str(df['매도시장가잔량범위'][0]))
-        ui.ss_sell_checkBox_17.setChecked(True) if df['매도취소관심진입'][0] else ui.ss_sell_checkBox_17.setChecked(False)
-        ui.ss_sell_checkBox_18.setChecked(True) if df['매도취소매수시그널'][0] else ui.ss_sell_checkBox_18.setChecked(False)
-        ui.ss_sell_checkBox_19.setChecked(True) if df['매도취소시간'][0] else ui.ss_sell_checkBox_19.setChecked(False)
-        ui.ss_sell_lineEdit_04.setText(str(df['매도취소시간초'][0]))
-        ui.ss_sell_checkBox_20.setChecked(True) if df['매도금지매수횟수'][0] else ui.ss_sell_checkBox_20.setChecked(False)
-        ui.ss_sell_lineEdit_05.setText(str(df['매도금지매수횟수값'][0]))
-        ui.ss_sell_checkBox_21.setChecked(True) if df['매도금지라운드피겨'][0] else ui.ss_sell_checkBox_21.setChecked(False)
-        ui.ss_sell_lineEdit_06.setText(str(df['매도금지라운드호가'][0]))
-        ui.ss_sell_checkBox_22.setChecked(True) if df['매도금지시간'][0] else ui.ss_sell_checkBox_22.setChecked(False)
-        ui.ss_sell_lineEdit_07.setText(str(df['매도금지시작시간'][0]))
-        ui.ss_sell_lineEdit_08.setText(str(df['매도금지종료시간'][0]))
-        ui.ss_sell_checkBox_23.setChecked(True) if df['매도금지간격'][0] else ui.ss_sell_checkBox_23.setChecked(False)
-        ui.ss_sell_lineEdit_09.setText(str(df['매도금지간격초'][0]))
-        ui.ss_sell_lineEdit_10.setText(str(df['매도정정횟수'][0]))
-        ui.ss_sell_comboBox_04.setCurrentText(str(df['매도정정호가차이'][0]))
-        ui.ss_sell_comboBox_05.setCurrentText(str(df['매도정정호가'][0]))
-        ui.ss_sell_checkBox_24.setChecked(True) if df['매도익절수익률청산'][0] else ui.ss_sell_checkBox_26.setChecked(False)
-        ui.ss_sell_lineEdit_11.setText(str(df['매도익절수익률'][0]))
-        ui.ss_sell_checkBox_25.setChecked(True) if df['매도익절수익금청산'][0] else ui.ss_sell_checkBox_27.setChecked(False)
-        ui.ss_sell_lineEdit_12.setText(str(df['매도익절수익금'][0]))
-        ui.ss_sell_checkBox_26.setChecked(True) if df['매도손절수익률청산'][0] else ui.ss_sell_checkBox_26.setChecked(False)
-        ui.ss_sell_lineEdit_13.setText(str(df['매도손절수익률'][0]))
-        ui.ss_sell_checkBox_27.setChecked(True) if df['매도손절수익금청산'][0] else ui.ss_sell_checkBox_27.setChecked(False)
-        ui.ss_sell_lineEdit_14.setText(str(df['매도손절수익금'][0]))
-    else:
-        QMessageBox.critical(ui, '오류 알림', '주문관리 주식매도 설정값이\n존재하지 않습니다.\n')
+    ui.ss_sell_checkBox_01.setChecked(True) if df['매도주문구분'][0] == '시장가' else ui.ss_sell_checkBox_01.setChecked(False)
+    ui.ss_sell_checkBox_02.setChecked(True) if df['매도주문구분'][0] == '지정가' else ui.ss_sell_checkBox_02.setChecked(False)
+    ui.ss_sell_checkBox_03.setChecked(True) if df['매도주문구분'][0] == '최유리지정가' else ui.ss_sell_checkBox_03.setChecked(False)
+    ui.ss_sell_checkBox_04.setChecked(True) if df['매도주문구분'][0] == '최우선지정가' else ui.ss_sell_checkBox_04.setChecked(False)
+    ui.ss_sell_checkBox_05.setChecked(True) if df['매도주문구분'][0] == '지정가IOC' else ui.ss_sell_checkBox_05.setChecked(False)
+    ui.ss_sell_checkBox_06.setChecked(True) if df['매도주문구분'][0] == '시장가IOC' else ui.ss_sell_checkBox_06.setChecked(False)
+    ui.ss_sell_checkBox_07.setChecked(True) if df['매도주문구분'][0] == '최유리IOC' else ui.ss_sell_checkBox_07.setChecked(False)
+    ui.ss_sell_checkBox_08.setChecked(True) if df['매도주문구분'][0] == '지정가FOK' else ui.ss_sell_checkBox_08.setChecked(False)
+    ui.ss_sell_checkBox_09.setChecked(True) if df['매도주문구분'][0] == '시장가FOK' else ui.ss_sell_checkBox_09.setChecked(False)
+    ui.ss_sell_checkBox_10.setChecked(True) if df['매도주문구분'][0] == '최유리FOK' else ui.ss_sell_checkBox_10.setChecked(False)
+    ui.ss_sell_lineEdit_01.setText(str(df['매도분할횟수'][0]))
+    ui.ss_sell_checkBox_11.setChecked(True) if df['매도분할방법'][0] == 1 else ui.ss_sell_checkBox_11.setChecked(False)
+    ui.ss_sell_checkBox_12.setChecked(True) if df['매도분할방법'][0] == 2 else ui.ss_sell_checkBox_12.setChecked(False)
+    ui.ss_sell_checkBox_13.setChecked(True) if df['매도분할방법'][0] == 3 else ui.ss_sell_checkBox_13.setChecked(False)
+    ui.ss_sell_checkBox_14.setChecked(True) if df['매도분할시그널'][0] else ui.ss_sell_checkBox_14.setChecked(False)
+    ui.ss_sell_checkBox_15.setChecked(True) if df['매도분할하방'][0] else ui.ss_sell_checkBox_15.setChecked(False)
+    ui.ss_sell_checkBox_16.setChecked(True) if df['매도분할상방'][0] else ui.ss_sell_checkBox_16.setChecked(False)
+    ui.ss_sell_lineEdit_02.setText(str(df['매도분할하방수익률'][0]))
+    ui.ss_sell_lineEdit_03.setText(str(df['매도분할상방수익률'][0]))
+    ui.ss_sell_comboBox_01.setCurrentText(str(df['매도지정가기준가격'][0]))
+    ui.ss_sell_comboBox_02.setCurrentText(str(df['매도지정가호가번호'][0]))
+    ui.ss_sell_comboBox_03.setCurrentText(str(df['매도시장가잔량범위'][0]))
+    ui.ss_sell_checkBox_17.setChecked(True) if df['매도취소관심진입'][0] else ui.ss_sell_checkBox_17.setChecked(False)
+    ui.ss_sell_checkBox_18.setChecked(True) if df['매도취소매수시그널'][0] else ui.ss_sell_checkBox_18.setChecked(False)
+    ui.ss_sell_checkBox_19.setChecked(True) if df['매도취소시간'][0] else ui.ss_sell_checkBox_19.setChecked(False)
+    ui.ss_sell_lineEdit_04.setText(str(df['매도취소시간초'][0]))
+    ui.ss_sell_checkBox_20.setChecked(True) if df['매도금지매수횟수'][0] else ui.ss_sell_checkBox_20.setChecked(False)
+    ui.ss_sell_lineEdit_05.setText(str(df['매도금지매수횟수값'][0]))
+    ui.ss_sell_checkBox_21.setChecked(True) if df['매도금지라운드피겨'][0] else ui.ss_sell_checkBox_21.setChecked(False)
+    ui.ss_sell_lineEdit_06.setText(str(df['매도금지라운드호가'][0]))
+    ui.ss_sell_checkBox_22.setChecked(True) if df['매도금지시간'][0] else ui.ss_sell_checkBox_22.setChecked(False)
+    ui.ss_sell_lineEdit_07.setText(str(df['매도금지시작시간'][0]))
+    ui.ss_sell_lineEdit_08.setText(str(df['매도금지종료시간'][0]))
+    ui.ss_sell_checkBox_23.setChecked(True) if df['매도금지간격'][0] else ui.ss_sell_checkBox_23.setChecked(False)
+    ui.ss_sell_lineEdit_09.setText(str(df['매도금지간격초'][0]))
+    ui.ss_sell_lineEdit_10.setText(str(df['매도정정횟수'][0]))
+    ui.ss_sell_comboBox_04.setCurrentText(str(df['매도정정호가차이'][0]))
+    ui.ss_sell_comboBox_05.setCurrentText(str(df['매도정정호가'][0]))
+    ui.ss_sell_checkBox_24.setChecked(True) if df['매도익절수익률청산'][0] else ui.ss_sell_checkBox_26.setChecked(False)
+    ui.ss_sell_lineEdit_11.setText(str(df['매도익절수익률'][0]))
+    ui.ss_sell_checkBox_25.setChecked(True) if df['매도익절수익금청산'][0] else ui.ss_sell_checkBox_27.setChecked(False)
+    ui.ss_sell_lineEdit_12.setText(str(df['매도익절수익금'][0]))
+    ui.ss_sell_checkBox_26.setChecked(True) if df['매도손절수익률청산'][0] else ui.ss_sell_checkBox_26.setChecked(False)
+    ui.ss_sell_lineEdit_13.setText(str(df['매도손절수익률'][0]))
+    ui.ss_sell_checkBox_27.setChecked(True) if df['매도손절수익금청산'][0] else ui.ss_sell_checkBox_27.setChecked(False)
+    ui.ss_sell_lineEdit_14.setText(str(df['매도손절수익금'][0]))
 
 
 @error_decorator
 def setting_order_save_01(ui):
-    주식매수주문구분 = ''
-    if ui.ss_buyy_checkBox_01.isChecked(): 주식매수주문구분 = '시장가'
-    if ui.ss_buyy_checkBox_02.isChecked(): 주식매수주문구분 = '지정가'
-    if ui.ss_buyy_checkBox_03.isChecked(): 주식매수주문구분 = '최유리지정가'
-    if ui.ss_buyy_checkBox_04.isChecked(): 주식매수주문구분 = '최우선지정가'
-    if ui.ss_buyy_checkBox_05.isChecked(): 주식매수주문구분 = '지정가IOC'
-    if ui.ss_buyy_checkBox_06.isChecked(): 주식매수주문구분 = '시장가IOC'
-    if ui.ss_buyy_checkBox_07.isChecked(): 주식매수주문구분 = '최유리IOC'
-    if ui.ss_buyy_checkBox_08.isChecked(): 주식매수주문구분 = '지정가FOK'
-    if ui.ss_buyy_checkBox_09.isChecked(): 주식매수주문구분 = '시장가FOK'
-    if ui.ss_buyy_checkBox_10.isChecked(): 주식매수주문구분 = '최유리FOK'
-    주식매수분할횟수 = ui.ss_buyy_lineEdit_01.text()
-    주식매수분할방법 = 0
-    if ui.ss_buyy_checkBox_11.isChecked(): 주식매수분할방법 = 1
-    if ui.ss_buyy_checkBox_12.isChecked(): 주식매수분할방법 = 2
-    if ui.ss_buyy_checkBox_13.isChecked(): 주식매수분할방법 = 3
-    주식매수분할시그널 = 1 if ui.ss_buyy_checkBox_14.isChecked() else 0
-    주식매수분할하방 = 1 if ui.ss_buyy_checkBox_15.isChecked() else 0
-    주식매수분할상방 = 1 if ui.ss_buyy_checkBox_16.isChecked() else 0
-    주식매수분할하방수익률 = ui.ss_buyy_lineEdit_02.text()
-    주식매수분할상방수익률 = ui.ss_buyy_lineEdit_03.text()
-    주식매수지정가기준가격 = ui.ss_buyy_comboBox_01.currentText()
-    주식매수지정가호가번호 = ui.ss_buyy_comboBox_02.currentText()
-    주식매수시장가잔량범위 = ui.ss_buyy_comboBox_03.currentText()
-    주식매수분할고정수익률 = 1 if ui.ss_buyy_checkBox_17.isChecked() else 0
-    주식매수취소관심이탈 = 1 if ui.ss_buyy_checkBox_18.isChecked() else 0
-    주식매수취소매도시그널 = 1 if ui.ss_buyy_checkBox_19.isChecked() else 0
-    주식매수취소시간 = 1 if ui.ss_buyy_checkBox_20.isChecked() else 0
-    주식매수취소시간초 = ui.ss_buyy_lineEdit_04.text()
-    주식매수금지블랙리스트 = 1 if ui.ss_buyy_checkBox_21.isChecked() else 0
-    주식매수금지라운드피겨 = 1 if ui.ss_buyy_checkBox_22.isChecked() else 0
-    주식매수금지라운드호가 = ui.ss_buyy_lineEdit_05.text()
-    주식매수금지손절횟수 = 1 if ui.ss_buyy_checkBox_23.isChecked() else 0
-    주식매수금지손절횟수값 = ui.ss_buyy_lineEdit_06.text()
-    주식매수금지거래횟수 = 1 if ui.ss_buyy_checkBox_24.isChecked() else 0
-    주식매수금지거래횟수값 = ui.ss_buyy_lineEdit_07.text()
-    주식매수금지시간 = 1 if ui.ss_buyy_checkBox_25.isChecked() else 0
-    주식매수금지시작시간 = ui.ss_buyy_lineEdit_08.text()
-    주식매수금지종료시간 = ui.ss_buyy_lineEdit_09.text()
-    주식매수금지간격 = 1 if ui.ss_buyy_checkBox_26.isChecked() else 0
-    주식매수금지간격초 = ui.ss_buyy_lineEdit_10.text()
-    주식매수금지손절간격 = 1 if ui.ss_buyy_checkBox_27.isChecked() else 0
-    주식매수금지손절간격초 = ui.ss_buyy_lineEdit_11.text()
-    주식매수정정횟수 = ui.ss_buyy_lineEdit_12.text()
-    주식매수정정호가차이 = ui.ss_buyy_comboBox_04.currentText()
-    주식매수정정호가 = ui.ss_buyy_comboBox_05.currentText()
+    매수주문구분 = ''
+    if ui.ss_buyy_checkBox_01.isChecked(): 매수주문구분 = '시장가'
+    if ui.ss_buyy_checkBox_02.isChecked(): 매수주문구분 = '지정가'
+    if ui.ss_buyy_checkBox_03.isChecked(): 매수주문구분 = '최유리지정가'
+    if ui.ss_buyy_checkBox_04.isChecked(): 매수주문구분 = '최우선지정가'
+    if ui.ss_buyy_checkBox_05.isChecked(): 매수주문구분 = '지정가IOC'
+    if ui.ss_buyy_checkBox_06.isChecked(): 매수주문구분 = '시장가IOC'
+    if ui.ss_buyy_checkBox_07.isChecked(): 매수주문구분 = '최유리IOC'
+    if ui.ss_buyy_checkBox_08.isChecked(): 매수주문구분 = '지정가FOK'
+    if ui.ss_buyy_checkBox_09.isChecked(): 매수주문구분 = '시장가FOK'
+    if ui.ss_buyy_checkBox_10.isChecked(): 매수주문구분 = '최유리FOK'
+    매수분할횟수 = ui.ss_buyy_lineEdit_01.text()
+
+    매수분할방법 = 0
+    if ui.ss_buyy_checkBox_11.isChecked(): 매수분할방법 = 1
+    if ui.ss_buyy_checkBox_12.isChecked(): 매수분할방법 = 2
+    if ui.ss_buyy_checkBox_13.isChecked(): 매수분할방법 = 3
+
+    매수분할시그널 = 1 if ui.ss_buyy_checkBox_14.isChecked() else 0
+    매수분할하방 = 1 if ui.ss_buyy_checkBox_15.isChecked() else 0
+    매수분할상방 = 1 if ui.ss_buyy_checkBox_16.isChecked() else 0
+    매수분할하방수익률 = ui.ss_buyy_lineEdit_02.text()
+    매수분할상방수익률 = ui.ss_buyy_lineEdit_03.text()
+    매수지정가기준가격 = ui.ss_buyy_comboBox_01.currentText()
+    매수지정가호가번호 = ui.ss_buyy_comboBox_02.currentText()
+    매수시장가잔량범위 = ui.ss_buyy_comboBox_03.currentText()
+    매수분할고정수익률 = 1 if ui.ss_buyy_checkBox_17.isChecked() else 0
+    매수취소관심이탈 = 1 if ui.ss_buyy_checkBox_18.isChecked() else 0
+    매수취소매도시그널 = 1 if ui.ss_buyy_checkBox_19.isChecked() else 0
+    매수취소시간 = 1 if ui.ss_buyy_checkBox_20.isChecked() else 0
+    매수취소시간초 = ui.ss_buyy_lineEdit_04.text()
+    매수금지블랙리스트 = 1 if ui.ss_buyy_checkBox_21.isChecked() else 0
+    매수금지라운드피겨 = 1 if ui.ss_buyy_checkBox_22.isChecked() else 0
+    매수금지라운드호가 = ui.ss_buyy_lineEdit_05.text()
+    매수금지손절횟수 = 1 if ui.ss_buyy_checkBox_23.isChecked() else 0
+    매수금지손절횟수값 = ui.ss_buyy_lineEdit_06.text()
+    매수금지거래횟수 = 1 if ui.ss_buyy_checkBox_24.isChecked() else 0
+    매수금지거래횟수값 = ui.ss_buyy_lineEdit_07.text()
+    매수금지시간 = 1 if ui.ss_buyy_checkBox_25.isChecked() else 0
+    매수금지시작시간 = ui.ss_buyy_lineEdit_08.text()
+    매수금지종료시간 = ui.ss_buyy_lineEdit_09.text()
+    매수금지간격 = 1 if ui.ss_buyy_checkBox_26.isChecked() else 0
+    매수금지간격초 = ui.ss_buyy_lineEdit_10.text()
+    매수금지손절간격 = 1 if ui.ss_buyy_checkBox_27.isChecked() else 0
+    매수금지손절간격초 = ui.ss_buyy_lineEdit_11.text()
+    매수정정횟수 = ui.ss_buyy_lineEdit_12.text()
+    매수정정호가차이 = ui.ss_buyy_comboBox_04.currentText()
+    매수정정호가 = ui.ss_buyy_comboBox_05.currentText()
 
     bjjj_list = []
     if ui.ss_bj_checkBoxxx_01.isChecked():   bjjj_list.append('0')
@@ -610,43 +600,43 @@ def setting_order_save_01(ui):
     bjjj_list.append(ui.ss_bj_lineEdittt_07.text())
     bjjj_list.append(ui.ss_bj_lineEdittt_08.text())
     bjjj_list.append(ui.ss_bj_lineEdittt_09.text())
-    주식비중조절 = ';'.join(bjjj_list)
-    주식비중조절_ = [float(x) for x in bjjj_list]
+    비중조절 = ';'.join(bjjj_list)
+    비중조절_ = [float(x) for x in bjjj_list]
 
-    if '' in (주식매수주문구분, 주식매수분할횟수, 주식매수분할하방수익률, 주식매수분할상방수익률, 주식매수지정가호가번호, 주식매수시장가잔량범위,
-              주식매수취소시간초, 주식매수금지라운드호가, 주식매수금지손절횟수값, 주식매수금지거래횟수값, 주식매수금지시작시간, 주식매수금지종료시간,
-              주식매수금지간격초, 주식매수정정횟수):
+    if '' in (매수주문구분, 매수분할횟수, 매수분할하방수익률, 매수분할상방수익률, 매수지정가호가번호, 매수시장가잔량범위,
+              매수취소시간초, 매수금지라운드호가, 매수금지손절횟수값, 매수금지거래횟수값, 매수금지시작시간, 매수금지종료시간,
+              매수금지간격초, 매수정정횟수):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
         return
 
-    if 주식매수분할방법 == 0:
+    if 매수분할방법 == 0:
         QMessageBox.critical(ui, '오류 알림', '분할매수방법이 선택되지 않았습니다.\n')
         return
 
-    if 1 not in (주식매수분할시그널, 주식매수분할하방, 주식매수분할상방):
+    if 1 not in (매수분할시그널, 매수분할하방, 매수분할상방):
         QMessageBox.critical(ui, '오류 알림', '추가매수방법이 선택되지 않았습니다.\n')
         return
 
-    주식매수분할횟수, 주식매수분할하방수익률, 주식매수분할상방수익률, 주식매수지정가호가번호, 주식매수시장가잔량범위, 주식매수취소시간초, \
-        주식매수금지라운드호가, 주식매수금지손절횟수값, 주식매수금지거래횟수값, 주식매수금지시작시간, 주식매수금지종료시간, 주식매수금지간격초, \
-        주식매수금지손절간격초, 주식매수정정횟수, 주식매수정정호가차이, 주식매수정정호가 = \
-        int(주식매수분할횟수), float(주식매수분할하방수익률), float(주식매수분할상방수익률), int(주식매수지정가호가번호), \
-        int(주식매수시장가잔량범위), int(주식매수취소시간초), int(주식매수금지라운드호가), int(주식매수금지손절횟수값), \
-        int(주식매수금지거래횟수값), int(주식매수금지시작시간), int(주식매수금지종료시간), int(주식매수금지간격초), int(주식매수금지손절간격초), \
-        int(주식매수정정횟수), int(주식매수정정호가차이), int(주식매수정정호가)
+    매수분할횟수, 매수분할하방수익률, 매수분할상방수익률, 매수지정가호가번호, 매수시장가잔량범위, 매수취소시간초, \
+        매수금지라운드호가, 매수금지손절횟수값, 매수금지거래횟수값, 매수금지시작시간, 매수금지종료시간, 매수금지간격초, \
+        매수금지손절간격초, 매수정정횟수, 매수정정호가차이, 매수정정호가 = \
+        int(매수분할횟수), float(매수분할하방수익률), float(매수분할상방수익률), int(매수지정가호가번호), \
+        int(매수시장가잔량범위), int(매수취소시간초), int(매수금지라운드호가), int(매수금지손절횟수값), \
+        int(매수금지거래횟수값), int(매수금지시작시간), int(매수금지종료시간), int(매수금지간격초), int(매수금지손절간격초), \
+        int(매수정정횟수), int(매수정정호가차이), int(매수정정호가)
 
-    if 주식매수분할횟수 < 0 or 주식매수분할하방수익률 < 0 or 주식매수분할상방수익률 < 0 or 주식매수시장가잔량범위 < 0 or 주식매수취소시간초 < 0 or \
-            주식매수금지라운드호가 < 0 or 주식매수금지손절횟수값 < 0 or 주식매수금지거래횟수값 < 0 or 주식매수금지시작시간 < 0 or \
-            주식매수금지종료시간 < 0 or 주식매수금지간격초 < 0 or 주식매수금지손절간격초 < 0 or 주식매수정정횟수 < 0 or \
-            주식매수정정호가차이 < 0 or 주식매수정정호가 < 0:
+    if 매수분할횟수 < 0 or 매수분할하방수익률 < 0 or 매수분할상방수익률 < 0 or 매수시장가잔량범위 < 0 or 매수취소시간초 < 0 or \
+            매수금지라운드호가 < 0 or 매수금지손절횟수값 < 0 or 매수금지거래횟수값 < 0 or 매수금지시작시간 < 0 or \
+            매수금지종료시간 < 0 or 매수금지간격초 < 0 or 매수금지손절간격초 < 0 or 매수정정횟수 < 0 or \
+            매수정정호가차이 < 0 or 매수정정호가 < 0:
         QMessageBox.critical(ui, '오류 알림', '지정가 호가 외 모든 입력값은 양수여야합니다.\n')
         return
 
-    if 주식매수분할횟수 > 10:
+    if 매수분할횟수 > 10:
         QMessageBox.critical(ui, '오류 알림', '매수분할횟수는 10을 초과할 수 없습니다.\n')
         return
 
-    if '해외선물' in ui.dict_set['거래소'] and 주식매수주문구분 not in ('시장가', '지정가'):
+    if '해외선물' in ui.dict_set['거래소'] and 매수주문구분 not in ('시장가', '지정가'):
         QMessageBox.critical(ui, '오류 알림', '해외선물의 주문유형은 시장가 또는 지정가만 지원합니다.\n')
         return
 
@@ -659,7 +649,7 @@ def setting_order_save_01(ui):
                    '매수금지간격', '매수금지간격초', '매수금지손절간격', '매수금지손절간격초', '매수정정횟수',
                    '매수정정호가차이', '매수정정호가', '비중조절']
         set_txt = ', '.join([f'{col} = ?' for col in columns])
-        query   = f'UPDATE stockbuyorder SET {set_txt}'
+        query   = f'UPDATE buyorder SET {set_txt}'
         localvs = locals()
         values  = tuple(localvs[col] for col in columns)
         ui.queryQ.put(('설정디비', query, values))
@@ -667,7 +657,7 @@ def setting_order_save_01(ui):
         for column, value in zip(columns, values):
             ui.dict_set[column] = value
 
-        ui.dict_set['비중조절'] = 주식비중조절_
+        ui.dict_set['비중조절'] = 비중조절_
 
         update_dictset(ui)
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
@@ -675,94 +665,96 @@ def setting_order_save_01(ui):
 
 @error_decorator
 def setting_order_save_02(ui):
-    주식매도주문구분 = ''
-    if ui.ss_sell_checkBox_01.isChecked(): 주식매도주문구분 = '시장가'
-    if ui.ss_sell_checkBox_02.isChecked(): 주식매도주문구분 = '지정가'
-    if ui.ss_sell_checkBox_03.isChecked(): 주식매도주문구분 = '최유리지정가'
-    if ui.ss_sell_checkBox_04.isChecked(): 주식매도주문구분 = '최우선지정가'
-    if ui.ss_sell_checkBox_05.isChecked(): 주식매도주문구분 = '지정가IOC'
-    if ui.ss_sell_checkBox_06.isChecked(): 주식매도주문구분 = '시장가IOC'
-    if ui.ss_sell_checkBox_07.isChecked(): 주식매도주문구분 = '최유리IOC'
-    if ui.ss_sell_checkBox_08.isChecked(): 주식매도주문구분 = '지정가FOK'
-    if ui.ss_sell_checkBox_09.isChecked(): 주식매도주문구분 = '시장가FOK'
-    if ui.ss_sell_checkBox_10.isChecked(): 주식매도주문구분 = '최유리FOK'
-    주식매도분할횟수 = ui.ss_sell_lineEdit_01.text()
-    주식매도분할방법 = 0
-    if ui.ss_sell_checkBox_11.isChecked(): 주식매도분할방법 = 1
-    if ui.ss_sell_checkBox_12.isChecked(): 주식매도분할방법 = 2
-    if ui.ss_sell_checkBox_13.isChecked(): 주식매도분할방법 = 3
-    주식매도분할시그널 = 1 if ui.ss_sell_checkBox_14.isChecked() else 0
-    주식매도분할하방 = 1 if ui.ss_sell_checkBox_15.isChecked() else 0
-    주식매도분할상방 = 1 if ui.ss_sell_checkBox_16.isChecked() else 0
-    주식매도분할하방수익률 = ui.ss_sell_lineEdit_02.text()
-    주식매도분할상방수익률 = ui.ss_sell_lineEdit_03.text()
-    주식매도지정가기준가격 = ui.ss_sell_comboBox_01.currentText()
-    주식매도지정가호가번호 = ui.ss_sell_comboBox_02.currentText()
-    주식매도시장가잔량범위 = ui.ss_sell_comboBox_03.currentText()
-    주식매도취소관심진입 = 1 if ui.ss_sell_checkBox_17.isChecked() else 0
-    주식매도취소매수시그널 = 1 if ui.ss_sell_checkBox_18.isChecked() else 0
-    주식매도취소시간 = 1 if ui.ss_sell_checkBox_19.isChecked() else 0
-    주식매도취소시간초 = ui.ss_sell_lineEdit_04.text()
-    주식매도금지매수횟수 = 1 if ui.ss_sell_checkBox_20.isChecked() else 0
-    주식매도금지매수횟수값 = ui.ss_sell_lineEdit_05.text()
-    주식매도금지라운드피겨 = 1 if ui.ss_sell_checkBox_21.isChecked() else 0
-    주식매도금지라운드호가 = ui.ss_sell_lineEdit_06.text()
-    주식매도금지시간 = 1 if ui.ss_sell_checkBox_22.isChecked() else 0
-    주식매도금지시작시간 = ui.ss_sell_lineEdit_07.text()
-    주식매도금지종료시간 = ui.ss_sell_lineEdit_08.text()
-    주식매도금지간격 = 1 if ui.ss_sell_checkBox_23.isChecked() else 0
-    주식매도금지간격초 = ui.ss_sell_lineEdit_09.text()
-    주식매도정정횟수 = ui.ss_sell_lineEdit_10.text()
-    주식매도정정호가차이 = ui.ss_sell_comboBox_04.currentText()
-    주식매도정정호가 = ui.ss_sell_comboBox_05.currentText()
-    주식매도익절수익률청산 = 1 if ui.ss_sell_checkBox_24.isChecked() else 0
-    주식매도익절수익률 = ui.ss_sell_lineEdit_11.text()
-    주식매도익절수익금청산  = 1 if ui.ss_sell_checkBox_25.isChecked() else 0
-    주식매도익절수익금 = ui.ss_sell_lineEdit_12.text()
-    주식매도손절수익률청산 = 1 if ui.ss_sell_checkBox_26.isChecked() else 0
-    주식매도손절수익률 = ui.ss_sell_lineEdit_13.text()
-    주식매도손절수익금청산  = 1 if ui.ss_sell_checkBox_27.isChecked() else 0
-    주식매도손절수익금 = ui.ss_sell_lineEdit_14.text()
+    매도주문구분 = ''
+    if ui.ss_sell_checkBox_01.isChecked(): 매도주문구분 = '시장가'
+    if ui.ss_sell_checkBox_02.isChecked(): 매도주문구분 = '지정가'
+    if ui.ss_sell_checkBox_03.isChecked(): 매도주문구분 = '최유리지정가'
+    if ui.ss_sell_checkBox_04.isChecked(): 매도주문구분 = '최우선지정가'
+    if ui.ss_sell_checkBox_05.isChecked(): 매도주문구분 = '지정가IOC'
+    if ui.ss_sell_checkBox_06.isChecked(): 매도주문구분 = '시장가IOC'
+    if ui.ss_sell_checkBox_07.isChecked(): 매도주문구분 = '최유리IOC'
+    if ui.ss_sell_checkBox_08.isChecked(): 매도주문구분 = '지정가FOK'
+    if ui.ss_sell_checkBox_09.isChecked(): 매도주문구분 = '시장가FOK'
+    if ui.ss_sell_checkBox_10.isChecked(): 매도주문구분 = '최유리FOK'
+    매도분할횟수 = ui.ss_sell_lineEdit_01.text()
 
-    if '' in (주식매도주문구분, 주식매도분할횟수, 주식매도분할하방수익률, 주식매도분할상방수익률, 주식매도취소시간초, 주식매도금지매수횟수값,
-              주식매도금지라운드호가, 주식매도금지시작시간, 주식매도금지종료시간, 주식매도금지간격초, 주식매도정정횟수, 주식매도익절수익률,
-              주식매도익절수익금, 주식매도손절수익률, 주식매도손절수익금):
+    매도분할방법 = 0
+    if ui.ss_sell_checkBox_11.isChecked(): 매도분할방법 = 1
+    if ui.ss_sell_checkBox_12.isChecked(): 매도분할방법 = 2
+    if ui.ss_sell_checkBox_13.isChecked(): 매도분할방법 = 3
+
+    매도분할시그널 = 1 if ui.ss_sell_checkBox_14.isChecked() else 0
+    매도분할하방 = 1 if ui.ss_sell_checkBox_15.isChecked() else 0
+    매도분할상방 = 1 if ui.ss_sell_checkBox_16.isChecked() else 0
+    매도분할하방수익률 = ui.ss_sell_lineEdit_02.text()
+    매도분할상방수익률 = ui.ss_sell_lineEdit_03.text()
+    매도지정가기준가격 = ui.ss_sell_comboBox_01.currentText()
+    매도지정가호가번호 = ui.ss_sell_comboBox_02.currentText()
+    매도시장가잔량범위 = ui.ss_sell_comboBox_03.currentText()
+    매도취소관심진입 = 1 if ui.ss_sell_checkBox_17.isChecked() else 0
+    매도취소매수시그널 = 1 if ui.ss_sell_checkBox_18.isChecked() else 0
+    매도취소시간 = 1 if ui.ss_sell_checkBox_19.isChecked() else 0
+    매도취소시간초 = ui.ss_sell_lineEdit_04.text()
+    매도금지매수횟수 = 1 if ui.ss_sell_checkBox_20.isChecked() else 0
+    매도금지매수횟수값 = ui.ss_sell_lineEdit_05.text()
+    매도금지라운드피겨 = 1 if ui.ss_sell_checkBox_21.isChecked() else 0
+    매도금지라운드호가 = ui.ss_sell_lineEdit_06.text()
+    매도금지시간 = 1 if ui.ss_sell_checkBox_22.isChecked() else 0
+    매도금지시작시간 = ui.ss_sell_lineEdit_07.text()
+    매도금지종료시간 = ui.ss_sell_lineEdit_08.text()
+    매도금지간격 = 1 if ui.ss_sell_checkBox_23.isChecked() else 0
+    매도금지간격초 = ui.ss_sell_lineEdit_09.text()
+    매도정정횟수 = ui.ss_sell_lineEdit_10.text()
+    매도정정호가차이 = ui.ss_sell_comboBox_04.currentText()
+    매도정정호가 = ui.ss_sell_comboBox_05.currentText()
+    매도익절수익률청산 = 1 if ui.ss_sell_checkBox_24.isChecked() else 0
+    매도익절수익률 = ui.ss_sell_lineEdit_11.text()
+    매도익절수익금청산  = 1 if ui.ss_sell_checkBox_25.isChecked() else 0
+    매도익절수익금 = ui.ss_sell_lineEdit_12.text()
+    매도손절수익률청산 = 1 if ui.ss_sell_checkBox_26.isChecked() else 0
+    매도손절수익률 = ui.ss_sell_lineEdit_13.text()
+    매도손절수익금청산  = 1 if ui.ss_sell_checkBox_27.isChecked() else 0
+    매도손절수익금 = ui.ss_sell_lineEdit_14.text()
+
+    if '' in (매도주문구분, 매도분할횟수, 매도분할하방수익률, 매도분할상방수익률, 매도취소시간초, 매도금지매수횟수값,
+              매도금지라운드호가, 매도금지시작시간, 매도금지종료시간, 매도금지간격초, 매도정정횟수, 매도익절수익률,
+              매도익절수익금, 매도손절수익률, 매도손절수익금):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
         return
 
-    if 주식매도분할방법 == 0:
+    if 매도분할방법 == 0:
         QMessageBox.critical(ui, '오류 알림', '분할매도방법이 선택되지 않았습니다.\n')
         return
 
-    if 1 not in (주식매도분할시그널, 주식매도분할하방, 주식매도분할상방):
+    if 1 not in (매도분할시그널, 매도분할하방, 매도분할상방):
         QMessageBox.critical(ui, '오류 알림', '추가매도방법이 선택되지 않았습니다.\n')
         return
 
-    주식매도분할횟수, 주식매도분할하방수익률, 주식매도분할상방수익률, 주식매도지정가호가번호, 주식매도시장가잔량범위, 주식매도취소시간초, \
-        주식매도금지매수횟수값, 주식매도금지라운드호가, 주식매도금지시작시간, 주식매도금지종료시간, 주식매도금지간격초, 주식매도정정횟수, \
-        주식매도정정호가차이, 주식매도정정호가, 주식매도익절수익률, 주식매도익절수익금, 주식매도손절수익률, 주식매도손절수익금 = \
-        int(주식매도분할횟수), float(주식매도분할하방수익률), float(주식매도분할상방수익률), int(주식매도지정가호가번호), \
-        int(주식매도시장가잔량범위), int(주식매도취소시간초), int(주식매도금지매수횟수값), int(주식매도금지라운드호가), \
-        int(주식매도금지시작시간), int(주식매도금지종료시간), int(주식매도금지간격초), int(주식매도정정횟수), \
-        int(주식매도정정호가차이), int(주식매도정정호가), float(주식매도익절수익률), int(주식매도익절수익금), \
-        float(주식매도손절수익률), int(주식매도손절수익금)
+    매도분할횟수, 매도분할하방수익률, 매도분할상방수익률, 매도지정가호가번호, 매도시장가잔량범위, 매도취소시간초, \
+        매도금지매수횟수값, 매도금지라운드호가, 매도금지시작시간, 매도금지종료시간, 매도금지간격초, 매도정정횟수, \
+        매도정정호가차이, 매도정정호가, 매도익절수익률, 매도익절수익금, 매도손절수익률, 매도손절수익금 = \
+        int(매도분할횟수), float(매도분할하방수익률), float(매도분할상방수익률), int(매도지정가호가번호), \
+        int(매도시장가잔량범위), int(매도취소시간초), int(매도금지매수횟수값), int(매도금지라운드호가), \
+        int(매도금지시작시간), int(매도금지종료시간), int(매도금지간격초), int(매도정정횟수), \
+        int(매도정정호가차이), int(매도정정호가), float(매도익절수익률), int(매도익절수익금), \
+        float(매도손절수익률), int(매도손절수익금)
 
-    if 주식매도분할횟수 < 0 or 주식매도분할하방수익률 < 0 or 주식매도분할상방수익률 < 0 or 주식매도취소시간초 < 0 or \
-            주식매도금지매수횟수값 < 0 or 주식매도금지라운드호가 < 0 or 주식매도금지시작시간 < 0 or 주식매도금지종료시간 < 0 or \
-            주식매도금지간격초 < 0 or 주식매도정정횟수 < 0 or 주식매도정정호가차이 < 0 or 주식매도정정호가 < 0 or \
-            주식매도익절수익률 < 0 or 주식매도익절수익금 < 0 or 주식매도손절수익률 < 0 or 주식매도손절수익금 < 0:
+    if 매도분할횟수 < 0 or 매도분할하방수익률 < 0 or 매도분할상방수익률 < 0 or 매도취소시간초 < 0 or \
+            매도금지매수횟수값 < 0 or 매도금지라운드호가 < 0 or 매도금지시작시간 < 0 or 매도금지종료시간 < 0 or \
+            매도금지간격초 < 0 or 매도정정횟수 < 0 or 매도정정호가차이 < 0 or 매도정정호가 < 0 or \
+            매도익절수익률 < 0 or 매도익절수익금 < 0 or 매도손절수익률 < 0 or 매도손절수익금 < 0:
         QMessageBox.critical(ui, '오류 알림', '모든 값은 양수로 입력하십시오.\n')
         return
 
-    if 주식매도분할횟수 > 10:
+    if 매도분할횟수 > 10:
         QMessageBox.critical(ui, '오류 알림', '매도분할횟수는 10을 초과할 수 없습니다.\n')
         return
 
-    if 주식매도금지매수횟수값 > 9:
+    if 매도금지매수횟수값 > 9:
         QMessageBox.critical(ui, '오류 알림', '매도금지 매수횟수는 10미만으로 입력하십시오.\n')
         return
 
-    if '해외선물' in ui.dict_set['거래소'] and 주식매도주문구분 not in ('시장가', '지정가'):
+    if '해외선물' in ui.dict_set['거래소'] and 매도주문구분 not in ('시장가', '지정가'):
         QMessageBox.critical(ui, '오류 알림', '해외선물의 주문유형은 시장가 또는 지정가만 지원합니다.\n')
         return
 
@@ -775,7 +767,7 @@ def setting_order_save_02(ui):
                    '매도정정호가차이', '매도정정호가', '매도익절수익률청산', '매도익절수익률', '매도익절수익금청산',
                    '매도익절수익금', '매도손절수익률청산', '매도손절수익률', '매도손절수익금청산', '매도손절수익금']
         set_txt = ', '.join([f'{col} = ?' for col in columns])
-        query   = f'UPDATE stocksellorder SET {set_txt}'
+        query   = f'UPDATE sellorder SET {set_txt}'
         localvs = locals()
         values  = tuple(localvs[col] for col in columns)
         ui.queryQ.put(('설정디비', query, values))
@@ -788,7 +780,7 @@ def setting_order_save_02(ui):
 
 
 def setting_all_load(ui):
-    LoadSettings(ui)
+    load_setting_file(ui)
 
 
 @error_decorator
@@ -836,7 +828,7 @@ def setting_all_del(ui):
 
     remove_file = f'{DB_PATH}/setting_{name}.db'
     os.remove(remove_file)
-    LoadSettings(ui)
+    load_setting_file(ui)
     QMessageBox.information(ui, '삭제 완료', random.choice(famous_saying))
 
 
@@ -850,17 +842,17 @@ def setting_all_save(ui):
     origin_file = f'{DB_PATH}/setting.db'
     copy_file = f'{DB_PATH}/setting_{name}.db'
     shutil.copy(origin_file, copy_file)
-    LoadSettings(ui)
+    load_setting_file(ui)
     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
 @error_decorator
-def setting_elapsed_tick_number(ui):
+def setting_passticks(ui):
     ui.dialog_setsj.show() if not ui.dialog_setsj.isVisible() else ui.dialog_setsj.close()
 
 
 @error_decorator
-def LoadSettings(ui):
+def load_setting_file(ui):
     ui.sj_set_comBoxx_01.clear()
     file_list = os.listdir(DB_PATH)
     file_list = [x for x in file_list if 'setting_' in x]

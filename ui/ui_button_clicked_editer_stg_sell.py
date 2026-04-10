@@ -7,7 +7,7 @@ from ui.ui_strategy_version import strategy_version
 from PyQt5.QtWidgets import QMessageBox, QApplication
 from utility.strategy_version_manager import stg_save_version
 from utility.static import text_not_in_special_characters, error_decorator
-from ui.set_text import famous_saying, sell_signal, future_sell_signal, sell_text
+from ui.set_text import famous_saying, sell_signal, sell_signal_future, sell_text
 
 
 @error_decorator
@@ -19,8 +19,7 @@ def sell_stg_load(ui):
             return
         strategy_version(ui, 'basic', 'sell', strategy_name)
     elif ui.ss_textEditttt_02.isVisible():
-        market = ui.market_info['전략구분']
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {market}_sell').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sell').set_index('index')
         if len(df) > 0:
             ui.svjs_comboBoxx_01.clear()
             indexs = list(df.index)
@@ -47,21 +46,20 @@ def sell_stg_save(ui):
     else:
         if 'self.tickcols' in strategy or (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest1(strategy):
             if ui.proc_chqs.is_alive():
-                market = ui.market_info['전략구분']
-                delete_query  = f"DELETE FROM {market}_sell WHERE `index` = '{strategy_name}'"
-                insert_query  = f"INSERT INTO {market}_sell VALUES (?, ?)"
+                delete_query  = f"DELETE FROM {ui.market_sname}_sell WHERE `index` = '{strategy_name}'"
+                insert_query  = f"INSERT INTO {ui.market_sname}_sell VALUES (?, ?)"
                 insert_values = (strategy_name, strategy)
                 ui.queryQ.put(('전략디비', delete_query))
                 ui.queryQ.put(('전략디비', insert_query, insert_values))
                 ui.svjs_pushButon_04.setStyleSheet(style_bc_st)
-                stg_save_version(market, 'basic', 'sell', strategy_name, strategy)
+                stg_save_version(ui.market_sname, 'basic', 'sell', strategy_name, strategy)
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
 @error_decorator
 def sell_factor(ui):
     ui.ss_textEditttt_02.clear()
-    ui.ss_textEditttt_02.append(sell_text if ui.dict_set['주식타임프레임'] else sell_text)
+    ui.ss_textEditttt_02.append(sell_text if ui.dict_set['타임프레임'] else sell_text)
     ui.svjs_pushButon_04.setStyleSheet(style_bc_st)
 
 
@@ -83,7 +81,7 @@ def sell_stg_start(ui):
 
 @error_decorator
 def sell_signal_insert(ui):
-    signal = sell_signal if '키움증권' in ui.dict_set['거래소'] else future_sell_signal
+    signal = sell_signal if ui.market_gubun < 6 else sell_signal_future
     ui.ss_textEditttt_02.append(signal)
 
 

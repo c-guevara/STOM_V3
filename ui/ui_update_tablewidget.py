@@ -2,8 +2,8 @@
 import pandas as pd
 from PyQt5.QtCore import Qt
 from ui.ui_draw_label_text import get_label_text
-from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
 from ui.ui_process_alive import receiver_process_alive
+from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
 from utility.setting_base import ui_num, columns_hg, columns_hj
 from utility.static import change_format, comma2int, comma2float, dt_ymdhms, error_decorator
 from ui.set_style import color_fg_bt, color_fg_dk, color_fg_bc, color_bf_bt, color_bf_dk, color_ct_hg
@@ -156,7 +156,7 @@ class UpdateTablewidget:
             if data[2].__class__ == str:
                 gubun, df, ymshms = data
                 if self.ui.ctpg_xticks is not None:
-                    self.update_hogainfo_for_chart(gubun, ymshms)
+                    self.update_hogainfo_for_chart(ymshms)
             else:
                 gubun, df, usdtokrw = data
                 self.ui.dialog_kimp.setWindowTitle(f'STOM KIMP - 환율 {usdtokrw:,}원/달러')
@@ -323,7 +323,7 @@ class UpdateTablewidget:
                             item.setForeground(color)
                         else:
                             if '해외선물' not in self.ui.dict_set['거래소'] or gubun == ui_num['호가체결']:
-                                func = comma2int if gubun == ui_num['S호가체결'] else comma2float
+                                func = comma2int if gubun == ui_num['호가체결'] else comma2float
                                 c = func(self.ui.hg_tableWidgett_01.item(5, columns_hg.index('호가')).text())
                                 if value > 0:
                                     item.setForeground(color_fg_bt)
@@ -350,7 +350,7 @@ class UpdateTablewidget:
                     elif column == '호가':
                         if column == '호가' and value != 0:
                             if self.ui.hj_tableWidgett_01.item(0, 0) is not None:
-                                func = comma2int if gubun == ui_num['호가잔량'] and '키움증권' in self.ui.dict_set['거래소'] else comma2float
+                                func = comma2int if gubun == ui_num['호가잔량'] and self.ui.market_gubun < 4 else comma2float
                                 c    = func(self.ui.hj_tableWidgett_01.item(0, columns_hj.index('현재가')).text())
                                 if i not in (0, 11) and value == c:
                                     item.setBackground(color_bf_bt)
@@ -466,7 +466,7 @@ class UpdateTablewidget:
                     tableWidget.setColumnWidth(10, 90)
                     tableWidget.setColumnWidth(11, 90)
 
-    def update_hogainfo_for_chart(self, gubun, ymdhms):
+    def update_hogainfo_for_chart(self, ymdhms):
         def fi(fname):
             return self.ui.dict_findex[fname]
 
@@ -545,10 +545,9 @@ class UpdateTablewidget:
             data.append(self.ui.ctpg_arry[xpoint, fi(col_name)])
         df2 = pd.DataFrame({'체결수량': info, '체결강도': data})
 
-        gubun_ = 'C' if gubun == ui_num['C호가종목'] else 'S'
-        self.ui.windowQ.put((ui_num[f'{gubun_}호가체결'], df1))
-        self.ui.windowQ.put((ui_num[f'{gubun_}호가체결2'], df2))
+        self.ui.windowQ.put((ui_num['호가체결'], df1))
+        self.ui.windowQ.put((ui_num['호가체결2'], df2))
 
         for i in range(len(self.ui.ctpg_legend)):
-            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, gubun_, is_min, xpoint, self.ui.ctpg_factors[i], hms_text))
+            self.ui.ctpg_legend[i].setText(get_label_text(self.ui, is_min, xpoint, self.ui.ctpg_factors[i], hms_text))
             self.ui.ctpg_labels[i].setText('')

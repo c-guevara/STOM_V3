@@ -11,19 +11,22 @@ from utility.static import comma2int, comma2float, now, str_ymd, now_utc, now_cm
 
 @error_decorator
 def cell_clicked_01(ui, row, col):
-    stock = True
-    if ui.focusWidget() in (ui.td_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
-        stock = False
-    if ui.focusWidget().parentWidget() in (ui.td_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
-        stock = False
     item = ui.focusWidget().item(row, 0)
     if item is None:
         return
-    name       = item.text()
-    linetext   = ui.ct_lineEdittttt_03.text()
-    tickcount  = int(linetext) if linetext else 30
-    searchdate = str_ymd(now_utc()) if not stock else str_ymd() if '키움증권' in ui.dict_set['거래소'] else str_ymd(now_cme())
-    code       = ui.dict_code[name] if name in ui.dict_code else name
+
+    name      = item.text()
+    linetext  = ui.ct_lineEdittttt_03.text()
+    tickcount = int(linetext) if linetext else 30
+
+    if ui.market_gubun < 4 or ui.market_gubun in (6, 7):
+        searchdate = str_ymd()
+    elif ui.market_gubun in (4, 8):
+        searchdate = str_ymd(now_cme())
+    else:
+        searchdate = str_ymd(now_utc())
+
+    code = ui.dict_code.get(name, name)
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     show_dialog(ui, name, tickcount, searchdate, col)
@@ -36,50 +39,26 @@ def cell_clicked_02(ui, row, col):
     if item is None:
         return
     name = item.text()
-    gubun = '주식' if '키움증권' in ui.dict_set['거래소'] else '해선'
-    columns = columns_jg if gubun == '주식' else columns_jgf
+    columns = columns_jg if ui.market_gubun < 6 else columns_jgf if ui.market_gubun < 9 else columns_jgcf
     oc = comma2int(ui.jg_tableWidgettt.item(row, columns.index('보유수량')).text())
     c = comma2int(ui.jg_tableWidgettt.item(row, columns.index('현재가')).text())
     buttonReply = QMessageBox.question(
-        ui, f'{gubun} 시장가 매도', f'{name} {oc}주를 시장가매도합니다.\n계속하시겠습니까?\n',
+        ui, f'{ui.market_name} 시장가 매도', f'{name} {oc}주를 시장가매도합니다.\n계속하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
-        if '선물' in ui.dict_set['거래소']:
-            position = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
-            position = 'SELL_LONG' if position == 'LONG' else 'BUY_SHORT'
-            ui.traderQ.put((position, ui.dict_code[name], name, c, oc, now(), True))
-        else:
-            ui.traderQ.put(('매도', ui.dict_code[name], name, c, oc, now(), True))
+        if trader_process_alive(ui):
+            if ui.market_gubun < 6:
+                ui.traderQ.put(('매도', ui.dict_code[name], name, c, oc, now(), True))
+            else:
+                position = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
+                position = 'SELL_LONG' if position == 'LONG' else 'BUY_SHORT'
+                ui.traderQ.put((position, ui.dict_code[name], name, c, oc, now(), True))
 
 
 # noinspection PyUnusedLocal
 @error_decorator
 def cell_clicked_03(ui, row, col):
-    item = ui.jg_tableWidgettt.item(row, 0)
-    if item is None:
-        return
-    code    = item.text()
-    columns = columns_jg if 'KRW' in code else columns_jgcf
-    oc      = comma2float(ui.jg_tableWidgettt.item(row, columns.index('보유수량')).text())
-    c       = comma2float(ui.jg_tableWidgettt.item(row, columns.index('현재가')).text())
-    buttonReply = QMessageBox.question(
-        ui, '코인 시장가 매도', f'{code} {oc}개를 시장가매도합니다.\n계속하시겠습니까?\n',
-        QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-    )
-    if buttonReply == QMessageBox.Yes:
-        if trader_process_alive(ui):
-            if 'KRW' in code:
-                ui.traderQ.put(('매도', code, c, oc, now(), True))
-            else:
-                p = ui.jg_tableWidgettt.item(row, columns.index('포지션')).text()
-                p = 'SELL_LONG' if p == 'LONG' else 'BUY_SHORT'
-                ui.traderQ.put((p, code, c, oc, now(), True))
-
-
-# noinspection PyUnusedLocal
-@error_decorator
-def cell_clicked_04(ui, row, col):
     searchdate = ''
     if ui.focusWidget() == ui.ds_tableWidgetttt:
         searchdate = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
@@ -91,7 +70,7 @@ def cell_clicked_04(ui, row, col):
     name      = item.text()
     linetext  = ui.ct_lineEdittttt_03.text()
     tickcount = int(linetext) if linetext else 30
-    code      = ui.dict_code[name] if name in ui.dict_code else name
+    code      = ui.dict_code.get(name, name)
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
@@ -100,7 +79,7 @@ def cell_clicked_04(ui, row, col):
 
 # noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_05(ui, row, col):
+def cell_clicked_04(ui, row, col):
     item = ui.focusWidget().item(row, 0)
     if item is None:
         return
@@ -119,13 +98,12 @@ def cell_clicked_05(ui, row, col):
 
     df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
     df.set_index('index', inplace=True)
-
     show_dialog_graph(ui, df)
 
 
 # noinspection PyUnusedLocal,PyUnresolvedReferences
 @error_decorator
-def cell_clicked_06(ui, row, col):
+def cell_clicked_05(ui, row, col):
     tableWidget = None
     if ui.focusWidget() == ui.ss_tableWidget_01 or ui.focusWidget().parentWidget() == ui.ss_tableWidget_01:
         tableWidget = ui.ss_tableWidget_01
@@ -141,21 +119,18 @@ def cell_clicked_06(ui, row, col):
     name       = item.text()
     searchdate = tableWidget.item(row, 2).text()[:8]
     buytime    = comma2int(tableWidget.item(row, 2).text())
+    if len(str(buytime)) > 12 and not ui.dict_set['타임프레임']:
+        QMessageBox.critical(ui, '오류 알림', '현재 데이터 형식의 설정은 1분봉 상태입니다.\n1초스냅샷용 백테결과는 차트에 표시할 수 없습니다.\n')
+        return
+    elif len(str(buytime)) < 14 and ui.dict_set['타임프레임']:
+        QMessageBox.critical(ui, '오류 알림', '현재 데이터 형식의 설정 1초스냅샷 상태입니다.\n1분봉용 백테결과는 차트에 표시할 수 없습니다.\n')
+        return
     selltime   = comma2int(tableWidget.item(row, 3).text())
     buyprice   = comma2float(tableWidget.item(row, 5).text())
     sellprice  = comma2float(tableWidget.item(row, 6).text())
     detail     = [buytime, buyprice, selltime, sellprice]
     buytimes   = tableWidget.item(row, 13).text()
-
-    coin = True if 'KRW' in name or 'USDT' in name else False
-    if len(str(buytime)) > 12 and (coin and not ui.dict_set['타임프레임'] or not coin and not ui.dict_set['타임프레임']):
-        QMessageBox.critical(ui, '오류 알림', '현재 전략설정의 데이터타입은 1분봉 상태입니다.\n1초스냅샷용 백테결과는 차트를 표시할 수 없습니다.\n')
-        return
-    elif len(str(buytime)) < 14 and (coin and ui.dict_set['타임프레임'] or not coin and ui.dict_set['타임프레임']):
-        QMessageBox.critical(ui, '오류 알림', '현재 전략설정의 데이터타입은 1초스냅샷 상태입니다.\n1분봉용 백테결과는 차트를 표시할 수 없습니다.\n')
-        return
-
-    code = ui.dict_code[name] if name in ui.dict_code else name
+    code = ui.dict_code.get(name, name)
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
@@ -171,12 +146,12 @@ def cell_clicked_06(ui, row, col):
 
 # noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_07(ui, row, col):
+def cell_clicked_06(ui, row, col):
     item = ui.ct_tableWidgett_01.item(row, 0)
     if item is None:
         return
     name       = item.text()
-    code       = ui.dict_code[name] if name in ui.dict_code else name
+    code       = ui.dict_code.get(name, name)
     searchdate = ui.ct_dateEdittttt_02.date().toString('yyyyMMdd')
     linetext   = ui.ct_lineEdittttt_03.text()
     tickcount  = int(linetext) if linetext else 30
@@ -188,7 +163,7 @@ def cell_clicked_07(ui, row, col):
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-    data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
+    data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui))
     cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
     if cf1 and cf2: data += (float(cf1), float(cf2))
     ui.chartQ.put(data)
@@ -197,7 +172,7 @@ def cell_clicked_07(ui, row, col):
 
 # noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_08(ui, row, col):
+def cell_clicked_07(ui, row, col):
     item = ui.dialog_info.focusWidget().item(row, 3)
     if item is None:
         return
@@ -206,27 +181,25 @@ def cell_clicked_08(ui, row, col):
 
 
 @error_decorator
-def cell_clicked_09(ui, row, col):
+def cell_clicked_08(ui, row, col):
     if ui.dialog_db.focusWidget() == ui.db_tableWidgett_01:
         item = ui.db_tableWidgett_01.item(row, col)
         if item is None:
             return
         stg_name = item.text()
-        gubun = '주식' if '키움증권' in ui.dict_set['거래소'] else '해선'
         buttonReply = QMessageBox.question(
-            ui.dialog_db, '전략 삭제', f'{gubun}전략 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
+            ui.dialog_db, '전략 삭제', f'{ui.market_name} 전략 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply == QMessageBox.Yes:
-            gubun = 'stock' if '키움증권' in ui.dict_set['거래소'] else 'future'
             if col == 0:
-                query = f'DELETE FROM {gubun}buy WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_buy WHERE "index" = "{stg_name}"'
             elif col == 1:
-                query = f'DELETE FROM {gubun}sell WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_sell WHERE "index" = "{stg_name}"'
             elif col == 2:
-                query = f'DELETE FROM {gubun}optibuy WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_optibuy WHERE "index" = "{stg_name}"'
             else:
-                query = f'DELETE FROM {gubun}optisell WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_optisell WHERE "index" = "{stg_name}"'
             ui.queryQ.put(('전략디비', query))
             ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 주식전략 "{stg_name}" 삭제 완료'))
     elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_02:
@@ -234,63 +207,21 @@ def cell_clicked_09(ui, row, col):
         if item is None:
             return
         stg_name = item.text()
-        gubun = '주식' if '키움증권' in ui.dict_set['거래소'] else '해선'
         buttonReply = QMessageBox.question(
-            ui.dialog_db, '범위 또는 조건 삭제', f'{gubun} 범위 또는 조건 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
+            ui.dialog_db, '범위 또는 조건 삭제', f'{ui.market_name} 범위 또는 조건 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply == QMessageBox.Yes:
-            gubun = 'stock' if '키움증권' in ui.dict_set['거래소'] else 'future'
             if col == 0:
-                query = f'DELETE FROM {gubun}optivars WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_optivars WHERE "index" = "{stg_name}"'
             elif col == 1:
-                query = f'DELETE FROM {gubun}vars WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_optigavars WHERE "index" = "{stg_name}"'
             elif col == 2:
-                query = f'DELETE FROM {gubun}buyconds WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_buyconds WHERE "index" = "{stg_name}"'
             else:
-                query = f'DELETE FROM {gubun}sellconds WHERE "index" = "{stg_name}"'
+                query = f'DELETE FROM {ui.market_sname}_sellconds WHERE "index" = "{stg_name}"'
             ui.queryQ.put(('전략디비', query))
             ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 주식 범위 또는 조건 "{stg_name}" 삭제 완료'))
-    elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_03:
-        item = ui.db_tableWidgett_03.item(row, col)
-        if item is None:
-            return
-        stg_name = item.text()
-        buttonReply = QMessageBox.question(
-            ui.dialog_db, '전략 삭제', f'코인전략 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-        )
-        if buttonReply == QMessageBox.Yes:
-            if col == 0:
-                query = f'DELETE FROM coinbuy WHERE "index" = "{stg_name}"'
-            elif col == 1:
-                query = f'DELETE FROM coinsell WHERE "index" = "{stg_name}"'
-            elif col == 2:
-                query = f'DELETE FROM coinoptibuy WHERE "index" = "{stg_name}"'
-            else:
-                query = f'DELETE FROM coinoptisell WHERE "index" = "{stg_name}"'
-            ui.queryQ.put(('전략디비', query))
-            ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 코인전략 "{stg_name}" 삭제 완료'))
-    elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_04:
-        item = ui.db_tableWidgett_04.item(row, col)
-        if item is None:
-            return
-        stg_name = item.text()
-        buttonReply = QMessageBox.question(
-            ui.dialog_db, '범위 또는 조건 삭제', f'코인 범위 또는 조건 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-        )
-        if buttonReply == QMessageBox.Yes:
-            if col == 0:
-                query = f'DELETE FROM coinoptivars WHERE "index" = "{stg_name}"'
-            elif col == 1:
-                query = f'DELETE FROM coinvars WHERE "index" = "{stg_name}"'
-            elif col == 2:
-                query = f'DELETE FROM coinbuyconds WHERE "index" = "{stg_name}"'
-            else:
-                query = f'DELETE FROM coinsellconds WHERE "index" = "{stg_name}"'
-            ui.queryQ.put(('전략디비', query))
-            ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 코인 범위 또는 조건 "{stg_name}" 삭제 완료'))
     elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_05:
         item = ui.db_tableWidgett_05.item(row, col)
         if item is None:
@@ -310,7 +241,7 @@ def cell_clicked_09(ui, row, col):
 
 
 @error_decorator
-def cell_clicked_10(ui, row, col):
+def cell_clicked_09(ui, row, col):
     item = ui.hg_tableWidgett_01.item(row, col)
     if item is not None:
         text = item.text()
@@ -324,11 +255,8 @@ def cell_clicked_10(ui, row, col):
 
 # noinspection PyUnusedLocal
 @error_decorator
-def cell_clicked_11(ui, row, col):
-    if ui.focusWidget() == ui.nt_tableWidgetttt:
-        table_name = 's_tradelist' if '키움증권' in ui.dict_set['거래소'] else 'f_tradelist'
-    else:
-        table_name = 'c_tradelist' if ui.dict_set['거래소'] == '업비트' else 'c_tradelist_future'
+def cell_clicked_10(ui, row, col):
+    table_name = ui.market_info['거래디비']
     df = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name}")
     df['index'] = df['index'].apply(lambda x: f'{x[:4]}-{x[4:6]}-{x[6:8]} {x[8:10]}:{x[10:12]}:{x[12:14]}')
     df.set_index('index', inplace=True)

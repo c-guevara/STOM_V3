@@ -7,7 +7,7 @@ from ui.ui_strategy_version import strategy_version
 from PyQt5.QtWidgets import QMessageBox, QApplication
 from utility.strategy_version_manager import stg_save_version
 from utility.static import text_not_in_special_characters, error_decorator
-from ui.set_text import famous_saying, buy_signal, buy_text_min, future_buy_signal, buy_text_tick
+from ui.set_text import famous_saying, buy_signal, buy_text_min, buy_signal_future, buy_text_tick
 
 
 @error_decorator
@@ -19,8 +19,7 @@ def buy_stg_load(ui):
             return
         strategy_version(ui, 'basic', 'buy', strategy_name)
     elif ui.ss_textEditttt_01.isVisible():
-        market = ui.market_info['전략구분']
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {market}_buy').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buy').set_index('index')
         if len(df) > 0:
             ui.svjb_comboBoxx_01.clear()
             indexs = list(df.index)
@@ -48,21 +47,20 @@ def buy_stg_save(ui):
     else:
         if 'self.tickcols' in strategy or (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest1(strategy):
             if ui.proc_chqs.is_alive():
-                market = ui.market_info['전략구분']
-                delete_query  = f"DELETE FROM {market}_buy WHERE `index` = '{strategy_name}'"
-                insert_query  = f"INSERT INTO {market}_buy VALUES (?, ?)"
+                delete_query  = f"DELETE FROM {ui.market_sname}_buy WHERE `index` = '{strategy_name}'"
+                insert_query  = f"INSERT INTO {ui.market_sname}_buy VALUES (?, ?)"
                 insert_values = (strategy_name, strategy)
                 ui.queryQ.put(('전략디비', delete_query))
                 ui.queryQ.put(('전략디비', insert_query, insert_values))
                 ui.svjb_pushButon_04.setStyleSheet(style_bc_st)
-                stg_save_version(market, 'basic', 'buy', strategy_name, strategy)
+                stg_save_version(ui.market_sname, 'basic', 'buy', strategy_name, strategy)
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
 @error_decorator
 def buy_factor(ui):
     ui.ss_textEditttt_01.clear()
-    ui.ss_textEditttt_01.append(buy_text_tick if ui.dict_set['주식타임프레임'] else buy_text_min)
+    ui.ss_textEditttt_01.append(buy_text_tick if ui.dict_set['타임프레임'] else buy_text_min)
     ui.svjb_pushButon_04.setStyleSheet(style_bc_st)
 
 
@@ -84,7 +82,7 @@ def buy_stg_start(ui):
 
 @error_decorator
 def buy_signal_insert(ui):
-    signal = buy_signal if '키움증권' in ui.dict_set['거래소'] else future_buy_signal
+    signal = buy_signal if ui.market_gubun < 6 else buy_signal_future
     ui.ss_textEditttt_01.append(signal)
 
 

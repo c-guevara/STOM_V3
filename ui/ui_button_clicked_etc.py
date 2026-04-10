@@ -34,11 +34,7 @@ def cpbutton_clicked_01(ui):
 @error_decorator
 def ttbutton_clicked_01(ui, cmd):
     if '집계' in cmd:
-        gubun = 'S' if 'S' in cmd else 'C'
-        if 'S' in cmd:
-            table = 's_totaltradelist' if '키움증권' in ui.dict_set['거래소'] else 'f_totaltradelist'
-        else:
-            table = 'c_totaltradelist'
+        table = ui.market_info['손익디비']
         df = ui.dbreader.read_sql('거래디비', f'SELECT * FROM {table}')
         df = df[::-1]
         if len(df) > 0:
@@ -52,15 +48,15 @@ def ttbutton_clicked_01(ui, cmd):
             nsig = df['수익금합계'].sum()
             df2 = pd.DataFrame(columns=columns_nt)
             df2.loc[0] = [pr, nbg, nsg, npg, nmg, nsp, nsig]
-            ui.update_tablewidget.update_tablewidget((ui_num[f'{gubun}누적합계'], df2))
+            ui.update_tablewidget.update_tablewidget((ui_num['누적합계'], df2))
         else:
             QMessageBox.critical(ui, '오류 알림', '거래목록이 존재하지 않습니다.\n')
             return
-        if cmd == f'{gubun}일별집계':
+        if cmd == '일별집계':
             df.rename(columns={'index': '일자'}, inplace=True)
             df.drop(columns=['거래횟수'], inplace=True)
-            ui.update_tablewidget.update_tablewidget((ui_num[f'{gubun}누적상세'], df))
-        elif cmd == f'{gubun}월별집계':
+            ui.update_tablewidget.update_tablewidget((ui_num['누적상세'], df))
+        elif cmd == '월별집계':
             df['연월'] = df['index'].str[:6]
             df2 = pd.DataFrame(columns=columns_nd)
             lastmonth = df['연월'].iloc[-1]
@@ -74,8 +70,8 @@ def ttbutton_clicked_01(ui, cmd):
                     ttsg = df3['수익금합계'].sum()
                     df2.loc[month] = [month, tbg, tsg, tpg, tmg, sp, ttsg]
                 month = str(int(month) - 89) if int(month[4:]) == 1 else str(int(month) - 1)
-            ui.update_tablewidget.update_tablewidget((ui_num[f'{gubun}누적상세'], df2))
-        elif cmd == f'{gubun}연도별집계':
+            ui.update_tablewidget.update_tablewidget((ui_num['누적상세'], df2))
+        elif cmd == '연도별집계':
             df['연도'] = df['index'].str[:4]
             df2 = pd.DataFrame(columns=columns_nd)
             lastyear = df['연도'].iloc[-1]
@@ -89,7 +85,7 @@ def ttbutton_clicked_01(ui, cmd):
                     ttsg = df3['수익금합계'].sum()
                     df2.loc[year] = [year, tbg, tsg, tpg, tmg, sp, ttsg]
                 year = str(int(year) - 1)
-            ui.update_tablewidget.update_tablewidget((ui_num[f'{gubun}누적상세'], df2))
+            ui.update_tablewidget.update_tablewidget((ui_num['누적상세'], df2))
 
 
 @error_decorator

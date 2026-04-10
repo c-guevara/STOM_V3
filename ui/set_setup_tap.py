@@ -41,7 +41,7 @@ class SetSetupTap:
         from utility.setting_market import DICT_MARKET_GUBUN
         self.ui.sj_main_comBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=list(DICT_MARKET_GUBUN.keys()), tip='사용할 거래소를 선택하십시오.')
         self.ui.sj_main_comBox_02 = self.wc.setCombobox(self.ui.sj_bs_groupBox_01, items=['1초스냅샷', '1분봉'], tip='사용할 타임프레임을 설정한다.')
-        self.ui.sj_main_cheBox_01 = self.wc.setCheckBox('모의투자', self.ui.sj_bs_groupBox_01, changed=lambda state: checkbox_changed_08(self.ui, state), tip='체크 해제 시 실매매')
+        self.ui.sj_main_cheBox_01 = self.wc.setCheckBox('모의투자', self.ui.sj_bs_groupBox_01, changed=lambda state: checkbox_changed_01(self.ui, state), tip='체크 해제 시 실매매')
         self.ui.sj_main_cheBox_02 = self.wc.setCheckBox('데이터저장', self.ui.sj_bs_groupBox_01, tip='전략종료 후 데이터 저장 여부를 설정한다.')
         self.ui.sj_main_cheBox_03 = self.wc.setCheckBox('알림소리', self.ui.sj_bs_groupBox_01, tip='시스템 이벤트를 tts를 통해 소리로 알려준다.')
 
@@ -85,8 +85,8 @@ class SetSetupTap:
         self.ui.sj_strgy_lEdit_06 = self.wc.setLineedit(self.ui.sj_bs_groupBox_04)
 
         self.ui.sj_back_cheBox_01 = self.wc.setCheckBox('백테스트 시 거래횟수 10회 이상이며 수익금이 마이너스일 경우 블랙리스트에 추가하기', self.ui.sj_bs_groupBox_05)
-        self.ui.sj_back_cheBox_02 = self.wc.setCheckBox('일괄 로딩(모든 종목의 데이터를 램에 올려두고 백테스트합니다. 백테속도↑, 램사용량↑)', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_11(self.ui, state))
-        self.ui.sj_back_cheBox_03 = self.wc.setCheckBox('분할 로딩(피클덤프한 다음 한종목씩 램에 올려 백테스트합니다. 백테속도↓, 램사용량↓)', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_11(self.ui, state))
+        self.ui.sj_back_cheBox_02 = self.wc.setCheckBox('일괄 로딩(모든 종목의 데이터를 램에 올려두고 백테스트합니다. 백테속도↑, 램사용량↑)', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_03(self.ui, state))
+        self.ui.sj_back_cheBox_03 = self.wc.setCheckBox('분할 로딩(피클덤프한 다음 한종목씩 램에 올려 백테스트합니다. 백테속도↓, 램사용량↓)', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_03(self.ui, state))
         self.ui.sj_back_cheBox_04 = self.wc.setCheckBox('데이터베이스 자동관리(일자DB분리, 백테DB추가)', self.ui.sj_bs_groupBox_05, tip='데이터 저장 후 일자별분리 및 백테디비추가가 자동실행됨')
 
         self.ui.sj_back_cheBox_05 = self.wc.setCheckBox('백테스트에 주문관리 설정 적용하기(최유리 및 IOC 주문 제외)', self.ui.sj_bs_groupBox_05, tip='설정 변경 시 백테엔진을 재로딩해야 합니다. 체크해제 시 시장가 호가범위선택 및 비중조절은 적용됨')
@@ -107,17 +107,17 @@ class SetSetupTap:
         self.ui.sj_back_cheBox_09 = self.wc.setCheckBox('1초스냅샷 전략에 시장리스크분석 적용하기', self.ui.sj_bs_groupBox_05, tip=tip_text)
         self.ui.sj_back_cheBox_10 = self.wc.setCheckBox('백테스트 그래프 매수시간 기준으로 표시하기', self.ui.sj_bs_groupBox_05, tip='체크해제 시 매도시간 기준으로 표시됩니다.')
         self.ui.sj_back_cheBox_11 = self.wc.setCheckBox('백테스트로그 기록하지 않기', self.ui.sj_bs_groupBox_05)
-        self.ui.sj_back_cheBox_12 = self.wc.setCheckBox('일반 백테스트 시 그래프 저장하지 않기', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_12(self.ui, state))
-        self.ui.sj_back_cheBox_13 = self.wc.setCheckBox('띄우지 않기', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_13(self.ui, state))
+        self.ui.sj_back_cheBox_12 = self.wc.setCheckBox('일반 백테스트 시 그래프 저장하지 않기', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_04(self.ui, state))
+        self.ui.sj_back_cheBox_13 = self.wc.setCheckBox('띄우지 않기', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_05(self.ui, state))
 
         self.ui.sj_back_cheBox_14 = self.wc.setCheckBox('스케쥴러 자동실행  |  요일                    시간                                                                                        ▣  엔진시작일자', self.ui.sj_bs_groupBox_05, tip='백테 스케쥴러를 자동실행한다.')
         self.ui.sj_back_comBox_01 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05, items=['금', '토', '일'])
         self.ui.sj_back_liEdit_02 = self.wc.setLineedit(self.ui.sj_bs_groupBox_05)
         self.ui.sj_back_comBox_02 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05, items=['주식', '코인'])
         self.ui.sj_back_comBox_03 = self.wc.setCombobox(self.ui.sj_bs_groupBox_05)
-        self.ui.sj_back_cheBox_15 = self.wc.setCheckBox('                  일전', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_16(self.ui, state))
+        self.ui.sj_back_cheBox_15 = self.wc.setCheckBox('                  일전', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_07(self.ui, state))
         self.ui.sj_back_liEdit_03 = self.wc.setLineedit(self.ui.sj_bs_groupBox_05)
-        self.ui.sj_back_cheBox_16 = self.wc.setCheckBox('고정', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_17(self.ui, state))
+        self.ui.sj_back_cheBox_16 = self.wc.setCheckBox('고정', self.ui.sj_bs_groupBox_05, changed=lambda state: checkbox_changed_08(self.ui, state))
         self.ui.sj_back_daEdit_01 = self.wc.setDateEdit(self.ui.sj_bs_groupBox_05)
 
         self.ui.sj_ilbunback_listtt = [self.ui.sj_back_cheBox_02, self.ui.sj_back_cheBox_03]
@@ -147,10 +147,10 @@ class SetSetupTap:
         self.ui.sj_save_Button_03 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_03, click=lambda: setting_save_03(self.ui))
         self.ui.sj_save_Button_04 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_04, click=lambda: setting_save_04(self.ui))
         self.ui.sj_save_Button_05 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_05, click=lambda: setting_save_05(self.ui))
-        self.ui.sj_save_Button_06 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_06, click=lambda: setting_save_06(self.ui))
+        self.ui.sj_save_Button_06 = self.wc.setPushbutton('저장하기', parent=self.ui.sj_bs_groupBox_06, click=self.ui.SettingSave_06)
 
         self.ui.sj_etc_pButton_01 = self.wc.setPushbutton('계정 텍스트 보기', parent=self.ui.ssd_tab, click=lambda: setting_acc_view(self.ui))
-        self.ui.sj_etc_pButton_02 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_04, click=lambda: setting_elapsed_tick_number(self.ui))
+        self.ui.sj_etc_pButton_02 = self.wc.setPushbutton('경과틱수 변수설정', parent=self.ui.sj_bs_groupBox_04, click=lambda: setting_passticks(self.ui))
 
         self.ui.set_tapWidgett_01.setGeometry(7, 10, 1341, 742)
         self.ui.sj_set_labelll_01.setGeometry(847, 10, 50, 20)

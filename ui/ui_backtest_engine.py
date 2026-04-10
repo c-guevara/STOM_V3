@@ -3,6 +3,7 @@ import sqlite3
 import numpy as np
 import pandas as pd
 from ui.set_style import style_bc_dk
+from PyQt5.QtWidgets import QMessageBox
 from backtest.back_subtotal import BackSubTotal
 from backtest.back_code_test import BackCodeTest
 from concurrent.futures import ThreadPoolExecutor
@@ -28,7 +29,7 @@ def backengine_show(ui):
     con.close()
 
     if table_list:
-        name_list = [ui.dict_name[code] if code in ui.dict_name else code for code in table_list]
+        name_list = [ui.dict_name.get(code, code) for code in table_list]
         name_list.sort()
         ui.be_comboBoxxxxx_02.clear()
         for name in name_list:
@@ -59,7 +60,7 @@ def backengine_start(ui):
     multi         = int(ui.be_lineEdittttt_04.text())
     divid_mode    = ui.be_comboBoxxxxx_01.currentText()
     one_name      = ui.be_comboBoxxxxx_02.currentText()
-    one_code      = ui.dict_code[one_name] if one_name in ui.dict_code else one_name
+    one_code      = ui.dict_code.get(one_name, one_name)
     ui.multi      = multi
     ui.divid_mode = divid_mode
 
@@ -290,7 +291,10 @@ def clear_backtestQ(ui):
 
 @error_decorator
 def backtest_process_kill(ui, coin, enginekill):
-    from ui.ui_button_clicked_dialog_backengine import backtest_engine_kill
+    if not ui.backtest_engine:
+        QMessageBox.critical(ui, '오류 알림', '백테스트 엔진이 미실행중입니다.\n')
+        return
+
     ui.back_cancelling = True
     for q in ui.back_eques:
         q.put('백테중지')
@@ -314,5 +318,7 @@ def backtest_process_kill(ui, coin, enginekill):
     ui.back_scount = 0
     ui.back_schedul = False
 
-    if enginekill: backtest_engine_kill(ui)
+    if enginekill:
+        from ui.ui_button_clicked_dialog_backengine import backtest_engine_kill
+        backtest_engine_kill(ui)
     ui.back_cancelling = False

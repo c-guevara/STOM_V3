@@ -66,24 +66,11 @@ def mnbutton_c_clicked_03(ui, auto=False):
         if ui.dialog_web.isVisible():
             QMessageBox.critical(ui, '오류 알림', '웹뷰어창이 열린 상태에서는 수동시작할 수 없습니다.\n웹뷰어창을 닫고 재시도하십시오.\n')
             return
-        if ui.dict_set['에이전트']:
-            if '키움증권' in ui.dict_set['거래소']:
-                buttonReply = QMessageBox.question(
-                    ui, '주식 수동 시작', '주식 리시버 또는 트레이더를 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-                )
-            else:
-                buttonReply = QMessageBox.question(
-                    ui, '해선 수동 시작', '해선 리시버 또는 트레이더를 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n',
-                    QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-                )
-        elif ui.dict_set['코인리시버']:
-            buttonReply = QMessageBox.question(
-                ui, '코인 수동 시작', '코인 리시버 또는 트레이더를 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n',
-                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-            )
-        else:
-            buttonReply = QMessageBox.No
+
+        buttonReply = QMessageBox.question(
+            ui, '수동 시작', f'{ui.market_name} 매매시스템 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n',
+            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+        )
 
     if buttonReply == QMessageBox.Yes:
         mnbutton_c_clicked_01(ui, 1)

@@ -1,8 +1,8 @@
 
+from utility.static import now
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.base_receiver import BaseReceiver
-from utility.static import now, str_hms, now_cme
 from trade.restapi_ls import LsRestAPI, WebSocketReceiver
 
 
@@ -24,9 +24,6 @@ class FutureOsReceiver(BaseReceiver):
     def _get_code_info(self):
         self.dict_info, self.codes = self.ls.get_code_info_future_oversea()
         self.traderQ.put(('종목정보', self.dict_info))
-
-    def _get_inthms(self):
-        return int(str_hms(now_cme()))
 
     def _convert_real_data(self, data):
         start = now()

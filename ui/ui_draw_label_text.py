@@ -1,10 +1,10 @@
 
-def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
+def get_label_text(ui, is_min, xpoint, factor, hms):
     def fi(fname):
         return ui.dict_findex[fname]
 
     if factor == '현재가':
-        if gubun == 'S':
+        if ui.market_gubun < 4:
             if is_min:
                 text = f"시간 {hms}\n" \
                        f"이평005 {ui.ctpg_arry[xpoint, fi('이동평균5')]:,.3f}\n" \
@@ -24,26 +24,6 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                        f"이평0600 {ui.ctpg_arry[xpoint, fi('이동평균600')]:,.3f}\n" \
                        f"이평1200 {ui.ctpg_arry[xpoint, fi('이동평균1200')]:,.3f}\n" \
                        f"현재가       {ui.ctpg_arry[xpoint, fi('현재가')]:,.0f}"
-        elif gubun == 'F':
-            if is_min:
-                text = f"시간 {hms}\n" \
-                       f"이평005 {ui.ctpg_arry[xpoint, fi('이동평균5')]:,.5f}\n" \
-                       f"이평010 {ui.ctpg_arry[xpoint, fi('이동평균10')]:,.5f}\n" \
-                       f"이평020 {ui.ctpg_arry[xpoint, fi('이동평균20')]:,.5f}\n" \
-                       f"이평060 {ui.ctpg_arry[xpoint, fi('이동평균60')]:,.5f}\n" \
-                       f"이평120 {ui.ctpg_arry[xpoint, fi('이동평균120')]:,.5f}\n" \
-                       f"분봉시가 {ui.ctpg_arry[xpoint, fi('분봉시가')]:,.2f}\n" \
-                       f"분봉고가 {ui.ctpg_arry[xpoint, fi('분봉고가')]:,.2f}\n" \
-                       f"분봉저가 {ui.ctpg_arry[xpoint, fi('분봉저가')]:,.2f}\n" \
-                       f"현재가    {ui.ctpg_arry[xpoint, fi('현재가')]:,.2f}"
-            else:
-                text = f"시간 {hms}\n" \
-                       f"이평0060 {ui.ctpg_arry[xpoint, fi('이동평균60')]:,.5f}\n" \
-                       f"이평0150 {ui.ctpg_arry[xpoint, fi('이동평균150')]:,.5f}\n" \
-                       f"이평0300 {ui.ctpg_arry[xpoint, fi('이동평균300')]:,.5f}\n" \
-                       f"이평0600 {ui.ctpg_arry[xpoint, fi('이동평균600')]:,.5f}\n" \
-                       f"이평1200 {ui.ctpg_arry[xpoint, fi('이동평균1200')]:,.5f}\n" \
-                       f"현재가       {ui.ctpg_arry[xpoint, fi('현재가')]:,.2f}"
         else:
             if is_min:
                 text = f"시간 {hms}\n" \
@@ -85,7 +65,7 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"최고매수금액 {ui.ctpg_arry[xpoint, fi('최고매수금액')]:,.0f}\n" \
                    f"최고매도금액 {ui.ctpg_arry[xpoint, fi('최고매도금액')]:,.0f}"
     elif factor == '최고매도수가격':
-        if gubun == 'S':
+        if ui.market_gubun < 4:
             text = f"시간 {hms}\n" \
                    f"최고매수가격 {ui.ctpg_arry[xpoint, fi('최고매수가격')]:,.0f}\n" \
                    f"최고매도가격 {ui.ctpg_arry[xpoint, fi('최고매도가격')]:,.0f}"
@@ -103,7 +83,7 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"분당거래대금        {ui.ctpg_arry[xpoint, fi('분당거래대금')]:,.0f}\n" \
                    f"분당거래대금평균 {ui.ctpg_arry[xpoint, fi('분당거래대금평균')]:,.0f}"
     elif factor == '초당체결수량':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"초당매수수량 {ui.ctpg_arry[xpoint, fi('초당매수수량')]:,.0f}\n" \
                    f"초당매도수량 {ui.ctpg_arry[xpoint, fi('초당매도수량')]:,.0f}"
@@ -112,7 +92,7 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"초당매수수량 {ui.ctpg_arry[xpoint, fi('초당매수수량')]:,.8f}\n" \
                    f"초당매도수량 {ui.ctpg_arry[xpoint, fi('초당매도수량')]:,.8f}"
     elif factor == '분당체결수량':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"분당매수수량 {ui.ctpg_arry[xpoint, fi('분당매수수량')]:,.0f}\n" \
                    f"분당매도수량 {ui.ctpg_arry[xpoint, fi('분당매도수량')]:,.0f}"
@@ -121,7 +101,7 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"분당매수수량 {ui.ctpg_arry[xpoint, fi('분당매수수량')]:,.8f}\n" \
                    f"분당매도수량 {ui.ctpg_arry[xpoint, fi('분당매도수량')]:,.8f}"
     elif factor == '호가총잔량':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"매도총잔량 {ui.ctpg_arry[xpoint, fi('매도총잔량')]:,.0f}\n" \
                    f"매수총잔량 {ui.ctpg_arry[xpoint, fi('매수총잔량')]:,.0f}"
@@ -130,7 +110,7 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"매도총잔량 {ui.ctpg_arry[xpoint, fi('매도총잔량')]:,.8f}\n" \
                    f"매수총잔량 {ui.ctpg_arry[xpoint, fi('매수총잔량')]:,.8f}"
     elif factor == '매도수호가잔량1':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"매도1잔량 {ui.ctpg_arry[xpoint, fi('매도잔량1')]:,.0f}\n" \
                    f"매수1잔량 {ui.ctpg_arry[xpoint, fi('매수잔량1')]:,.0f}"
@@ -139,14 +119,14 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"매도1잔량 {ui.ctpg_arry[xpoint, fi('매도잔량1')]:,.8f}\n" \
                    f"매수1잔량 {ui.ctpg_arry[xpoint, fi('매수잔량1')]:,.8f}"
     elif factor == '매도수5호가잔량합':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"매도수5호가잔량합 {ui.ctpg_arry[xpoint, fi('매도수5호가잔량합')]:,.0f}"
         else:
             text = f"시간 {hms}\n" \
                    f"매도수5호가잔량합 {ui.ctpg_arry[xpoint, fi('매도수5호가잔량합')]:,.8f}"
     elif factor == '누적초당매도수수량':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"누적초당매수수량 {ui.ctpg_arry[xpoint, fi('누적초당매수수량')]:,.0f}\n" \
                    f"누적초당매도수량 {ui.ctpg_arry[xpoint, fi('누적초당매도수량')]:,.0f}"
@@ -155,7 +135,7 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
                    f"누적초당매수수량 {ui.ctpg_arry[xpoint, fi('누적초당매수수량')]:,.8f}\n" \
                    f"누적초당매도수량 {ui.ctpg_arry[xpoint, fi('누적초당매도수량')]:,.8f}"
     elif factor == '누적분당매도수수량':
-        if gubun in ('S', 'F'):
+        if ui.market_gubun not in (5, 9):
             text = f"시간 {hms}\n" \
                    f"누적분당매수수량 {ui.ctpg_arry[xpoint, fi('누적분당매수수량')]:,.0f}\n" \
                    f"누적분당매도수량 {ui.ctpg_arry[xpoint, fi('누적분당매도수량')]:,.0f}"
@@ -196,10 +176,8 @@ def get_label_text(ui, gubun, is_min, xpoint, factor, hms):
     if ui.dict_fm is not None and factor in ui.dict_fm:
         for name, ftype, findex in ui.dict_fm[factor]:
             if ftype in ('선:일반', '선:조건'):
-                if gubun == 'S':
+                if ui.market_gubun < 4:
                     text = f"{text}\n{name} {ui.ctpg_arry[xpoint, findex]:,.2f}"
-                elif gubun == 'F':
-                    text = f"{text}\n{name} {ui.ctpg_arry[xpoint, findex]:,.4f}"
                 else:
                     text = f"{text}\n{name} {ui.ctpg_arry[xpoint, findex]:,.8f}"
             else:

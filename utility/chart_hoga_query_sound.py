@@ -666,7 +666,7 @@ class ChartHogaQuerySound:
             pass
 
         if df is None or df.empty:
-            self.windowQ.put((ui_num['차트'], '차트오류', '', '', '', ''))
+            self.windowQ.put((ui_num['차트'], '차트오류'))
             return
 
         round_unit = self.market_info['반올림단위']

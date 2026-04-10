@@ -129,7 +129,7 @@ def show_dialog_hoga(ui, _show, code):
     if ui.dialog_hoga.isVisible():
         put_hoga_code(ui, code)
     if ui.dialog_order.isVisible():
-        name = ui.dict_name[code] if code in ui.dict_name else code
+        name = ui.dict_name.get(code, code)
         if name not in ui.order_combo_name_list:
             ui.od_comboBoxxxxx_01.addItem(name)
         ui.od_comboBoxxxxx_01.setCurrentText(name)
@@ -154,7 +154,7 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
         else:
             chart_clear(ui)
             cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
-            data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
+            data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui))
             if detail is not None: data += (detail, buytimes)
             if cf1 and cf2:        data += (float(cf1), float(cf2))
             ui.chartQ.put(data)
@@ -421,7 +421,7 @@ def chart_moneytop_list(ui):
         return
 
     table_list = list(set(';'.join(df['거래대금순위'].to_list()).split(';')))
-    name_list = [ui.dict_name[code] if code in ui.dict_name else code for code in table_list] if not coin else table_list
+    name_list = [ui.dict_name.get(code, code) for code in table_list]
     name_list.sort()
 
     ui.ct_tableWidgett_01.setRowCount(len(name_list))

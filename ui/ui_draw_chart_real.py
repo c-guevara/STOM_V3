@@ -12,13 +12,6 @@ class DrawRealChart(DrawChartBase):
         self.real = True
         self.code, self.ui.ctpg_arry = data[1:]
 
-        if 'KRW' in self.code or 'USDT' in self.code:
-            self.gubun = 'C'
-        elif '키움증권' in self.ui.dict_set['거래소']:
-            self.gubun = 'S'
-        else:
-            self.gubun = 'F'
-
         if not self.ui.dialog_chart.isVisible():
             chart_clear(self.ui)
             if receiver_process_alive(self.ui):

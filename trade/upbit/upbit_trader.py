@@ -123,10 +123,10 @@ class UpbitTrader:
         df_td = pd.read_sql(f"SELECT * FROM c_tradelist WHERE 체결시간 LIKE '{self.str_today}%'", con).set_index('index')
         if len(df_cj) > 0:
             self.dict_cj = df_cj.to_dict('index')
-            self.windowQ.put((ui_num['C체결목록'], df_cj[::-1]))
+            self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
         if len(df_td) > 0:
             self.dict_td = df_td.to_dict('index')
-            self.windowQ.put((ui_num['C거래목록'], df_td[::-1]))
+            self.windowQ.put((ui_num['거래목록'], df_td[::-1]))
         if self.dict_set['모의투자']:
             df_jg = pd.read_sql(f'SELECT * FROM c_jangolist', con).set_index('index')
             if len(df_jg) > 0:
@@ -655,7 +655,7 @@ class UpbitTrader:
             '체결시간': 주문시간
         }
         df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
-        self.windowQ.put((ui_num['C거래목록'], df_td[::-1]))
+        self.windowQ.put((ui_num['거래목록'], df_td[::-1]))
         df = pd.DataFrame([[종목코드, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간]], columns=columns_td, index=[index])
         self.queryQ.put(('거래디비', df, 'c_tradelist', 'append'))
         self._update_totaltradelist()
@@ -684,7 +684,7 @@ class UpbitTrader:
         delete_query = f"DELETE FROM c_totaltradelist WHERE `index` = '{self.str_today}'"
         self.queryQ.put(('거래디비', delete_query))
         self.queryQ.put(('거래디비', df_tt, 'c_totaltradelist', 'append'))
-        self.windowQ.put((ui_num['C실현손익'], df_tt))
+        self.windowQ.put((ui_num['실현손익'], df_tt))
 
         if not first:
             self.teleQ.put(f'총매수금액 {총매수금액:,.0f}, 총매도금액 {총매도금액:,.0f}, 수익 {총수익금액:,.0f}, 손실 {총손실금액:,.0f}, 수익금합계 {수익금합계:,.0f}')
@@ -710,7 +710,7 @@ class UpbitTrader:
         }
         self.dict_cj = dict(sorted(self.dict_cj.items(), key=lambda x: x[0]))
         df_cj = pd.DataFrame.from_dict(self.dict_cj, orient='index')
-        self.windowQ.put((ui_num['C체결목록'], df_cj[::-1]))
+        self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
         df = pd.DataFrame([[종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호]], columns=columns_cj, index=[index])
         self.queryQ.put(('거래디비', df, 'c_chegeollist', 'append'))
 
@@ -761,8 +761,8 @@ class UpbitTrader:
         else:
             df_jg = pd.DataFrame(columns=columns_jg)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')
-        self.windowQ.put((ui_num['C잔고목록'], df_jg))
-        self.windowQ.put((ui_num['C잔고평가'], df_tj))
+        self.windowQ.put((ui_num['잔고목록'], df_jg))
+        self.windowQ.put((ui_num['잔고평가'], df_tj))
 
     def _strategy_stop(self):
         self.stgQ.put('매수전략중지')

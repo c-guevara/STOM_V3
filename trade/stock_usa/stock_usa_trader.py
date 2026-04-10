@@ -6,7 +6,7 @@ from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from trade.restapi_ls import LsRestAPI, WebSocketTrader
 from utility.setting_base import columns_cj, columns_td, ui_num, DB_TRADELIST, columns_jg
-from utility.static import now, timedelta_sec, now_utc, str_ymdhmsf, str_hmsf, str_hms, str_ymd, dt_hms, qtest_qwait, \
+from utility.static import now, timedelta_sec, now_cme, str_ymdhmsf, str_hmsf, str_hms, str_ymd, dt_hms, qtest_qwait, \
     set_builtin_print, error_decorator
 
 
@@ -75,7 +75,7 @@ class StockUsaTrader:
 
         self.symbols    = []
         self.jgcs_time  = self.get_jgcs_time()
-        self.str_today  = str_ymd(now_utc())
+        self.str_today  = str_ymd(now_cme())
         self.order_time = now()
 
         self.ls = LsRestAPI(self.windowQ, self.dict_set['access_key1'], self.dict_set['secret_key1'])
@@ -131,10 +131,10 @@ class StockUsaTrader:
         df_td = pd.read_sql(f"SELECT * FROM c_tradelist WHERE 체결시간 LIKE '{self.str_today}%'", con).set_index('index')
         if len(df_cj) > 0:
             self.dict_cj = df_cj.to_dict('index')
-            self.windowQ.put((ui_num['C체결목록'], df_cj[::-1]))
+            self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
         if len(df_td) > 0:
             self.dict_td = df_td.to_dict('index')
-            self.windowQ.put((ui_num['C거래목록'], df_td[::-1]))
+            self.windowQ.put((ui_num['거래목록'], df_td[::-1]))
         if self.dict_set['모의투자']:
             df_jg = pd.read_sql(f'SELECT * FROM c_jangolist', con).set_index('index')
             if len(df_jg) > 0:
@@ -172,7 +172,7 @@ class StockUsaTrader:
         self.stgQ.put(('잔고목록', self.dict_jg.copy()))
 
     def _scheduler2(self):
-        inthms = int(str_hms(now_utc()))
+        inthms = int(str_hms(now_cme()))
         if self.dict_set['타임프레임'] and inthms < self.dict_set['전략종료시간']:
             self._order_time_control()
         if self.dict_set['잔고청산'] and not self.dict_bool['잔고청산'] and self.jgcs_time < inthms < self.jgcs_time + 10:
@@ -200,7 +200,7 @@ class StockUsaTrader:
         elif self.dict_bool['잔고청산']:
             주문취소 = True
         elif 주문구분 == '매수':
-            inthmsutc = int(str_hms(now_utc()))
+            inthmsutc = int(str_hms(now_cme()))
             거래횟수 = len(set([v['체결시간'] for v in self.dict_td.values() if v['종목명'] == 종목코드]))
             손절횟수 = len(set([v['체결시간'] for v in self.dict_td.values() if v['종목명'] == 종목코드 and v['수익률'] < 0]))
             if self.dict_set['매수금지거래횟수'] and self.dict_set['매수금지거래횟수값'] <= 거래횟수:
@@ -217,7 +217,7 @@ class StockUsaTrader:
                 주문취소 = True
             elif self.dict_intg['추정예수금'] < 주문수량 * 주문가격:
                 if 현재시간 > self.dict_info[종목코드]['시드부족시간']:
-                    self._create_order('시드부족', 종목코드, 주문가격, 주문수량, str_hmsf(now_utc()), 시그널시간, 잔고청산, 0, None)
+                    self._create_order('시드부족', 종목코드, 주문가격, 주문수량, str_hmsf(now_cme()), 시그널시간, 잔고청산, 0, None)
                     self.dict_info[종목코드]['시드부족시간'] = timedelta_sec(180)
                 주문취소 = True
             elif 매수주문중:
@@ -478,7 +478,7 @@ class StockUsaTrader:
         pass
 
     def _get_index(self):
-        index = str_ymdhmsf(now_utc())
+        index = str_ymdhmsf(now_cme())
         if index in self.dict_cj:
             while index in self.dict_cj:
                 index = str(int(index) + 1)
@@ -608,7 +608,7 @@ class StockUsaTrader:
             '체결시간': 주문시간
         }
         df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
-        self.windowQ.put((ui_num['C거래목록'], df_td[::-1]))
+        self.windowQ.put((ui_num['거래목록'], df_td[::-1]))
         df = pd.DataFrame([[종목코드, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간]], columns=columns_td, index=[index])
         self.queryQ.put(('거래디비', df, 'c_tradelist', 'append'))
         self._update_totaltradelist()
@@ -637,7 +637,7 @@ class StockUsaTrader:
         delete_query = f"DELETE FROM c_totaltradelist WHERE `index` = '{self.str_today}'"
         self.queryQ.put(('거래디비', delete_query))
         self.queryQ.put(('거래디비', df_tt, 'c_totaltradelist', 'append'))
-        self.windowQ.put((ui_num['C실현손익'], df_tt))
+        self.windowQ.put((ui_num['실현손익'], df_tt))
 
         if not first:
             self.teleQ.put(f'총매수금액 {총매수금액:,.0f}, 총매도금액 {총매도금액:,.0f}, 수익 {총수익금액:,.0f}, 손실 {총손실금액:,.0f}, 수익금합계 {수익금합계:,.0f}')
@@ -663,7 +663,7 @@ class StockUsaTrader:
         }
         self.dict_cj = dict(sorted(self.dict_cj.items(), key=lambda x: x[0]))
         df_cj = pd.DataFrame.from_dict(self.dict_cj, orient='index')
-        self.windowQ.put((ui_num['C체결목록'], df_cj[::-1]))
+        self.windowQ.put((ui_num['체결목록'], df_cj[::-1]))
         df = pd.DataFrame([[종목코드, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호]], columns=columns_cj, index=[index])
         self.queryQ.put(('거래디비', df, 'c_chegeollist', 'append'))
 
@@ -714,8 +714,8 @@ class StockUsaTrader:
         else:
             df_jg = pd.DataFrame(columns=columns_jg)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')
-        self.windowQ.put((ui_num['C잔고목록'], df_jg))
-        self.windowQ.put((ui_num['C잔고평가'], df_tj))
+        self.windowQ.put((ui_num['잔고목록'], df_jg))
+        self.windowQ.put((ui_num['잔고평가'], df_tj))
 
     def _strategy_stop(self):
         self.stgQ.put('매수전략중지')

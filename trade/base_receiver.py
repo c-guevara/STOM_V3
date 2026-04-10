@@ -8,7 +8,7 @@ from trade.restapi_ls import LsRestData
 from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from utility.static import now, timedelta_sec, str_ymdhms, get_vi_price
+from utility.static import now, timedelta_sec, str_ymdhms, get_vi_price, str_hms, now_cme, now_utc
 
 
 class Updater(QThread):
@@ -601,4 +601,9 @@ class BaseReceiver:
                 self.lvhp_time = timedelta_sec(300)
 
     def _get_inthms(self):
-        pass
+        if self.market_gubun < 4 or self.market_gubun in (6, 7):
+            return int(str_hms())
+        elif self.market_gubun in (4, 8):
+            return int(str_hms(now_cme()))
+        else:
+            return int(str_hms(now_utc()))

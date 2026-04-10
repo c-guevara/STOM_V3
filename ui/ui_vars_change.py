@@ -2,7 +2,7 @@
 from traceback import format_exc
 from utility.setting_base import ui_num
 from utility.static import error_decorator
-from ui.set_text import buy_signal, sell_signal, future_buy_signal, future_sell_signal
+from ui.set_text import buy_signal, sell_signal, buy_signal_future, sell_signal_future
 
 
 @error_decorator
@@ -15,9 +15,9 @@ def get_fix_strategy(ui, strategy, gubun):
                 strategy += '\n' + buy_signal
         else:
             if '\nif BUY_LONG or SELL_SHORT:' in strategy:
-                strategy = strategy.split('\nif BUY_LONG or SELL_SHORT:')[0] + future_buy_signal
-            elif 'self.tickdata' not in strategy and future_buy_signal not in strategy:
-                strategy += '\n' + future_buy_signal
+                strategy = strategy.split('\nif BUY_LONG or SELL_SHORT:')[0] + buy_signal_future
+            elif 'self.tickdata' not in strategy and buy_signal_future not in strategy:
+                strategy += '\n' + buy_signal_future
     else:
         if ui.market_gubun < 6:
             if '\nif 매도:' in strategy:
@@ -26,9 +26,9 @@ def get_fix_strategy(ui, strategy, gubun):
                 strategy += '\n' + sell_signal
         else:
             if "\nif (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):" in strategy:
-                strategy = strategy.split("\nif (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):")[0] + future_sell_signal
-            elif 'self.tickdata' not in strategy and future_sell_signal not in strategy:
-                strategy += '\n' + future_sell_signal
+                strategy = strategy.split("\nif (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):")[0] + sell_signal_future
+            elif 'self.tickdata' not in strategy and sell_signal_future not in strategy:
+                strategy += '\n' + sell_signal_future
     return strategy
 
 

@@ -46,9 +46,6 @@ class BinanceReceiver(BaseReceiver):
         data = tuple(self.list_gsjm)
         self.stgQ.put(('관심목록', data))
 
-    def _get_inthms(self):
-        return int(str_hms(now_utc()))
-
     def _convert_hoga_data(self, data):
         try:
             data = data['data']

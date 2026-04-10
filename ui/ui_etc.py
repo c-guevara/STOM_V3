@@ -115,12 +115,12 @@ def chart_clear(ui):
 
 @error_decorator
 def calendar_clicked(ui):
-    table = ui.market_info['거래디비']
+    table_name = ui.market_info['거래디비']
     searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
-    df1 = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table} WHERE 체결시간 LIKE '{searchday}%'").set_index('index')
+    df1 = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name} WHERE 체결시간 LIKE '{searchday}%'").set_index('index')
     if len(df1) > 0:
         df1.sort_values(by=['체결시간'], ascending=True, inplace=True)
-        if 'future' in table:
+        if ui.market_gubun > 5:
             df1 = df1[['체결시간', '종목명', '포지션', '매수금액', '매도금액', '주문수량', '수익률', '수익금']]
         else:
             df1 = df1[['체결시간', '종목명', '매수금액', '매도금액', '주문수량', '수익률', '수익금']]

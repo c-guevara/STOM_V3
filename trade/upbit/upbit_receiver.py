@@ -2,7 +2,7 @@
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.base_receiver import BaseReceiver
-from utility.static import now, str_ymdhms_utc, str_hms, now_utc
+from utility.static import now, str_ymdhms_utc
 from trade.upbit.upbit_restapi import WebSocketReceiver, get_symbols_info
 
 
@@ -22,9 +22,6 @@ class UpbitReceiver(BaseReceiver):
         self.list_gsjm = [x for x, y in sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:10]]
         data = tuple(self.list_gsjm)
         self.stgQ.put(('관심목록', data))
-
-    def _get_inthms(self):
-        return int(str_hms(now_utc()))
 
     def _convert_real_data(self, data):
         try:

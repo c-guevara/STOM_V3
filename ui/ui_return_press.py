@@ -21,7 +21,7 @@ def return_press_01(ui):
             code = ui.dict_code[name]
         else:
             code = name
-            name = ui.dict_name[code] if code in ui.dict_name else code
+            name = ui.dict_name.get(code, code)
         ui.ct_lineEdittttt_04.setText(code)
         ui.ct_lineEdittttt_05.setText(name)
         show_dialog(ui, name, tickcount, searchdate, 4)
@@ -31,7 +31,7 @@ def return_press_01(ui):
         if item is None:
             return
         name       = item.text()
-        code       = ui.dict_code[name] if name in ui.dict_code else name
+        code       = ui.dict_code.get(name, name)
         searchdate = ui.ct_dateEdittttt_02.date().toString('yyyyMMdd')
         linetext   = ui.ct_lineEdittttt_03.text()
         tickcount  = int(linetext) if linetext else 30
@@ -43,7 +43,7 @@ def return_press_01(ui):
         ui.ct_lineEdittttt_04.setText(code)
         ui.ct_lineEdittttt_05.setText(name)
         ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-        data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui, code))
+        data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui))
         cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
         if cf1 and cf2: data += (float(cf1), float(cf2))
         ui.chartQ.put(data)

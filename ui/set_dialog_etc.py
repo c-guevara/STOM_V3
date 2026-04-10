@@ -5,10 +5,10 @@ from ui.ui_button_clicked_order import *
 from ui.ui_return_press import return_press_02
 from ui.ui_text_changed import text_changed_05
 from ui.ui_button_clicked_dialog_database import *
-from ui.ui_button_clicked_dialog_pass_ticks import *
+from ui.ui_button_clicked_dialog_passticks import *
 from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
 from ui.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
-from ui.ui_cell_clicked import cell_clicked_09, cell_clicked_10, cell_clicked_08
+from ui.ui_cell_clicked import cell_clicked_08, cell_clicked_09, cell_clicked_07
 from utility.setting_base import columns_hj, columns_hc, columns_hg, columns_gc, columns_ns, columns_jm1, columns_jm2, \
     columns_stg1, columns_stg2, columns_kp, columns_hc2
 
@@ -27,7 +27,7 @@ class SetDialogEtc:
         self.ui.hj_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hj, 1)
         self.ui.hc_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc, 12)
         self.ui.hc_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hc2, 12, visible=False)
-        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hg, 12, clicked=lambda row, col: cell_clicked_10(self.ui, row, col))
+        self.ui.hg_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_hoga, columns_hg, 12, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
         self.ui.hg_lineeeeeeeee_01 = self.wc.setLine(self.ui.dialog_hoga, 1)
         self.ui.hg_labellllllll_01 = QLabel('', self.ui.dialog_hoga)
         self.ui.hg_pushButtonnn_01 = self.wc.setPushbutton('이전(Alt+left)', parent=self.ui.dialog_hoga, click=lambda: hg_button_clicked_01(self.ui, '이전'), shortcut='Alt+left')
@@ -39,8 +39,8 @@ class SetDialogEtc:
         self.ui.dialog_info.geometry().center()
 
         self.ui.gg_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_info, font=qfont14)
-        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_gc, 20, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
-        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_ns, 10, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.gs_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_gc, 20, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
+        self.ui.ns_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_ns, 10, clicked=lambda row, col: cell_clicked_07(self.ui, row, col))
         self.ui.jm_tableWidgett_01 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm1, 13)
         self.ui.jm_tableWidgett_02 = self.wc.setTablewidget(self.ui.dialog_info, columns_jm2, 13)
 
@@ -97,9 +97,9 @@ class SetDialogEtc:
         self.ui.db_labellllllll_09 = QLabel('거래기록 테이블 모두 삭제 (체결목록, 잔고목록, 거래목록, 일별실현손익)', self.ui.db_groupBoxxxxx_01)
         self.ui.db_pushButtonnn_09 = self.wc.setPushbutton('실행', parent=self.ui.db_groupBoxxxxx_01, click=lambda: dbbutton_clicked_09(self.ui))
 
-        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.ssg_tab1, columns_stg1, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
-        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.ssg_tab2, columns_stg2, 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
-        self.ui.db_tableWidgett_05 = self.wc.setTablewidget(self.ui.bsd_tab0, ['백테스트 스케쥴'], 8, clicked=lambda row, col: cell_clicked_09(self.ui, row, col))
+        self.ui.db_tableWidgett_01 = self.wc.setTablewidget(self.ui.ssg_tab1, columns_stg1, 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.db_tableWidgett_02 = self.wc.setTablewidget(self.ui.ssg_tab2, columns_stg2, 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
+        self.ui.db_tableWidgett_05 = self.wc.setTablewidget(self.ui.bsd_tab0, ['백테스트 스케쥴'], 8, clicked=lambda row, col: cell_clicked_08(self.ui, row, col))
         self.ui.db_textEdittttt_01 = self.wc.setTextEdit(self.ui.dialog_db, vscroll=True)
 
         self.ui.dialog_order = self.wc.setDialog('STOM ORDER')
@@ -240,9 +240,9 @@ class SetDialogEtc:
 
         self.ui.dialog_setsj = self.wc.setDialog('STOM SETSJ', parent=self.ui)
         self.ui.dialog_setsj.geometry().center()
-        self.ui.set_pushButton_01 = self.wc.setPushbutton('설정예제', parent=self.ui.dialog_setsj, click=lambda: setting_elapsed_tick_number_sample(self.ui))
-        self.ui.set_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_setsj, click=lambda: setting_elapsed_tick_number_load(self.ui))
-        self.ui.set_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_setsj, click=lambda: setting_elapsed_tick_number_save(self.ui))
+        self.ui.set_pushButton_01 = self.wc.setPushbutton('설정예제', parent=self.ui.dialog_setsj, click=lambda: setting_passticks_sample(self.ui))
+        self.ui.set_pushButton_02 = self.wc.setPushbutton('불러오기', parent=self.ui.dialog_setsj, click=lambda: setting_passticks_load(self.ui))
+        self.ui.set_pushButton_03 = self.wc.setPushbutton('저장하기', parent=self.ui.dialog_setsj, click=lambda: setting_passticks_save(self.ui))
         self.ui.set_groupBoxxx_01 = QGroupBox('', self.ui.dialog_setsj)
         text = '''
         ▣ 백테 및 전략연산에서 사용할 경과틱수('조건명')을 설정한다. 경과틱수는 작성한 조건을 만족한 이후 경과한 틱수이며

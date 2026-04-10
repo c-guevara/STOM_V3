@@ -4,7 +4,7 @@ from ui.ui_etc import calendar_clicked
 from ui.set_widget import error_decorator
 from PyQt5.QtWidgets import QCalendarWidget, QTabWidget
 from ui.ui_button_clicked_etc import ttbutton_clicked_01
-from ui.ui_cell_clicked import cell_clicked_11, cell_clicked_01, cell_clicked_04, cell_clicked_05
+from ui.ui_cell_clicked import cell_clicked_01, cell_clicked_02, cell_clicked_03, cell_clicked_04, cell_clicked_10
 from utility.setting_base import columns_tt, columns_td, columns_tj, columns_jg, columns_gj, columns_cj, columns_dt, \
     columns_dd, columns_nt, columns_nd, columns_sb, columns_sd
 
@@ -20,7 +20,7 @@ class SetTable:
         self.ui.tt_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_tt, 1)
         self.ui.td_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_td, 13, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
         self.ui.tj_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_tj, 1)
-        self.ui.jg_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_jg, 13, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
+        self.ui.jg_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_jg, 13, fixed=True, clicked=lambda row, col: cell_clicked_02(self.ui, row, col))
         self.ui.gj_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_gj, 15, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
         self.ui.cj_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_cj, 15, fixed=True, clicked=lambda row, col: cell_clicked_01(self.ui, row, col))
 
@@ -34,13 +34,13 @@ class SetTable:
         self.ui.calendarWidgetttt.setCurrentPage(todayDate.year(), todayDate.month())
         self.ui.calendarWidgetttt.clicked.connect(lambda: calendar_clicked(self.ui))
         self.ui.dt_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_dt, 1)
-        self.ui.ds_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_dd, 19, clicked=lambda row, col: cell_clicked_04(self.ui, row, col))
+        self.ui.ds_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_dd, 19, clicked=lambda row, col: cell_clicked_03(self.ui, row, col))
 
         self.ui.nt_pushButtonn_01 = self.wc.setPushbutton('일별집계', parent=self.ui.td_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, '일별집계'))
         self.ui.nt_pushButtonn_02 = self.wc.setPushbutton('월별집계', parent=self.ui.td_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, '월별집계'))
         self.ui.nt_pushButtonn_03 = self.wc.setPushbutton('연도별집계', parent=self.ui.td_tab, animated=True, click=lambda: ttbutton_clicked_01(self.ui, '연도별집계'))
-        self.ui.nt_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_nt, 1, clicked=lambda row, col: cell_clicked_11(self.ui, row, col))
-        self.ui.ns_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_nd, 28, clicked=lambda row, col: cell_clicked_05(self.ui, row, col))
+        self.ui.nt_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_nt, 1, clicked=lambda row, col: cell_clicked_10(self.ui, row, col))
+        self.ui.ns_tableWidgetttt = self.wc.setTablewidget(self.ui.td_tab, columns_nd, 28, clicked=lambda row, col: cell_clicked_04(self.ui, row, col))
 
         self.ui.table_total_listt = [
             self.ui.calendarWidgetttt, self.ui.dt_tableWidgetttt, self.ui.ds_tableWidgetttt, self.ui.nt_pushButtonn_01,
