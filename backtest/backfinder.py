@@ -18,7 +18,7 @@ class BackFinder:
         self.tq           = tq
         self.lq           = lq
         self.beq_list     = beq_list
-        self.market_sname = market_infos[2]
+        self.market_info  = market_infos[1]
         self.dict_set     = dict_set
         self.avgtime      = int(avgtime)
         self.startday     = int(startday)
@@ -39,7 +39,7 @@ class BackFinder:
 
     def _start(self):
         con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.market_sname}_buy', con).set_index('index')
+        dfb = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_buy", con).set_index('index')
         con.close()
 
         buystg = dfb['전략코드'][self.buystg_name]
@@ -91,7 +91,7 @@ class BackFinder:
             save_time = str_ymdhms()
             con = sqlite3.connect(DB_BACKTEST)
             df = pd.DataFrame.from_dict(dict_back, orient='index')
-            df.to_sql(f"{self.market_sname}_bf_{self.buystg_name}_{save_time}", con, if_exists='append', chunksize=1000)
+            df.to_sql(f"{self.market_info['전략구분']}_bf_{self.buystg_name}_{save_time}", con, if_exists='append', chunksize=1000)
             con.close()
             self.wq.put((ui_num['백테스트'], '백파인터 결과값 저장 완료'))
         else:

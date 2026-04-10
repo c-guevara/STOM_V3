@@ -19,7 +19,7 @@ def sell_stg_load(ui):
             return
         strategy_version(ui, 'basic', 'sell', strategy_name)
     elif ui.ss_textEditttt_02.isVisible():
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sell').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_sell").set_index('index')
         if len(df) > 0:
             ui.svjs_comboBoxx_01.clear()
             indexs = list(df.index)
@@ -46,13 +46,13 @@ def sell_stg_save(ui):
     else:
         if 'self.tickcols' in strategy or (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest1(strategy):
             if ui.proc_chqs.is_alive():
-                delete_query  = f"DELETE FROM {ui.market_sname}_sell WHERE `index` = '{strategy_name}'"
-                insert_query  = f"INSERT INTO {ui.market_sname}_sell VALUES (?, ?)"
+                delete_query  = f"DELETE FROM {ui.market_info['전략구분']}_sell WHERE `index` = '{strategy_name}'"
+                insert_query  = f"INSERT INTO {ui.market_info['전략구분']}_sell VALUES (?, ?)"
                 insert_values = (strategy_name, strategy)
                 ui.queryQ.put(('전략디비', delete_query))
                 ui.queryQ.put(('전략디비', insert_query, insert_values))
                 ui.svjs_pushButon_04.setStyleSheet(style_bc_st)
-                stg_save_version(ui.market_sname, 'basic', 'sell', strategy_name, strategy)
+                stg_save_version(ui.market_info['전략구분'], 'basic', 'sell', strategy_name, strategy)
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 

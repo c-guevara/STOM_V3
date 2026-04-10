@@ -37,7 +37,7 @@ def update_cpuper(ui):
 def auto_back_schedule(ui, gubun):
     if gubun == 1:
         ui.auto_mode = True
-        if ui.dict_set['알림소리'] or ui.dict_set['코인알림소리']:
+        if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
             ui.soundQ.put('예약된 백테스트 스케쥴러를 시작합니다.')
         if not ui.dialog_backengine.isVisible():
             backengine_show(ui)
@@ -89,12 +89,9 @@ def update_dictset(ui):
 @error_decorator
 def update_market_gubun(ui):
     from utility.setting_market import DICT_MARKET_GUBUN, DICT_MARKET_INFO
-    market = ui.dict_set['거래소']
-    ui.market_gubun = DICT_MARKET_GUBUN[market]
-    ui.market_name  = market[:3] if '업' in market else market[:6] if '바' in market else market[:4]
+    ui.market_gubun = DICT_MARKET_GUBUN[ui.dict_set['거래소']]
     ui.market_info  = DICT_MARKET_INFO[ui.market_gubun]
-    ui.market_sname = ui.market_info['전략구분']
-    ui.market_infos = [ui.market_gubun, ui.market_name, ui.market_sname, ui.market_info]
+    ui.market_infos = [ui.market_gubun, ui.market_info]
     factor_list     = ui.market_info['팩터목록'][ui.dict_set['타임프레임']]
     ui.dict_findex  = {factor: i for i, factor in enumerate(factor_list)}
 

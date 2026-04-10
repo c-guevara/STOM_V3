@@ -3,7 +3,7 @@ import bisect
 import datetime
 
 
-def set_builtin_print(bit64, q):
+def set_builtin_print(q):
     import inspect
     import builtins
     from utility.setting_base import ui_num
@@ -38,10 +38,7 @@ def set_builtin_print(bit64, q):
             message = message.lstrip()
             message = message.rstrip()
 
-            if bit64:
-                q.put((ui_num['시스템로그'], message))
-            else:
-                q.put(('window', (ui_num['시스템로그'], message)))
+            q.put((ui_num['시스템로그'], message))
         except:
             pass
 

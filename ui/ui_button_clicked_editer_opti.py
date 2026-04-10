@@ -19,7 +19,7 @@ def opti_buy_load(ui):
             return
         strategy_version(ui, 'opti', 'buy', strategy_name)
     elif ui.ss_textEditttt_03.isVisible():
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optibuy").set_index('index')
         if len(df) > 0:
             ui.svc_comboBoxxx_01.clear()
             indexs = list(df.index)
@@ -46,16 +46,16 @@ def opti_buy_save(ui):
         else:
             if 'self.tickcols' in strategy or (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest1(strategy):
                 if ui.proc_chqs.is_alive():
-                    df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_sname}_optibuy WHERE `index` = '{strategy_name}'")
+                    df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optibuy WHERE `index` = '{strategy_name}'")
                     if len(df) > 0:
-                        update_query  = f"UPDATE {ui.market_sname}_optibuy SET 전략코드 = ? WHERE `index` = ?"
+                        update_query  = f"UPDATE {ui.market_info['전략구분']}_optibuy SET 전략코드 = ? WHERE `index` = ?"
                         update_vlaues = (strategy, strategy_name)
                         ui.queryQ.put(('전략디비', update_query, update_vlaues))
                     else:
-                        insert_query  = f"INSERT INTO {ui.market_sname}_optibuy VALUES (?, ?, ?)"
+                        insert_query  = f"INSERT INTO {ui.market_info['전략구분']}_optibuy VALUES (?, ?, ?)"
                         insert_vlaues = (strategy_name, strategy, '')
                         ui.queryQ.put(('전략디비', insert_query, insert_vlaues))
-                    stg_save_version(ui.market_sname, 'opti', 'buy', strategy_name, strategy)
+                    stg_save_version(ui.market_info['전략구분'], 'opti', 'buy', strategy_name, strategy)
                     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
@@ -68,7 +68,7 @@ def opti_vars_load(ui):
             return
         strategy_version(ui, 'opti', 'vars', strategy_name)
     elif ui.ss_textEditttt_05.isVisible():
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optivars').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optivars").set_index('index')
         if len(df) > 0:
             ui.svc_comboBoxxx_02.clear()
             indexs = list(df.index)
@@ -93,12 +93,12 @@ def opti_vars_save(ui):
         else:
             if (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest2(strategy):
                 if ui.proc_chqs.is_alive():
-                    delete_query  = f"DELETE FROM {ui.market_sname}_optivars WHERE `index` = '{strategy_name}'"
-                    insert_query  = f"INSERT INTO {ui.market_sname}_optivars VALUES (?, ?)"
+                    delete_query  = f"DELETE FROM {ui.market_info['전략구분']}_optivars WHERE `index` = '{strategy_name}'"
+                    insert_query  = f"INSERT INTO {ui.market_info['전략구분']}_optivars VALUES (?, ?)"
                     insert_values = (strategy_name, strategy)
                     ui.queryQ.put(('전략디비', delete_query))
                     ui.queryQ.put(('전략디비', insert_query, insert_values))
-                    stg_save_version(ui.market_sname, 'opti', 'vars', strategy_name, strategy)
+                    stg_save_version(ui.market_info['전략구분'], 'opti', 'vars', strategy_name, strategy)
                     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
@@ -111,7 +111,7 @@ def opti_sell_load(ui):
             return
         strategy_version(ui, 'opti', 'sell', strategy_name)
     elif ui.ss_textEditttt_04.isVisible():
-        df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optisell').set_index('index')
+        df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optisell").set_index('index')
         if len(df) > 0:
             ui.svc_comboBoxxx_08.clear()
             indexs = list(df.index)
@@ -138,12 +138,12 @@ def opti_sell_save(ui):
         else:
             if 'self.tickcols' in strategy or (QApplication.keyboardModifiers() & Qt.ControlModifier) or ui.BackCodeTest1(strategy):
                 if ui.proc_chqs.is_alive():
-                    delete_query  = f"DELETE FROM {ui.market_sname}_optisell WHERE `index` = '{strategy_name}'"
-                    insert_query  = f"INSERT INTO {ui.market_sname}_optisell VALUES (?, ?)"
+                    delete_query  = f"DELETE FROM {ui.market_info['전략구분']}_optisell WHERE `index` = '{strategy_name}'"
+                    insert_query  = f"INSERT INTO {ui.market_info['전략구분']}_optisell VALUES (?, ?)"
                     insert_values = (strategy_name, strategy)
                     ui.queryQ.put(('전략디비', delete_query))
                     ui.queryQ.put(('전략디비', insert_query, insert_values))
-                    stg_save_version(ui.market_sname, 'opti', 'sell', strategy_name, strategy)
+                    stg_save_version(ui.market_info['전략구분'], 'opti', 'sell', strategy_name, strategy)
                     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
@@ -202,7 +202,7 @@ def opti_sample(ui):
 
 @error_decorator
 def opti_to_buy_save(ui):
-    tabl = f'{ui.market_sname}_optivars' if not ui.sva_pushButton_01.isVisible() else f'{ui.market_sname}_optigavars'
+    tabl = f"{ui.market_info['전략구분']}_optivars" if not ui.sva_pushButton_01.isVisible() else f"{ui.market_info['전략구분']}_optigavars"
     stgy = ui.svc_comboBoxxx_01.currentText()
     opti = ui.svc_comboBoxxx_02.currentText() if not ui.sva_pushButton_01.isVisible() else ui.sva_comboBoxxx_01.currentText()
     name = ui.svc_lineEdittt_04.text()
@@ -213,9 +213,9 @@ def opti_to_buy_save(ui):
         QMessageBox.critical(ui, '오류 알림', '매수전략의 이름에 특문이 포함되어 있습니다.\n언더바(_)를 제외한 특문을 제거하십시오.\n')
         return
 
-    df  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
+    df  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optibuy").set_index('index')
     stg = df['전략코드'][stgy]
-    df  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM "{tabl}"').set_index('index')
+    df  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM '{tabl}'").set_index('index')
     opt = df['전략코드'][opti]
 
     try:
@@ -229,8 +229,8 @@ def opti_to_buy_save(ui):
         return
 
     if ui.proc_chqs.is_alive():
-        delete_query  = f"DELETE FROM {ui.market_sname}_buy WHERE `index` = '{name}'"
-        insert_query  = f"INSERT INTO {ui.market_sname}_buy VALUES (?, ?)"
+        delete_query  = f"DELETE FROM {ui.market_info['전략구분']}_buy WHERE `index` = '{name}'"
+        insert_query  = f"INSERT INTO {ui.market_info['전략구분']}_buy VALUES (?, ?)"
         insert_values = (name, stg)
         ui.queryQ.put(('전략디비', delete_query))
         ui.queryQ.put(('전략디비', insert_query, insert_values))
@@ -239,7 +239,7 @@ def opti_to_buy_save(ui):
 
 @error_decorator
 def opti_to_sell_save(ui):
-    tabl = f'{ui.market_sname}_optivars' if not ui.sva_pushButton_01.isVisible() else f'{ui.market_sname}_optigavars'
+    tabl = f"{ui.market_info['전략구분']}_optivars" if not ui.sva_pushButton_01.isVisible() else f"{ui.market_info['전략구분']}_optigavars"
     stgy = ui.svc_comboBoxxx_08.currentText()
     opti = ui.svc_comboBoxxx_02.currentText() if not ui.sva_pushButton_01.isVisible() else ui.sva_comboBoxxx_01.currentText()
     name = ui.svc_lineEdittt_05.text()
@@ -250,9 +250,9 @@ def opti_to_sell_save(ui):
         QMessageBox.critical(ui, '오류 알림', '매도전략의 이름에 특문이 포함되어 있습니다.\n언더바(_)를 제외한 특문을 제거하십시오.\n')
         return
 
-    df  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optisell').set_index('index')
+    df  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optisell").set_index('index')
     stg = df['전략코드'][stgy]
-    df  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM "{tabl}"').set_index('index')
+    df  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM '{tabl}'").set_index('index')
     opt = df['전략코드'][opti]
 
     try:
@@ -266,8 +266,8 @@ def opti_to_sell_save(ui):
         return
 
     if ui.proc_chqs.is_alive():
-        delete_query  = f"DELETE FROM {ui.market_sname}_sell WHERE `index` = '{name}'"
-        insert_query  = f"INSERT INTO {ui.market_sname}_sell VALUES (?, ?)"
+        delete_query  = f"DELETE FROM {ui.market_info['전략구분']}_sell WHERE `index` = '{name}'"
+        insert_query  = f"INSERT INTO {ui.market_info['전략구분']}_sell VALUES (?, ?)"
         insert_values = (name, stg)
         ui.queryQ.put(('전략디비', delete_query))
         ui.queryQ.put(('전략디비', insert_query, insert_values))

@@ -98,16 +98,16 @@ class BackEngineUpbitTick2(BackEngineBaseOms):
                         if not 보유중:
                             exec(self.buystg)
                         else:
-                            if not self._check_divid_buy(포지션, 현재가, 추가매수가, 수익률) and self.dict_set['코인매수분할시그널']:
+                            if not self._check_divid_buy(포지션, 현재가, 추가매수가, 수익률) and self.dict_set['매수분할시그널']:
                                 exec(self.buystg)
 
                     if '매도' in gubun:
                         if self._check_sonjeol(수익률, 수익금): continue
                         if self._cancel_sell_order(매수분할횟수): continue
-                        if self.dict_set['코인매도분할횟수'] == 1:
+                        if self.dict_set['매도분할횟수'] == 1:
                             exec(self.sellstg)
                         else:
-                            if not self._check_divid_sell(포지션, 수익률, 매도분할횟수) and self.dict_set['코인매도분할시그널']:
+                            if not self._check_divid_sell(포지션, 수익률, 매도분할횟수) and self.dict_set['매도분할시그널']:
                                 exec(self.sellstg)
 
         elif self.opti_kind == 3:
@@ -149,7 +149,7 @@ class BackEngineUpbitTick2(BackEngineBaseOms):
                             else:
                                 exec(self.dict_buystg[index_])
                         else:
-                            if not self._check_divid_buy(포지션, 현재가, 추가매수가, 수익률) and self.dict_set['코인매도분할시그널']:
+                            if not self._check_divid_buy(포지션, 현재가, 추가매수가, 수익률) and self.dict_set['매도분할시그널']:
                                 if self.back_type != '조건최적화':
                                     exec(self.buystg)
                                 else:
@@ -158,13 +158,13 @@ class BackEngineUpbitTick2(BackEngineBaseOms):
                     if '매도' in gubun:
                         if self._check_sonjeol(수익률, 수익금): continue
                         if self._cancel_sell_order(매수분할횟수): continue
-                        if self.dict_set['코인매도분할횟수'] == 1:
+                        if self.dict_set['매도분할횟수'] == 1:
                             if self.back_type != '조건최적화':
                                 exec(self.sellstg)
                             else:
                                 exec(self.dict_sellstg[index_])
                         else:
-                            if not self._check_divid_sell(포지션, 수익률, 매도분할횟수) and self.dict_set['코인매도분할시그널']:
+                            if not self._check_divid_sell(포지션, 수익률, 매도분할횟수) and self.dict_set['매도분할시그널']:
                                 if self.back_type != '조건최적화':
                                     exec(self.sellstg)
                                 else:
@@ -199,16 +199,16 @@ class BackEngineUpbitTick2(BackEngineBaseOms):
                 if not 보유중:
                     exec(self.buystg)
                 else:
-                    if not self._check_divid_buy(포지션, 현재가, 추가매수가, 수익률) and self.dict_set['코인매수분할시그널']:
+                    if not self._check_divid_buy(포지션, 현재가, 추가매수가, 수익률) and self.dict_set['매수분할시그널']:
                         exec(self.buystg)
 
             if '매도' in gubun:
                 if self._check_sonjeol(수익률, 수익금): return
                 if self._cancel_sell_order(매수분할횟수): return
-                if self.dict_set['코인매도분할횟수'] == 1:
+                if self.dict_set['매도분할횟수'] == 1:
                     exec(self.sellstg)
                 else:
-                    if not self._check_divid_sell(포지션, 수익률, 매도분할횟수) and self.dict_set['코인매도분할시그널']:
+                    if not self._check_divid_sell(포지션, 수익률, 매도분할횟수) and self.dict_set['매도분할시그널']:
                         exec(self.sellstg)
 
     def _update_globals_func(self, dict_add_func):

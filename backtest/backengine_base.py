@@ -91,7 +91,7 @@ class BackEngineBase(StrategyGlobalsFunc):
         self.sell_count      = 0
         self.비중조절기준       = 0
 
-        set_builtin_print(True, self.wq)
+        set_builtin_print(True)
         self._main_loop()
 
     def _update_sub_vars(self):

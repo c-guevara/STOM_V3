@@ -3,7 +3,8 @@ import numpy as np
 from utility.setting_base import ui_num
 from trade.stock_korea.stock_strategy_tick import StockStrategyTick
 # noinspection PyUnresolvedReferences
-from utility.static import now, dt_ymdhms, timedelta_sec, get_stock_hogaunit, get_stock_profit, get_indicator
+from utility.static import now, dt_ymdhms, timedelta_sec, get_stock_hogaunit, get_stock_profit, get_indicator, \
+    error_decorator
 
 
 class StockStrategyMin(StockStrategyTick):
@@ -11,6 +12,7 @@ class StockStrategyMin(StockStrategyTick):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
+    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
             VI해제시간, VI가격, VI호가단위, 분봉시가, 분봉고가, 분봉저가, \
@@ -55,8 +57,8 @@ class StockStrategyMin(StockStrategyTick):
             )
             self.arry_code[-1, self.area_cnt:self.data_cnt] = indicator_list
 
-            AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, OBV, \
-                PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
+            AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
+                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
 
             high_low = self.high_low.get(종목코드)
             if high_low:
@@ -113,7 +115,6 @@ class StockStrategyMin(StockStrategyTick):
                 if jg_data:
                     if 종목코드 not in self.dict_buy_num:
                         self.dict_buy_num[종목코드] = self.indexn
-                    # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
                     _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
                     _, 수익금, 수익률 = get_stock_profit(매입금액, 보유수량 * 현재가)
                     profit_data = self.dict_profit.get(종목코드)
@@ -129,11 +130,13 @@ class StockStrategyMin(StockStrategyTick):
                     보유시간 = int((now() - dt_ymdhms(매수시간)).total_seconds() / 60)
                     매수틱번호 = self.dict_buy_num[종목코드]
                 else:
-                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0
+                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                        최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0
 
                 self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
-                BBT = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+                BBT = not self.dict_set['매수금지시간'] or \
+                    not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
                 BLK = not self.dict_set['매수금지블랙리스트'] or 종목코드 not in self.dict_set['블랙리스트']
                 NIB = 종목코드 not in self.dict_signal['매수']
                 NIS = 종목코드 not in self.dict_signal['매도']
@@ -163,21 +166,26 @@ class StockStrategyMin(StockStrategyTick):
                         if 매수:
                             self.Buy()
 
-                SBT = not self.dict_set['매도금지시간'] or not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
-                SCC = self.dict_set['매수분할횟수'] == 1 or not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+                SBT = not self.dict_set['매도금지시간'] or \
+                    not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+                SCC = self.dict_set['매수분할횟수'] == 1 or \
+                    not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
                 NIB = 종목코드 not in self.dict_signal['매수']
 
                 A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
                 B = self.dict_set['매도분할시그널']
                 C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['매도분할횟수']
                 D = NIS and self.dict_set['매수취소매도시그널'] and not NIB
-                E = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
-                F = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+                E = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                F = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
 
                 if SBT and (A or (B and C) or C or D or E or F):
                     강제청산 = E or F
                     전량매도 = A or 강제청산
-                    self.info_for_signal = D, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+                    self.info_for_signal = \
+                        D, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                     매도 = False
                     if A or (B and C) or D:
@@ -203,7 +211,7 @@ class StockStrategyMin(StockStrategyTick):
             self.indexn = 데이터길이 - 1
 
         if 관심종목:
-            # ['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
                 '종목명': 종목코드,
                 'per': 등락율,

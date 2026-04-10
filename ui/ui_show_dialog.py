@@ -282,8 +282,8 @@ def show_db(ui):
     ui.db_tableWidgett_02.clearContents()
     ui.db_tableWidgett_05.clearContents()
 
-    stock_stg_list = [f'{ui.market_sname}_buy', f'{ui.market_sname}_sell',
-                      f'{ui.market_sname}_optibuy', f'{ui.market_sname}_optisell']
+    stock_stg_list = [f"{ui.market_info['전략구분']}_buy", f"{ui.market_info['전략구분']}_sell",
+                      f"{ui.market_info['전략구분']}_optibuy", f"{ui.market_info['전략구분']}_optisell"]
     maxlow = 0
     for i, stock_stg in enumerate(stock_stg_list):
         df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {stock_stg}')
@@ -299,8 +299,8 @@ def show_db(ui):
     if maxlow < 8:
         ui.db_tableWidgett_01.setRowCount(8)
 
-    stock_stg_list = [f'{ui.market_sname}_optivars', f'{ui.market_sname}_optigavars',
-                      f'{ui.market_sname}_buyconds', f'{ui.market_sname}_sellconds']
+    stock_stg_list = [f"{ui.market_info['전략구분']}_optivars", f"{ui.market_info['전략구분']}_optigavars",
+                      f"{ui.market_info['전략구분']}_buyconds", f"{ui.market_info['전략구분']}_sellconds"]
     maxlow = 0
     for i, stock_stg in enumerate(stock_stg_list):
         df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {stock_stg}')
@@ -443,13 +443,10 @@ def chart_size_change(ui):
         else:
             width = 2898
         ui.dialog_chart.setFixedSize(width, 1370 if not ui.dict_set['저해상도'] else 1010)
-        ui.ct_pushButtonnn_06.setText('주식')
+        ui.ct_pushButtonnn_06.setText('축소')
         ui.ct_pushButtonnn_06.setStyleSheet(style_bc_bb)
         chart_moneytop_list(ui)
-    elif ui.ct_pushButtonnn_06.text() == '주식':
-        ui.ct_pushButtonnn_06.setText('코인')
-        chart_moneytop_list(ui)
-    elif ui.ct_pushButtonnn_06.text() == '코인':
+    elif ui.ct_pushButtonnn_06.text() == '축소':
         if ui.ct_pushButtonnn_05.text() == 'CHART I':
             width = 1403
         elif ui.ct_pushButtonnn_05.text() == 'CHART II':

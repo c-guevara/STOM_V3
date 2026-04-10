@@ -20,14 +20,14 @@ class BackEngineBaseOms(BackEngineBase):
     def _check_buy_or_sell(self, 보유중, 현재가, 매수분할횟수, 매수호가, 매도호가, 관심종목, 매수가, 주문수량, 보유수량, 매수호가단위,
                            매수주문취소시간, 매도호가단위, 매도정정횟수, 매도주문취소시간, 주문포지션, 분봉고가=None, 분봉저가=None):
         gubun = None
-        if self.dict_set['매수주문구분'] == '시장가':
+        if self.dict_set['매수주문유형'] == '시장가':
             if not 보유중:
                 gubun = '매수'
             elif 매수분할횟수 < self.dict_set['매수분할횟수']:
                 gubun = '매수매도'
             else:
                 gubun = '매도'
-        elif self.dict_set['매수주문구분'] == '지정가':
+        elif self.dict_set['매수주문유형'] == '지정가':
             관심종목1 = self._관심종목N(1)
             if not 보유중:
                 if 매수호가 == 0:
@@ -85,7 +85,7 @@ class BackEngineBaseOms(BackEngineBase):
         self._get_buy_count(buy_long)
         주문수량 = self.curr_trade_info['주문수량']
         if 주문수량 > 0:
-            if self.dict_set['매수주문구분'] == '시장가':
+            if self.dict_set['매수주문유형'] == '시장가':
                 if self.market_gubun in (1, 3) or buy_long:
                     호가배열 = self.shogainfo[:self.buy_hj_limit]
                     잔량배열 = self.shreminfo[:self.buy_hj_limit]
@@ -108,7 +108,7 @@ class BackEngineBaseOms(BackEngineBase):
                     })
                     self._update_buy_info(주문포지션, True if 매수가 == 0 else False)
 
-            elif self.dict_set['매수주문구분'] == '지정가':
+            elif self.dict_set['매수주문유형'] == '지정가':
                 매수주문취소시간 = timedelta_sec(
                     self.dict_set['매수취소시간초'],
                     dt_ymdhms(str(self.index)) if self.is_tick else dt_ymdhm(str(self.index))
@@ -150,7 +150,7 @@ class BackEngineBaseOms(BackEngineBase):
         oc_ratio = order_ratio[매수분할횟수]
         self.curr_trade_info['주문수량'] = self._set_buy_count(betting, 현재가, 매수가, oc_ratio)
 
-        if self.dict_set['매수주문구분'] == '지정가':
+        if self.dict_set['매수주문유형'] == '지정가':
             기준가격 = 현재가
             if self.dict_set['매수지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1
             if self.dict_set['매수지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1
@@ -259,18 +259,18 @@ class BackEngineBaseOms(BackEngineBase):
         C = self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
         D = self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
         if A or B or C or D:
-            origin_sell_gubun = self.dict_set['매도주문구분']
-            self.dict_set['매도주문구분'] = '시장가'
+            origin_sell_gubun = self.dict_set['매도주문유형']
+            self.dict_set['매도주문유형'] = '시장가'
             self.curr_trade_info['주문수량'] = self.curr_trade_info['보유수량']
             self.Sell()
             self.sell_cond = 1001 if A or B else 1002
-            self.dict_set['매도주문구분'] = origin_sell_gubun
+            self.dict_set['매도주문유형'] = origin_sell_gubun
             return True
         return False
 
     def _cancel_sell_order(self, 매수분할횟수):
         cancel = False
-        if self.dict_set['매도주문구분'] == '시장가':
+        if self.dict_set['매도주문유형'] == '시장가':
             if 매수분할횟수 != self.curr_trade_info['매수분할횟수']:
                 cancel = True
                 return cancel
@@ -292,7 +292,7 @@ class BackEngineBaseOms(BackEngineBase):
 
     def Sell(self, sell_long=False):
         self._get_sell_count()
-        if self.dict_set['매도주문구분'] == '시장가':
+        if self.dict_set['매도주문유형'] == '시장가':
             주문수량 = self.curr_trade_info['주문수량']
             if 주문수량 > 0:
                 if self.market_gubun in (1, 3) or sell_long:
@@ -307,7 +307,7 @@ class BackEngineBaseOms(BackEngineBase):
                     self.curr_trade_info['매도가'] = self._get_order_price(거래금액, 주문수량)
                     self._calculation_eyun()
 
-        elif self.dict_set['매도주문구분'] == '지정가':
+        elif self.dict_set['매도주문유형'] == '지정가':
             매도주문취소시간 = timedelta_sec(
                 self.dict_set['매도취소시간초'],
                 dt_ymdhms(str(self.index)) if self.is_tick else dt_ymdhm(str(self.index))
@@ -332,7 +332,7 @@ class BackEngineBaseOms(BackEngineBase):
             if self.curr_trade_info['주문수량'] > 보유수량 or 매도분할횟수 + 1 == self.dict_set['매도분할횟수']:
                 self.curr_trade_info['주문수량'] = 보유수량
 
-        if self.dict_set['매도주문구분'] == '지정가':
+        if self.dict_set['매도주문유형'] == '지정가':
             기준가격 = 현재가
             if self.dict_set['매도지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1
             if self.dict_set['매도지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1

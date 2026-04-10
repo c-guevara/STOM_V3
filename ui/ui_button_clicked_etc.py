@@ -240,9 +240,8 @@ def lvbutton_clicked_03(ui):
 def lvcheck_changed_01(ui, state):
     if ui.dialog_leverage.focusWidget().__class__ != QPushButton and state == Qt.Checked:
         for widget in ui.lv_checkbox_listt:
-            if widget != ui.dialog_leverage.focusWidget():
-                if widget.isChecked():
-                    widget.nextCheckState()
+            if widget != ui.dialog_leverage.focusWidget() and widget.isChecked():
+                widget.nextCheckState()
 
 
 @error_decorator

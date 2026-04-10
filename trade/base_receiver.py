@@ -4,11 +4,11 @@ import time
 import sqlite3
 import numpy as np
 import pandas as pd
-from trade.restapi_ls import LsRestData
 from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
+from trade.ls_rest_api import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from utility.static import now, timedelta_sec, str_ymdhms, get_vi_price, str_hms, now_cme, now_utc
+from utility.static import now, timedelta_sec, get_vi_price, str_hms, now_cme, now_utc, set_builtin_print
 
 
 class Updater(QThread):
@@ -47,8 +47,7 @@ class BaseReceiver:
         self.stgQ         = qlist[10][0]
         self.dict_set     = dict_set
         self.market_gubun = market_infos[0]
-        self.market_name  = market_infos[1]
-        self.market_info  = market_infos[3]
+        self.market_info  = market_infos[1]
 
         self.dict_dtdm: dict[str, list]        = {}
         self.dict_data: dict[str, list]        = {}
@@ -79,7 +78,6 @@ class BaseReceiver:
         self.tuple_kosd   = ()
 
         self.lvhp_time    = now()
-        self.int_hgtime   = int(str_ymdhms())
         self.int_logt     = 0
         self.operation    = 0
 
@@ -101,8 +99,8 @@ class BaseReceiver:
         self.mtop_rank    = self.market_info['거래대금순위']
 
         self.str_today    = LsRestData.당일일자
-        self.tr_cd_trade  = LsRestData.실시간거래코드[f'{self.market_name}체결']
-        self.tr_cd_hoga   = LsRestData.실시간거래코드[f'{self.market_name}호가']
+        self.tr_cd_trade  = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}체결"]
+        self.tr_cd_hoga   = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}호가"]
         self.tr_cd_oper   = LsRestData.실시간거래코드['장운영정보']
         self.oper_gubun   = LsRestData.장구분[self.market_gubun]
 
@@ -116,17 +114,17 @@ class BaseReceiver:
         self.qtimer.timeout.connect(self._scheduler)
         self.qtimer.start()
 
+        set_builtin_print(self.windowQ)
         app.exec_()
 
-    def _save_code_info(self):
-        dict_name = {code: self.dict_info[code]['종목명'] for code in self.codes}
+    def _save_code_info_and_noti(self):
+        dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
         dict_code = {name: code for code, name in dict_name.items()}
         self.windowQ.put((ui_num['종목명데이터'], dict_name, dict_code))
         df = pd.DataFrame.from_dict(self.dict_info, orient='index')
         self.queryQ.put(('종목디비', df, self.market_info['종목디비'], 'replace'))
 
-    def _start_notification(self):
-        text = f'{self.market_name} 시스템을 시작하였습니다.'
+        text = f"{self.market_info['마켓이름']} 시스템을 시작하였습니다."
         self.teleQ.put(text)
         if self.dict_set['알림소리']: self.soundQ.put(text)
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 리시버 시작'))
@@ -517,7 +515,7 @@ class BaseReceiver:
         self.dict_bool['프로세스종료'] = True
         self._websocket_kill()
         if self.dict_set['알림소리']:
-            self.soundQ.put(f'{self.market_name} 시스템을 3분 후 종료합니다.')
+            self.soundQ.put(f"{self.market_info['마켓이름']} 시스템을 3분 후 종료합니다.")
         QTimer.singleShot(180 * 1000, lambda: self.receivQ.put('프로세스종료'))
 
     def _websocket_kill(self):

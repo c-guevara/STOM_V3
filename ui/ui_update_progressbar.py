@@ -142,7 +142,7 @@ def update_progressbar(ui):
     if ui.lgicon_alert:
         icon = ui.icon_log if ui.counter % 2 == 0 else ui.icon_log2
         ui.main_btn_list[4].setIcon(icon)
-        if ui.counter % 60 == 0 and (ui.dict_set['주식알림소리'] or ui.dict_set['코인알림소리']):
+        if ui.counter % 60 == 0 and ui.dict_set['알림소리']:
             ui.soundQ.put('오류가 발생하였습니다. 로그탭을 확인하십시오.')
 
     if not ui.image_search or (ui.counter % 600 == 0 and (ui.image_label1.isVisible() or ui.image_label2.isVisible())):

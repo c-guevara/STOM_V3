@@ -97,12 +97,37 @@ def checkbox_changed_09(ui, state):
     ui.ctpg_code = None
 
 
+# noinspection PyUnresolvedReferences
 @error_decorator
 def sbcheckbox_changed_01(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
-        for widget in ui.sodb_checkbox_list1:
-            if widget != ui.focusWidget():
-                if widget.isChecked():
+        if ui.market_gubun in (1, 2, 3, 6, 7):
+            for widget in ui.sodb_checkbox_list1:
+                if widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()
+        elif ui.market_gubun == 5:
+            for i, widget in enumerate(ui.sodb_checkbox_list1):
+                if widget == ui.focusWidget() and i == 2:
+                    widget.nextCheckState()
+                    QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 거래소에서는 선택할 수 없는 주문유형입니다.\n")
+                    break
+                elif widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()
+        elif ui.market_gubun in (4, 8):
+            for i, widget in enumerate(ui.sodb_checkbox_list1):
+                if widget == ui.focusWidget() and i > 1:
+                    widget.nextCheckState()
+                    QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 거래소에서는 선택할 수 없는 주문유형입니다.\n")
+                    break
+                elif widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()
+        else:
+            for i, widget in enumerate(ui.sodb_checkbox_list1):
+                if widget == ui.focusWidget() and i in (2, 4, 6):
+                    widget.nextCheckState()
+                    QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 거래소에서는 선택할 수 없는 주문유형입니다.\n")
+                    break
+                elif widget != ui.focusWidget() and widget.isChecked():
                     widget.nextCheckState()
 
 
@@ -110,17 +135,41 @@ def sbcheckbox_changed_01(ui, state):
 def sbcheckbox_changed_02(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         for widget in ui.sodb_checkbox_list2:
-            if widget != ui.focusWidget():
-                if widget.isChecked():
-                    widget.nextCheckState()
+            if widget != ui.focusWidget() and widget.isChecked():
+                widget.nextCheckState()
 
 
+# noinspection PyUnresolvedReferences
 @error_decorator
 def sscheckbox_changed_01(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
-        for widget in ui.sods_checkbox_list1:
-            if widget != ui.focusWidget():
-                if widget.isChecked():
+        if ui.market_gubun in (1, 2, 3, 5, 6, 7):
+            for widget in ui.sods_checkbox_list1:
+                if widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()
+        elif ui.market_gubun == 5:
+            for i, widget in enumerate(ui.sods_checkbox_list1):
+                if widget == ui.focusWidget() and i == 2:
+                    widget.nextCheckState()
+                    QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 거래소에서는 선택할 수 없는 주문유형입니다.\n")
+                    break
+                elif widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()
+        elif ui.market_gubun in (4, 8):
+            for i, widget in enumerate(ui.sods_checkbox_list1):
+                if widget == ui.focusWidget() and i > 1:
+                    widget.nextCheckState()
+                    QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 거래소에서는 선택할 수 없는 주문유형입니다.\n")
+                    break
+                elif widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()
+        else:
+            for i, widget in enumerate(ui.sods_checkbox_list1):
+                if widget == ui.focusWidget() and i in (2, 4, 6):
+                    widget.nextCheckState()
+                    QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 거래소에서는 선택할 수 없는 주문유형입니다.\n")
+                    break
+                elif widget != ui.focusWidget() and widget.isChecked():
                     widget.nextCheckState()
 
 
@@ -128,9 +177,8 @@ def sscheckbox_changed_01(ui, state):
 def sscheckbox_changed_02(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton) and state == Qt.Checked:
         for widget in ui.sods_checkbox_list2:
-            if widget != ui.focusWidget():
-                if widget.isChecked():
-                    widget.nextCheckState()
+            if widget != ui.focusWidget() and widget.isChecked():
+                widget.nextCheckState()
 
 
 @error_decorator
@@ -138,6 +186,5 @@ def setting_stock_weight_cotrol_changed(ui, state):
     if ui.focusWidget().__class__ not in (QPushButton, BounceButton):
         if state == Qt.Checked:
             for widget in ui.ss_bj_check_button_list:
-                if widget != ui.focusWidget():
-                    if widget.isChecked():
-                        widget.nextCheckState()
+                if widget != ui.focusWidget() and widget.isChecked():
+                    widget.nextCheckState()

@@ -2,7 +2,7 @@
 import numpy as np
 from utility.setting_base import ui_num
 from trade.base_strategy import BaseStrategy
-from utility.static import now, now_cme, get_stock_os_profit, dt_ymdhms, set_builtin_print
+from utility.static import now, now_cme, dt_ymdhms, get_stock_os_profit, error_decorator
 
 
 class StockUsaStrategyTick(BaseStrategy):
@@ -13,7 +13,6 @@ class StockUsaStrategyTick(BaseStrategy):
             '매도': []
         }
 
-        set_builtin_print(True, self.windowQ)
         self._set_formula_data()
         self._update_stringategy()
         self._main_loop()
@@ -31,6 +30,7 @@ class StockUsaStrategyTick(BaseStrategy):
         return round(거래금액 / 주문수량, 2) if 주문수량 != 0 else 0
 
     # noinspection PyUnusedLocal
+    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
             초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
@@ -41,7 +41,8 @@ class StockUsaStrategyTick(BaseStrategy):
 
         시분초 = int(str(체결시간)[8:])
         순매수금액 = 초당매수금액 - 초당매도금액
-        호가빼기데이터 = (매도호가5 - 매도호가4, 매도호가4 - 매도호가3, 매도호가3 - 매도호가2, 매수호가2 - 매수호가3, 매수호가3 - 매수호가4, 매수호가4 - 매수호가5)
+        호가빼기데이터 = (매도호가5 - 매도호가4, 매도호가4 - 매도호가3, 매도호가3 - 매도호가2, 매수호가2 - 매수호가3,
+                    매수호가3 - 매수호가4, 매수호가4 - 매수호가5)
         self.hoga_unit = 호가단위 = min(x for x in 호가빼기데이터 if x > 0)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
@@ -123,7 +124,8 @@ class StockUsaStrategyTick(BaseStrategy):
             if jg_data:
                 if 종목코드 not in self.dict_buy_num:
                     self.dict_buy_num[종목코드] = self.indexn
-                # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
+                """['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수',
+                    '분할매도횟수', '매수시간']"""
                 _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
                 _, 수익금, 수익률 = get_stock_os_profit(매입금액, 보유수량 * 현재가)
                 profit_data = self.dict_profit.get(종목코드)
@@ -139,11 +141,13 @@ class StockUsaStrategyTick(BaseStrategy):
                 보유시간 = (now_cme() - dt_ymdhms(매수시간)).total_seconds()
                 매수틱번호 = self.dict_buy_num[종목코드]
             else:
-                매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now_cme(), 0, 0, 0
+                매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                    최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now_cme(), 0, 0, 0
 
             self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
-            BBT = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+            BBT = not self.dict_set['매수금지시간'] or \
+                not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
             BLK = not self.dict_set['매수금지블랙리스트'] or 종목코드 not in self.dict_set['블랙리스트']
             NIB = 종목코드 not in self.dict_signal['매수']
             NIS = 종목코드 not in self.dict_signal['매도']
@@ -163,7 +167,8 @@ class StockUsaStrategyTick(BaseStrategy):
 
                 elif C:
                     매수 = False
-                    분할매수기준수익률 = round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
+                    분할매수기준수익률 = \
+                        round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
                     if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
                         매수 = True
                     elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
@@ -172,8 +177,10 @@ class StockUsaStrategyTick(BaseStrategy):
                     if 매수:
                         self.Buy()
 
-            SBT = not self.dict_set['매도금지시간'] or not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
-            SCC = self.dict_set['매수분할횟수'] == 1 or not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+            SBT = not self.dict_set['매도금지시간'] or \
+                not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+            SCC = self.dict_set['매수분할횟수'] == 1 or \
+                not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
             NIB = 종목코드 not in self.dict_signal['매수']
 
             A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
@@ -206,7 +213,7 @@ class StockUsaStrategyTick(BaseStrategy):
                         self.Sell()
 
         if 관심종목:
-            # ['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
                 '종목명': 종목명,
                 'per': 등락율,

@@ -151,8 +151,7 @@ class OptimizeConditions:
         self.dict_set     = dict_set
         self.is_tick      = self.dict_set['타임프레임']
         self.market_gubun = market_infos[0]
-        self.market_sname = market_infos[2]
-        self.market_info  = market_infos[3]
+        self.market_info  = market_infos[1]
         self.result       = {}
         self.opti_list    = []
         self.bcount       = None
@@ -160,7 +159,7 @@ class OptimizeConditions:
         self.buyconds     = None
         self.sellconds    = None
         self.optistandard = None
-        self.savename     = f'{self.market_sname}_{self.backname.replace("최적화", "").lower()}'
+        self.savename     = f"{self.market_info['전략구분']}_{self.backname.replace('최적화', '').lower()}"
 
         try:
             self._start()
@@ -234,8 +233,8 @@ class OptimizeConditions:
             self._sys_exit(True)
 
         con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.market_sname}_buyconds', con).set_index('index')
-        dfs = pd.read_sql(f'SELECT * FROM {self.market_sname}_sellconds', con).set_index('index')
+        dfb = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_buyconds", con).set_index('index')
+        dfs = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_sellconds", con).set_index('index')
         con.close()
 
         self.buyconds  = dfb['전략코드'][buystg_name].split('\n')

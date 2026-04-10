@@ -3,7 +3,8 @@ import numpy as np
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
-from utility.static import now, now_utc, get_upbit_hoga_unit, get_upbit_profit, dt_ymdhms, get_indicator
+from utility.static import now, now_utc, dt_ymdhms, get_upbit_hoga_unit, get_upbit_profit, get_indicator, \
+    error_decorator
 
 
 class UpbitStrategyMin(UpbitStrategyTick):
@@ -11,13 +12,15 @@ class UpbitStrategyMin(UpbitStrategyTick):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
+    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
-            분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+            분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, \
+            당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
             매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
             매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
-            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, _, 틱수신시간, 전략연산 = data
+            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
 
         시분초 = int(str(체결시간)[8:] + '00')
         순매수금액 = 분당매수금액 - 분당매도금액
@@ -40,7 +43,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
 
             self.arry_code = self.dict_data[종목코드]
             self.tick_count = 데이터길이 = len(self.arry_code)
-            self.code, self.index, self.indexn = 종목코드, 체결시간, 데이터길이 - 1
+            self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
 
             if 데이터길이 >= self.rolling_window:
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
@@ -54,8 +57,8 @@ class UpbitStrategyMin(UpbitStrategyTick):
             )
             self.arry_code[-1, self.area_cnt:self.data_cnt] = indicator_list
 
-            AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, OBV, \
-                PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
+            AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
+                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
 
             high_low = self.high_low.get(종목코드)
             if high_low:
@@ -115,7 +118,8 @@ class UpbitStrategyMin(UpbitStrategyTick):
                 if jg_data:
                     if 종목코드 not in self.dict_buy_num:
                         self.dict_buy_num[종목코드] = self.indexn
-                    # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
+                    """['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량',
+                        '분할매수횟수', '분할매도횟수', '매수시간']"""
                     _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
                     _, 수익금, 수익률 = get_upbit_profit(매입금액, 보유수량 * 현재가)
                     profit_data = self.dict_profit.get(종목코드)
@@ -131,11 +135,13 @@ class UpbitStrategyMin(UpbitStrategyTick):
                     보유시간 = int((now_utc() - dt_ymdhms(매수시간)).total_seconds() / 60)
                     매수틱번호 = self.dict_buy_num[종목코드]
                 else:
-                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now_utc(), 0, 0, 0
+                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                        최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now_utc(), 0, 0, 0
 
                 self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
-                BBT = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+                BBT = not self.dict_set['매수금지시간'] or \
+                    not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
                 BLK = not self.dict_set['매수금지블랙리스트'] or 종목코드 not in self.dict_set['블랙리스트']
                 NIB = 종목코드 not in self.dict_signal['매수']
                 NIS = 종목코드 not in self.dict_signal['매도']
@@ -167,19 +173,24 @@ class UpbitStrategyMin(UpbitStrategyTick):
                         if 매수:
                             self.Buy()
 
-                SBT = not self.dict_set['매도금지시간'] or not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
-                SCC = self.dict_set['매수분할횟수'] == 1 or not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set[
-                    '매도금지매수횟수값']
+                SBT = not self.dict_set['매도금지시간'] or \
+                    not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+                SCC = self.dict_set['매수분할횟수'] == 1 or \
+                    not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
                 NIB = 종목코드 not in self.dict_signal['매수']
 
                 A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
                 B = self.dict_set['매도분할시그널']
                 C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['매도분할횟수']
                 D = NIS and self.dict_set['매수취소매도시그널'] and not NIB
-                E = NIB and NIS and 매수가 != 0 and self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
-                F = NIB and NIS and 매수가 != 0 and self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
-                G = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
-                H = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+                E = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+                F = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+                G = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                H = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
 
                 if SBT and (A or (B and C) or C or D or E or F or G or H):
                     강제청산 = E or F or G or H
@@ -214,7 +225,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
             self.indexn = 데이터길이 - 1
 
         if 관심종목:
-            # ['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
                 '종목명': 종목코드,
                 'per': 등락율,

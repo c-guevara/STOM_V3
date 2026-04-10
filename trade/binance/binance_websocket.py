@@ -7,8 +7,7 @@ from binance import AsyncClient, BinanceSocketManager
 
 
 class WebSocketReceiver(QThread):
-    signal1 = pyqtSignal(dict)
-    signal2 = pyqtSignal(dict)
+    signal = pyqtSignal(dict)
 
     def __init__(self, codes, windowQ):
         super().__init__()
@@ -77,13 +76,13 @@ class WebSocketReceiver(QThread):
         async with self.wsk_trade as ws:
             while self.con_trade:
                 data = await ws.recv()
-                self.signal1.emit(data)
+                self.signal.emit(data)
 
     async def receive_order(self):
         async with self.wsk_order as ws:
             while self.con_order:
                 data = await ws.recv()
-                self.signal2.emit(data)
+                self.signal.emit(data)
 
     def stop(self):
         if self.loop and self.loop.is_running():
@@ -91,7 +90,7 @@ class WebSocketReceiver(QThread):
 
 
 class WebSocketTrader(QThread):
-    signal1 = pyqtSignal(dict)
+    signal = pyqtSignal(dict)
 
     def __init__(self, api_key, scret_key, windowQ):
         super().__init__()
@@ -132,7 +131,7 @@ class WebSocketTrader(QThread):
         async with self.websocket as ws:
             while self.connected:
                 data = await ws.recv()
-                self.signal1.emit(data)
+                self.signal.emit(data)
 
     def stop(self):
         if self.loop and self.loop.is_running():

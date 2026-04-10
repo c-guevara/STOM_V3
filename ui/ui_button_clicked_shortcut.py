@@ -68,7 +68,8 @@ def mnbutton_c_clicked_03(ui, auto=False):
             return
 
         buttonReply = QMessageBox.question(
-            ui, '수동 시작', f'{ui.market_name} 매매시스템 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n',
+            ui, '수동 시작',
+            f"{ui.market_info['마켓이름']} 매매시스템 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
 
@@ -83,8 +84,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
             ui.proc_trader.kill()
         qtest_qwait(3)
 
-        market = ui.dict_set['거래소']
-        acc_no = market[-2:]
+        acc_no = ui.dict_set['거래소'][-2:]
         if ui.dict_set[f'access_key{acc_no}'] is None or ui.dict_set[f'secret_key{acc_no}'] is None:
             QMessageBox.critical(ui, '오류 알림', '계정이 설정되지 않아 매매시스템을 시작할 수 없습니다.\n계정 설정 후 다시 시작하십시오.\n')
         else:
@@ -169,11 +169,11 @@ def trade_process_start(ui):
     if not strategy_process_alive(ui):
         target = ui.market_info['프로세스'][2][ui.dict_set['타임프레임']]
         if ui.market_gubun < 5:
-            for _ in range(8):
-                p = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
+            for i in range(8):
+                p = Process(target=target, args=(i, ui.qlist, ui.dict_set, ui.market_infos))
                 p.start()
                 ui.proc_strategys.append(p)
         else:
-            p = Process(target=target, args=(ui.qlist, ui.dict_set, ui.market_infos))
+            p = Process(target=target, args=(0, ui.qlist, ui.dict_set, ui.market_infos))
             p.start()
             ui.proc_strategys.append(p)

@@ -21,7 +21,7 @@ class TelegramBot(QThread):
         self.windowQ       = qlist[0]
         self.teleQ         = qlist[3]
         self.traderQ       = qlist[9]
-        self.stgQ          = qlist[10][0]
+        self.stgQs         = qlist[10]
         self.dict_set      = dict_set
 
         self.token         = None
@@ -71,10 +71,8 @@ class TelegramBot(QThread):
             update_queue = await self.application.updater.start_polling()
 
             keyboard = [
-                ['주식\n거래목록', '주식\n잔고평가', '주식\n잔고청산', '주식\n전략중지'],
-                ['해선\n거래목록', '해선\n잔고평가', '해선\n잔고청산', '해선\n전략중지'],
-                ['코인\n거래목록', '코인\n잔고평가', '코인\n잔고청산', '코인\n전략중지'],
-                ['주식\n라이브', '해선\n라이브', '코인\n라이브', '백테\n라이브']
+                ['거래목록', '잔고평가', '잔고청산', '전략중지'],
+                ['S라이브', 'F라이브', 'C라이브', 'B라이브']
             ]
             reply_markup = ReplyKeyboardMarkup(keyboard)
 
@@ -101,20 +99,12 @@ class TelegramBot(QThread):
     async def handle_message(self, update: Update, context: ContextTypes.DEFAULT_TYPE):
         cmd = update.message.text
         cmd = cmd.replace('\n', '')
-        if cmd in ('주식전략중지', '해선전략중지'):
-            self.wdzservQ.put(('strategy', '매수전략중지'))
-        elif cmd == '코인전략중지':
-            self.stgQ.put('매수전략중지')
+        if cmd == '전략중지':
+            for q in self.stgQs:
+                q.put('매수전략중지')
         elif '라이브' in cmd:
             self.windowQ.put(cmd)
-        elif '주식' in cmd:
-            cmd = cmd.replace('주식', '')
-            self.wdzservQ.put(('trade', cmd))
-        elif '해선' in cmd:
-            cmd = cmd.replace('해선', '')
-            self.wdzservQ.put(('trade', cmd))
-        elif '코인' in cmd:
-            cmd = cmd.replace('코인', '')
+        else:
             self.traderQ.put(cmd)
 
     def moniter_queue(self):
@@ -144,7 +134,7 @@ class TelegramBot(QThread):
 
     async def restart_bot(self):
         change = False
-        gubun = self.dict_set['거래소'][4:]
+        gubun = self.dict_set['거래소'][-2:]
         if self.token != self.dict_set[f'텔레그램봇토큰{gubun}'] or \
                 self.chat_id != self.dict_set[f'텔레그램아이디{gubun}']:
             change = True

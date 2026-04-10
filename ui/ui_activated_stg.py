@@ -7,8 +7,8 @@ from ui.ui_strategy_version import strategy_version
 # UI 타입별 설정 매핑
 UI_ACTIBATED_CONFIG = {
     'tables': [
-        '{market_sname}_buy', '{market_sname}_sell', '{market_sname}_optibuy', '{market_sname}_optivars',
-        '{market_sname}_optisell', '{market_sname}_vars', '{market_sname}_buyconds', '{market_sname}_sellconds'
+        '{stg_tname}_buy', '{stg_tname}_sell', '{stg_tname}_optibuy', '{stg_tname}_optivars',
+        '{stg_tname}_optisell', '{stg_tname}_vars', '{stg_tname}_buyconds', '{stg_tname}_sellconds'
     ],
     'widgets': {
         'text_01': 'ss_textEditttt_01', 'text_02': 'ss_textEditttt_02',
@@ -56,7 +56,7 @@ def _activated_common(ui, idx):
         return
 
     if '{' in table:
-        table = table.format(market_sname=ui.market_sname)
+        table = table.format(stg_tname=ui.market_info['전략구분'])
 
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')
 
@@ -122,7 +122,7 @@ def activated_09(ui):
     if not strategy_name:
         return
 
-    table = UI_ACTIBATED_CONFIG['tables'][2].format(market_sname=ui.market_sname)
+    table = UI_ACTIBATED_CONFIG['tables'][2].format(stg_tname=ui.market_info['전략구분'])
     df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {table} WHERE `index` = '{strategy_name}'").set_index('index')
 
     if len(df) > 0:

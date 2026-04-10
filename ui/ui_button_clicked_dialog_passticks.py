@@ -20,7 +20,7 @@ def setting_passticks_load(ui):
     for lineedit in ui.scc_lineedit_list:
         lineedit.clear()
 
-    df = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_passticks')
+    df = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_passticks")
     if len(df) > 0:
         name_list = df['index'].tolist()
         stg_list  = df['전략코드'].tolist()
@@ -42,5 +42,5 @@ def setting_passticks_save(ui):
         if ui.proc_chqs.is_alive():
             import pandas as pd
             df = pd.DataFrame(data_list, columns=['index', '전략코드']).set_index('index')
-            ui.queryQ.put(('전략디비', df, f'{ui.market_sname}_passticks', 'replace'))
+            ui.queryQ.put(('전략디비', df, f"{ui.market_info['전략구분']}_passticks", 'replace'))
             QMessageBox.information(ui.dialog_setsj, '저장 완료', random.choice(famous_saying))

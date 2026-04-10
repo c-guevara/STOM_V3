@@ -16,7 +16,7 @@ from backtest.back_static import send_result, get_moneytop_query, plot_show, get
 
 
 class Total:
-    def __init__(self, wq, sq, tq, teleQ, mq, bstq_list, backname, market_gubun, market_sname, dict_set):
+    def __init__(self, wq, sq, tq, teleQ, mq, bstq_list, backname, market_gubun, market_info, dict_set):
         self.wq           = wq
         self.sq           = sq
         self.tq           = tq
@@ -25,10 +25,10 @@ class Total:
         self.bstq_list    = bstq_list
         self.backname     = backname
         self.market_gubun = market_gubun
-        self.market_sname = market_sname
+        self.market_info  = market_info
         self.dict_set     = dict_set
         self.is_tick      = dict_set['타임프레임']
-        self.savename     = f'{self.market_sname}_{self.backname.replace("전진분석", "").lower()}'
+        self.savename     = f"{self.market_info['전략구분']}_{self.backname.replace('전진분석', '').lower()}"
 
         self.file_name    = str_ymdhms()
 
@@ -335,8 +335,7 @@ class RollingWalkForwardTest:
         self.dict_set     = dict_set
         self.is_tick      = self.dict_set['타임프레임']
         self.market_gubun = market_infos[0]
-        self.market_sname = market_infos[2]
-        self.market_info  = market_infos[3]
+        self.market_info  = market_infos[1]
         self.vars         = {}
         self.vars_        = []
         self.study        = None
@@ -425,9 +424,9 @@ class RollingWalkForwardTest:
             self.sys_exit(True)
 
         con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.market_sname}_optibuy', con).set_index('index')
-        dfs = pd.read_sql(f'SELECT * FROM {self.market_sname}_optisell', con).set_index('index')
-        dfv = pd.read_sql(f'SELECT * FROM {self.market_sname}_optivars', con).set_index('index')
+        dfb = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optibuy", con).set_index('index')
+        dfs = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optisell", con).set_index('index')
+        dfv = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optivars", con).set_index('index')
         buystg = dfb['전략코드'][buystg_name]
         sellstg = dfs['전략코드'][sellstg_name]
         optivars = dfv['전략코드'][optivars_name]
@@ -482,7 +481,7 @@ class RollingWalkForwardTest:
         Process(
             target=Total,
             args=(self.wq, self.sq, self.tq, self.teleQ, mq, self.bstq_list, self.backname, self.market_gubun,
-                  self.market_sname, self.dict_set)
+                  self.market_info, self.dict_set)
         ).start()
         self.wq.put((ui_num['백테스트'], f'{self.backname} 집계용 프로세스 생성 완료'))
 

@@ -8,19 +8,34 @@ import asyncio
 import requests
 import websockets
 from traceback import format_exc
-from urllib.parse import urlencode
 from utility.setting_base import ui_num
+from urllib.parse import unquote, urlencode
 from PyQt5.QtCore import QThread, pyqtSignal
 
 
 def get_symbols_info():
-    url = 'https://api.upbit.com/v1/ticker/all?quote_currencies=KRW'
-    headers = {'accept': 'application/json'}
-    response = requests.get(url, headers=headers)
-    data = response.json()
     dict_data = {}
-    for d in data:
-        dict_data[d['market']] = int(d['acc_trade_price'])
+    headers = {'accept': 'application/json'}
+
+    url = 'https://api.upbit.com/v1/market/all'
+    response = requests.get(url, headers=headers)
+    datas = response.json()
+    for data in datas:
+        symbol = data['market']
+        if 'KRW' in symbol:
+            dict_data[symbol] = {
+                '종목명': data['korean_name']
+            }
+
+    url = 'https://api.upbit.com/v1/ticker/all?quote_currencies=KRW'
+    response = requests.get(url, headers=headers)
+    datas = response.json()
+    for data in datas:
+        symbol = data['market']
+        dict_data[symbol].update({
+            '거래대금':  int(data['acc_trade_price'])
+        })
+
     return dict_data, list(dict_data.keys())
 
 
@@ -29,69 +44,90 @@ class Upbit:
         self.access = access
         self.secret = secret
 
-    def _request_headers(self, query=None):
+        self.주문구분 = {
+            '매수': 'bid',
+            '매도': 'ask'
+        }
+
+        self.주문유형 = {
+            '시장가': {'매수': 'price', '매도': 'market'},
+            '지정가': {'매수': 'limit', '매도': 'limit'},
+            '지정가IOC': {'매수': 'limit', '매도': 'limit'},
+            '지정가FOK': {'매수': 'limit', '매도': 'limit'},
+            '최유리IOC': {'매수': 'best', '매도': 'best'},
+            '최유리FOK': {'매수': 'best', '매도': 'best'},
+        }
+
+        self.주문조건 = {
+            '지정가IOC': 'ioc',
+            '지정가FOK': 'fok',
+            '최유리IOC': 'ioc',
+            '최유리FOK': 'fok',
+        }
+
+    def _headers(self, query=None):
         payload = {
             'access_key': self.access,
             'nonce': str(uuid.uuid4())
         }
-
         if query is not None:
-            m = hashlib.sha512()
-            m.update(urlencode(query, doseq=True).replace('%5B%5D=', '[]=').encode())
-            query_hash = m.hexdigest()
+            query_string = unquote(urlencode(query, doseq=True))
+            query_hash = hashlib.sha512(query_string.encode('utf-8')).hexdigest()
             payload['query_hash'] = query_hash
             payload['query_hash_alg'] = 'SHA512'
 
-        jwt_token = jwt.encode(payload, self.secret, algorithm='HS256')
-        authorization_token = 'Bearer {}'.format(jwt_token)
-        headers = {'Authorization': authorization_token}
-        return headers
+        token = jwt.encode(payload, self.secret, algorithm='HS512')
+        if not isinstance(token, str):
+            token = token.decode('utf-8')
+
+        return {'Authorization': f'Bearer {token}'}
 
     def _get(self, url, data=None):
-        headers = self._request_headers(data)
+        headers = self._headers(data)
         response = requests.get(url, headers=headers, data=data)
         return response.json()
 
     def _post(self, url, data):
-        headers = self._request_headers(data)
+        headers = self._headers(data)
         response = requests.post(url, headers=headers, data=json.dumps(data))
         return response.json()
 
     def _delete(self, url, data):
-        headers = self._request_headers(data)
+        headers = self._headers(data)
         response = requests.delete(url, headers=headers, data=json.dumps(data))
         return response.json()
 
     def get_balances(self):
         url = 'https://api.upbit.com/v1/accounts'
-        return self._get(url)
+        ret = self._get(url)
+        return int(float(ret[0]['balance']))
 
-    def buy_market_order(self, ticker, price):
+    def order_coin(self, 종목코드='', 주문구분='', 주문유형='', 주문금액=0, 주문수량=0):
         url = 'https://api.upbit.com/v1/orders'
-        data = {'market': ticker, 'side': 'bid', 'price': str(price), 'ord_type': 'price'}
+        data = {
+            'market': 종목코드,
+            'side': self.주문구분[주문구분],
+            'ord_type': self.주문유형[주문유형][주문구분]
+        }
+
+        if 주문구분 == '매수' or '지정가' in 주문유형:
+            data['price'] = str(주문금액)
+
+        if 주문수량 > 0 and (주문구분 == '매도' or '지정가' in 주문유형):
+            data['volume'] = str(주문수량)
+
+        주문조건 = self.주문조건.get(주문유형)
+        if 주문조건:
+            data['time_in_force'] = 주문조건
+
         return self._post(url, data)
 
-    def buy_limit_order(self, ticker, price, volume):
-        url = 'https://api.upbit.com/v1/orders'
-        data = {'market': ticker, 'side': 'bid', 'volume': str(volume), 'price': str(price), 'ord_type': 'limit'}
-        return self._post(url, data)
-
-    def sell_market_order(self, ticker, volume):
-        url = 'https://api.upbit.com/v1/orders'
-        data = {'market': ticker, 'side': 'ask', 'volume': str(volume), 'ord_type': 'market'}
-        return self._post(url, data)
-
-    def sell_limit_order(self, ticker, price, volume):
-        url = 'https://api.upbit.com/v1/orders'
-        data = {'market': ticker, 'side': 'ask', 'volume': str(volume), 'price': str(price), 'ord_type': 'limit'}
-        return self._post(url, data)
-
-    def cancel_order(self, od_no):
+    def order_cancel(self, od_no):
         url = 'https://api.upbit.com/v1/order'
         data = {'uuid': od_no}
         return self._delete(url, data)
 
-    def get_order(self, od_no, state='wait', page=1, limit=100):
+    def get_order_info(self, od_no, state='wait', page=1, limit=100):
         p = re.compile(r'^\w+-\w+-\w+-\w+-\w+$')
         is_uuid = len(p.findall(od_no)) > 0
         if is_uuid:
@@ -129,7 +165,7 @@ class WebSocketReceiver(QThread):
                 await self._receive_message()
             except:
                 self.windowQ.put(
-                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 업비트 웹소켓 수신 중 오류가 발생하여 재연결합니다.')
+                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 업비트 웹소켓 실시간시세 수신 중 오류가 발생하여 재연결합니다.')
                 )
 
             await self._disconnect()
@@ -137,9 +173,62 @@ class WebSocketReceiver(QThread):
     async def _connect(self):
         self.websocket = await websockets.connect(self.url, ping_interval=60)
         self.connected = True
-        data = [{'ticket': str(uuid.uuid4())[:6]}, {'type': 'ticker', 'codes': self.codes, 'isOnlyRealtime': True}]
+        data = [{'ticket': str(uuid.uuid4())}, {'type': 'ticker', 'codes': self.codes, 'isOnlyRealtime': True}]
         await self.websocket.send(json.dumps(data))
-        data = [{'ticket': str(uuid.uuid4())[:6]}, {'type': 'orderbook', 'codes': self.codes, 'isOnlyRealtime': True}]
+        data = [{'ticket': str(uuid.uuid4())}, {'type': 'orderbook', 'codes': self.codes, 'isOnlyRealtime': True}]
+        await self.websocket.send(json.dumps(data))
+
+    async def _receive_message(self):
+        while self.connected:
+            data = await self.websocket.recv()
+            data = json.loads(data)
+            self.signal.emit(data)
+
+    async def _disconnect(self):
+        self.connected = False
+        if self.websocket is not None:
+            await self.websocket.close()
+        await asyncio.sleep(5)
+
+    def stop(self):
+        if self.loop and self.loop.is_running():
+            self.loop.stop()
+
+
+class WebSocketTrader(QThread):
+    signal = pyqtSignal(dict)
+
+    def __init__(self, windowQ):
+        super().__init__()
+        self.windowQ   = windowQ
+        self.loop      = None
+        self.websocket = None
+        self.connected = False
+        self.url       = 'wss://api.upbit.com/websocket/v1/private'
+
+    def run(self):
+        self.loop = asyncio.new_event_loop()
+        asyncio.set_event_loop(self.loop)
+        self.loop.create_task(self._run())
+        self.loop.run_forever()
+
+    async def _run(self):
+        while True:
+            try:
+                if not self.connected:
+                    await self._connect()
+                await self._receive_message()
+            except:
+                self.windowQ.put(
+                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 업비트 웹소켓 주문체결 수신 중 오류가 발생하여 재연결합니다.')
+                )
+
+            await self._disconnect()
+
+    async def _connect(self):
+        self.websocket = await websockets.connect(self.url, ping_interval=60)
+        self.connected = True
+        data = [{'ticket': str(uuid.uuid4())}, {'type': 'myOrder'}]
         await self.websocket.send(json.dumps(data))
 
     async def _receive_message(self):

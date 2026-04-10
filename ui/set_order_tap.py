@@ -32,22 +32,18 @@ class SetOrderTap:
         self.ui.ss_od_groupBoxxx_16 = self.wc.setQGroupBox('익절청산', self.ui.ss_od_groupBoxxx_02, hover=True)
         self.ui.ss_od_groupBoxxx_17 = self.wc.setQGroupBox('손절청산', self.ui.ss_od_groupBoxxx_02, hover=True)
 
-        self.ui.ss_buyy_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_03,      changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_buyy_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_03,      changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='전체 호가잔량에 원하는 수량만큼 주문하는 방식')
         self.ui.ss_buyy_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.ss_od_groupBoxxx_03,      changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
-        self.ui.ss_buyy_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_03, changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 부족한 수량은 잔량 대기하는 방식')
-        self.ui.ss_buyy_checkBox_04 = self.wc.setCheckBox('최우선지정가', self.ui.ss_od_groupBoxxx_03, changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매수1호가에 매도는 매도1호가에 원하는 수량만큼 주문하는 방식, 체결이 안될 수도 있음')
-        self.ui.ss_buyy_checkBox_05 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_buyy_checkBox_06 = self.wc.setCheckBox('시장가IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_buyy_checkBox_07 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_buyy_checkBox_08 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_buyy_checkBox_09 = self.wc.setCheckBox('시장가FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_buyy_checkBox_10 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='매수는 매도호1가에 매도는 매수1호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_buyy_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_03, changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='가장 유리한 호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_buyy_checkBox_04 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_buyy_checkBox_05 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_buyy_checkBox_06 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_buyy_checkBox_07 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_03,   changed=lambda state: sbcheckbox_changed_01(self.ui, state), tip='1호가잔량에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
 
         self.ui.sodb_checkbox_list1 = [
             self.ui.ss_buyy_checkBox_01, self.ui.ss_buyy_checkBox_02, self.ui.ss_buyy_checkBox_03,
             self.ui.ss_buyy_checkBox_04, self.ui.ss_buyy_checkBox_05, self.ui.ss_buyy_checkBox_06,
-            self.ui.ss_buyy_checkBox_07, self.ui.ss_buyy_checkBox_08, self.ui.ss_buyy_checkBox_09,
-            self.ui.ss_buyy_checkBox_10
+            self.ui.ss_buyy_checkBox_07
         ]
 
         self.ui.ss_buyy_labellll_01 = QLabel('▣ 분할매수횟수 (1:분할매수X)', self.ui.ss_od_groupBoxxx_04)
@@ -141,22 +137,18 @@ class SetOrderTap:
 
         # =============================================================================================================
 
-        self.ui.ss_sell_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_10,      changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_sell_checkBox_01 = self.wc.setCheckBox('시장가', self.ui.ss_od_groupBoxxx_10,      changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='전체 호가잔량에 원하는 수량만큼 주문하는 방식')
         self.ui.ss_sell_checkBox_02 = self.wc.setCheckBox('지정가', self.ui.ss_od_groupBoxxx_10,      changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하는 방식')
-        self.ui.ss_sell_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_10, changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 부족한 수량은 잔량 대기하는 방식')
-        self.ui.ss_sell_checkBox_04 = self.wc.setCheckBox('최우선지정가', self.ui.ss_od_groupBoxxx_10, changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매수1호가에 매도는 매도1호가에 원하는 수량만큼 주문하는 방식, 체결이 안될 수도 있음')
-        self.ui.ss_sell_checkBox_05 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_sell_checkBox_06 = self.wc.setCheckBox('시장가IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_sell_checkBox_07 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도1호가에 매도는 매수1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
-        self.ui.ss_sell_checkBox_08 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_sell_checkBox_09 = self.wc.setCheckBox('시장가FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호가에 매도는 매수호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
-        self.ui.ss_sell_checkBox_10 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='매수는 매도호1가에 매도는 매수1호가에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_sell_checkBox_03 = self.wc.setCheckBox('최유리지정가', self.ui.ss_od_groupBoxxx_10, changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='가장 유리한 호가에 원하는 수량만큼 주문하는 방식')
+        self.ui.ss_sell_checkBox_04 = self.wc.setCheckBox('지정가IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_sell_checkBox_05 = self.wc.setCheckBox('최유리IOC', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='1호가에 원하는 수량만큼 주문하고 미체결수량은 취소하는 방식')
+        self.ui.ss_sell_checkBox_06 = self.wc.setCheckBox('지정가FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='원하는 가격에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
+        self.ui.ss_sell_checkBox_07 = self.wc.setCheckBox('최유리FOK', self.ui.ss_od_groupBoxxx_10,   changed=lambda state: sscheckbox_changed_01(self.ui, state), tip='1호가잔량에 원하는 수량이 있을 경우 주문하고 없을 경우 취소하는 방식')
 
         self.ui.sods_checkbox_list1 = [
             self.ui.ss_sell_checkBox_01, self.ui.ss_sell_checkBox_02, self.ui.ss_sell_checkBox_03,
             self.ui.ss_sell_checkBox_04, self.ui.ss_sell_checkBox_05, self.ui.ss_sell_checkBox_06,
-            self.ui.ss_sell_checkBox_07, self.ui.ss_sell_checkBox_08, self.ui.ss_sell_checkBox_09,
-            self.ui.ss_sell_checkBox_10
+            self.ui.ss_sell_checkBox_07
         ]
 
         self.ui.ss_sell_labellll_01 = QLabel('▣ 분할매도횟수 (1:분할매도X)', self.ui.ss_od_groupBoxxx_11)
@@ -189,8 +181,6 @@ class SetOrderTap:
 
         self.ui.ss_sell_checkBox_20 = self.wc.setCheckBox('분할매수횟수                                 회 이내', self.ui.ss_od_groupBoxxx_14)
         self.ui.ss_sell_lineEdit_05 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_14)
-        self.ui.ss_sell_checkBox_21 = self.wc.setCheckBox('라운드피겨 ↓                                  호가 이내', self.ui.ss_od_groupBoxxx_14)
-        self.ui.ss_sell_lineEdit_06 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_14)
         self.ui.ss_sell_checkBox_22 = self.wc.setCheckBox('매도금지시간                                  ~', self.ui.ss_od_groupBoxxx_14)
         self.ui.ss_sell_lineEdit_07 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_14)
         self.ui.ss_sell_lineEdit_08 = self.wc.setLineedit(self.ui.ss_od_groupBoxxx_14)
@@ -251,9 +241,6 @@ class SetOrderTap:
         self.ui.ss_buyy_checkBox_05.setGeometry(470, 25, 100, 20)
         self.ui.ss_buyy_checkBox_06.setGeometry(10, 50, 100, 20)
         self.ui.ss_buyy_checkBox_07.setGeometry(120, 50, 110, 20)
-        self.ui.ss_buyy_checkBox_08.setGeometry(230, 50, 100, 20)
-        self.ui.ss_buyy_checkBox_09.setGeometry(350, 50, 100, 20)
-        self.ui.ss_buyy_checkBox_10.setGeometry(470, 50, 110, 20)
 
         # 분할매수
         self.ui.ss_buyy_labellll_01.setGeometry(10, 25, 200, 20)
@@ -342,9 +329,6 @@ class SetOrderTap:
         self.ui.ss_sell_checkBox_05.setGeometry(470, 25, 100, 20)
         self.ui.ss_sell_checkBox_06.setGeometry(10, 50, 100, 20)
         self.ui.ss_sell_checkBox_07.setGeometry(120, 50, 100, 20)
-        self.ui.ss_sell_checkBox_08.setGeometry(230, 50, 100, 20)
-        self.ui.ss_sell_checkBox_09.setGeometry(350, 50, 100, 20)
-        self.ui.ss_sell_checkBox_10.setGeometry(470, 50, 100, 20)
 
         # 분할매도
         self.ui.ss_sell_labellll_01.setGeometry(10, 25, 200, 20)
@@ -376,8 +360,6 @@ class SetOrderTap:
         # 매도금지
         self.ui.ss_sell_checkBox_20.setGeometry(10, 25, 310, 20)
         self.ui.ss_sell_lineEdit_05.setGeometry(110, 25, 80, 20)
-        self.ui.ss_sell_checkBox_21.setGeometry(10, 50, 310, 20)
-        self.ui.ss_sell_lineEdit_06.setGeometry(110, 50, 80, 20)
         self.ui.ss_sell_checkBox_22.setGeometry(10, 75, 310, 20)
         self.ui.ss_sell_lineEdit_07.setGeometry(110, 75, 80, 20)
         self.ui.ss_sell_lineEdit_08.setGeometry(210, 75, 80, 20)

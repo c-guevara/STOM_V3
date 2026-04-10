@@ -29,12 +29,12 @@ class BackEngineBinanceMin(BackEngineFutureMin):
             포지션 = 'LONG'
             평가금액, 수익금, 수익률 = get_binance_long_profit(
                 보유수량 * 매수가, 보유수량 * 현재가,
-                '시장가' in self.dict_set['코인매수주문구분'],
-                '시장가' in self.dict_set['코인매도주문구분'])
+                '시장가' in self.dict_set['매수주문유형'],
+                '시장가' in self.dict_set['매도주문유형'])
         else:
             포지션 = 'SHORT'
             평가금액, 수익금, 수익률 = get_binance_short_profit(
                 보유수량 * 매수가, 보유수량 * 현재가,
-                '시장가' in self.dict_set['코인매수주문구분'],
-                '시장가' in self.dict_set['코인매도주문구분'])
+                '시장가' in self.dict_set['매수주문유형'],
+                '시장가' in self.dict_set['매도주문유형'])
         return 포지션, 평가금액, 수익금, 수익률

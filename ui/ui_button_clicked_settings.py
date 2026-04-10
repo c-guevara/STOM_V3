@@ -54,10 +54,10 @@ def setting_load_03(ui):
 @error_decorator
 def setting_load_04(ui):
     df   = ui.dbreader.read_sql('설정디비', 'SELECT * FROM strategy').set_index('index')
-    dfb  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buy').set_index('index')
-    dfs  = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_sell').set_index('index')
-    dfob = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
-    dfos = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optisell').set_index('index')
+    dfb  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_buy").set_index('index')
+    dfs  = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_sell").set_index('index')
+    dfob = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optibuy").set_index('index')
+    dfos = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optisell").set_index('index')
 
     ui.sj_strgy_ckBox_01.setChecked(True) if df['잔고청산'][0] else ui.sj_strgy_ckBox_01.setChecked(False)
     ui.sj_strgy_ckBox_02.setChecked(True) if df['프로세스종료'][0] else ui.sj_strgy_ckBox_02.setChecked(False)
@@ -101,7 +101,7 @@ def setting_load_04(ui):
     ui.sj_strgy_lEdit_06.setText(str(df['수익중지수익률'][0]))
     time_limit = ui.market_info['프로세스종료시간'] - 30
     if ui.market_gubun != 7 and df['전략종료시간'][0] > time_limit:
-        QMessageBox.critical(ui, '오류 알림', f'{ui.market_name} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n')
+        QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n")
 
 
 @error_decorator
@@ -165,9 +165,9 @@ def setting_load_06(ui):
 @error_decorator
 def setting_save_01(ui):
     거래소 = ui.sj_main_comBox_01.currentText()
-    타임프레임 = 1 if ui.sj_main_comBox_02.currentText() == '1초스냅샷' else 0
     모의투자 = 1 if ui.sj_main_cheBox_01.isChecked() else 0
     데이터저장 = 1 if ui.sj_main_cheBox_02.isChecked() else 0
+    타임프레임 = 1 if ui.sj_main_comBox_02.currentText() == '1초스냅샷' else 0
     프로그램비밀번호_ = ui.sj_main_liEdit_01.text()
     바이낸스선물마진타입 = 'ISOLATED' if ui.sj_main_comBox_03.currentText() == '격리' else 'CROSSED'
     바이낸스선물포지션 = 'false' if ui.sj_main_comBox_04.currentText() == '단방향' else 'true'
@@ -181,7 +181,6 @@ def setting_save_01(ui):
         values = tuple(localvs[col] for col in columns)
         ui.queryQ.put(('설정디비', query, values))
 
-        prev_sg = ui.dict_set['거래소']
         for column, value in zip(columns, values):
             ui.dict_set[column] = value
         ui.dict_set['프로그램비밀번호'] = 프로그램비밀번호_
@@ -265,7 +264,7 @@ def setting_save_04(ui):
             QMessageBox.critical(ui, '오류 알림', '전략종료시간을 초단위 시간까지 입력하십시오.\n')
             return
         elif ui.market_gubun != 7 and 전략종료시간 > ui.market_info['프로세스종료시간'] - 30:
-            QMessageBox.critical(ui, '오류 알림', f'{ui.market_name} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n')
+            QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n")
             return
 
         if 매수전략 == '사용안함': 매수전략 = ''
@@ -395,16 +394,13 @@ def setting_acc_view(ui):
 def setting_order_load_01(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM buyorder').set_index('index')
 
-    ui.ss_buyy_checkBox_01.setChecked(True) if df['매수주문구분'][0] == '시장가' else ui.ss_buyy_checkBox_01.setChecked(False)
-    ui.ss_buyy_checkBox_02.setChecked(True) if df['매수주문구분'][0] == '지정가' else ui.ss_buyy_checkBox_02.setChecked(False)
-    ui.ss_buyy_checkBox_03.setChecked(True) if df['매수주문구분'][0] == '최유리지정가' else ui.ss_buyy_checkBox_03.setChecked(False)
-    ui.ss_buyy_checkBox_04.setChecked(True) if df['매수주문구분'][0] == '최우선지정가' else ui.ss_buyy_checkBox_04.setChecked(False)
-    ui.ss_buyy_checkBox_05.setChecked(True) if df['매수주문구분'][0] == '지정가IOC' else ui.ss_buyy_checkBox_05.setChecked(False)
-    ui.ss_buyy_checkBox_06.setChecked(True) if df['매수주문구분'][0] == '시장가IOC' else ui.ss_buyy_checkBox_06.setChecked(False)
-    ui.ss_buyy_checkBox_07.setChecked(True) if df['매수주문구분'][0] == '최유리IOC' else ui.ss_buyy_checkBox_07.setChecked(False)
-    ui.ss_buyy_checkBox_08.setChecked(True) if df['매수주문구분'][0] == '지정가FOK' else ui.ss_buyy_checkBox_08.setChecked(False)
-    ui.ss_buyy_checkBox_09.setChecked(True) if df['매수주문구분'][0] == '시장가FOK' else ui.ss_buyy_checkBox_09.setChecked(False)
-    ui.ss_buyy_checkBox_10.setChecked(True) if df['매수주문구분'][0] == '최유리FOK' else ui.ss_buyy_checkBox_10.setChecked(False)
+    ui.ss_buyy_checkBox_01.setChecked(True) if df['매수주문유형'][0] == '시장가' else ui.ss_buyy_checkBox_01.setChecked(False)
+    ui.ss_buyy_checkBox_02.setChecked(True) if df['매수주문유형'][0] == '지정가' else ui.ss_buyy_checkBox_02.setChecked(False)
+    ui.ss_buyy_checkBox_03.setChecked(True) if df['매수주문유형'][0] == '최유리지정가' else ui.ss_buyy_checkBox_03.setChecked(False)
+    ui.ss_buyy_checkBox_04.setChecked(True) if df['매수주문유형'][0] == '지정가IOC' else ui.ss_buyy_checkBox_04.setChecked(False)
+    ui.ss_buyy_checkBox_05.setChecked(True) if df['매수주문유형'][0] == '최유리IOC' else ui.ss_buyy_checkBox_05.setChecked(False)
+    ui.ss_buyy_checkBox_06.setChecked(True) if df['매수주문유형'][0] == '지정가FOK' else ui.ss_buyy_checkBox_06.setChecked(False)
+    ui.ss_buyy_checkBox_07.setChecked(True) if df['매수주문유형'][0] == '최유리FOK' else ui.ss_buyy_checkBox_07.setChecked(False)
     ui.ss_buyy_lineEdit_01.setText(str(df['매수분할횟수'][0]))
     ui.ss_buyy_checkBox_11.setChecked(True) if df['매수분할방법'][0] == 1 else ui.ss_buyy_checkBox_11.setChecked(False)
     ui.ss_buyy_checkBox_12.setChecked(True) if df['매수분할방법'][0] == 2 else ui.ss_buyy_checkBox_12.setChecked(False)
@@ -423,8 +419,6 @@ def setting_order_load_01(ui):
     ui.ss_buyy_checkBox_20.setChecked(True) if df['매수취소시간'][0] else ui.ss_buyy_checkBox_20.setChecked(False)
     ui.ss_buyy_lineEdit_04.setText(str(df['매수취소시간초'][0]))
     ui.ss_buyy_checkBox_21.setChecked(True) if df['매수금지블랙리스트'][0] else ui.ss_buyy_checkBox_21.setChecked(False)
-    ui.ss_buyy_checkBox_22.setChecked(True) if df['매수금지라운드피겨'][0] else ui.ss_buyy_checkBox_22.setChecked(False)
-    ui.ss_buyy_lineEdit_05.setText(str(df['매수금지라운드호가'][0]))
     ui.ss_buyy_checkBox_23.setChecked(True) if df['매수금지손절횟수'][0] else ui.ss_buyy_checkBox_23.setChecked(False)
     ui.ss_buyy_lineEdit_06.setText(str(df['매수금지손절횟수값'][0]))
     ui.ss_buyy_checkBox_24.setChecked(True) if df['매수금지거래횟수'][0] else ui.ss_buyy_checkBox_24.setChecked(False)
@@ -439,12 +433,14 @@ def setting_order_load_01(ui):
     ui.ss_buyy_lineEdit_12.setText(str(df['매수정정횟수'][0]))
     ui.ss_buyy_comboBox_04.setCurrentText(str(df['매수정정호가차이'][0]))
     ui.ss_buyy_comboBox_05.setCurrentText(str(df['매수정정호가'][0]))
+
     ui.ss_bj_checkBoxxx_01.setChecked(False)
     ui.ss_bj_checkBoxxx_02.setChecked(False)
     ui.ss_bj_checkBoxxx_03.setChecked(False)
     ui.ss_bj_checkBoxxx_04.setChecked(False)
     ui.ss_bj_checkBoxxx_05.setChecked(False)
     ui.ss_bj_checkBoxxx_06.setChecked(False)
+
     bjjj_list = df['비중조절'][0]
     bjjj_list = bjjj_list.split(';')
     if bjjj_list[0] == '0':   ui.ss_bj_checkBoxxx_01.setChecked(True)
@@ -453,6 +449,7 @@ def setting_order_load_01(ui):
     elif bjjj_list[0] == '3': ui.ss_bj_checkBoxxx_04.setChecked(True)
     elif bjjj_list[0] == '4': ui.ss_bj_checkBoxxx_05.setChecked(True)
     elif bjjj_list[0] == '5': ui.ss_bj_checkBoxxx_06.setChecked(True)
+
     ui.ss_bj_lineEdittt_01.setText(bjjj_list[1])
     ui.ss_bj_lineEdittt_02.setText(bjjj_list[2])
     ui.ss_bj_lineEdittt_03.setText(bjjj_list[3])
@@ -468,16 +465,13 @@ def setting_order_load_01(ui):
 def setting_order_load_02(ui):
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM sellorder').set_index('index')
 
-    ui.ss_sell_checkBox_01.setChecked(True) if df['매도주문구분'][0] == '시장가' else ui.ss_sell_checkBox_01.setChecked(False)
-    ui.ss_sell_checkBox_02.setChecked(True) if df['매도주문구분'][0] == '지정가' else ui.ss_sell_checkBox_02.setChecked(False)
-    ui.ss_sell_checkBox_03.setChecked(True) if df['매도주문구분'][0] == '최유리지정가' else ui.ss_sell_checkBox_03.setChecked(False)
-    ui.ss_sell_checkBox_04.setChecked(True) if df['매도주문구분'][0] == '최우선지정가' else ui.ss_sell_checkBox_04.setChecked(False)
-    ui.ss_sell_checkBox_05.setChecked(True) if df['매도주문구분'][0] == '지정가IOC' else ui.ss_sell_checkBox_05.setChecked(False)
-    ui.ss_sell_checkBox_06.setChecked(True) if df['매도주문구분'][0] == '시장가IOC' else ui.ss_sell_checkBox_06.setChecked(False)
-    ui.ss_sell_checkBox_07.setChecked(True) if df['매도주문구분'][0] == '최유리IOC' else ui.ss_sell_checkBox_07.setChecked(False)
-    ui.ss_sell_checkBox_08.setChecked(True) if df['매도주문구분'][0] == '지정가FOK' else ui.ss_sell_checkBox_08.setChecked(False)
-    ui.ss_sell_checkBox_09.setChecked(True) if df['매도주문구분'][0] == '시장가FOK' else ui.ss_sell_checkBox_09.setChecked(False)
-    ui.ss_sell_checkBox_10.setChecked(True) if df['매도주문구분'][0] == '최유리FOK' else ui.ss_sell_checkBox_10.setChecked(False)
+    ui.ss_sell_checkBox_01.setChecked(True) if df['매도주문유형'][0] == '시장가' else ui.ss_sell_checkBox_01.setChecked(False)
+    ui.ss_sell_checkBox_02.setChecked(True) if df['매도주문유형'][0] == '지정가' else ui.ss_sell_checkBox_02.setChecked(False)
+    ui.ss_sell_checkBox_03.setChecked(True) if df['매도주문유형'][0] == '최유리지정가' else ui.ss_sell_checkBox_03.setChecked(False)
+    ui.ss_sell_checkBox_04.setChecked(True) if df['매도주문유형'][0] == '지정가IOC' else ui.ss_sell_checkBox_04.setChecked(False)
+    ui.ss_sell_checkBox_05.setChecked(True) if df['매도주문유형'][0] == '최유리IOC' else ui.ss_sell_checkBox_05.setChecked(False)
+    ui.ss_sell_checkBox_06.setChecked(True) if df['매도주문유형'][0] == '지정가FOK' else ui.ss_sell_checkBox_06.setChecked(False)
+    ui.ss_sell_checkBox_07.setChecked(True) if df['매도주문유형'][0] == '최유리FOK' else ui.ss_sell_checkBox_07.setChecked(False)
     ui.ss_sell_lineEdit_01.setText(str(df['매도분할횟수'][0]))
     ui.ss_sell_checkBox_11.setChecked(True) if df['매도분할방법'][0] == 1 else ui.ss_sell_checkBox_11.setChecked(False)
     ui.ss_sell_checkBox_12.setChecked(True) if df['매도분할방법'][0] == 2 else ui.ss_sell_checkBox_12.setChecked(False)
@@ -496,8 +490,6 @@ def setting_order_load_02(ui):
     ui.ss_sell_lineEdit_04.setText(str(df['매도취소시간초'][0]))
     ui.ss_sell_checkBox_20.setChecked(True) if df['매도금지매수횟수'][0] else ui.ss_sell_checkBox_20.setChecked(False)
     ui.ss_sell_lineEdit_05.setText(str(df['매도금지매수횟수값'][0]))
-    ui.ss_sell_checkBox_21.setChecked(True) if df['매도금지라운드피겨'][0] else ui.ss_sell_checkBox_21.setChecked(False)
-    ui.ss_sell_lineEdit_06.setText(str(df['매도금지라운드호가'][0]))
     ui.ss_sell_checkBox_22.setChecked(True) if df['매도금지시간'][0] else ui.ss_sell_checkBox_22.setChecked(False)
     ui.ss_sell_lineEdit_07.setText(str(df['매도금지시작시간'][0]))
     ui.ss_sell_lineEdit_08.setText(str(df['매도금지종료시간'][0]))
@@ -518,17 +510,14 @@ def setting_order_load_02(ui):
 
 @error_decorator
 def setting_order_save_01(ui):
-    매수주문구분 = ''
-    if ui.ss_buyy_checkBox_01.isChecked(): 매수주문구분 = '시장가'
-    if ui.ss_buyy_checkBox_02.isChecked(): 매수주문구분 = '지정가'
-    if ui.ss_buyy_checkBox_03.isChecked(): 매수주문구분 = '최유리지정가'
-    if ui.ss_buyy_checkBox_04.isChecked(): 매수주문구분 = '최우선지정가'
-    if ui.ss_buyy_checkBox_05.isChecked(): 매수주문구분 = '지정가IOC'
-    if ui.ss_buyy_checkBox_06.isChecked(): 매수주문구분 = '시장가IOC'
-    if ui.ss_buyy_checkBox_07.isChecked(): 매수주문구분 = '최유리IOC'
-    if ui.ss_buyy_checkBox_08.isChecked(): 매수주문구분 = '지정가FOK'
-    if ui.ss_buyy_checkBox_09.isChecked(): 매수주문구분 = '시장가FOK'
-    if ui.ss_buyy_checkBox_10.isChecked(): 매수주문구분 = '최유리FOK'
+    매수주문유형 = ''
+    if ui.ss_buyy_checkBox_01.isChecked(): 매수주문유형 = '시장가'
+    if ui.ss_buyy_checkBox_02.isChecked(): 매수주문유형 = '지정가'
+    if ui.ss_buyy_checkBox_03.isChecked(): 매수주문유형 = '최유리지정가'
+    if ui.ss_buyy_checkBox_04.isChecked(): 매수주문유형 = '지정가IOC'
+    if ui.ss_buyy_checkBox_05.isChecked(): 매수주문유형 = '최유리IOC'
+    if ui.ss_buyy_checkBox_06.isChecked(): 매수주문유형 = '지정가FOK'
+    if ui.ss_buyy_checkBox_07.isChecked(): 매수주문유형 = '최유리FOK'
     매수분할횟수 = ui.ss_buyy_lineEdit_01.text()
 
     매수분할방법 = 0
@@ -550,8 +539,6 @@ def setting_order_save_01(ui):
     매수취소시간 = 1 if ui.ss_buyy_checkBox_20.isChecked() else 0
     매수취소시간초 = ui.ss_buyy_lineEdit_04.text()
     매수금지블랙리스트 = 1 if ui.ss_buyy_checkBox_21.isChecked() else 0
-    매수금지라운드피겨 = 1 if ui.ss_buyy_checkBox_22.isChecked() else 0
-    매수금지라운드호가 = ui.ss_buyy_lineEdit_05.text()
     매수금지손절횟수 = 1 if ui.ss_buyy_checkBox_23.isChecked() else 0
     매수금지손절횟수값 = ui.ss_buyy_lineEdit_06.text()
     매수금지거래횟수 = 1 if ui.ss_buyy_checkBox_24.isChecked() else 0
@@ -602,9 +589,8 @@ def setting_order_save_01(ui):
     비중조절 = ';'.join(bjjj_list)
     비중조절_ = [float(x) for x in bjjj_list]
 
-    if '' in (매수주문구분, 매수분할횟수, 매수분할하방수익률, 매수분할상방수익률, 매수지정가호가번호, 매수시장가잔량범위,
-              매수취소시간초, 매수금지라운드호가, 매수금지손절횟수값, 매수금지거래횟수값, 매수금지시작시간, 매수금지종료시간,
-              매수금지간격초, 매수정정횟수):
+    if '' in (매수주문유형, 매수분할횟수, 매수분할하방수익률, 매수분할상방수익률, 매수지정가호가번호, 매수시장가잔량범위, 매수취소시간초,
+              매수금지손절횟수값, 매수금지거래횟수값, 매수금지시작시간, 매수금지종료시간, 매수금지간격초, 매수정정횟수):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
         return
 
@@ -616,18 +602,15 @@ def setting_order_save_01(ui):
         QMessageBox.critical(ui, '오류 알림', '추가매수방법이 선택되지 않았습니다.\n')
         return
 
-    매수분할횟수, 매수분할하방수익률, 매수분할상방수익률, 매수지정가호가번호, 매수시장가잔량범위, 매수취소시간초, \
-        매수금지라운드호가, 매수금지손절횟수값, 매수금지거래횟수값, 매수금지시작시간, 매수금지종료시간, 매수금지간격초, \
-        매수금지손절간격초, 매수정정횟수, 매수정정호가차이, 매수정정호가 = \
-        int(매수분할횟수), float(매수분할하방수익률), float(매수분할상방수익률), int(매수지정가호가번호), \
-        int(매수시장가잔량범위), int(매수취소시간초), int(매수금지라운드호가), int(매수금지손절횟수값), \
-        int(매수금지거래횟수값), int(매수금지시작시간), int(매수금지종료시간), int(매수금지간격초), int(매수금지손절간격초), \
-        int(매수정정횟수), int(매수정정호가차이), int(매수정정호가)
+    매수분할횟수, 매수분할하방수익률, 매수분할상방수익률, 매수지정가호가번호, 매수시장가잔량범위, 매수취소시간초, 매수금지손절횟수값, 매수금지거래횟수값, \
+        매수금지시작시간, 매수금지종료시간, 매수금지간격초, 매수금지손절간격초, 매수정정횟수, 매수정정호가차이, 매수정정호가 = \
+        int(매수분할횟수), float(매수분할하방수익률), float(매수분할상방수익률), int(매수지정가호가번호), int(매수시장가잔량범위), \
+        int(매수취소시간초), int(매수금지손절횟수값), int(매수금지거래횟수값), int(매수금지시작시간), int(매수금지종료시간), \
+        int(매수금지간격초), int(매수금지손절간격초), int(매수정정횟수), int(매수정정호가차이), int(매수정정호가)
 
     if 매수분할횟수 < 0 or 매수분할하방수익률 < 0 or 매수분할상방수익률 < 0 or 매수시장가잔량범위 < 0 or 매수취소시간초 < 0 or \
-            매수금지라운드호가 < 0 or 매수금지손절횟수값 < 0 or 매수금지거래횟수값 < 0 or 매수금지시작시간 < 0 or \
-            매수금지종료시간 < 0 or 매수금지간격초 < 0 or 매수금지손절간격초 < 0 or 매수정정횟수 < 0 or \
-            매수정정호가차이 < 0 or 매수정정호가 < 0:
+            매수금지손절횟수값 < 0 or 매수금지거래횟수값 < 0 or 매수금지시작시간 < 0 or 매수금지종료시간 < 0 or 매수금지간격초 < 0 or \
+            매수금지손절간격초 < 0 or 매수정정횟수 < 0 or 매수정정호가차이 < 0 or 매수정정호가 < 0:
         QMessageBox.critical(ui, '오류 알림', '지정가 호가 외 모든 입력값은 양수여야합니다.\n')
         return
 
@@ -635,18 +618,13 @@ def setting_order_save_01(ui):
         QMessageBox.critical(ui, '오류 알림', '매수분할횟수는 10을 초과할 수 없습니다.\n')
         return
 
-    if '해외선물' in ui.dict_set['거래소'] and 매수주문구분 not in ('시장가', '지정가'):
-        QMessageBox.critical(ui, '오류 알림', '해외선물의 주문유형은 시장가 또는 지정가만 지원합니다.\n')
-        return
-
     if ui.proc_chqs.is_alive():
-        columns = ['매수주문구분', '매수분할횟수', '매수분할방법', '매수분할시그널', '매수분할하방', '매수분할상방',
-                   '매수분할하방수익률', '매수분할상방수익률', '매수분할고정수익률', '매수지정가기준가격', '매수지정가호가번호',
-                   '매수시장가잔량범위', '매수취소관심이탈', '매수취소매도시그널', '매수취소시간', '매수취소시간초',
-                   '매수금지블랙리스트', '매수금지라운드피겨', '매수금지라운드호가', '매수금지손절횟수', '매수금지손절횟수값',
-                   '매수금지거래횟수', '매수금지거래횟수값', '매수금지시간', '매수금지시작시간', '매수금지종료시간',
-                   '매수금지간격', '매수금지간격초', '매수금지손절간격', '매수금지손절간격초', '매수정정횟수',
-                   '매수정정호가차이', '매수정정호가', '비중조절']
+        columns = ['매수주문유형', '매수분할횟수', '매수분할방법', '매수분할시그널', '매수분할하방', '매수분할상방', '매수분할하방수익률',
+                   '매수분할상방수익률', '매수분할고정수익률', '매수지정가기준가격', '매수지정가호가번호', '매수시장가잔량범위',
+                   '매수취소관심이탈', '매수취소매도시그널', '매수취소시간', '매수취소시간초', '매수금지블랙리스트', '매수금지손절횟수',
+                   '매수금지손절횟수값', '매수금지거래횟수', '매수금지거래횟수값', '매수금지시간', '매수금지시작시간', '매수금지종료시간',
+                   '매수금지간격', '매수금지간격초', '매수금지손절간격', '매수금지손절간격초', '매수정정횟수', '매수정정호가차이',
+                   '매수정정호가', '비중조절']
         set_txt = ', '.join([f'{col} = ?' for col in columns])
         query   = f'UPDATE buyorder SET {set_txt}'
         localvs = locals()
@@ -664,17 +642,14 @@ def setting_order_save_01(ui):
 
 @error_decorator
 def setting_order_save_02(ui):
-    매도주문구분 = ''
-    if ui.ss_sell_checkBox_01.isChecked(): 매도주문구분 = '시장가'
-    if ui.ss_sell_checkBox_02.isChecked(): 매도주문구분 = '지정가'
-    if ui.ss_sell_checkBox_03.isChecked(): 매도주문구분 = '최유리지정가'
-    if ui.ss_sell_checkBox_04.isChecked(): 매도주문구분 = '최우선지정가'
-    if ui.ss_sell_checkBox_05.isChecked(): 매도주문구분 = '지정가IOC'
-    if ui.ss_sell_checkBox_06.isChecked(): 매도주문구분 = '시장가IOC'
-    if ui.ss_sell_checkBox_07.isChecked(): 매도주문구분 = '최유리IOC'
-    if ui.ss_sell_checkBox_08.isChecked(): 매도주문구분 = '지정가FOK'
-    if ui.ss_sell_checkBox_09.isChecked(): 매도주문구분 = '시장가FOK'
-    if ui.ss_sell_checkBox_10.isChecked(): 매도주문구분 = '최유리FOK'
+    매도주문유형 = ''
+    if ui.ss_sell_checkBox_01.isChecked(): 매도주문유형 = '시장가'
+    if ui.ss_sell_checkBox_02.isChecked(): 매도주문유형 = '지정가'
+    if ui.ss_sell_checkBox_03.isChecked(): 매도주문유형 = '최유리지정가'
+    if ui.ss_sell_checkBox_04.isChecked(): 매도주문유형 = '지정가IOC'
+    if ui.ss_sell_checkBox_05.isChecked(): 매도주문유형 = '최유리IOC'
+    if ui.ss_sell_checkBox_06.isChecked(): 매도주문유형 = '지정가FOK'
+    if ui.ss_sell_checkBox_07.isChecked(): 매도주문유형 = '최유리FOK'
     매도분할횟수 = ui.ss_sell_lineEdit_01.text()
 
     매도분할방법 = 0
@@ -696,8 +671,6 @@ def setting_order_save_02(ui):
     매도취소시간초 = ui.ss_sell_lineEdit_04.text()
     매도금지매수횟수 = 1 if ui.ss_sell_checkBox_20.isChecked() else 0
     매도금지매수횟수값 = ui.ss_sell_lineEdit_05.text()
-    매도금지라운드피겨 = 1 if ui.ss_sell_checkBox_21.isChecked() else 0
-    매도금지라운드호가 = ui.ss_sell_lineEdit_06.text()
     매도금지시간 = 1 if ui.ss_sell_checkBox_22.isChecked() else 0
     매도금지시작시간 = ui.ss_sell_lineEdit_07.text()
     매도금지종료시간 = ui.ss_sell_lineEdit_08.text()
@@ -715,9 +688,8 @@ def setting_order_save_02(ui):
     매도손절수익금청산  = 1 if ui.ss_sell_checkBox_27.isChecked() else 0
     매도손절수익금 = ui.ss_sell_lineEdit_14.text()
 
-    if '' in (매도주문구분, 매도분할횟수, 매도분할하방수익률, 매도분할상방수익률, 매도취소시간초, 매도금지매수횟수값,
-              매도금지라운드호가, 매도금지시작시간, 매도금지종료시간, 매도금지간격초, 매도정정횟수, 매도익절수익률,
-              매도익절수익금, 매도손절수익률, 매도손절수익금):
+    if '' in (매도주문유형, 매도분할횟수, 매도분할하방수익률, 매도분할상방수익률, 매도취소시간초, 매도금지매수횟수값, 매도금지시작시간,
+              매도금지종료시간, 매도금지간격초, 매도정정횟수, 매도익절수익률, 매도익절수익금, 매도손절수익률, 매도손절수익금):
         QMessageBox.critical(ui, '오류 알림', '일부 설정값이 입력되지 않았습니다.\n')
         return
 
@@ -729,19 +701,15 @@ def setting_order_save_02(ui):
         QMessageBox.critical(ui, '오류 알림', '추가매도방법이 선택되지 않았습니다.\n')
         return
 
-    매도분할횟수, 매도분할하방수익률, 매도분할상방수익률, 매도지정가호가번호, 매도시장가잔량범위, 매도취소시간초, \
-        매도금지매수횟수값, 매도금지라운드호가, 매도금지시작시간, 매도금지종료시간, 매도금지간격초, 매도정정횟수, \
-        매도정정호가차이, 매도정정호가, 매도익절수익률, 매도익절수익금, 매도손절수익률, 매도손절수익금 = \
-        int(매도분할횟수), float(매도분할하방수익률), float(매도분할상방수익률), int(매도지정가호가번호), \
-        int(매도시장가잔량범위), int(매도취소시간초), int(매도금지매수횟수값), int(매도금지라운드호가), \
-        int(매도금지시작시간), int(매도금지종료시간), int(매도금지간격초), int(매도정정횟수), \
-        int(매도정정호가차이), int(매도정정호가), float(매도익절수익률), int(매도익절수익금), \
-        float(매도손절수익률), int(매도손절수익금)
+    매도분할횟수, 매도분할하방수익률, 매도분할상방수익률, 매도지정가호가번호, 매도시장가잔량범위, 매도취소시간초, 매도금지매수횟수값, 매도금지시작시간, \
+        매도금지종료시간, 매도금지간격초, 매도정정횟수, 매도정정호가차이, 매도정정호가, 매도익절수익률, 매도익절수익금, 매도손절수익률, 매도손절수익금 = \
+        int(매도분할횟수), float(매도분할하방수익률), float(매도분할상방수익률), int(매도지정가호가번호), int(매도시장가잔량범위), \
+        int(매도취소시간초), int(매도금지매수횟수값), int(매도금지시작시간), int(매도금지종료시간), int(매도금지간격초), int(매도정정횟수), \
+        int(매도정정호가차이), int(매도정정호가), float(매도익절수익률), int(매도익절수익금), float(매도손절수익률), int(매도손절수익금)
 
-    if 매도분할횟수 < 0 or 매도분할하방수익률 < 0 or 매도분할상방수익률 < 0 or 매도취소시간초 < 0 or \
-            매도금지매수횟수값 < 0 or 매도금지라운드호가 < 0 or 매도금지시작시간 < 0 or 매도금지종료시간 < 0 or \
-            매도금지간격초 < 0 or 매도정정횟수 < 0 or 매도정정호가차이 < 0 or 매도정정호가 < 0 or \
-            매도익절수익률 < 0 or 매도익절수익금 < 0 or 매도손절수익률 < 0 or 매도손절수익금 < 0:
+    if 매도분할횟수 < 0 or 매도분할하방수익률 < 0 or 매도분할상방수익률 < 0 or 매도취소시간초 < 0 or 매도금지매수횟수값 < 0 or \
+            매도금지시작시간 < 0 or 매도금지종료시간 < 0 or 매도금지간격초 < 0 or 매도정정횟수 < 0 or 매도정정호가차이 < 0 or \
+            매도정정호가 < 0 or 매도익절수익률 < 0 or 매도익절수익금 < 0 or 매도손절수익률 < 0 or 매도손절수익금 < 0:
         QMessageBox.critical(ui, '오류 알림', '모든 값은 양수로 입력하십시오.\n')
         return
 
@@ -753,18 +721,13 @@ def setting_order_save_02(ui):
         QMessageBox.critical(ui, '오류 알림', '매도금지 매수횟수는 10미만으로 입력하십시오.\n')
         return
 
-    if '해외선물' in ui.dict_set['거래소'] and 매도주문구분 not in ('시장가', '지정가'):
-        QMessageBox.critical(ui, '오류 알림', '해외선물의 주문유형은 시장가 또는 지정가만 지원합니다.\n')
-        return
-
     if ui.proc_chqs.is_alive():
-        columns = ['매도주문구분', '매도분할횟수', '매도분할방법', '매도분할시그널', '매도분할하방', '매도분할상방',
-                   '매도분할하방수익률', '매도분할상방수익률', '매도지정가기준가격', '매도지정가호가번호',
-                   '매도시장가잔량범위', '매도취소관심진입', '매도취소매수시그널', '매도취소시간', '매도취소시간초',
-                   '매도금지매수횟수', '매도금지매수횟수값', '매도금지라운드피겨', '매도금지라운드호가', '매도금지시간',
-                   '매도금지시작시간', '매도금지종료시간', '매도금지간격', '매도금지간격초', '매도정정횟수',
-                   '매도정정호가차이', '매도정정호가', '매도익절수익률청산', '매도익절수익률', '매도익절수익금청산',
-                   '매도익절수익금', '매도손절수익률청산', '매도손절수익률', '매도손절수익금청산', '매도손절수익금']
+        columns = ['매도주문유형', '매도분할횟수', '매도분할방법', '매도분할시그널', '매도분할하방', '매도분할상방', '매도분할하방수익률',
+                   '매도분할상방수익률', '매도지정가기준가격', '매도지정가호가번호', '매도시장가잔량범위', '매도취소관심진입',
+                   '매도취소매수시그널', '매도취소시간', '매도취소시간초', '매도금지매수횟수', '매도금지매수횟수값', '매도금지시간',
+                   '매도금지시작시간', '매도금지종료시간', '매도금지간격', '매도금지간격초', '매도정정횟수', '매도정정호가차이', '매도정정호가',
+                   '매도익절수익률청산', '매도익절수익률', '매도익절수익금청산', '매도익절수익금', '매도손절수익률청산', '매도손절수익률',
+                   '매도손절수익금청산', '매도손절수익금']
         set_txt = ', '.join([f'{col} = ?' for col in columns])
         query   = f'UPDATE sellorder SET {set_txt}'
         localvs = locals()

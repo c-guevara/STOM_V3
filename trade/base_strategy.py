@@ -8,9 +8,9 @@ from utility.setting_base import indicator
 from trade.risk_analyzer import RiskAnalyzer
 from trade.formula_manager import get_formula_data
 from trade.strategy_globals_func import StrategyGlobalsFunc
-from utility.static import get_ema_list, now, get_profile_text
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
+from utility.static import get_ema_list, now, get_profile_text, set_builtin_print
 
 
 class BaseStrategy(StrategyGlobalsFunc):
@@ -29,7 +29,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.dict_set        = dict_set
         self.indicator       = indicator
         self.market_gubun    = market_info[0]
-        self.market_info     = market_info[2]
+        self.market_info     = market_info[1]
 
         self.buystrategy     = None
         self.sellstrategy    = None
@@ -88,6 +88,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.ms_analyzer = MicrostructureAnalyzer(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'], factor_list)
 
+        set_builtin_print(self.windowQ)
         if self.dict_set['전략연산프로파일링']:
             import cProfile
             self.pr = cProfile.Profile()
@@ -184,10 +185,7 @@ class BaseStrategy(StrategyGlobalsFunc):
                 if data.__class__ == list:
                     self._strategy(data)
                 elif data.__class__ == tuple:
-                    if self.market_gubun < 6:
-                        self._update_tuple(data)
-                    else:
-                        self._update_tuple_future(data)
+                    self._update_tuple(data)
                 elif data.__class__ == str:
                     self._update_string(data)
             except:
@@ -217,32 +215,6 @@ class BaseStrategy(StrategyGlobalsFunc):
         elif gubun == '매도주문':
             if data not in self.dict_signal['매도']:
                 self.dict_signal['매도'].append(data)
-        elif gubun == '매수전략':
-            self._set_buy_strategy(data)
-        elif gubun == '매도전략':
-            self.sellstrategy = compile(data, '<string>', 'exec')
-        elif gubun == '종목당투자금':
-            self.int_tujagm = data
-        elif gubun == '차트종목코드':
-            self.chart_code = data
-        elif gubun == '설정변경':
-            self.dict_set = data
-            self._update_stringategy()
-        elif gubun == '종목정보':
-            self.dict_info = data
-        elif gubun == '데이터저장':
-            self._save_data(data)
-
-    def _update_tuple_future(self, data):
-        gubun, data = data
-        if gubun == '잔고목록':
-            self.dict_jg = data
-            self.jgrv_count += 1
-            if self.jgrv_count == 2:
-                self.jgrv_count = 0
-                self._put_gsjm_and_delete_hilo()
-        elif gubun == '관심목록':
-            self.dict_gj = {k: v for k, v in self.dict_gj.items() if k in data}
         elif '_COMPLETE' in gubun:
             gubun = gubun.replace('_COMPLETE', '')
             if data in self.dict_signal[gubun]:
@@ -268,7 +240,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         elif gubun == '설정변경':
             self.dict_set = data
             self._update_stringategy()
-        elif gubun == '바낸선물단위정보':
+        elif gubun == '종목정보':
             self.dict_info = data
         elif gubun == '데이터저장':
             self._save_data(data)
@@ -321,13 +293,13 @@ class BaseStrategy(StrategyGlobalsFunc):
         else:
             signal_gubun = 'BUY_LONG' if buy_long else 'SELL_SHORT'
 
-        if '지정가' in self.dict_set['매수주문구분']:
+        if '지정가' in self.dict_set['매수주문유형']:
             기준가격 = 현재가
             if self.dict_set['매수지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1 if self.market_gubun < 6 or buy_long else 매수호가1
             if self.dict_set['매수지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1 if self.market_gubun < 6 or buy_long else 매도호가1
             self.dict_signal[signal_gubun].append(self.code)
             self.dict_signal_num[self.code] = self.indexn
-            self.traderQ.put((signal_gubun, self.code, 기준가격, 주문수량, now(), False))
+            self.traderQ.put((signal_gubun, self.code, self.name, 기준가격, 주문수량, now(), False))
         else:
             if self.market_gubun < 6 or buy_long:
                 호가배열 = self.shogainfo[:self.buy_hj_limit]
@@ -341,7 +313,7 @@ class BaseStrategy(StrategyGlobalsFunc):
                 예상체결가 = self._get_order_price(거래금액, 주문수량)
                 self.dict_signal[signal_gubun].append(self.code)
                 self.dict_signal_num[self.code] = self.indexn
-                self.traderQ.put((signal_gubun, self.code, 예상체결가, 주문수량, now(), False))
+                self.traderQ.put((signal_gubun, self.code, self.name, 예상체결가, 주문수량, now(), False))
 
     def _get_buy_count(self, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율):
         if self.dict_set['비중조절'][0] == 0:
@@ -387,12 +359,12 @@ class BaseStrategy(StrategyGlobalsFunc):
         else:
             signal_gubun = 'SELL_LONG' if sell_long else 'BUY_SHORT'
 
-        if '지정가' in self.dict_set['매도주문구분'] and not 강제청산:
+        if '지정가' in self.dict_set['매도주문유형'] and not 강제청산:
             기준가격 = 현재가
             if self.dict_set['매도지정가기준가격'] == '매도1호가': 기준가격 = 매도호가1 if self.market_gubun < 6 or sell_long else 매수호가1
             if self.dict_set['매도지정가기준가격'] == '매수1호가': 기준가격 = 매수호가1 if self.market_gubun < 6 or sell_long else 매도호가1
             self.dict_signal[signal_gubun].append(self.code)
-            self.traderQ.put((signal_gubun, self.code, 기준가격, 주문수량, now(), False))
+            self.traderQ.put((signal_gubun, self.code, self.name, 기준가격, 주문수량, now(), False))
         else:
             if self.market_gubun < 6 or sell_long:
                 호가배열 = self.bhogainfo[:self.sell_hj_limit]
@@ -405,7 +377,7 @@ class BaseStrategy(StrategyGlobalsFunc):
             if 체결완료:
                 예상체결가 = self._get_order_price(거래금액, 주문수량)
                 self.dict_signal[signal_gubun].append(self.code)
-                self.traderQ.put((signal_gubun, self.code, 예상체결가, 주문수량, now(), True if 강제청산 else False))
+                self.traderQ.put((signal_gubun, self.code, self.name, 예상체결가, 주문수량, now(), True if 강제청산 else False))
 
     def _get_sell_count(self, 분할매도횟수, 보유수량):
         if self.dict_set['매도분할횟수'] == 1:

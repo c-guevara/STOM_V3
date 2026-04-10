@@ -1,11 +1,9 @@
 
 import re
 import binance
-from traceback import format_exc
-from utility.setting_base import ui_num
 from trade.base_receiver import BaseReceiver
+from utility.static import now, now_utc, str_ymd, error_decorator, str_ymdhms_utc
 from trade.binance.binance_websocket import WebSocketReceiver
-from utility.static import now, str_ymdhms_utc, now_utc, str_ymd
 
 
 class BinanceReceiver(BaseReceiver):
@@ -15,15 +13,32 @@ class BinanceReceiver(BaseReceiver):
         self.binance = binance.Client()
 
         self._get_code_info()
-        self._start_notification()
+        self._save_code_info_and_noti()
 
         self.ws_thread = WebSocketReceiver(self.codes, self.windowQ)
-        self.ws_thread.signal1.connect(self._convert_tick_data)
-        self.ws_thread.signal2.connect(self._convert_hoga_data)
+        self.ws_thread.signal.connect(self._convert_real_data)
         self.ws_thread.start()
 
     def _get_code_info(self):
-        dict_daym = {}
+        def get_decimal_place(float_):
+            float_ = str(float(float_))
+            float_ = float_.split('.')[1]
+            return 0 if float_ == '0' else len(float_)
+
+        datas = self.binance.futures_exchange_info()
+        datas = [x for x in datas['symbols'] if re.search('USDT$', x['symbol']) is not None]
+        for data in datas:
+            code = data['symbol']
+            tick_size = data['filters'][0]['tickSize']
+            self.dict_info[code] = {
+                '종목명': code,
+                '호가단위': float(tick_size),
+                '가격소숫점자리수': get_decimal_place(tick_size),
+                '수량소숫점자리수': get_decimal_place(data['filters'][2]['minQty'])
+            }
+        self.traderQ.put(('종목정보', self.dict_info))
+        self.stgQ.put(('종목정보', self.dict_info))
+
         datas = self.binance.futures_ticker()
         datas = [data for data in datas if re.search('USDT$', data['symbol']) is not None]
         ymd   = str_ymd(now_utc())
@@ -39,19 +54,27 @@ class BinanceReceiver(BaseReceiver):
                 prec = round(c - float(data['priceChange']), 8)
                 self.dict_data[code] = [c, o, h, low, per, dm, 0, 0, 0, 0, 0, c, c, c]
                 self.dict_prec[code] = [ymd, prec]
-                dict_daym[code] = dm
+                self.dict_daym[code] = dm
 
         self.codes = list(self.dict_data)
-        self.list_gsjm = [x for x, y in sorted(dict_daym.items(), key=lambda x: x[1], reverse=True)[:10]]
+        self.list_gsjm = \
+            [x for x, y in sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:self.mtop_rank]]
         data = tuple(self.list_gsjm)
         self.stgQ.put(('관심목록', data))
 
-    def _convert_hoga_data(self, data):
-        try:
-            data = data['data']
+    @error_decorator
+    def _convert_real_data(self, data):
+        if 'stream' not in data:
+            return
+
+        stream_name = data['stream']
+        data = data['data']
+
+        if '@depth10' in stream_name:
             dt = int(str_ymdhms_utc(data['T']))
             if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
                 return
+
             receivetime = now()
             code = data['s']
             asks_data = data['a']
@@ -81,17 +104,11 @@ class BinanceReceiver(BaseReceiver):
             ]
             self._update_hoga_data(dt, code, hoga_seprice, hoga_buprice, hoga_samount,
                                    hoga_bamount, hoga_tamount, receivetime)
-        except:
-            self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - convert_hoga_data'))
 
-    def _convert_tick_data(self, data):
-        try:
-            data = data['data']
-            dt   = int(str_ymdhms_utc(data['T']))
+        elif '@aggTrade' in stream_name:
+            dt = int(str_ymdhms_utc(data['T']))
             code = data['s']
-            c    = float(data['p'])
-            v    = float(data['q'])
-            m    = data['m']
+            c = float(data['p'])
+            v = float(data['q'])
+            m = data['m']
             self._update_tick_data_coin_future(dt, code, c, v, m)
-        except:
-            self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - convert_tick_data'))

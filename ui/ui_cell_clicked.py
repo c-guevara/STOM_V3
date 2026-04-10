@@ -43,7 +43,7 @@ def cell_clicked_02(ui, row, col):
     oc = comma2int(ui.jg_tableWidgettt.item(row, columns.index('보유수량')).text())
     c = comma2int(ui.jg_tableWidgettt.item(row, columns.index('현재가')).text())
     buttonReply = QMessageBox.question(
-        ui, f'{ui.market_name} 시장가 매도', f'{name} {oc}주를 시장가매도합니다.\n계속하시겠습니까?\n',
+        ui, f"{ui.market_info['마켓이름']} 시장가 매도', f'{name} {oc}주를 시장가매도합니다.\n계속하시겠습니까?\n",
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
@@ -188,18 +188,18 @@ def cell_clicked_08(ui, row, col):
             return
         stg_name = item.text()
         buttonReply = QMessageBox.question(
-            ui.dialog_db, '전략 삭제', f'{ui.market_name} 전략 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
+            ui.dialog_db, '전략 삭제', f"{ui.market_info['마켓이름']} 전략 '{stg_name}'을(를) 삭제합니다.\n계속하시겠습니까?\n",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply == QMessageBox.Yes:
             if col == 0:
-                query = f'DELETE FROM {ui.market_sname}_buy WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_buy WHERE `index` = '{stg_name}'"
             elif col == 1:
-                query = f'DELETE FROM {ui.market_sname}_sell WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_sell WHERE `index` = '{stg_name}'"
             elif col == 2:
-                query = f'DELETE FROM {ui.market_sname}_optibuy WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_optibuy WHERE `index` = '{stg_name}'"
             else:
-                query = f'DELETE FROM {ui.market_sname}_optisell WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_optisell WHERE `index` = '{stg_name}'"
             ui.queryQ.put(('전략디비', query))
             ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 주식전략 "{stg_name}" 삭제 완료'))
     elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_02:
@@ -208,18 +208,18 @@ def cell_clicked_08(ui, row, col):
             return
         stg_name = item.text()
         buttonReply = QMessageBox.question(
-            ui.dialog_db, '범위 또는 조건 삭제', f'{ui.market_name} 범위 또는 조건 "{stg_name}"을(를) 삭제합니다.\n계속하시겠습니까?\n',
+            ui.dialog_db, '범위 또는 조건 삭제', f"{ui.market_info['마켓이름']} 범위 또는 조건 '{stg_name}'을(를) 삭제합니다.\n계속하시겠습니까?\n",
             QMessageBox.Yes | QMessageBox.No, QMessageBox.No
         )
         if buttonReply == QMessageBox.Yes:
             if col == 0:
-                query = f'DELETE FROM {ui.market_sname}_optivars WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_optivars WHERE `index` = '{stg_name}'"
             elif col == 1:
-                query = f'DELETE FROM {ui.market_sname}_optigavars WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_optigavars WHERE `index` = '{stg_name}'"
             elif col == 2:
-                query = f'DELETE FROM {ui.market_sname}_buyconds WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_buyconds WHERE `index` = '{stg_name}'"
             else:
-                query = f'DELETE FROM {ui.market_sname}_sellconds WHERE "index" = "{stg_name}"'
+                query = f"DELETE FROM {ui.market_info['전략구분']}_sellconds WHERE `index` = '{stg_name}'"
             ui.queryQ.put(('전략디비', query))
             ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 주식 범위 또는 조건 "{stg_name}" 삭제 완료'))
     elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_05:

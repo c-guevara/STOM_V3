@@ -18,7 +18,7 @@ from backtest.back_static import send_result, plot_show, get_moneytop_query, get
 
 
 class Total:
-    def __init__(self, wq, sq, tq, teleQ, mq, lq, bstq_list, backname, market_gubun, market_sname, dict_set):
+    def __init__(self, wq, sq, tq, teleQ, mq, lq, bstq_list, backname, market_gubun, market_info, dict_set):
         self.wq           = wq
         self.sq           = sq
         self.tq           = tq
@@ -28,10 +28,10 @@ class Total:
         self.bstq_list    = bstq_list
         self.backname     = backname
         self.market_gubun = market_gubun
-        self.market_sname = market_sname
+        self.market_info  = market_info
         self.dict_set     = dict_set
         self.is_tick      = dict_set['타임프레임']
-        self.savename     = f'{self.market_sname}_{self.backname.replace("최적화", "").lower()}'
+        self.savename     = f"{self.market_info['전략구분']}_{self.backname.replace('최적화', '').lower()}"
 
         self.file_name    = str_ymdhms()
 
@@ -306,7 +306,7 @@ class Total:
             cur = con.cursor()
             vars_text = [str(i) for i in self.vars]
             vars_text = ';'.join(vars_text)
-            cur.execute(f"UPDATE {self.market_sname}_optibuy SET 변수값 = '{vars_text}' WHERE `index` = '{self.buystg_name}'")
+            cur.execute(f"UPDATE {self.market_info['전략구분']}_optibuy SET 변수값 = '{vars_text}' WHERE `index` = '{self.buystg_name}'")
             con.commit()
             con.close()
             self.wq.put((ui_num['백테스트'], f'최적화전략 {self.buystg_name}의 최적값 및 평균틱수 갱신 완료'))
@@ -349,8 +349,7 @@ class Optimize:
         self.dict_set     = dict_set
         self.is_tick      = self.dict_set['타임프레임']
         self.market_gubun = market_infos[0]
-        self.market_sname = market_infos[2]
-        self.market_info  = market_infos[3]
+        self.market_info  = market_infos[1]
         self.visual3D     = Visualization3D()
         self.vars  = {}
         self.vars_ = []
@@ -449,9 +448,9 @@ class Optimize:
             self._sys_exit(True)
 
         con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.market_sname}_optibuy', con).set_index('index')
-        dfs = pd.read_sql(f'SELECT * FROM {self.market_sname}_optisell', con).set_index('index')
-        dfv = pd.read_sql(f'SELECT * FROM {self.market_sname}_optivars', con).set_index('index')
+        dfb = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optibuy", con).set_index('index')
+        dfs = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optisell", con).set_index('index')
+        dfv = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optivars", con).set_index('index')
         buystg = dfb['전략코드'][buystg_name]
         sellstg = dfs['전략코드'][sellstg_name]
         text_vars = dfv['전략코드'][optivars_name]
@@ -512,7 +511,7 @@ class Optimize:
         Process(
             target=Total,
             args=(self.wq, self.sq, self.tq, self.teleQ, mq, self.lq, self.bstq_list, self.backname, self.market_gubun,
-                  self.market_sname, self.dict_set)
+                  self.market_info, self.dict_set)
         ).start()
         self.wq.put((ui_num['백테스트'], f'{self.backname} 집계용 프로세스 생성 완료'))
 
@@ -546,7 +545,7 @@ class Optimize:
         if self.dict_set['스톰라이브']:
             self.lq.put(self.backname.replace('O', '').replace('B', ''))
 
-        back_name = f'{self.market_sname}_{self.backname.replace("최적화", "").lower()}'
+        back_name = f"{self.market_info['전략구분']}_{self.backname.replace('최적화', '').lower()}"
         ymdhms    = str_ymdhms()
         file_name = f'{back_name}_{buystg_name}_{optistandard}_{ymdhms}'
         self.visual3D.plot_3d_visualization(schedul, file_name)
@@ -925,7 +924,7 @@ class Optimize:
                 text_vars = text_vars[:-1]
                 con = sqlite3.connect(DB_STRATEGY)
                 cur = con.cursor()
-                cur.execute(f"UPDATE {self.market_sname}_optivars SET 전략코드 = '{text_vars}' WHERE `index` = '{optivars_name}'")
+                cur.execute(f"UPDATE {self.market_info['전략구분']}_optivars SET 전략코드 = '{text_vars}' WHERE `index` = '{optivars_name}'")
                 con.commit()
                 con.close()
 

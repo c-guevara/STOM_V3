@@ -84,7 +84,7 @@ def strategy_version(ui, gubun1, gubun2, strategy_name):
         return
 
     global SVM
-    SVM = StrategyVersionManager(ui.market_sname, gubun1, gubun2, strategy_name)
+    SVM = StrategyVersionManager(ui.market_info['전략구분'], gubun1, gubun2, strategy_name)
 
     visible_false(ui)
     version_widget_list = getattr(ui, 'stock_version_list')

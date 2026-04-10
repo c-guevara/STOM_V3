@@ -28,8 +28,7 @@ class BackTest:
         self.backname     = backname
         self.dict_set     = dict_set
         self.market_gubun = market_infos[0]
-        self.market_sname = market_infos[2]
-        self.market_info  = market_infos[3]
+        self.market_info  = market_infos[1]
 
         if self.market_gubun < 4:
             self.betting  = float(betting) * 1000000
@@ -52,7 +51,7 @@ class BackTest:
         self.sellstg      = None
         self.day_count    = None
         self.is_tick      = self.dict_set['타임프레임']
-        self.savename     = f'{self.market_sname}_bt'
+        self.savename     = f"{self.market_info['전략구분']}_bt"
         self.insertblacklist = []
 
         self.start_time = now()
@@ -76,8 +75,8 @@ class BackTest:
             self._sys_exit(True)
 
         con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.market_sname}_buy', con).set_index('index')
-        dfs = pd.read_sql(f'SELECT * FROM {self.market_sname}_sell', con).set_index('index')
+        dfb = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_buy", con).set_index('index')
+        dfs = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_sell", con).set_index('index')
         con.close()
 
         buystg = dfb['전략코드'][self.buystg_name]

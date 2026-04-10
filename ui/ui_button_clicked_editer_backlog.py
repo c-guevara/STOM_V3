@@ -11,7 +11,7 @@ def ssbutton_clicked_01(ui):
     df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
     ui.ss_comboBoxxxx_01.clear()
     for table in df['name'].to_list()[::-1]:
-        if ui.market_sname in table and '_bt_' in table:
+        if ui.market_info['전략구분'] in table and '_bt_' in table:
             ui.ss_comboBoxxxx_01.addItem(table)
     try:
         df = ui.dbreader.read_sql('백테디비', f"SELECT * FROM '{ui.ss_comboBoxxxx_01.currentText()}'").set_index('index')
@@ -26,7 +26,7 @@ def ssbutton_clicked_02(ui):
     df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
     ui.ss_comboBoxxxx_02.clear()
     for table in df['name'].to_list()[::-1]:
-        if ui.market_sname in table and \
+        if ui.market_info['전략구분'] in table and \
                 ('o_' in table or 'ov_' in table or 'ovc_' in table or 'b_' in table or
                  'bv_' in table or 'bvc_' in table):
             ui.ss_comboBoxxxx_02.addItem(table)
@@ -43,7 +43,7 @@ def ssbutton_clicked_03(ui):
     df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
     ui.ss_comboBoxxxx_03.clear()
     for table in df['name'].to_list()[::-1]:
-        if ui.market_sname in table and '_bt_' not in table and \
+        if ui.market_info['전략구분'] in table and '_bt_' not in table and \
                 ('t_' in table or 'or_' in table or 'orv_' in table or 'orvc_' in table or 'br_' in table or
                  'brv_' in table or 'brvc_' in table):
             ui.ss_comboBoxxxx_03.addItem(table)
@@ -88,7 +88,7 @@ def ssbutton_clicked_05(ui):
         df = ui.dbreader.read_sql('백테디비', "SELECT name FROM sqlite_master WHERE TYPE = 'table'")
 
         if len(df) > 0:
-            ui.backdetail_list = [x for x in df['name'].to_list()[::-1] if ui.market_sname in x and ('t_' in x or 'v_' in x or 'c_' in x or 'vc_' in x)]
+            ui.backdetail_list = [x for x in df['name'].to_list()[::-1] if ui.market_info['전략구분'] in x and ('t_' in x or 'v_' in x or 'c_' in x or 'vc_' in x)]
             if ui.backdetail_list:
                 ui.backcheckbox_list = []
                 count = len(ui.backdetail_list)

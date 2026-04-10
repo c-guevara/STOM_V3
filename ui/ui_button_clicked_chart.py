@@ -43,8 +43,8 @@ def get_indicator_detail(ui):
             vars_  = None
             try:
                 stg_name = ui.dict_set['매수전략']
-                df1 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_buy').set_index('index')
-                df2 = ui.dbreader.read_sql('전략디비', f'SELECT * FROM {ui.market_sname}_optibuy').set_index('index')
+                df1 = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_buy").set_index('index')
+                df2 = ui.dbreader.read_sql('전략디비', f"SELECT * FROM {ui.market_info['전략구분']}_optibuy").set_index('index')
                 if stg_name in df1.index:
                     buystg = df1['전략코드'][stg_name]
                 elif stg_name in df2.index:

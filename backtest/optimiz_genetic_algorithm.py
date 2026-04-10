@@ -160,8 +160,7 @@ class OptimizeGeneticAlgorithm:
         self.ui_gubun     = ui_gubun
         self.dict_set     = dict_set
         self.market_gubun = market_infos[0]
-        self.market_sname = market_infos[2]
-        self.market_info  = market_infos[3]
+        self.market_info  = market_infos[1]
         self.high_list    = []
         self.vars_list    = []
         self.opti_lists   = []
@@ -169,7 +168,7 @@ class OptimizeGeneticAlgorithm:
         self.result       = {}
         self.vars         = {}
         self.total_count  = 0
-        self.savename     = f'{self.market_sname}_{self.backname.replace("최적화", "").lower()}'
+        self.savename     = f"{self.market_info['전략구분']}_{self.backname.replace('최적화', '').lower()}"
         self.orignal_vars_list = []
 
         try:
@@ -241,9 +240,9 @@ class OptimizeGeneticAlgorithm:
             self._sys_exit(True)
 
         con = sqlite3.connect(DB_STRATEGY)
-        dfb = pd.read_sql(f'SELECT * FROM {self.market_sname}_optibuy', con).set_index('index')
-        dfs = pd.read_sql(f'SELECT * FROM {self.market_sname}_optisell', con).set_index('index')
-        dfv = pd.read_sql(f'SELECT * FROM {self.market_sname}_vars', con).set_index('index')
+        dfb = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optibuy", con).set_index('index')
+        dfs = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_optisell", con).set_index('index')
+        dfv = pd.read_sql(f"SELECT * FROM {self.market_info['전략구분']}_vars", con).set_index('index')
         buystg = dfb['전략코드'][buystg_name]
         sellstg = dfs['전략코드'][sellstg_name]
         optivars = dfv['전략코드'][optivars_name]
@@ -378,7 +377,7 @@ class OptimizeGeneticAlgorithm:
 
         con = sqlite3.connect(DB_STRATEGY)
         cur = con.cursor()
-        cur.execute(f"UPDATE {self.market_sname}_vars SET 전략코드 = '{optivars}' WHERE `index` = '{optivars_name}'")
+        cur.execute(f"UPDATE {self.market_info['전략구분']}_vars SET 전략코드 = '{optivars}' WHERE `index` = '{optivars_name}'")
         con.commit()
         con.close()
 

@@ -2,8 +2,8 @@
 import numpy as np
 from utility.setting_base import ui_num
 from trade.base_strategy import BaseStrategy
-from utility.static import now, now_cme, dt_ymdhms, set_builtin_print, get_future_os_long_profit, \
-    get_future_os_short_profit
+from utility.static import now, now_cme, dt_ymdhms, get_future_os_long_profit, get_future_os_short_profit, \
+    error_decorator
 
 
 class FutureOsStrategyTick(BaseStrategy):
@@ -16,7 +16,6 @@ class FutureOsStrategyTick(BaseStrategy):
             'BUY_SHORT': []
         }
 
-        set_builtin_print(True, self.windowQ)
         self._set_formula_data()
         self._update_stringategy()
         self._main_loop()
@@ -35,12 +34,14 @@ class FutureOsStrategyTick(BaseStrategy):
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0
 
     # noinspection PyUnusedLocal
+    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
-            초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, 당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+            초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
+            당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
             매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
             매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
-            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, _, 틱수신시간 = data
+            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
 
         시분초 = int(str(체결시간)[8:])
         순매수금액 = 초당매수금액 - 초당매도금액
@@ -62,7 +63,7 @@ class FutureOsStrategyTick(BaseStrategy):
 
         self.arry_code = self.dict_data[종목코드]
         self.tick_count = 데이터길이 = len(self.arry_code)
-        self.code, self.index, self.indexn = 종목코드, 체결시간, 데이터길이 - 1
+        self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
 
         리스크점수 = 0
         if 데이터길이 >= self.rolling_window:
@@ -125,7 +126,6 @@ class FutureOsStrategyTick(BaseStrategy):
             if jg_data:
                 if 종목코드 not in self.dict_buy_num:
                     self.dict_buy_num[종목코드] = self.indexn
-                # ['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']
                 _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 레버리지 = jg_data.values()
                 if 포지션 == 'LONG':
                     _, 수익금, 수익률 = get_future_os_long_profit(매입금액, 보유수량 * 현재가)
@@ -144,11 +144,13 @@ class FutureOsStrategyTick(BaseStrategy):
                 보유시간 = (now_cme() - dt_ymdhms(매수시간)).total_seconds()
                 매수틱번호 = self.dict_buy_num[종목코드]
             else:
-                포지션, 매수틱번호, 수익금, 수익률, 레버리지, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, 최고수익률, 최저수익률 = None, 0, 0, 0, 1, 0, 0, 0, 0, now_cme(), 0, 0, 0
+                포지션, 매수틱번호, 수익금, 수익률, 레버리지, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                    최고수익률, 최저수익률 = None, 0, 0, 0, 1, 0, 0, 0, 0, now_cme(), 0, 0, 0
 
             self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
 
-            BBT  = not self.dict_set['매수금지시간'] or not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+            BBT  = not self.dict_set['매수금지시간'] or \
+                not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
             BLK  = not self.dict_set['매수금지블랙리스트'] or 종목코드 not in self.dict_set['블랙리스트']
             NIBL = 종목코드 not in self.dict_signal['BUY_LONG']
             NISS = 종목코드 not in self.dict_signal['SELL_SHORT']
@@ -172,7 +174,8 @@ class FutureOsStrategyTick(BaseStrategy):
 
                 elif D or E:
                     BUY_LONG, SELL_SHORT = False, False
-                    분할매수기준수익률 = round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
+                    분할매수기준수익률 = \
+                        round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
                     if D:
                         if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
                             BUY_LONG   = True
@@ -187,33 +190,44 @@ class FutureOsStrategyTick(BaseStrategy):
                     if BUY_LONG or SELL_SHORT:
                         self.Buy(BUY_LONG)
 
-            SBT  = not self.dict_set['매도금지시간'] or not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
-            SCC  = self.dict_set['매수분할횟수'] == 1 or not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+            SBT  = not self.dict_set['매도금지시간'] or \
+                not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+            SCC  = self.dict_set['매수분할횟수'] == 1 or \
+                not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
             NIBL = 종목코드 not in self.dict_signal['BUY_LONG']
             NISS = 종목코드 not in self.dict_signal['SELL_SHORT']
 
-            A    = NIBL and NISL and SCC and 포지션 == 'LONG' and self.dict_set['매도분할횟수'] == 1
-            B    = NISS and NIBS and SCC and 포지션 == 'SHORT' and self.dict_set['매도분할횟수'] == 1
-            C    = self.dict_set['매도분할시그널']
-            D    = NIBL and NISL and SCC and 포지션 == 'LONG' and 분할매도횟수 < self.dict_set['매도분할횟수']
-            E    = NISS and NIBS and SCC and 포지션 == 'SHORT' and 분할매도횟수 < self.dict_set['매도분할횟수']
-            F    = NISL and self.dict_set['매수취소매도시그널'] and not NIBL
-            G    = NIBS and self.dict_set['매수취소매도시그널'] and not NISS
-            H    = NIBL and NISL and 포지션 == 'LONG' and self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
-            J    = NISS and NIBS and 포지션 == 'SHORT' and self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
-            K    = NIBL and NISL and 포지션 == 'LONG' and self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
-            L    = NISS and NIBS and 포지션 == 'SHORT' and self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
-            M    = NIBL and NISL and 포지션 == 'LONG' and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
-            N    = NISS and NIBS and 포지션 == 'SHORT' and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
-            P    = NIBL and NISL and 포지션 == 'LONG' and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
-            Q    = NISS and NIBS and 포지션 == 'SHORT' and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
-            R    = NIBL and NISL and 포지션 == 'LONG' and 수익률 * 레버리지 < -90
-            S    = NISS and NIBS and 포지션 == 'SHORT' and 수익률 * 레버리지 < -90
+            A = NIBL and NISL and SCC and 포지션 == 'LONG' and self.dict_set['매도분할횟수'] == 1
+            B = NISS and NIBS and SCC and 포지션 == 'SHORT' and self.dict_set['매도분할횟수'] == 1
+            C = self.dict_set['매도분할시그널']
+            D = NIBL and NISL and SCC and 포지션 == 'LONG' and 분할매도횟수 < self.dict_set['매도분할횟수']
+            E = NISS and NIBS and SCC and 포지션 == 'SHORT' and 분할매도횟수 < self.dict_set['매도분할횟수']
+            F = NISL and self.dict_set['매수취소매도시그널'] and not NIBL
+            G = NIBS and self.dict_set['매수취소매도시그널'] and not NISS
+            H = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+            J = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+            K = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+            L = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+            M = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+            N = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+            P = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+            Q = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+            R = NIBL and NISL and 포지션 == 'LONG' and 수익률 * 레버리지 < -90
+            S = NISS and NIBS and 포지션 == 'SHORT' and 수익률 * 레버리지 < -90
 
             if SBT and (A or B or (C and D) or (C and E) or D or E or F or G or H or J or K or L or M or N or P or Q or R or S):
                 강제청산 = H or J or K or L or M or N or P or Q or R or S
                 전량매도 = A or B or 강제청산
-                self.info_for_sell = F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+                self.info_for_sell = \
+                    F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
 
                 SELL_LONG, BUY_SHORT = False, False
                 if A or B or (C and D) or (C and E) or F or G:
@@ -240,7 +254,7 @@ class FutureOsStrategyTick(BaseStrategy):
                         self.Sell(SELL_LONG)
 
         if 관심종목:
-            # ['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
                 '종목명': 종목코드,
                 'per': 등락율,
