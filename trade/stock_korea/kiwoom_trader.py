@@ -318,7 +318,7 @@ class KiwoomTrader:
             df_td = pd.DataFrame.from_dict(self.dict_td, orient='index')
             self.mgzservQ.put(('tele', df_td)) if len(df_td) > 0 else self.mgzservQ.put(('tele', '현재는 주식 거래목록이 없습니다.'))
         elif data == '잔고평가':
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jg)
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
             self.mgzservQ.put(('tele', df_jg)) if len(df_jg) > 0 else self.mgzservQ.put(('tele', '현재는 주식 잔고목록이 없습니다.'))
         elif data == '잔고청산':
             self.JangoCheongsan('수동')
@@ -714,7 +714,7 @@ class KiwoomTrader:
                 q.put(('종목당투자금', self.dict_intg['종목당투자금']))
 
         if self.dict_jg:
-            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index') if self.dict_jg else pd.DataFrame(columns=columns_jg)
+            df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
         else:
             df_jg = pd.DataFrame(columns=columns_jg)
         df_tj = pd.DataFrame.from_dict(self.dict_tj, orient='index')
