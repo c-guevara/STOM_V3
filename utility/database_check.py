@@ -4,6 +4,7 @@ import sqlite3
 import pandas as pd
 from traceback import format_exc
 from utility.static import read_key, write_key
+from utility.setting_base import code_info_tables
 
 
 def database_check():
@@ -72,11 +73,11 @@ def database_check():
         if 'back' not in table_list:
             columns = [
                 "index", "블랙리스트추가", "백테주문관리적용", "백테매수시간기준", "백테일괄로딩", "그래프저장하지않기", "그래프띄우지않기",
-                "디비자동관리", "교차검증가중치", "기준값최소상승률", "백테스케쥴실행", "백테스케쥴요일", "백테스케쥴시간", "백테스케쥴구분",
+                "디비자동관리", "교차검증가중치", "기준값최소상승률", "백테스케쥴실행", "백테스케쥴요일", "백테스케쥴시간",
                 "백테스케쥴명", "백테날짜고정", "백테날짜", "최적화기준값제한", "백테엔진분류방법", "옵튜나샘플러", "옵튜나고정변수",
                 "옵튜나실행횟수", "옵튜나자동스탭", "범위자동관리", "보조지표설정", "백테스트로그기록안함", "시장미시구조분석", '시장리스크분석'
             ]
-            data = [0, 0, 0, 0, 1, 0, 0, 1, 1, 2, 0, 4, 160000, '', '', 1, '20220323',
+            data = [0, 0, 0, 0, 1, 0, 0, 1, 1, 2, 0, 4, 160000, '', 1, '20220323',
                     '0.0;1000.0;0;100.0;0.0;100.0;-10.0;10.0;0.0;1000.0;-10000.0;10000.0;0.0;100.0',
                     '종목코드별 분류', 'TPESampler', '', 0, 0, 0,
                     '3;10;14;12;26;0;14;14;5;2;2;0;14;14;12;26;9;14;10;12;26;0;10;14;0.02;0.2;5;3;0;3;0;5;3;0;14', 0, 0, 0]
@@ -167,17 +168,17 @@ def database_check():
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('future_os_info', con)
 
-        if 'upbit_info' not in table_list:
-            columns = ['index', '종목명']
-            data = ['KRW-BTC', 'KRW-BTC']
+        if 'coin_info' not in table_list:
+            columns = ['index', '종목명', '거래대금']
+            data = ['KRW-BTC', 'KRW-BTC', 5000]
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('upbit_info', con)
+            df.to_sql('coin_info', con)
 
-        if 'binance_info' not in table_list:
-            columns = ['index', '종목명']
-            data = ['BTSUSDT', 'BTSUSDT']
+        if 'coin_future_info' not in table_list:
+            columns = ['index', '종목명', '호가단위', '가격소숫점자리수', '수량소숫점자리수']
+            data = ['BTSUSDT', 'BTSUSDT', 1, 1, 1]
             df = pd.DataFrame([data], columns=columns).set_index('index')
-            df.to_sql('binance_info', con)
+            df.to_sql('coin_future_info', con)
 
         con.close()
 
@@ -826,9 +827,9 @@ def database_check():
                 con = sqlite3.connect(f'{DB_PATH}/{file_list_[0]}')
                 df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
                 table_list = df['name'].to_list()
-                if 'moneytop' in table_list: table_list.remove('moneytop')
-                if 'stock_info' in table_list: table_list.remove('stock_info')
-                if 'future_info' in table_list: table_list.remove('future_info')
+                for table in code_info_tables:
+                    if table in table_list:
+                        table_list.remove(table)
                 if table_list:
                     df = pd.read_sql(f'SELECT * FROM "{table_list[0]}"', con)
                     if '당일매수금액' not in df.columns:

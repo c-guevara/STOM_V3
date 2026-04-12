@@ -51,15 +51,20 @@ def return_press_01(ui):
 
 @error_decorator
 def return_press_02(ui):
-    if ui.pa_lineEditttt_01.text() == ui.dict_set['프로그램비밀번호']:
-        ui.sj_main_liEdit_01.setEchoMode(QLineEdit.Normal)
-        ui.sj_accc_liEdit_01.setEchoMode(QLineEdit.Normal)
-        ui.sj_accc_liEdit_02.setEchoMode(QLineEdit.Normal)
-        ui.sj_tele_liEdit_01.setEchoMode(QLineEdit.Normal)
-        ui.sj_tele_liEdit_02.setEchoMode(QLineEdit.Normal)
-        ui.sj_etc_liEditt_01.setEchoMode(QLineEdit.Normal)
-        ui.sj_etc_pButton_01.setText('계정 텍스트 가리기')
-        ui.sj_etc_pButton_01.setStyleSheet(style_bc_dk)
+    if '비밀번호가 변경되었습니다' in ui.pa_labelllllll_01.text():
         ui.dialog_pass.close()
     else:
-        ui.teleQ.put('경고!! 계정 텍스트 보기 비밀번호 입력 오류가 발생하였습니다.')
+        if ui.pa_lineEditttt_01.text() == ui.dict_set['프로그램비밀번호']:
+            ui.sj_main_liEdit_01.setEchoMode(QLineEdit.Normal)
+            ui.sj_accc_liEdit_01.setEchoMode(QLineEdit.Normal)
+            ui.sj_accc_liEdit_02.setEchoMode(QLineEdit.Normal)
+            ui.sj_tele_liEdit_01.setEchoMode(QLineEdit.Normal)
+            ui.sj_tele_liEdit_02.setEchoMode(QLineEdit.Normal)
+            ui.sj_etc_liEditt_01.setEchoMode(QLineEdit.Normal)
+            ui.sj_etc_pButton_01.setText('계정 텍스트 가리기')
+            ui.sj_etc_pButton_01.setStyleSheet(style_bc_dk)
+            ui.dialog_pass.close()
+        else:
+            ui.teleQ.put('경고!! 계정 텍스트 보기 비밀번호 입력 오류가 발생하였습니다.')
+            ui.dialog_pass.close()
+            QMessageBox.critical(ui, '오류 알림', '프로그램 비밀번호을 잘못입력하였습니다.\n')

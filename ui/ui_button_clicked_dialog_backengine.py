@@ -134,7 +134,7 @@ def sdbutton_clicked_02(ui):
                 bl = True if ui.dict_set['블랙리스트추가'] else False
 
                 if int(avgtime) not in ui.avg_list:
-                    ui.StopScheduler()
+                    stop_scheduler(ui)
                     QMessageBox.critical(
                         ui.dialog_scheduler,
                         '오류 알림',
@@ -481,11 +481,11 @@ def sdbutton_clicked_02(ui):
             ui.list_progressBarrr[ui.back_scount].setValue(0)
             ui.back_schedul = True
         else:
-            StopScheduler(ui, True)
+            stop_scheduler(ui, True)
 
 
 @error_decorator
-def StopScheduler(ui, gubun=False):
+def stop_scheduler(ui, gubun=False):
     from ui.ui_etc import auto_back_schedule
     ui.back_scount = 0
     ui.back_schedul = False

@@ -87,7 +87,7 @@ def strategy_version(ui, gubun1, gubun2, strategy_name):
     SVM = StrategyVersionManager(ui.market_info['전략구분'], gubun1, gubun2, strategy_name)
 
     visible_false(ui)
-    version_widget_list = getattr(ui, 'stock_version_list')
+    version_widget_list = getattr(ui, 'version_list')
     version_delete_btn  = getattr(ui, 'ss_pushButtonn_41')
 
     textEdit1, textEdit2, comboBox1, comboBox2 = get_widget(ui, gubun1, gubun2)

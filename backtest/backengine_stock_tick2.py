@@ -1,6 +1,6 @@
 
 from backtest.backengine_base_oms import BackEngineBaseOms
-from utility.static import dt_ymdhms, get_stock_hogaunit, get_stock_profit
+from utility.static import dt_ymdhms, get_hogaunit_stock, get_profit_stock
 # noinspection PyUnresolvedReferences
 from utility.static import timedelta_sec
 
@@ -24,7 +24,7 @@ class BackEngineStockTick2(BackEngineBaseOms):
 
         VI해제시간, 순매수금액 = dt_ymdhms(str(int(VI해제시간))), 초당매수금액 - 초당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:])
-        self.hoga_unit = 호가단위 = get_stock_hogaunit(현재가)
+        self.hoga_unit = 호가단위 = get_hogaunit_stock(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -238,5 +238,5 @@ class BackEngineStockTick2(BackEngineBaseOms):
 
     def _get_profit_info(self, 현재가, 매수가, 보유수량):
         시가총액 = int(self.arry_code[self.indexn, self.dict_findex['시가총액']])
-        평가금액, 수익금, 수익률 = get_stock_profit(보유수량 * 매수가, 보유수량 * 현재가)
+        평가금액, 수익금, 수익률 = get_profit_stock(보유수량 * 매수가, 보유수량 * 현재가)
         return 시가총액, 평가금액, 수익금, 수익률

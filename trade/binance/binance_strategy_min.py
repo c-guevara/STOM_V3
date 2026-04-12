@@ -3,16 +3,18 @@ import numpy as np
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.binance.binance_strategy_tick import BinanceStrategyTick
-from utility.static import now, now_utc, dt_ymdhms, get_binance_short_profit, get_binance_long_profit, get_indicator, \
-    error_decorator
+from utility.static import now, now_utc, dt_ymdhms, get_profit_coin_future_short, get_profit_coin_future_long, \
+    get_indicator
 
 
 class BinanceStrategyMin(BinanceStrategyTick):
+    def __init__(self, gubun, qlist, dict_set, market_info):
+        super().__init__(gubun, qlist, dict_set, market_info)
+
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
-    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
@@ -60,16 +62,7 @@ class BinanceStrategyMin(BinanceStrategyTick):
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
                 OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
 
-            high_low = self.high_low.get(종목코드)
-            if high_low:
-                if 분봉고가 >= high_low[0]:
-                    high_low[0] = 분봉고가
-                    high_low[1] = self.indexn
-                if 분봉저가 <= high_low[2]:
-                    high_low[2] = 분봉저가
-                    high_low[3] = self.indexn
-            else:
-                self.high_low[종목코드] = [분봉고가, self.indexn, 분봉저가, self.indexn]
+            self._update_high_low(종목코드, 분봉고가, 분봉저가)
 
             if self.dict_condition:
                 if 종목코드 not in self.dict_cond_indexn:
@@ -122,14 +115,14 @@ class BinanceStrategyMin(BinanceStrategyTick):
                         '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']"""
                     _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 레버리지 = jg_data.values()
                     if 포지션 == 'LONG':
-                        _, 수익금, 수익률 = get_binance_long_profit(
+                        _, 수익금, 수익률 = get_profit_coin_future_long(
                             매입금액,
                             보유수량 * 현재가,
                             '시장가' in self.dict_set['매수주문유형'],
                             '시장가' in self.dict_set['매도주문유형']
                         )
                     else:
-                        _, 수익금, 수익률 = get_binance_short_profit(
+                        _, 수익금, 수익률 = get_profit_coin_future_short(
                             매입금액,
                             보유수량 * 현재가,
                             '시장가' in self.dict_set['매수주문유형'],

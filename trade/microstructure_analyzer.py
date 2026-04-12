@@ -749,7 +749,6 @@ class MicrostructureAnalyzer:
     def _setup_parameters(self):
         """
         시장 종류와 데이터 타입에 따른 파라미터 설정
-        주식/코인/해외선물 × 1초스냅샷
         """
         # 주식 1초 스냅샷 파라미터 (고빈도, 저지연, 변동성 적음)
         if self.market_type == 'stock':

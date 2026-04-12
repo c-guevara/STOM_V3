@@ -1,17 +1,48 @@
 
+import sys
 import binance
 import pandas as pd
 from PyQt5.QtCore import QTimer
 from traceback import format_exc
+from PyQt5.QtWidgets import QApplication
 from trade.base_trader import BaseTrader
+from PyQt5.QtCore import QThread, pyqtSignal
 from utility.setting_base import ui_num, columns_jgcf
-from trade.binance.binance_websocket import WebSocketTrader
-from utility.static import now, timedelta_sec, error_decorator, get_binance_short_profit, get_binance_long_profit
+from utility.static import now, timedelta_sec, error_decorator, get_profit_coin_future_short, \
+    get_profit_coin_future_long
+
+
+class MonitorTraderQ(QThread):
+    signal1 = pyqtSignal(tuple)
+    signal2 = pyqtSignal(tuple)
+    signal3 = pyqtSignal(tuple)
+    signal4 = pyqtSignal(str)
+
+    def __init__(self, traderQ, market_gubun):
+        super().__init__()
+        self.traderQ = traderQ
+        self.market_gubun = market_gubun
+
+    def run(self):
+        while True:
+            data = self.traderQ.get()
+            if data.__class__ == tuple:
+                if len(data) in (7, 8):
+                    if self.market_gubun < 6:
+                        self.signal1.emit(data)
+                    else:
+                        self.signal2.emit(data)
+                else:
+                    self.signal3.emit(data)
+            elif data.__class__ == str:
+                self.signal4.emit(data)
 
 
 class BinanceTrader(BaseTrader):
     def __init__(self, qlist, dict_set, market_infos):
         super().__init__(qlist, dict_set, market_infos)
+
+        app = QApplication(sys.argv)
 
         self.dict_order = {
             'BUY_LONG': {},
@@ -20,17 +51,34 @@ class BinanceTrader(BaseTrader):
             'BUY_SHORT': {}
         }
 
-        access_key = self.dict_set[f"access_key{self.market_info['계정번호']}"]
-        secret_key = self.dict_set[f"secret_key{self.market_info['계정번호']}"]
-
-        self.binance = binance.Client(access_key, secret_key)
+        self.binance = binance.Client(self.access_key, self.secret_key)
 
         self._get_balances()
 
         if not self.dict_set['모의투자']:
-            self.ws_thread = WebSocketTrader(access_key, secret_key, self.windowQ)
+            from trade.binance.binance_websocket import BinanceWebSocketTrader
+            self.ws_thread = BinanceWebSocketTrader(self.access_key, self.secret_key, self.windowQ)
             self.ws_thread.signal.connect(self._convert_order_data)
             self.ws_thread.start()
+
+        self.qtimer1 = QTimer()
+        self.qtimer1.setInterval(500)
+        self.qtimer1.timeout.connect(self._scheduler1)
+        self.qtimer1.start()
+
+        self.qtimer2 = QTimer()
+        self.qtimer2.setInterval(1 * 1000)
+        self.qtimer2.timeout.connect(self._scheduler2)
+        self.qtimer2.start()
+
+        self.updater = MonitorTraderQ(self.traderQ, self.market_gubun)
+        self.updater.signal1.connect(self._check_order)
+        self.updater.signal2.connect(self._check_order_future)
+        self.updater.signal3.connect(self._update_tuple)
+        self.updater.signal4.connect(self._update_string)
+        self.updater.start()
+
+        app.exec_()
 
     def _get_balances(self):
         if self.dict_set['모의투자']:
@@ -128,39 +176,6 @@ class BinanceTrader(BaseTrader):
 
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 마진타입 및 레버리지 설정 완료'))
 
-    def _update_jango(self, data):
-        종목코드, 현재가 = data
-        self.dict_curc[종목코드] = 현재가
-        try:
-            """['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수',
-                '분할매도횟수', '매수시간']"""
-            if 현재가 != self.dict_jg[종목코드]['현재가']:
-                포지션 = self.dict_jg[종목코드]['포지션']
-                매입금액 = self.dict_jg[종목코드]['매입금액']
-                보유수량 = self.dict_jg[종목코드]['보유수량']
-                if 포지션 == 'LONG':
-                    평가금액, 평가손익, 수익률 = get_binance_long_profit(
-                        매입금액,
-                        보유수량 * 현재가,
-                        '시장가' in self.dict_set['매수주문유형'],
-                        '시장가' in self.dict_set['매도주문유형']
-                    )
-                else:
-                    평가금액, 평가손익, 수익률 = get_binance_short_profit(
-                        매입금액,
-                        보유수량 * 현재가,
-                        '시장가' in self.dict_set['매수주문유형'],
-                        '시장가' in self.dict_set['매도주문유형']
-                    )
-                self.dict_jg[종목코드].update({
-                    '현재가': 현재가,
-                    '수익률': 수익률,
-                    '평가손익': 평가손익,
-                    '평가금액': 평가금액
-                })
-        except:
-            pass
-
     def _set_leverage(self, dict_dlhp):
         for code in self.dict_info:
             lhp = dict_dlhp.get(code)
@@ -180,60 +195,6 @@ class BinanceTrader(BaseTrader):
                 leverage = lvrg
                 break
         return leverage
-
-    def _cancel_order(self, 종목코드, 주문구분):
-        종목명 = self.dict_info[종목코드]['종목명']
-        last_value = self._get_chejan_last_value(종목코드, 주문구분)
-        if last_value:
-            미체결수량 = last_value['미체결수량']
-            if 미체결수량 > 0:
-                주문번호, 주문가격 = last_value['주문번호'], last_value['주문가격']
-                self._create_order(f'{주문구분}_CANCEL', 종목코드, 종목명, 주문가격, 미체결수량, 주문번호, now(), False, 0, None)
-
-    def _modify_order(self, 종목코드, 주문구분):
-        last_value = self._get_chejan_last_value(종목코드, 주문구분)
-        if last_value:
-            미체결수량 = last_value['미체결수량']
-            if 미체결수량 > 0:
-                if 주문구분 == 'BUY_LONG':
-                    정정가격 = self.dict_curc[종목코드] - self.dict_order[주문구분][종목코드][3] * self.dict_set['매수정정호가']
-                elif 주문구분 == 'SELL_SHORT':
-                    정정가격 = self.dict_curc[종목코드] + self.dict_order[주문구분][종목코드][3] * self.dict_set['매수정정호가']
-                elif 주문구분 == 'SELL_LONG':
-                    정정가격 = self.dict_curc[종목코드] + self.dict_order[주문구분][종목코드][3] * self.dict_set['매도정정호가']
-                else:
-                    정정가격 = self.dict_curc[종목코드] - self.dict_order[주문구분][종목코드][3] * self.dict_set['매도정정호가']
-
-                현재시간 = now()
-                정정횟수 = self.dict_order[주문구분][종목코드][1] + 1
-                주문번호, 주문가격 = last_value['주문번호'], last_value['주문가격']
-                self._create_order(f'{주문구분}_CANCEL', 종목코드, 종목코드, 주문가격, 미체결수량, 주문번호, 현재시간, False, 0, None)
-                self._create_order(주문구분, 종목코드, 종목코드, 정정가격, 미체결수량, '', 현재시간, False, 정정횟수, None)
-
-    def _jango_cheongsan(self, gubun):
-        for 주문구분 in self.dict_order:
-            for 종목코드 in self.dict_order[주문구분]:
-                self._cancel_order(종목코드, 주문구분)
-
-        if self.dict_jg:
-            if gubun == '수동':
-                self.teleQ.put('잔고청산 주문을 전송합니다.')
-            for 종목코드 in self.dict_jg.copy():
-                포지션 = self.dict_jg[종목코드]['포지션']
-                현재가 = self.dict_jg[종목코드]['현재가']
-                보유수량 = self.dict_jg[종목코드]['보유수량']
-                주문구분 = 'SELL_LONG' if 포지션 == 'LONG' else 'BUY_SHORT'
-                if self.dict_set['모의투자']:
-                    주문시간 = self._get_str_ymdhms()
-                    self._update_chejan_data(주문구분, 종목코드, 보유수량, 보유수량, 0, 현재가, 현재가, 주문시간, '')
-                else:
-                    self._check_order((주문구분, 종목코드, 현재가, 보유수량, now(), True))
-            if self.dict_set['알림소리']:
-                self.soundQ.put('잔고청산 주문을 전송하였습니다.')
-            self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 잔고청산 주문 완료'))
-        elif gubun == '수동':
-            self.teleQ.put('현재는 보유종목이 없습니다.')
-        self.dict_bool['잔고청산'] = True
 
     def _convert_order_data(self, data):
         if data['e'] == 'ACCOUNT_UPDATE':
@@ -278,20 +239,14 @@ class BinanceTrader(BaseTrader):
                     보유수량 = round(self.dict_jg[종목코드]['보유수량'] + 체결수량, self.dict_info[종목코드]['소숫점자리수'])
                     매입금액 = round(self.dict_jg[종목코드]['매입금액'] + 체결수량 * 체결가격, 4)
                     매수가 = round(매입금액 / 보유수량, 8)
-                    평가금액 = round(체결가격 * 보유수량, 4)
+                    보유금액 = round(체결가격 * 보유수량, 4)
                     if 주문구분 == 'BUY_LONG':
-                        평가금액, 수익금, 수익률 = get_binance_long_profit(
-                            매입금액,
-                            평가금액,
-                            '시장가' in self.dict_set['매수주문유형'],
-                            '시장가' in self.dict_set['매도주문유형']
+                        평가금액, 수익금, 수익률 = get_profit_coin_future_long(
+                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                         )
                     else:
-                        평가금액, 수익금, 수익률 = get_binance_short_profit(
-                            매입금액,
-                            평가금액,
-                            '시장가' in self.dict_set['매수주문유형'],
-                            '시장가' in self.dict_set['매도주문유형']
+                        평가금액, 수익금, 수익률 = get_profit_coin_future_short(
+                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                         )
                     self.dict_jg[종목코드].update({
                         '매수가': 매수가,
@@ -304,26 +259,20 @@ class BinanceTrader(BaseTrader):
                         '매수시간': 주문시간
                     })
                 else:
-                    매입금액 = round(체결가격 * 체결수량, 4)
+                    매입금액 = 보유금액 = round(체결가격 * 체결수량, 4)
                     if self.dict_set['바이낸스선물고정레버리지']:
                         레버리지 = self.dict_set['바이낸스선물고정레버리지값']
                     else:
                         레버리지 = self.dict_order[주문구분][종목코드][4]
                     if 주문구분 == 'BUY_LONG':
                         포지션 = 'LONG'
-                        평가금액, 수익금, 수익률 = get_binance_long_profit(
-                            매입금액,
-                            매입금액,
-                            '시장가' in self.dict_set['매수주문유형'],
-                            '시장가' in self.dict_set['매도주문유형']
+                        평가금액, 수익금, 수익률 = get_profit_coin_future_long(
+                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                         )
                     else:
                         포지션 = 'SHORT'
-                        평가금액, 수익금, 수익률 = get_binance_short_profit(
-                            매입금액,
-                            매입금액,
-                            '시장가' in self.dict_set['매수주문유형'],
-                            '시장가' in self.dict_set['매도주문유형']
+                        평가금액, 수익금, 수익률 = get_profit_coin_future_short(
+                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                         )
                     self.dict_jg[종목코드] = {
                         '종목명': 종목명,
@@ -353,20 +302,14 @@ class BinanceTrader(BaseTrader):
                 보유수량 = round(self.dict_jg[종목코드]['보유수량'] - 체결수량, self.dict_info[종목코드]['소숫점자리수'])
                 if 보유수량 != 0:
                     매입금액 = round(매수가 * 보유수량, 4)
-                    평가금액 = round(체결가격 * 보유수량, 4)
+                    보유금액 = round(체결가격 * 보유수량, 4)
                     if 주문구분 == 'SELL_LONG':
-                        평가금액, 수익금, 수익률 = get_binance_long_profit(
-                            매입금액,
-                            평가금액,
-                            '시장가' in self.dict_set['매수주문유형'],
-                            '시장가' in self.dict_set['매도주문유형']
+                        평가금액, 수익금, 수익률 = get_profit_coin_future_long(
+                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                         )
                     else:
-                        평가금액, 수익금, 수익률 = get_binance_short_profit(
-                            매입금액,
-                            평가금액,
-                            '시장가' in self.dict_set['매수주문유형'],
-                            '시장가' in self.dict_set['매도주문유형']
+                        평가금액, 수익금, 수익률 = get_profit_coin_future_short(
+                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                         )
                     """['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량',
                         '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']"""
@@ -388,20 +331,14 @@ class BinanceTrader(BaseTrader):
                         del self.dict_order[주문구분][종목코드]
 
                 매입금액 = round(매수가 * 체결수량, 4)
-                평가금액 = round(체결가격 * 체결수량, 4)
+                보유금액 = round(체결가격 * 체결수량, 4)
                 if 주문구분 == 'SELL_LONG':
-                    평가금액, 수익금, 수익률 = get_binance_long_profit(
-                        매입금액,
-                        평가금액,
-                        '시장가' in self.dict_set['매수주문유형'],
-                        '시장가' in self.dict_set['매도주문유형']
+                    평가금액, 수익금, 수익률 = get_profit_coin_future_long(
+                        매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                     )
                 else:
-                    평가금액, 수익금, 수익률 = get_binance_short_profit(
-                        매입금액,
-                        평가금액,
-                        '시장가' in self.dict_set['매수주문유형'],
-                        '시장가' in self.dict_set['매도주문유형']
+                    평가금액, 수익금, 수익률 = get_profit_coin_future_short(
+                        매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
                     )
                 if -100 < 수익률 < 100:
                     self._update_tradelist(index, 종목명, 포지션, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간)

@@ -1,6 +1,6 @@
 
 from backtest.backengine_stock_tick2 import BackEngineStockTick2
-from utility.static import dt_ymdhms, get_indicator, get_stock_hogaunit
+from utility.static import dt_ymdhms, get_indicator, get_hogaunit_stock
 # noinspection PyUnresolvedReferences
 from utility.static import timedelta_sec
 
@@ -18,7 +18,7 @@ class BackEngineStockMin2(BackEngineStockTick2):
 
         VI해제시간, 순매수금액 = dt_ymdhms(str(int(VI해제시간))), 분당매수금액 - 분당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:] + '00')
-        self.hoga_unit = 호가단위 = get_stock_hogaunit(현재가)
+        self.hoga_unit = 호가단위 = get_hogaunit_stock(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]

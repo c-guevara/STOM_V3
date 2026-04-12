@@ -3,28 +3,15 @@ import sqlite3
 import pandas as pd
 from PyQt5.QtWidgets import QCompleter
 from utility.static import error_decorator
-from utility.setting_base import DB_CODE_INFO
+from utility.setting_base import DB_CODE_INFO, code_info_tables
 
 
 @error_decorator
 def load_database(ui):
     con = sqlite3.connect(DB_CODE_INFO)
-    df = pd.read_sql('SELECT * FROM stock_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM stock_etf_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM stock_etn_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM stock_usa_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM upbit_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM future_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM future_os_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
-    df = pd.read_sql('SELECT * FROM binance_info', con).set_index('index')
-    ui.dict_name.update(df['종목명'].to_dict())
+    for table in code_info_tables:
+        df = pd.read_sql(f'SELECT * FROM {table}', con).set_index('index')
+        ui.dict_name.update(df['종목명'].to_dict())
     con.close()
     ui.dict_code = {name: code for code, name in ui.dict_name.items()}
 

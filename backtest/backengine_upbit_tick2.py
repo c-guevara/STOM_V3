@@ -1,6 +1,6 @@
 
 from backtest.backengine_base_oms import BackEngineBaseOms
-from utility.static import get_upbit_hoga_unit, get_upbit_profit
+from utility.static import get_hogaunit_coin, get_profit_coin
 
 
 class BackEngineUpbitTick2(BackEngineBaseOms):
@@ -21,7 +21,7 @@ class BackEngineUpbitTick2(BackEngineBaseOms):
 
         순매수금액 = 초당매수금액 - 초당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:])
-        self.hoga_unit = 호가단위 = get_upbit_hoga_unit(현재가)
+        self.hoga_unit = 호가단위 = get_hogaunit_coin(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -234,5 +234,5 @@ class BackEngineUpbitTick2(BackEngineBaseOms):
 
     def _get_profit_info(self, 현재가, 매수가, 보유수량):
         시가총액 = 0
-        평가금액, 수익금, 수익률 = get_upbit_profit(보유수량 * 매수가, 보유수량 * 현재가)
+        평가금액, 수익금, 수익률 = get_profit_coin(보유수량 * 매수가, 보유수량 * 현재가)
         return 시가총액, 평가금액, 수익금, 수익률

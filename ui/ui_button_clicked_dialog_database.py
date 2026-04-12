@@ -7,6 +7,19 @@ from utility.static import error_decorator
 @error_decorator
 def dbbutton_clicked_01(ui):
     if not ui.database_control:
+        date = ui.db_lineEdittttt_16.text()
+        if date == '':
+            ui.windowQ.put((ui_num['DB관리'], '일자를 입력하십시오.'))
+            return
+        if ui.proc_chqs.is_alive():
+            ui.database_control = True
+            ui.windowQ.put((ui_num['DB관리'], f"{ui.market_info['마켓이름']} 백테DB의 지정일자 데이터를 삭제합니다."))
+            ui.queryQ.put(('백테DB지정일자삭제', date))
+
+
+@error_decorator
+def dbbutton_clicked_02(ui):
+    if not ui.database_control:
         date = ui.db_lineEdittttt_01.text()
         if date == '':
             ui.windowQ.put((ui_num['DB관리'], '일자를 입력하십시오.'))
@@ -18,7 +31,7 @@ def dbbutton_clicked_01(ui):
 
 
 @error_decorator
-def dbbutton_clicked_02(ui):
+def dbbutton_clicked_03(ui):
     if not ui.database_control:
         time = ui.db_lineEdittttt_02.text()
         if time == '':
@@ -31,7 +44,7 @@ def dbbutton_clicked_02(ui):
 
 
 @error_decorator
-def dbbutton_clicked_03(ui):
+def dbbutton_clicked_04(ui):
     if not ui.database_control:
         time = ui.db_lineEdittttt_03.text()
         if time == '':
@@ -44,7 +57,7 @@ def dbbutton_clicked_03(ui):
 
 
 @error_decorator
-def dbbutton_clicked_04(ui):
+def dbbutton_clicked_05(ui):
     if not ui.database_control:
         date = ui.db_lineEdittttt_04.text()
         if date == '':
@@ -57,7 +70,7 @@ def dbbutton_clicked_04(ui):
 
 
 @error_decorator
-def dbbutton_clicked_05(ui):
+def dbbutton_clicked_06(ui):
     if not ui.database_control:
         date1 = ui.db_lineEdittttt_05.text()
         date2 = ui.db_lineEdittttt_06.text()
@@ -71,7 +84,7 @@ def dbbutton_clicked_05(ui):
 
 
 @error_decorator
-def dbbutton_clicked_06(ui):
+def dbbutton_clicked_07(ui):
     if not ui.database_control:
         date1 = ui.db_lineEdittttt_07.text()
         date2 = ui.db_lineEdittttt_08.text()
@@ -85,7 +98,7 @@ def dbbutton_clicked_06(ui):
 
 
 @error_decorator
-def dbbutton_clicked_07(ui):
+def dbbutton_clicked_08(ui):
     if not ui.database_control:
         if ui.proc_chqs.is_alive():
             ui.database_control = True
@@ -94,7 +107,7 @@ def dbbutton_clicked_07(ui):
 
 
 @error_decorator
-def dbbutton_clicked_08(ui):
+def dbbutton_clicked_09(ui):
     if not ui.database_control:
         if ui.proc_chqs.is_alive():
             ui.database_control = True
@@ -103,7 +116,7 @@ def dbbutton_clicked_08(ui):
 
 
 @error_decorator
-def dbbutton_clicked_09(ui):
+def dbbutton_clicked_10(ui):
     buttonReply = QMessageBox.warning(
         ui.dialog_db, f"{ui.market_info['마켓이름']} 거래기록 삭제', '체결목록, 잔고목록, 거래목록, 일별목록이 모두 삭제됩니다.\n계속하시겠습니까?\n",
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
@@ -116,16 +129,3 @@ def dbbutton_clicked_09(ui):
             ui.queryQ.put(('거래디비', f"DELETE FROM {ui.market_info['전략구분']}_totaltradelist"))
             ui.queryQ.put(('거래디비', 'VACUUM'))
             ui.windowQ.put((ui_num['DB관리'], f"{ui.market_info['마켓이름']} 거래기록 삭제 완료"))
-
-
-@error_decorator
-def dbbutton_clicked_10(ui):
-    if not ui.database_control:
-        date = ui.db_lineEdittttt_16.text()
-        if date == '':
-            ui.windowQ.put((ui_num['DB관리'], '일자를 입력하십시오.'))
-            return
-        if ui.proc_chqs.is_alive():
-            ui.database_control = True
-            ui.windowQ.put((ui_num['DB관리'], f"{ui.market_info['마켓이름']} 백테DB의 지정일자 데이터를 삭제합니다."))
-            ui.queryQ.put(('백테DB지정일자삭제', date))

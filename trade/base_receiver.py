@@ -1,31 +1,11 @@
 
-import sys
-import time
 import sqlite3
 import numpy as np
 import pandas as pd
 from utility.setting_base import ui_num
-from PyQt5.QtWidgets import QApplication
 from trade.ls_rest_api import LsRestData
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
-from utility.static import now, timedelta_sec, get_vi_price, str_hms, now_cme, now_utc, set_builtin_print
-
-
-class Updater(QThread):
-    signal1 = pyqtSignal(tuple)
-    signal2 = pyqtSignal()
-
-    def __init__(self, receivQ):
-        super().__init__()
-        self.receivQ = receivQ
-
-    def run(self):
-        while True:
-            data = self.receivQ.get()
-            if data.__class__ == tuple:
-                self.signal1.emit(data)
-            elif data.__class__ == str:
-                self.signal2.emit()
+from utility.static import now, timedelta_sec, get_vi_price, str_hms, now_cme, now_utc, threading_timer, \
+    set_builtin_print
 
 
 class BaseReceiver:
@@ -34,8 +14,6 @@ class BaseReceiver:
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
         """
-        app = QApplication(sys.argv)
-
         self.windowQ      = qlist[0]
         self.soundQ       = qlist[1]
         self.queryQ       = qlist[2]
@@ -87,39 +65,28 @@ class BaseReceiver:
         self.chart_code   = None
         self.last_gsjm    = None
         self.ws_thread    = None
+        self.tr_cd_trade  = None
+        self.tr_cd_hoga   = None
+        self.tr_cd_oper   = None
+        self.oper_gubun   = None
 
         self.is_tick      = self.dict_set['타임프레임']
-        acc_no            = self.dict_set['거래소'][-2:]
-        self.access       = self.dict_set[f'access_key{acc_no}']
-        self.secret       = self.dict_set[f'secret_key{acc_no}']
+        acc_no            = self.market_info['계정번호']
+        self.access_key   = self.dict_set[f"access_key{acc_no}"]
+        self.secret_key   = self.dict_set[f"secret_key{acc_no}"]
 
         self.market_open  = self.market_info['시작시간']
         self.market_close = self.market_info['프로세스종료시간']
         self.mtop_rank    = self.market_info['거래대금순위']
 
         self.str_today    = LsRestData.당일일자
-        self.tr_cd_trade  = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}체결"]
-        self.tr_cd_hoga   = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}호가"]
-        self.tr_cd_oper   = LsRestData.실시간거래코드['장운영정보']
-        self.oper_gubun   = LsRestData.장구분[self.market_gubun]
-
-        self.updater = Updater(self.receivQ)
-        self.updater.signal1.connect(self._update_tuple)
-        self.updater.signal2.connect(self._sys_exit)
-        self.updater.start()
-
-        self.qtimer = QTimer()
-        self.qtimer.setInterval(1 * 1000)
-        self.qtimer.timeout.connect(self._scheduler)
-        self.qtimer.start()
-
-        if self.dict_set['리시버프로파일링']:
-            import cProfile
-            self.pr = cProfile.Profile()
-            self.pr.enable()
+        if self.market_gubun not in (5, 9):
+            self.tr_cd_trade = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}체결"]
+            self.tr_cd_hoga  = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}호가"]
+            self.tr_cd_oper  = LsRestData.실시간거래코드['장운영정보']
+            self.oper_gubun  = LsRestData.장구분[self.market_gubun]
 
         set_builtin_print(self.windowQ)
-        app.exec_()
 
     def _save_code_info_and_noti(self):
         dict_name = {code: value['종목명'] for code, value in self.dict_info.items()}
@@ -131,7 +98,7 @@ class BaseReceiver:
         text = f"{self.market_info['마켓이름']} 시스템을 시작하였습니다."
         self.teleQ.put(text)
         if self.dict_set['알림소리']: self.soundQ.put(text)
-        self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 리시버 시작'))
+        self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
 
     def _update_vi(self, gubun, code, name):
         if gubun == '1' and (code not in self.dict_vipr or (self.dict_vipr[code][0] and now() > self.dict_vipr[code][1])):
@@ -520,7 +487,7 @@ class BaseReceiver:
         self._websocket_kill()
         if self.dict_set['알림소리']:
             self.soundQ.put(f"{self.market_info['마켓이름']} 시스템을 3분 후 종료합니다.")
-        QTimer.singleShot(180 * 1000, lambda: self.receivQ.put('프로세스종료'))
+        threading_timer(180, self.receivQ.put, '프로세스종료')
 
     def _websocket_kill(self):
         if self.ws_thread:
@@ -538,12 +505,13 @@ class BaseReceiver:
         elif gubun == '차트종목코드':
             self.chart_code = data
         elif gubun == '수동데이터저장':
-            self._receiver_process_kill()
+            self._save_data()
         elif gubun == '설정변경':
             self.dict_set = data
 
-    def _sys_exit(self):
-        if self.dict_set['데이터저장']:
+    def _sys_exit(self, data):
+        self._websocket_kill()
+        if data == '프로세스종료' and self.dict_set['데이터저장']:
             self._save_data()
         else:
             if self.market_gubun < 5:
@@ -552,8 +520,7 @@ class BaseReceiver:
             else:
                 self.stgQ.put('프로세스종료')
         self.traderQ.put('프로세스종료')
-        time.sleep(5)
-        self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 리시버 종료'))
+        self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 종료"))
 
     def _save_data(self):
         codes = set()
@@ -570,7 +537,7 @@ class BaseReceiver:
             df.to_sql('moneytop', con, if_exists='append', chunksize=2000)
             con.close()
 
-            self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 거래대금순위 저장 완료'))
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 거래대금순위 저장 완료"))
 
         if self.market_gubun < 5:
             self.stgQs[0].put(('데이터저장', codes))

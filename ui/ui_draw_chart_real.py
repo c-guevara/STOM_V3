@@ -21,7 +21,7 @@ class DrawRealChart(DrawChartBase):
                     for q in self.ui.stgQs:
                         q.put(('차트종목코드', None))
                 else:
-                    self.ui.stgQ.put(('차트종목코드', None))
+                    self.ui.stgQs[0].put(('차트종목코드', None))
             return
 
         self.chart_cnt = len(self.ui.ctpg)

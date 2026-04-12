@@ -18,8 +18,8 @@ class UpdateTextedit:
     @error_decorator
     def update_texedit(self, data):
         if data[0] == ui_num['종목명데이터']:
-            self.ui.dict_name = data[1]
-            self.ui.dict_code = data[2]
+            self.ui.dict_name.update(data[1])
+            self.ui.dict_code.update(data[2])
 
         elif data[0] == ui_num['사용자수식']:
             self.ui.fm_list = data[1]
@@ -134,12 +134,12 @@ class UpdateTextedit:
                         for p in self.ui.proc_strategys:
                             p.kill()
                     if self.data_save and self.ui.dict_set['디비자동관리']:
-                        self.AutoDataBase(1)
+                        self._auto_database_control(1)
                     else:
-                        self.ShutDownCheck()
+                        self._shut_down_check()
 
-            elif '해외선물 휴무 종료' in data[1] or '해외주식 휴무 종료' in data[1]:
-                self.ShutDownCheck()
+            elif '휴무 종료' in data[1]:
+                self._shut_down_check(force=True)
 
             elif data[0] == ui_num['DB관리']:
                 if data[1] == 'DB업데이트완료':
@@ -149,11 +149,11 @@ class UpdateTextedit:
 
                 if self.ui.auto_mode:
                     if '당일DB 데이터, 일자DB로 분리 완료' in data[1]:
-                        self.AutoDataBase(2)
+                        self._auto_database_control(2)
                     elif '당일DB 데이터, 백테DB로 추가 완료' in data[1]:
-                        self.AutoDataBase(3)
+                        self._auto_database_control(3)
 
-    def AutoDataBase(self, gubun):
+    def _auto_database_control(self, gubun):
         if gubun == 1:
             self.ui.auto_mode = True
             if self.ui.dict_set['알림소리']:
@@ -162,13 +162,13 @@ class UpdateTextedit:
                 self.ui.dialog_db.show()
             self.ui.sdb_tapWidgettt_01.setCurrentIndex(self.ui.sdb_index1)
             qtest_qwait(2)
-            dbbutton_clicked_08(self.ui)
+            dbbutton_clicked_09(self.ui)
         elif gubun == 2:
             if not self.ui.dialog_db.isVisible():
                 self.ui.dialog_db.show()
             self.ui.sdb_tapWidgettt_01.setCurrentIndex(self.ui.sdb_index1)
             qtest_qwait(2)
-            dbbutton_clicked_07(self.ui)
+            dbbutton_clicked_08(self.ui)
         elif gubun == 3:
             if self.ui.dialog_db.isVisible():
                 self.ui.dialog_db.close()
@@ -176,9 +176,9 @@ class UpdateTextedit:
             self.ui.windowQ.put((ui_num['기본로그'], '데이터베이스 자동관리 완료'))
             qtest_qwait(2)
             self.ui.auto_mode = False
-            self.ShutDownCheck()
+            self._shut_down_check()
 
-    def ShutDownCheck(self):
+    def _shut_down_check(self, force=False):
         from utility.static import str_hms
         if self.ui.dict_set['백테스케쥴실행'] and now().weekday() == self.ui.dict_set['백테스케쥴요일']:
             if self.ui.dict_set['알림소리']:
@@ -190,6 +190,7 @@ class UpdateTextedit:
             if self.ui.dict_set['컴퓨터종료'] or (
                 self.ui.dict_set['휴무컴퓨터종료'] and
                 (
+                    force or
                     (self.ui.market_gubun < 4 and 90000 < int(str_hms()) < 90500) or
                     (self.ui.market_gubun in (4, 8) and 93000 < int(str_hms(now_cme())) < 93500) or
                     (self.ui.market_gubun == 6 and 84500 < int(str_hms()) < 85000) or

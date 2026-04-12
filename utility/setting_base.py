@@ -59,6 +59,11 @@ columns_stg1 = ['매수전략', '매도전략', '최적화매수전략', '최적
 columns_stg2 = ['최적화범위', 'GA범위', '매수조건', '매도조건']
 columns_kp   = ['종목명', '바이낸스(달러)', '업비트(원)', '대비(원)', '대비율(%)']
 
+code_info_tables = [
+    'stock_info', 'stock_etf_info', 'stock_etn_info', 'stock_usa_info', 'coin_info', 'future_info',
+    'future_nt_info', 'future_os_info', 'coin_future_info'
+]
+
 dict_order_ratio = {
     1: {
         10: {

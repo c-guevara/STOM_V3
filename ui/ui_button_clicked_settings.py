@@ -139,7 +139,6 @@ def setting_load_05(ui):
         ui.sj_back_comBox_01.setCurrentText('일')
 
     ui.sj_back_liEdit_02.setText(str(df['백테스케쥴시간'][0]))
-    ui.sj_back_comBox_02.setCurrentText(df['백테스케쥴구분'][0])
     ui.sj_back_comBox_03.setCurrentText(df['백테스케쥴명'][0])
     if df['백테날짜고정'][0]:
         ui.sj_back_daEdit_01.setDate(QDate.fromString(ui.dict_set['백테날짜'], 'yyyyMMdd'))
@@ -172,24 +171,39 @@ def setting_save_01(ui):
     바이낸스선물마진타입 = 'ISOLATED' if ui.sj_main_comBox_03.currentText() == '격리' else 'CROSSED'
     바이낸스선물포지션 = 'false' if ui.sj_main_comBox_04.currentText() == '단방향' else 'true'
 
-    if ui.proc_chqs.is_alive():
-        프로그램비밀번호 = en_text(ui.dict_set['키'], 프로그램비밀번호_) if 프로그램비밀번호_ else ''
-        columns = ['거래소', '모의투자', '데이터저장', '타임프레임', '프로그램비밀번호', '바이낸스선물마진타입', '바이낸스선물포지션']
-        set_txt = ', '.join([f'{col} = ?' for col in columns])
-        query = f'UPDATE main SET {set_txt}'
-        localvs = locals()
-        values = tuple(localvs[col] for col in columns)
-        ui.queryQ.put(('설정디비', query, values))
+    pass_check = True
+    if ui.dict_set['프로그램비밀번호'] != '' and ui.dict_set['프로그램비밀번호'] != 프로그램비밀번호_:
+        ui.pa_lineEditttt_01.clear()
+        ui.pa_labelllllll_01.setText('비밀번호가 변경되었습니다.\n이전 비밀번호를 입력하십시오.\n')
+        ui.dialog_pass.show()
+        while ui.dialog_pass.isVisible():
+            qtest_qwait(0.1)
+        if ui.pa_lineEditttt_01.text() != ui.dict_set['프로그램비밀번호']:
+            pass_check = False
 
-        for column, value in zip(columns, values):
-            ui.dict_set[column] = value
-        ui.dict_set['프로그램비밀번호'] = 프로그램비밀번호_
+    if pass_check:
+        if ui.proc_chqs.is_alive():
+            프로그램비밀번호 = en_text(ui.dict_set['키'], 프로그램비밀번호_) if 프로그램비밀번호_ else ''
+            columns = ['거래소', '모의투자', '데이터저장', '타임프레임', '프로그램비밀번호', '바이낸스선물마진타입', '바이낸스선물포지션']
+            set_txt = ', '.join([f'{col} = ?' for col in columns])
+            query = f'UPDATE main SET {set_txt}'
+            localvs = locals()
+            values = tuple(localvs[col] for col in columns)
+            ui.queryQ.put(('설정디비', query, values))
 
-        update_dictset(ui)
-        QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
+            for column, value in zip(columns, values):
+                ui.dict_set[column] = value
+            ui.dict_set['프로그램비밀번호'] = 프로그램비밀번호_
 
-        from ui.ui_etc import strategy_setting_label_change
-        strategy_setting_label_change(ui)
+            update_dictset(ui)
+            QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
+
+            from ui.ui_etc import strategy_setting_label_change
+            strategy_setting_label_change(ui)
+    else:
+        QMessageBox.critical(ui, '오류 알림', '이전 비밀번호을 잘못입력하여\n기본설정을 변경할 수 없습니다.\n')
+
+    ui.pa_labelllllll_01.setText('프로그램 비밀번호을 입력하십시오.\n미설정 시 입력없이 엔터!!\n')
 
 
 @error_decorator
@@ -274,7 +288,7 @@ def setting_save_04(ui):
             columns = ['잔고청산', '프로세스종료', '컴퓨터종료', '투자금고정', '손실중지', '수익중지', '매수전략', '매도전략',
                        '평균값계산틱수', '최대매수종목수', '전략종료시간', '투자금', '손실중지수익률', '수익중지수익률']
             set_txt = ', '.join([f'{col} = ?' for col in columns])
-            query   = f'UPDATE stock SET {set_txt}'
+            query   = f'UPDATE strategy SET {set_txt}'
             localvs = locals()
             values  = tuple(localvs[col] for col in columns)
             ui.queryQ.put(('설정디비', query, values))
@@ -311,7 +325,6 @@ def setting_save_05(ui):
     else:                                            백테스케쥴요일 = 6
 
     백테스케쥴시간 = ui.sj_back_liEdit_02.text()
-    백테스케쥴구분 = ui.sj_back_comBox_02.currentText()
     백테스케쥴명 = ui.sj_back_comBox_03.currentText()
 
     if 백테날짜고정:
@@ -326,7 +339,7 @@ def setting_save_05(ui):
         if ui.proc_chqs.is_alive():
             columns = ['블랙리스트추가', '백테일괄로딩', '디비자동관리', '백테주문관리적용', '교차검증가중치', '범위자동관리',
                        '기준값최소상승률', '시장미시구조분석', '시장리스크분석', '백테매수시간기준', '백테스트로그기록안함',
-                       '그래프저장하지않기', '그래프띄우지않기', '백테스케쥴실행', '백테스케쥴요일', '백테스케쥴시간', '백테스케쥴구분',
+                       '그래프저장하지않기', '그래프띄우지않기', '백테스케쥴실행', '백테스케쥴요일', '백테스케쥴시간',
                        '백테스케쥴명', '백테날짜고정', '백테날짜']
             set_txt = ', '.join([f'{col} = ?' for col in columns])
             query   = f'UPDATE back SET {set_txt}'

@@ -150,7 +150,7 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
                     for q in ui.stgQs:
                         q.put(('차트종목코드', code))
                 else:
-                    ui.stgQ.put(('차트종목코드', code))
+                    ui.stgQs[0].put(('차트종목코드', code))
         else:
             chart_clear(ui)
             cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
@@ -280,7 +280,7 @@ def show_db(ui):
 
     ui.db_tableWidgett_01.clearContents()
     ui.db_tableWidgett_02.clearContents()
-    ui.db_tableWidgett_05.clearContents()
+    ui.db_tableWidgett_03.clearContents()
 
     stock_stg_list = [f"{ui.market_info['전략구분']}_buy", f"{ui.market_info['전략구분']}_sell",
                       f"{ui.market_info['전략구분']}_optibuy", f"{ui.market_info['전략구분']}_optisell"]
@@ -321,13 +321,13 @@ def show_db(ui):
     stg_names.sort()
     if len(df) > maxlow:
         maxlow = len(df)
-        ui.db_tableWidgett_05.setRowCount(maxlow)
+        ui.db_tableWidgett_03.setRowCount(maxlow)
     for j, stg_name in enumerate(stg_names):
         item = QTableWidgetItem(stg_name)
         item.setTextAlignment(int(Qt.AlignVCenter | Qt.AlignCenter))
-        ui.db_tableWidgett_05.setItem(j, 0, item)
+        ui.db_tableWidgett_03.setItem(j, 0, item)
     if maxlow < 8:
-        ui.db_tableWidgett_05.setRowCount(8)
+        ui.db_tableWidgett_03.setRowCount(8)
 
 
 @error_decorator

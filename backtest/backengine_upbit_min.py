@@ -1,6 +1,6 @@
 
+from utility.static import get_indicator, get_hogaunit_coin
 from backtest.backengine_upbit_tick import BackEngineUpbitTick
-from utility.static import get_indicator, get_upbit_hoga_unit
 
 
 class BackEngineUpbitMin(BackEngineUpbitTick):
@@ -15,7 +15,7 @@ class BackEngineUpbitMin(BackEngineUpbitTick):
 
         순매수금액 = 분당매수금액 - 분당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:] + '00')
-        self.hoga_unit = 호가단위 = get_upbit_hoga_unit(현재가)
+        self.hoga_unit = 호가단위 = get_hogaunit_coin(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]

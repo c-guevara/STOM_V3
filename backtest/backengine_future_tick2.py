@@ -1,6 +1,6 @@
 
 from backtest.backengine_base_oms import BackEngineBaseOms
-from utility.static import get_future_long_profit, get_future_short_profit
+from utility.static import get_profit_future_long, get_profit_future_short
 
 
 class BackEngineFutureTick2(BackEngineBaseOms):
@@ -22,7 +22,7 @@ class BackEngineFutureTick2(BackEngineBaseOms):
         순매수금액 = 초당매수금액 - 초당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:])
         호가빼기데이터 = (매도호가5 - 매도호가4, 매도호가4 - 매도호가3, 매도호가3 - 매도호가2, 매수호가2 - 매수호가3, 매수호가3 - 매수호가4, 매수호가4 - 매수호가5)
-        self.hoga_unit = 호가단위 = self.GetHogaunit(호가빼기데이터)
+        self.hoga_unit = 호가단위 = self._get_hogaunit(호가빼기데이터)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -218,7 +218,7 @@ class BackEngineFutureTick2(BackEngineBaseOms):
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
-    def GetHogaunit(self, 호가빼기데이터):
+    def _get_hogaunit(self, 호가빼기데이터):
         return min(x for x in 호가빼기데이터 if x > 0)
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
@@ -228,24 +228,24 @@ class BackEngineFutureTick2(BackEngineBaseOms):
         return int(보유수량 / 보유비율 * oc_ratio)
 
     def _get_order_price(self, 거래금액, 주문수량):
-        return round(거래금액 / 주문수량, self.dict_info[self.code]['가격소숫점자리수'])
+        return round(거래금액 / 주문수량, self.dict_info[self.code]['소숫점자리수'])
 
     def _get_last_sell_price(self, 매도금액, 보유수량, 미체결수량):
         if 미체결수량 <= 0:
-            매도가 = round(매도금액 / 보유수량, self.dict_info[self.code]['가격소숫점자리수'])
+            매도가 = round(매도금액 / 보유수량, self.dict_info[self.code]['소숫점자리수'])
         elif 매도금액 == 0:
             매도가 = self.arry_code[self.indexn, 1]
         else:
-            매도가 = round(매도금액 / (보유수량 - 미체결수량), self.dict_info[self.code]['가격소숫점자리수'])
+            매도가 = round(매도금액 / (보유수량 - 미체결수량), self.dict_info[self.code]['소숫점자리수'])
         return 매도가
 
     def _get_profit_info(self, 현재가, 매수가, 보유수량):
         매입금액 = self.dict_info[self.code]['위탁증거금'] * 보유수량
-        평가금액 = 매입금액 + (현재가 - 매수가) * self.dict_info[self.code]['틱가치'] * 보유수량
+        보유금액 = 매입금액 + (현재가 - 매수가) * self.dict_info[self.code]['틱가치'] * 보유수량
         if self.curr_trade_info['보유중'] == 1:
             포지션 = 'LONG'
-            평가금액, 수익금, 수익률 = get_future_long_profit(매입금액, 평가금액)
+            평가금액, 수익금, 수익률 = get_profit_future_long(매입금액, 보유금액)
         else:
             포지션 = 'SHORT'
-            평가금액, 수익금, 수익률 = get_future_short_profit(매입금액, 평가금액)
+            평가금액, 수익금, 수익률 = get_profit_future_short(매입금액, 보유금액)
         return 포지션, 평가금액, 수익금, 수익률

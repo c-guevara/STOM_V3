@@ -3,16 +3,17 @@ import numpy as np
 from traceback import format_exc
 from utility.setting_base import ui_num
 from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
-from utility.static import now, now_utc, dt_ymdhms, get_upbit_hoga_unit, get_upbit_profit, get_indicator, \
-    error_decorator
+from utility.static import now, now_utc, dt_ymdhms, get_hogaunit_coin, get_profit_coin, get_indicator
 
 
 class UpbitStrategyMin(UpbitStrategyTick):
+    def __init__(self, gubun, qlist, dict_set, market_info):
+        super().__init__(gubun, qlist, dict_set, market_info)
+
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
     # noinspection PyUnusedLocal
-    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
@@ -24,7 +25,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
 
         시분초 = int(str(체결시간)[8:] + '00')
         순매수금액 = 분당매수금액 - 분당매도금액
-        self.hoga_unit = 호가단위 = get_upbit_hoga_unit(현재가)
+        self.hoga_unit = 호가단위 = get_hogaunit_coin(현재가)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -60,16 +61,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
             AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
                 OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
 
-            high_low = self.high_low.get(종목코드)
-            if high_low:
-                if 분봉고가 >= high_low[0]:
-                    high_low[0] = 분봉고가
-                    high_low[1] = self.indexn
-                if 분봉저가 <= high_low[2]:
-                    high_low[2] = 분봉저가
-                    high_low[3] = self.indexn
-            else:
-                self.high_low[종목코드] = [분봉고가, self.indexn, 분봉저가, self.indexn]
+            self._update_high_low(종목코드, 분봉고가, 분봉저가)
 
             if self.dict_condition:
                 if 종목코드 not in self.dict_cond_indexn:
@@ -121,7 +113,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
                     """['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량',
                         '분할매수횟수', '분할매도횟수', '매수시간']"""
                     _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
-                    _, 수익금, 수익률 = get_upbit_profit(매입금액, 보유수량 * 현재가)
+                    _, 수익금, 수익률 = get_profit_coin(매입금액, 보유수량 * 현재가)
                     profit_data = self.dict_profit.get(종목코드)
                     if profit_data:
                         if 수익률 > profit_data[0]:

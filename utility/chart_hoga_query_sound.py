@@ -13,7 +13,7 @@ from traceback import format_exc
 from trade.formula_manager import FormulaManager, get_formula_data
 from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm, thread_decorator
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_BACKTEST, DB_CODE_INFO, DB_SETTING, DB_STRATEGY, \
-    columns_hj
+    columns_hj, code_info_tables
 
 
 class ChartHogaQuerySound:
@@ -61,22 +61,9 @@ class ChartHogaQuerySound:
 
     def _update_dict_name(self):
         con = sqlite3.connect(DB_CODE_INFO)
-        df = pd.read_sql('SELECT * FROM stock_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM stock_etf_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM stock_etn_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM stock_usa_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM upbit_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM future_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM future_os_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
-        df = pd.read_sql('SELECT * FROM binance_info', con).set_index('index')
-        self.dict_name.update(df['종목명'].to_dict())
+        for table in code_info_tables:
+            df = pd.read_sql(f'SELECT * FROM {table}', con).set_index('index')
+            self.dict_name.update(df['종목명'].to_dict())
         con.close()
 
     def _set_dict_findex(self):

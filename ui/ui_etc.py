@@ -74,7 +74,7 @@ def update_dictset(ui):
             for q in ui.stgQs:
                 q.put(('설정변경', ui.dict_set))
         else:
-            ui.stgQ.put(('설정변경', ui.dict_set))
+            ui.stgQs[0].put(('설정변경', ui.dict_set))
 
     if ui.proc_chqs.is_alive():
         ui.chartQ.put(('설정변경', ui.dict_set))
@@ -202,13 +202,13 @@ def stom_public_use_limit(ui):
 def strategy_setting_label_change(ui):
     if ui.market_gubun < 4 or ui.market_gubun == 5:
         ui.sj_strgy_label_02.setText(
-            '종목당투자금                          백만원                                  전략중지 및 잔고청산   |')
+            '종목당투자금                          백만원                  ▣  전략중지 및 잔고청산   |')
     elif ui.market_gubun in (6, 7, 8):
         ui.sj_strgy_label_02.setText(
-            '종목당투자금                          계약수                                  전략중지 및 잔고청산   |')
+            '종목당투자금                          계약수                  ▣  전략중지 및 잔고청산   |')
     elif ui.market_gubun == 4:
         ui.sj_strgy_label_02.setText(
-            '종목당투자금                          USD                                     전략중지 및 잔고청산   |')
+            '종목당투자금                          USD                    ▣  전략중지 및 잔고청산   |')
     else:
         ui.sj_strgy_label_02.setText(
-            '종목당투자금                          USDT                                   전략중지 및 잔고청산   |')
+            '종목당투자금                          USDT                  ▣  전략중지 및 잔고청산   |')

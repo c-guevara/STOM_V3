@@ -2,12 +2,13 @@
 import numpy as np
 from utility.setting_base import ui_num
 from trade.base_strategy import BaseStrategy
-from utility.static import now, dt_ymdhms, get_future_long_profit, get_future_short_profit, error_decorator
+from utility.static import now, dt_ymdhms, get_profit_future_long, get_profit_future_short
 
 
 class FutureStrategyTick(BaseStrategy):
     def __init__(self, gubun, qlist, dict_set, market_info):
         super().__init__(gubun, qlist, dict_set, market_info)
+
         self.dict_signal = {
             'BUY_LONG': [],
             'SELL_SHORT': [],
@@ -33,7 +34,6 @@ class FutureStrategyTick(BaseStrategy):
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0
 
     # noinspection PyUnusedLocal
-    @error_decorator
     def _strategy(self, data):
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
             초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
@@ -73,16 +73,7 @@ class FutureStrategyTick(BaseStrategy):
             if self.dict_set['시장리스크분석']:
                 리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
 
-        high_low = self.high_low.get(종목코드)
-        if high_low:
-            if 현재가 >= high_low[0]:
-                high_low[0] = 현재가
-                high_low[1] = self.indexn
-            if 현재가 <= high_low[2]:
-                high_low[2] = 현재가
-                high_low[3] = self.indexn
-        else:
-            self.high_low[종목코드] = [현재가, self.indexn, 현재가, self.indexn]
+        self._update_high_low(종목코드, 현재가)
 
         if self.dict_condition:
             if 종목코드 not in self.dict_cond_indexn:
@@ -127,9 +118,9 @@ class FutureStrategyTick(BaseStrategy):
                     self.dict_buy_num[종목코드] = self.indexn
                 _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 레버리지 = jg_data.values()
                 if 포지션 == 'LONG':
-                    _, 수익금, 수익률 = get_future_long_profit(매입금액, 보유수량 * 현재가)
+                    _, 수익금, 수익률 = get_profit_future_long(매입금액, 보유수량 * 현재가)
                 else:
-                    _, 수익금, 수익률 = get_future_short_profit(매입금액, 보유수량 * 현재가)
+                    _, 수익금, 수익률 = get_profit_future_short(매입금액, 보유수량 * 현재가)
                 profit_data = self.dict_profit.get(종목코드)
                 if profit_data:
                     if 수익률 > profit_data[0]:

@@ -3,9 +3,9 @@ import os
 import pandas as pd
 from multiprocessing import Process
 from PyQt5.QtWidgets import QMessageBox
-from utility.setting_base import GRAPH_PATH
 from ui.set_style import style_bc_bb, style_bc_st
-from utility.static import qtest_qwait, error_decorator
+from utility.setting_base import GRAPH_PATH, ui_num
+from utility.static import qtest_qwait, error_decorator, cme_normal_open, now
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QSize, QEasingCurve
 from ui.ui_process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 
@@ -74,6 +74,17 @@ def mnbutton_c_clicked_03(ui, auto=False):
         )
 
     if buttonReply == QMessageBox.Yes:
+        if auto:
+            holiday = False
+            if ui.market_gubun not in (5, 9) and now().weekday() > 4:
+                holiday = True
+            elif ui.market_gubun == 8 and not cme_normal_open():
+                holiday = True
+
+            if holiday:
+                ui.windowQ.put((ui_num['시스템로그'], f"거래소 {ui.market_info['마켓이름']}, 휴무 종료"))
+                return
+
         mnbutton_c_clicked_01(ui, 1)
         if receiver_process_alive(ui):
             ui.proc_receiver.kill()
@@ -82,9 +93,9 @@ def mnbutton_c_clicked_03(ui, auto=False):
                 p.kill()
         if trader_process_alive(ui):
             ui.proc_trader.kill()
-        qtest_qwait(3)
+            qtest_qwait(3)
 
-        acc_no = ui.dict_set['거래소'][-2:]
+        acc_no = ui.market_info['계정번호']
         if ui.dict_set[f'access_key{acc_no}'] is None or ui.dict_set[f'secret_key{acc_no}'] is None:
             QMessageBox.critical(ui, '오류 알림', '계정이 설정되지 않아 매매시스템을 시작할 수 없습니다.\n계정 설정 후 다시 시작하십시오.\n')
         else:
@@ -95,7 +106,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
 @error_decorator
 def mnbutton_c_clicked_04(ui):
     if ui.geometry().width() > 1000:
-        ui.setFixedSize(722, 383)
+        ui.setFixedSize(726, 384)
         ui.zo_pushButton.setStyleSheet(style_bc_st)
     else:
         ui.setFixedSize(1403, 763)

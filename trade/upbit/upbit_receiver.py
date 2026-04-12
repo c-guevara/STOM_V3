@@ -1,24 +1,58 @@
 
+import sys
+from PyQt5.QtWidgets import QApplication
 from trade.base_receiver import BaseReceiver
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
+from trade.upbit.upbit_restapi import get_symbols_info
+from trade.upbit.upbit_restapi import UpbitWebSocketReceiver
 from utility.static import now, str_ymdhms_utc, error_decorator
-from trade.upbit.upbit_restapi import WebSocketReceiver, get_symbols_info
+
+
+class MonitorReceivQ(QThread):
+    signal1 = pyqtSignal(tuple)
+    signal2 = pyqtSignal(str)
+
+    def __init__(self, receivQ):
+        super().__init__()
+        self.receivQ = receivQ
+
+    def run(self):
+        while True:
+            data = self.receivQ.get()
+            if data.__class__ == tuple:
+                self.signal1.emit(data)
+            elif data.__class__ == str:
+                self.signal2.emit(data)
 
 
 class UpbitReceiver(BaseReceiver):
     def __init__(self, qlist, dict_set, market_info):
         super().__init__(qlist, dict_set, market_info)
 
+        app = QApplication(sys.argv)
+
         self._get_code_info()
         self._save_code_info_and_noti()
 
-        self.ws_thread = WebSocketReceiver(self.codes, self.windowQ)
+        self.ws_thread = UpbitWebSocketReceiver(self.codes, self.windowQ)
         self.ws_thread.signal.connect(self._convert_real_data)
         self.ws_thread.start()
+
+        self.updater = MonitorReceivQ(self.receivQ)
+        self.updater.signal1.connect(self._update_tuple)
+        self.updater.signal2.connect(self._sys_exit)
+        self.updater.start()
+
+        self.qtimer = QTimer()
+        self.qtimer.setInterval(1 * 1000)
+        self.qtimer.timeout.connect(self._scheduler)
+        self.qtimer.start()
+
+        app.exec_()
 
     def _get_code_info(self):
         self.dict_info, self.codes = get_symbols_info()
         self.traderQ.put(('종목정보', self.dict_info))
-
         self.dict_daym = {code: value['거래대금'] for code, value in self.dict_info.items()}
         self.list_gsjm = [x for x, y in sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:self.mtop_rank]]
         data = tuple(self.list_gsjm)
@@ -26,11 +60,11 @@ class UpbitReceiver(BaseReceiver):
 
     @error_decorator
     def _convert_real_data(self, data):
-        dt = int(str_ymdhms_utc(data['timestamp']))
-        if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
-            return
-
         if data['type'] == 'orderbook':
+            dt = int(str_ymdhms_utc(data['timestamp']))
+            if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
+                return
+
             receivetime = now()
             code = data['code']
             hoga_tamount = [
@@ -61,6 +95,10 @@ class UpbitReceiver(BaseReceiver):
                                    hoga_bamount, hoga_tamount, receivetime)
 
         elif data['type'] == 'ticker':
+            dt = int(str_ymdhms_utc(data['timestamp']))
+            if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
+                return
+
             code  = data['code']
             c     = data['trade_price']
             o     = data['opening_price']

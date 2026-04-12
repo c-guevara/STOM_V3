@@ -168,10 +168,10 @@ list_stock_usa_min = [
     'MACDH', 'MFI', 'MOM', 'OBV', 'PPO', 'ROC', 'RSI', 'SAR', 'STOCHSK', 'STOCHSD', 'STOCHFK', 'STOCHFD', 'WILLR'
 ]
 
-len_list_stock_tick    = len(list_stock_tick)
-len_list_stock_min     = len(list_stock_min)
-len_list_basic_tick    = len(list_basic_tick)
-len_list_basic_min     = len(list_basic_min)
+len_list_stock_tick     = len(list_stock_tick)
+len_list_stock_min      = len(list_stock_min)
+len_list_basic_tick     = len(list_basic_tick)
+len_list_basic_min      = len(list_basic_min)
 len_list_stock_usa_tick = len(list_stock_usa_tick)
 len_list_stock_usa_min  = len(list_stock_usa_min)
 
@@ -215,12 +215,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/stock_min', 1: './database/stock_tick'},
         '당일디비': {0: DB_STOCK_MIN,        1: DB_STOCK_TICK},
         '백테디비': {0: DB_STOCK_MIN_BACK,   1: DB_STOCK_TICK_BACK},
-        '팩터목록': {0: list_stock_tick,     1: list_stock_min},
-        '팩터개수': {0: len_list_stock_tick, 1: len_list_stock_min},
+        '팩터목록': {0: list_stock_min,      1: list_stock_tick},
+        '팩터개수': {0: len_list_stock_min,  1: len_list_stock_tick},
         '각도계수': {0: [5, 0.01],           1: [5, 0.01]},
         '프로세스': {0: StockReceiver, 1: StockTrader, 2: [StockStrategyMin, StockStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineStockMin, 1: BackEngineStockTick},
+            0: {0: BackEngineStockMin,  1: BackEngineStockTick},
             1: {0: BackEngineStockMin2, 1: BackEngineStockTick2}
         },
     },
@@ -242,12 +242,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/stock_etf_min', 1: './database/stock_etf_tick'},
         '당일디비': {0: DB_STOCK_ETF_MIN,      1: DB_STOCK_ETF_TICK},
         '백테디비': {0: DB_STOCK_ETF_MIN_BACK, 1: DB_STOCK_ETF_TICK_BACK},
-        '팩터목록': {0: list_stock_tick,       1: list_stock_min},
-        '팩터개수': {0: len_list_stock_tick,   1: len_list_stock_min},
+        '팩터목록': {0: list_stock_min,        1: list_stock_tick},
+        '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
         '각도계수': {0: [5, 0.01],             1: [5, 0.01]},
         '프로세스': {0: StockReceiver, 1: StockTrader, 2: [StockStrategyMin, StockStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineStockMin, 1: BackEngineStockTick},
+            0: {0: BackEngineStockMin,  1: BackEngineStockTick},
             1: {0: BackEngineStockMin2, 1: BackEngineStockTick2}
         },
     },
@@ -269,12 +269,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/stock_etn_min', 1: './database/stock_etn_tick'},
         '당일디비': {0: DB_STOCK_ETN_MIN,      1: DB_STOCK_ETN_TICK},
         '백테디비': {0: DB_STOCK_ETN_MIN_BACK, 1: DB_STOCK_ETN_TICK_BACK},
-        '팩터목록': {0: list_stock_tick,       1: list_stock_min},
-        '팩터개수': {0: len_list_stock_tick,   1: len_list_stock_min},
+        '팩터목록': {0: list_stock_min,        1: list_stock_tick},
+        '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
         '각도계수': {0: [5, 0.01],             1: [5, 0.01]},
         '프로세스': {0: StockReceiver, 1: StockTrader, 2: [StockStrategyMin, StockStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineStockMin, 1: BackEngineStockTick},
+            0: {0: BackEngineStockMin,  1: BackEngineStockTick},
             1: {0: BackEngineStockMin2, 1: BackEngineStockTick2}
         },
     },
@@ -296,12 +296,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/stock_usa_min', 1: './database/stock_usa_tick'},
         '당일디비': {0: DB_STOCK_USA_MIN,        1: DB_STOCK_USA_TICK},
         '백테디비': {0: DB_STOCK_USA_MIN_BACK,   1: DB_STOCK_USA_TICK_BACK},
-        '팩터목록': {0: list_stock_usa_tick,     1: list_stock_usa_min},
-        '팩터개수': {0: len_list_stock_usa_tick, 1: len_list_stock_usa_min},
+        '팩터목록': {0: list_stock_usa_min,      1: list_stock_usa_tick},
+        '팩터개수': {0: len_list_stock_usa_min,  1: len_list_stock_usa_tick},
         '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
         '프로세스': {0: StockUsaReceiver, 1: StockUsaTrader, 2: [StockUsaStrategyMin, StockUsaStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineStockOsMin, 1: BackEngineStockOsTick},
+            0: {0: BackEngineStockOsMin,  1: BackEngineStockOsTick},
             1: {0: BackEngineStockOsMin2, 1: BackEngineStockOsTick2}
         },
     },
@@ -323,12 +323,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/coin_min', 1: './database/coin_tick'},
         '당일디비': {0: DB_COIN_MIN,         1: DB_COIN_TICK},
         '백테디비': {0: DB_COIN_MIN_BACK,    1: DB_COIN_TICK_BACK},
-        '팩터목록': {0: list_basic_tick,     1: list_basic_min},
-        '팩터개수': {0: len_list_basic_tick, 1: len_list_basic_min},
+        '팩터목록': {0: list_basic_min,      1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min,  1: len_list_basic_tick},
         '각도계수': {0: [10, 0.000_000_01],  1: [10, 0.000_000_01]},
         '프로세스': {0: UpbitReceiver, 1: UpbitTrader, 2: [UpbitStrategyMin, UpbitStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineUpbitMin, 1: BackEngineUpbitTick},
+            0: {0: BackEngineUpbitMin,  1: BackEngineUpbitTick},
             1: {0: BackEngineUpbitMin2, 1: BackEngineUpbitTick2}
         },
     },
@@ -350,12 +350,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/future_min', 1: './database/future_tick'},
         '당일디비': {0: DB_FUTURE_MIN,       1: DB_FUTURE_TICK},
         '백테디비': {0: DB_FUTURE_MIN_BACK,  1: DB_FUTURE_TICK_BACK},
-        '팩터목록': {0: list_basic_tick,     1: list_basic_min},
-        '팩터개수': {0: len_list_basic_tick, 1: len_list_basic_min},
+        '팩터목록': {0: list_basic_min,      1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min,  1: len_list_basic_tick},
         '각도계수': {0: [100, 0.000_000_05], 1: [100, 0.000_000_05]},
         '프로세스': {0: FutureReceiver, 1: FutureTrader, 2: [FutureStrategyMin, FutureStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineFutureMin, 1: BackEngineFutureTick},
+            0: {0: BackEngineFutureMin,  1: BackEngineFutureTick},
             1: {0: BackEngineFutureMin2, 1: BackEngineFutureTick2}
         },
     },
@@ -377,12 +377,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/future_nt_min', 1: './database/future_nt_tick'},
         '당일디비': {0: DB_FUTURE_NT_MIN,      1: DB_FUTURE_NT_TICK},
         '백테디비': {0: DB_FUTURE_NT_MIN_BACK, 1: DB_FUTURE_NT_TICK_BACK},
-        '팩터목록': {0: list_basic_tick,       1: list_basic_min},
-        '팩터개수': {0: len_list_basic_tick,   1: len_list_basic_min},
+        '팩터목록': {0: list_basic_min,        1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min,    1: len_list_basic_tick},
         '각도계수': {0: [100, 0.000_000_05],   1: [100, 0.000_000_05]},
         '프로세스': {0: FutureReceiver, 1: FutureTrader, 2: [FutureStrategyMin, FutureStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineFutureMin, 1: BackEngineFutureTick},
+            0: {0: BackEngineFutureMin,  1: BackEngineFutureTick},
             1: {0: BackEngineFutureMin2, 1: BackEngineFutureTick2}
         },
     },
@@ -404,12 +404,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/future_os_min', 1: './database/future_os_tick'},
         '당일디비': {0: DB_FUTURE_OS_MIN,      1: DB_FUTURE_OS_TICK},
         '백테디비': {0: DB_FUTURE_OS_MIN_BACK, 1: DB_FUTURE_OS_TICK_BACK},
-        '팩터목록': {0: list_basic_tick,       1: list_basic_min},
-        '팩터개수': {0: len_list_basic_tick,   1: len_list_basic_min},
+        '팩터목록': {0: list_basic_min,        1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min,    1: len_list_basic_tick},
         '각도계수': {0: [100, 0.000_000_05],   1: [100, 0.000_000_05]},
         '프로세스': {0: FutureOsReceiver, 1: FutureOsTrader, 2: [FutureOsStrategyMin, FutureOsStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineFutureMin, 1: BackEngineFutureTick},
+            0: {0: BackEngineFutureMin,  1: BackEngineFutureTick},
             1: {0: BackEngineFutureMin2, 1: BackEngineFutureTick2}
         },
     },
@@ -431,12 +431,12 @@ DICT_MARKET_INFO = {
         '일자디비경로': {0: './database/coin_future_min', 1: './database/coin_future_tick'},
         '당일디비': {0: DB_COIN_FUTURE_MIN,      1: DB_COIN_FUTURE_TICK},
         '백테디비': {0: DB_COIN_FUTURE_MIN_BACK, 1: DB_COIN_FUTURE_TICK_BACK},
-        '팩터목록': {0: list_basic_tick,         1: list_basic_min},
-        '팩터개수': {0: len_list_basic_tick,     1: len_list_basic_min},
+        '팩터목록': {0: list_basic_min,          1: list_basic_tick},
+        '팩터개수': {0: len_list_basic_min,      1: len_list_basic_tick},
         '각도계수': {0: [10, 0.000_000_01],      1: [10, 0.000_000_01]},
         '프로세스': {0: BinanceReceiver, 1: BinanceTrader, 2: [BinanceStrategyMin, BinanceStrategyTick]},
         '백테엔진': {
-            0: {0: BackEngineBinanceMin, 1: BackEngineBinanceTick},
+            0: {0: BackEngineBinanceMin,  1: BackEngineBinanceTick},
             1: {0: BackEngineBinanceMin2, 1: BackEngineBinanceTick2}
         },
     },

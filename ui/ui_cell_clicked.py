@@ -201,7 +201,7 @@ def cell_clicked_08(ui, row, col):
             else:
                 query = f"DELETE FROM {ui.market_info['전략구분']}_optisell WHERE `index` = '{stg_name}'"
             ui.queryQ.put(('전략디비', query))
-            ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 주식전략 "{stg_name}" 삭제 완료'))
+            ui.windowQ.put((ui_num['DB관리'], f"DB 명령 실행 알림 - {ui.market_info['마켓이름']} 전략 '{stg_name}' 삭제 완료"))
     elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_02:
         item = ui.db_tableWidgett_02.item(row, col)
         if item is None:
@@ -221,9 +221,9 @@ def cell_clicked_08(ui, row, col):
             else:
                 query = f"DELETE FROM {ui.market_info['전략구분']}_sellconds WHERE `index` = '{stg_name}'"
             ui.queryQ.put(('전략디비', query))
-            ui.windowQ.put((ui_num['DB관리'], f'DB 명령 실행 알림 - 주식 범위 또는 조건 "{stg_name}" 삭제 완료'))
-    elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_05:
-        item = ui.db_tableWidgett_05.item(row, col)
+            ui.windowQ.put((ui_num['DB관리'], f"DB 명령 실행 알림 - {ui.market_info['마켓이름']} 범위 또는 조건 '{stg_name}' 삭제 완료"))
+    elif ui.dialog_db.focusWidget() == ui.db_tableWidgett_03:
+        item = ui.db_tableWidgett_03.item(row, col)
         if item is None:
             return
         stg_name = item.text()

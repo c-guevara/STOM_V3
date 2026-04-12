@@ -6,7 +6,7 @@ from PyQt5.QtCore import QThread, pyqtSignal
 from binance import AsyncClient, BinanceSocketManager
 
 
-class WebSocketReceiver(QThread):
+class BinanceWebSocketReceiver(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, codes, windowQ):
@@ -89,7 +89,7 @@ class WebSocketReceiver(QThread):
             self.loop.stop()
 
 
-class WebSocketTrader(QThread):
+class BinanceWebSocketTrader(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, api_key, scret_key, windowQ):

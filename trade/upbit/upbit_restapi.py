@@ -139,7 +139,7 @@ class Upbit:
         return self._get(url, data)
 
 
-class WebSocketReceiver(QThread):
+class UpbitWebSocketReceiver(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, codes, windowQ):
@@ -147,47 +147,79 @@ class WebSocketReceiver(QThread):
         self.codes     = codes
         self.windowQ   = windowQ
         self.loop      = None
-        self.websocket = None
-        self.connected = False
+        self.wsk_trade = None
+        self.wsk_order = None
+        self.con_trade = False
+        self.con_order = False
         self.url       = 'wss://api.upbit.com/websocket/v1'
 
     def run(self):
         self.loop = asyncio.new_event_loop()
         asyncio.set_event_loop(self.loop)
-        self.loop.create_task(self._run())
+        self.loop.create_task(self.run_trade())
+        self.loop.create_task(self.run_order())
         self.loop.run_forever()
 
-    async def _run(self):
+    async def run_trade(self):
         while True:
             try:
-                if not self.connected:
-                    await self._connect()
-                await self._receive_message()
+                if not self.con_trade:
+                    await self.connect_trader()
+                await self.receive_ticker()
             except:
                 self.windowQ.put(
-                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 업비트 웹소켓 실시간시세 수신 중 오류가 발생하여 재연결합니다.')
+                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 업비트 웹소켓 실시간체결 수신 중 오류가 발생하여 재연결합니다.')
                 )
 
-            await self._disconnect()
+            await self.disconnect_trader()
 
-    async def _connect(self):
-        self.websocket = await websockets.connect(self.url, ping_interval=60)
-        self.connected = True
+    async def run_order(self):
+        while True:
+            try:
+                if not self.con_order:
+                    await self.connect_order()
+                await self.receive_order()
+            except:
+                self.windowQ.put(
+                    (ui_num['시스템로그'], f'{format_exc()}오류 알림 - 업비트 웹소켓 실시간호가 수신 중 오류가 발생하여 재연결합니다.')
+                )
+
+            await self.disconnect_order()
+
+    async def connect_trader(self):
+        self.con_trade = True
+        self.wsk_trade = await websockets.connect(self.url, ping_interval=60)
         data = [{'ticket': str(uuid.uuid4())}, {'type': 'ticker', 'codes': self.codes, 'isOnlyRealtime': True}]
-        await self.websocket.send(json.dumps(data))
-        data = [{'ticket': str(uuid.uuid4())}, {'type': 'orderbook', 'codes': self.codes, 'isOnlyRealtime': True}]
-        await self.websocket.send(json.dumps(data))
+        await self.wsk_trade.send(json.dumps(data))
 
-    async def _receive_message(self):
-        while self.connected:
-            data = await self.websocket.recv()
+    async def connect_order(self):
+        self.con_order = True
+        self.wsk_order = await websockets.connect(self.url, ping_interval=60)
+        data = [{'ticket': str(uuid.uuid4())}, {'type': 'orderbook', 'codes': self.codes, 'isOnlyRealtime': True}]
+        await self.wsk_order.send(json.dumps(data))
+
+    async def receive_ticker(self):
+        while self.con_trade:
+            data = await self.wsk_trade.recv()
             data = json.loads(data)
             self.signal.emit(data)
 
-    async def _disconnect(self):
-        self.connected = False
-        if self.websocket is not None:
-            await self.websocket.close()
+    async def receive_order(self):
+        while self.con_order:
+            data = await self.wsk_order.recv()
+            data = json.loads(data)
+            self.signal.emit(data)
+
+    async def disconnect_trader(self):
+        self.con_trade = False
+        if self.wsk_trade is not None:
+            await self.wsk_trade.close()
+        await asyncio.sleep(5)
+
+    async def disconnect_order(self):
+        self.con_order = False
+        if self.wsk_order is not None:
+            await self.wsk_order.close()
         await asyncio.sleep(5)
 
     def stop(self):
@@ -195,7 +227,7 @@ class WebSocketReceiver(QThread):
             self.loop.stop()
 
 
-class WebSocketTrader(QThread):
+class UpbitWebSocketTrader(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, windowQ):

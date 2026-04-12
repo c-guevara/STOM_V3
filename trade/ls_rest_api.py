@@ -420,7 +420,7 @@ class LsRestAPI:
         return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
 
 
-class WebSocketReceiver(QThread):
+class LsWebSocketReceiver(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, gubun, token, symbols, windowQ):
@@ -542,7 +542,7 @@ class WebSocketReceiver(QThread):
             self.loop.stop()
 
 
-class WebSocketTrader(QThread):
+class LsWebSocketTrader(QThread):
     signal = pyqtSignal(dict)
 
     def __init__(self, gubun, token, windowQ):
@@ -609,3 +609,62 @@ class WebSocketTrader(QThread):
     def stop(self):
         if self.loop and self.loop.is_running():
             self.loop.stop()
+
+
+class MonitorWindowQ(QThread):
+    signal = pyqtSignal(str)
+
+    def __init__(self, windowQ):
+        super().__init__()
+        self.windowQ = windowQ
+
+    def run(self):
+        while True:
+            data = self.windowQ.get()
+            self.signal.emit(data[1])
+
+
+if __name__ == "__main__":
+    """테스트 코드"""
+    import sys
+    from multiprocessing import Queue
+    from PyQt5.QtWidgets import QApplication
+
+    app = QApplication(sys.argv)
+
+    gubun_ = '야간선물'  # 국내주식, 국내주식ETF, 국내주식ETN, 지수선물, 야간선물, 해외주식, 해외선물
+    access_key = 'PSRFkgSSsFHFZ5scUWeEd6dFnw5cqbdCA3gk'
+    secret_key = 'dp9q92cFbpxMaTARhE3jSJOipCtTc2Gl'
+
+    windowQ_ = Queue()
+
+    ls = LsRestAPI(windowQ_, access_key, secret_key)
+    token_ = ls.create_token()
+
+    if gubun_ == '국내주식':
+        dict_info, symbols_ = ls.get_code_info_stock(etfgubun=0, debug=True)
+    elif gubun_ == '국내주식ETF':
+        dict_info, symbols_ = ls.get_code_info_stock(etfgubun=1, debug=True)
+    elif gubun_ == '국내주식ETN':
+        dict_info, symbols_ = ls.get_code_info_stock(etfgubun=2, debug=True)
+    elif gubun_ == '지수선물':
+        dict_info, symbols_ = ls.get_code_info_future(debug=True)
+    elif gubun_ == '야간선물':
+        dict_info, symbols_ = ls.get_code_info_future_night(debug=True)
+    elif gubun_ == '해외주식':
+        dict_info, symbols_ = ls.get_code_info_stock_usa(debug=True)
+    else:
+        dict_info, symbols_ = ls.get_code_info_future_oversea(debug=True)
+
+    def real_data_print(data):
+        print(f'[{now()}] {data}')
+
+    writer = MonitorWindowQ(windowQ_)
+    writer.signal.connect(real_data_print)
+    writer.start()
+
+    ws_thread = LsWebSocketReceiver(gubun_, token_, symbols_, windowQ_)
+    ws_thread.signal.connect(real_data_print)
+    ws_thread.start()
+
+    app.exec_()

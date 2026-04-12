@@ -1,5 +1,4 @@
 
-import time
 import sqlite3
 import pandas as pd
 from copy import deepcopy
@@ -8,9 +7,9 @@ from utility.setting_base import indicator
 from trade.risk_analyzer import RiskAnalyzer
 from trade.formula_manager import get_formula_data
 from trade.strategy_globals_func import StrategyGlobalsFunc
+from utility.static import get_ema_list, now, set_builtin_print
 from trade.microstructure_analyzer import MicrostructureAnalyzer
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
-from utility.static import get_ema_list, now, get_profile_text, set_builtin_print
 
 
 class BaseStrategy(StrategyGlobalsFunc):
@@ -89,10 +88,6 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'], factor_list)
 
         set_builtin_print(self.windowQ)
-        if self.dict_set['전략연산프로파일링']:
-            import cProfile
-            self.pr = cProfile.Profile()
-            self.pr.enable()
 
     def _set_formula_data(self):
         self.fm_list, dict_fm, self.fm_tcnt = get_formula_data(False, self.data_cnt)
@@ -178,7 +173,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.dict_condition = dict(zip(name_list, stg_list))
 
     def _main_loop(self):
-        self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 전략 연산 시작'))
+        self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략 연산 시작"))
         while True:
             try:
                 data = self.stgQ.get()
@@ -189,6 +184,7 @@ class BaseStrategy(StrategyGlobalsFunc):
                 elif data.__class__ == str:
                     self._update_string(data)
             except:
+                from traceback import format_exc
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
     def _update_tuple(self, data):
@@ -252,12 +248,8 @@ class BaseStrategy(StrategyGlobalsFunc):
         elif data == '매도전략중지':
             self.sellstrategy = None
             self.teleQ.put('매도전략 중지 완료')
-        elif data == '프로파일링결과':
-            if self.gubun == 0:
-                self.windowQ.put((ui_num['시스템로그'], get_profile_text(self.pr)))
         elif data == '프로세스종료':
-            time.sleep(5)
-            self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 전략연산 종료'))
+            self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략연산 종료"))
 
     def _get_parameter_area(self, rw):
         if self.is_tick:
@@ -430,6 +422,30 @@ class BaseStrategy(StrategyGlobalsFunc):
                 self.stgQs[self.gubun].put('프로세스종료')
         else:
             self.stgQ.put('프로세스종료')
+
+    def _update_high_low(self, 종목코드, 현재가또는분봉고가, 분봉저가=None):
+        if 분봉저가 is None:
+            high_low = self.high_low.get(종목코드)
+            if high_low:
+                if 현재가또는분봉고가 >= high_low[0]:
+                    high_low[0] = 현재가또는분봉고가
+                    high_low[1] = self.indexn
+                if 현재가또는분봉고가 <= high_low[2]:
+                    high_low[2] = 현재가또는분봉고가
+                    high_low[3] = self.indexn
+            else:
+                self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 현재가또는분봉고가, self.indexn]
+        else:
+            high_low = self.high_low.get(종목코드)
+            if high_low:
+                if 현재가또는분봉고가 >= high_low[0]:
+                    high_low[0] = 현재가또는분봉고가
+                    high_low[1] = self.indexn
+                if 분봉저가 <= high_low[2]:
+                    high_low[2] = 분봉저가
+                    high_low[3] = self.indexn
+            else:
+                self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
 
     def _strategy(self, data):
         pass

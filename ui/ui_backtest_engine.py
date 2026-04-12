@@ -9,8 +9,8 @@ from backtest.back_code_test import BackCodeTest
 from concurrent.futures import ThreadPoolExecutor
 from ui.ui_dialog_animation import DialogAnimator
 from backtest.back_static import get_moneytop_query
-from utility.setting_base import ui_num, DB_STRATEGY
 from multiprocessing import Process, Queue, Value, Lock
+from utility.setting_base import ui_num, DB_STRATEGY, code_info_tables
 from utility.static import thread_decorator, str_hms, dt_hms, timedelta_sec, error_decorator
 
 
@@ -21,9 +21,9 @@ def backengine_show(ui):
     try:
         df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
         table_list = df['name'].to_list()
-        table_list.remove('moneytop')
-        table_list.remove('stock_info')
-        table_list.remove('future_info')
+        for table in code_info_tables:
+            if table in table_list:
+                table_list.remove(table)
     except:
         pass
     con.close()

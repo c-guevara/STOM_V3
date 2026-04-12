@@ -16,7 +16,7 @@ class BackEngineFutureMin2(BackEngineFutureTick2):
         순매수금액 = 분당매수금액 - 분당매도금액
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:] + '00')
         호가빼기데이터 = (매도호가5 - 매도호가4, 매도호가4 - 매도호가3, 매도호가3 - 매도호가2, 매수호가2 - 매수호가3, 매수호가3 - 매수호가4, 매수호가4 - 매수호가5)
-        self.hoga_unit = 호가단위 = self.GetHogaunit(호가빼기데이터)
+        self.hoga_unit = 호가단위 = self._get_hogaunit(호가빼기데이터)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]

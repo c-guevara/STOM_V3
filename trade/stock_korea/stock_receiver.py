@@ -1,12 +1,35 @@
 
+import sys
+from trade.ls_rest_api import LsRestData
+from PyQt5.QtWidgets import QApplication
 from trade.base_receiver import BaseReceiver
 from utility.static import now, error_decorator
-from trade.ls_rest_api import LsRestAPI, LsRestData, WebSocketReceiver
+from PyQt5.QtCore import QThread, pyqtSignal, QTimer
+from trade.ls_rest_api import LsRestAPI, LsWebSocketReceiver
+
+
+class MonitorReceivQ(QThread):
+    signal1 = pyqtSignal(tuple)
+    signal2 = pyqtSignal(str)
+
+    def __init__(self, receivQ):
+        super().__init__()
+        self.receivQ = receivQ
+
+    def run(self):
+        while True:
+            data = self.receivQ.get()
+            if data.__class__ == tuple:
+                self.signal1.emit(data)
+            elif data.__class__ == str:
+                self.signal2.emit(data)
 
 
 class StockReceiver(BaseReceiver):
     def __init__(self, qlist, dict_set, market_infos):
         super().__init__(qlist, dict_set, market_infos)
+
+        app = QApplication(sys.argv)
 
         self.ls = LsRestAPI(self.windowQ, self.access, self.secret)
         self.token = self.ls.create_token()
@@ -14,13 +37,24 @@ class StockReceiver(BaseReceiver):
         self._get_code_info()
         self._save_code_info_and_noti()
 
-        self.ws_thread = WebSocketReceiver(self.market_info['마켓이름'], self.token, self.codes, self.windowQ)
+        self.ws_thread = LsWebSocketReceiver(self.market_info['마켓이름'], self.token, self.codes, self.windowQ)
         self.ws_thread.signal.connect(self._convert_real_data)
         self.ws_thread.start()
 
+        self.updater = MonitorReceivQ(self.receivQ)
+        self.updater.signal1.connect(self._update_tuple)
+        self.updater.signal2.connect(self._sys_exit)
+        self.updater.start()
+
+        self.qtimer = QTimer()
+        self.qtimer.setInterval(1 * 1000)
+        self.qtimer.timeout.connect(self._scheduler)
+        self.qtimer.start()
+
+        app.exec_()
+
     def _get_code_info(self):
         self.dict_info, self.codes = self.ls.get_code_info_stock(self.market_gubun-1)
-
         self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.codes)}
         self.traderQ.put(('종목정보', (self.dict_sgbn, self.dict_info)))
 

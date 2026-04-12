@@ -37,7 +37,7 @@ class Kimp:
         self.qtimer.timeout.connect(self._converted_currency)
         self.qtimer.start()
 
-        self.thread_ws = WebSocketManager(self.codes)
+        self.thread_ws = KimpWebSocketManager(self.codes)
         self.thread_ws.signal1.connect(self._update_upbit_data)
         self.thread_ws.signal2.connect(self._update_binance_data)
         self.thread_ws.start()
@@ -75,7 +75,7 @@ class Kimp:
             pass
 
 
-class WebSocketManager(QThread):
+class KimpWebSocketManager(QThread):
     signal1 = pyqtSignal(object)
     signal2 = pyqtSignal(object)
 

@@ -143,7 +143,7 @@ def activated_09(ui):
 @error_decorator
 def activated_10(ui):
     """바이낸스 선물 마진타입 경고"""
-    if ui.dict_set['거래소'] == '바이낸스선물' and ui.sj_main_comBox_03.currentText() == '교차':
+    if ui.sj_main_comBox_03.currentText() == '교차':
         ui.sj_main_comBox_03.setCurrentText('격리')
         QMessageBox.warning(ui, '경고', '현재 바이낸스 선물 마진타입은 격리타입만 지원합니다.\n')
 
@@ -151,6 +151,6 @@ def activated_10(ui):
 @error_decorator
 def activated_11(ui):
     """바이낸스 선물 포지션모드 경고"""
-    if ui.dict_set['거래소'] == '바이낸스선물' and ui.sj_main_comBox_04.currentText() == '양방향':
+    if ui.sj_main_comBox_04.currentText() == '양방향':
         ui.sj_main_comBox_04.setCurrentText('단방향')
         QMessageBox.warning(ui, '경고', '현재 바이낸스 선물 포지션모드는 단방향만 지원합니다.\n')
