@@ -219,7 +219,7 @@ class UpbitStrategyMin(UpbitStrategyTick):
         if 관심종목:
             """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
             self.dict_gj[종목코드] = {
-                '종목명': 종목코드,
+                '종목명': 종목명,
                 'per': 등락율,
                 'hlp': 고저평균대비등락율,
                 'lhp': 저가대비고가등락율,

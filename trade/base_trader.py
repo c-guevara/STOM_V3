@@ -1,11 +1,38 @@
 
 import sqlite3
 import pandas as pd
+from PyQt5.QtCore import QThread, pyqtSignal
 from utility.setting_base import columns_cj, ui_num, DB_TRADELIST, columns_jg, columns_td, columns_tdf
 from utility.static import now, now_cme, now_utc, str_hmsf, str_ymdhms, str_ymdhmsf, str_hms, str_ymd, dt_hms, \
     timedelta_sec, error_decorator, get_hogaunit_stock, get_hogaunit_coin, set_builtin_print, get_profit_stock, \
     get_profit_stock_os, get_profit_coin, get_profit_future_long, get_profit_future_os_long, \
     get_profit_coin_future_long, get_profit_future_short, get_profit_future_os_short, get_profit_coin_future_short
+
+
+class MonitorTraderQ(QThread):
+    signal1 = pyqtSignal(tuple)
+    signal2 = pyqtSignal(tuple)
+    signal3 = pyqtSignal(tuple)
+    signal4 = pyqtSignal(str)
+
+    def __init__(self, traderQ, market_gubun):
+        super().__init__()
+        self.traderQ = traderQ
+        self.market_gubun = market_gubun
+
+    def run(self):
+        while True:
+            data = self.traderQ.get()
+            if data.__class__ == tuple:
+                if len(data) in (7, 8):
+                    if self.market_gubun < 6:
+                        self.signal1.emit(data)
+                    else:
+                        self.signal2.emit(data)
+                else:
+                    self.signal3.emit(data)
+            elif data.__class__ == str:
+                self.signal4.emit(data)
 
 
 class BaseTrader:

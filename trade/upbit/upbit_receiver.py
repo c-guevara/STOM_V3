@@ -1,28 +1,11 @@
 
 import sys
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
-from trade.base_receiver import BaseReceiver
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from trade.upbit.upbit_restapi import get_symbols_info
 from trade.upbit.upbit_restapi import UpbitWebSocketReceiver
+from trade.base_receiver import BaseReceiver, MonitorReceivQ
 from utility.static import now, str_ymdhms_utc, error_decorator
-
-
-class MonitorReceivQ(QThread):
-    signal1 = pyqtSignal(tuple)
-    signal2 = pyqtSignal(str)
-
-    def __init__(self, receivQ):
-        super().__init__()
-        self.receivQ = receivQ
-
-    def run(self):
-        while True:
-            data = self.receivQ.get()
-            if data.__class__ == tuple:
-                self.signal1.emit(data)
-            elif data.__class__ == str:
-                self.signal2.emit(data)
 
 
 class UpbitReceiver(BaseReceiver):

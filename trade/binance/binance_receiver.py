@@ -2,28 +2,11 @@
 import re
 import sys
 import binance
+from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
-from trade.base_receiver import BaseReceiver
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
+from trade.base_receiver import BaseReceiver, MonitorReceivQ
 from trade.binance.binance_websocket import BinanceWebSocketReceiver
 from utility.static import now, now_utc, str_ymd, error_decorator, str_ymdhms_utc
-
-
-class MonitorReceivQ(QThread):
-    signal1 = pyqtSignal(tuple)
-    signal2 = pyqtSignal(str)
-
-    def __init__(self, receivQ):
-        super().__init__()
-        self.receivQ = receivQ
-
-    def run(self):
-        while True:
-            data = self.receivQ.get()
-            if data.__class__ == tuple:
-                self.signal1.emit(data)
-            elif data.__class__ == str:
-                self.signal2.emit(data)
 
 
 class BinanceReceiver(BaseReceiver):

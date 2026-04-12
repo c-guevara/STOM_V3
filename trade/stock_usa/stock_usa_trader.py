@@ -4,36 +4,9 @@ import pandas as pd
 from PyQt5.QtCore import QTimer
 from trade.ls_rest_api import LsRestAPI
 from PyQt5.QtWidgets import QApplication
-from trade.base_trader import BaseTrader
-from PyQt5.QtCore import QThread, pyqtSignal
 from utility.setting_base import ui_num,  columns_jg
+from trade.base_trader import BaseTrader, MonitorTraderQ
 from utility.static import now, timedelta_sec, error_decorator, get_profit_stock_os
-
-
-class MonitorTraderQ(QThread):
-    signal1 = pyqtSignal(tuple)
-    signal2 = pyqtSignal(tuple)
-    signal3 = pyqtSignal(tuple)
-    signal4 = pyqtSignal(str)
-
-    def __init__(self, traderQ, market_gubun):
-        super().__init__()
-        self.traderQ = traderQ
-        self.market_gubun = market_gubun
-
-    def run(self):
-        while True:
-            data = self.traderQ.get()
-            if data.__class__ == tuple:
-                if len(data) in (7, 8):
-                    if self.market_gubun < 6:
-                        self.signal1.emit(data)
-                    else:
-                        self.signal2.emit(data)
-                else:
-                    self.signal3.emit(data)
-            elif data.__class__ == str:
-                self.signal4.emit(data)
 
 
 class StockUsaTrader(BaseTrader):

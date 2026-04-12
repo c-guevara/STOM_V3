@@ -17,14 +17,11 @@ def return_press_01(ui):
             name = ui.ct_lineEdittttt_04.text()
         else:
             name = ui.ct_lineEdittttt_05.text()
-        if name in ui.dict_code:
-            code = ui.dict_code[name]
-        else:
-            code = name
-            name = ui.dict_name.get(code, code)
+        code = ui.dict_code.get(name, name)
+        name = ui.dict_name.get(code, code)
         ui.ct_lineEdittttt_04.setText(code)
         ui.ct_lineEdittttt_05.setText(name)
-        show_dialog(ui, name, tickcount, searchdate, 4)
+        show_dialog(ui, code, tickcount, searchdate, 4)
     elif ui.dialog_chart.focusWidget() == ui.ct_tableWidgett_01:
         row = ui.ct_tableWidgett_01.currentIndex().row()
         item = ui.ct_tableWidgett_01.item(row, 0)

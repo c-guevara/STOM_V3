@@ -59,37 +59,28 @@ def show_dialog_graph(ui, df):
 
 
 @error_decorator
-def show_dialog(ui, code_or_name, tickcount, searchdate, col):
-    coin = False
-    if code_or_name in ui.dict_code:
-        code = ui.dict_code[code_or_name]
-    elif code_or_name in ui.dict_code.values():
-        code = code_or_name
-    else:
-        code = code_or_name
-        coin = True
-
+def show_dialog(ui, code, tickcount, searchdate, col):
     if col == 0:
-        if not coin:
-            show_dialog_web(ui, True, code)
-        else:
+        if ui.market_gubun < 4:
             show_dialog_hoga(ui, True, code)
+        else:
+            show_dialog_web(ui, True, code)
     elif col == 1:
-        if not coin:
+        if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, True, code)
     elif col < 4 or ui.focusWidget() in (ui.gj_tableWidgettt, ui.cj_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
-        if not coin:
+        if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, False, code)
-        show_dialog_chart(ui, True, coin, code)
+        show_dialog_chart(ui, True, code)
     else:
         starttime = ui.ct_lineEdittttt_01.text()
         endtime   = ui.ct_lineEdittttt_02.text()
         if len(starttime) < 6 or len(endtime) < 6:
             QMessageBox.critical(ui.dialog_chart, '오류 알림', '차트의 시작 및 종료시간은 초단위까지로 입력하십시오.\n(예: 000000, 090000, 152000)\n')
             return
-        if not coin:
+        if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, False, code)
         show_dialog_chart(ui, False, code, tickcount, searchdate, starttime, endtime)
@@ -140,7 +131,7 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
                       detail=None, buytimes=None):
     if not ui.dialog_chart.isVisible():
         dialog_chart_show(ui)
-    if ui.dialog_chart.isVisible() and ui.proc_chqs.is_alive():
+    if ui.proc_chqs.is_alive():
         if real:
             chart_clear(ui)
             if receiver_process_alive(ui):

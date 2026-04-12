@@ -97,7 +97,7 @@ class LsRestAPI:
             })
             if i % 100 == 0 or i == last - 1:
                 if not debug:
-                    self.windowQ.put((ui_num['시스템로그'], f'상장수식주 조회 중 ... [{i+1}/{last}]'))
+                    self.windowQ.put((ui_num['시스템로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
                 else:
                     print(f'상장수식주 조회 중 ... [{i+1}/{last}]')
             time.sleep(0.1)
@@ -632,7 +632,7 @@ if __name__ == "__main__":
 
     app = QApplication(sys.argv)
 
-    gubun_ = '야간선물'  # 국내주식, 국내주식ETF, 국내주식ETN, 지수선물, 야간선물, 해외주식, 해외선물
+    gubun_ = '해외선물'  # 국내주식, 국내주식ETF, 국내주식ETN, 지수선물, 야간선물, 해외주식, 해외선물
     access_key = 'PSRFkgSSsFHFZ5scUWeEd6dFnw5cqbdCA3gk'
     secret_key = 'dp9q92cFbpxMaTARhE3jSJOipCtTc2Gl'
 
@@ -655,6 +655,23 @@ if __name__ == "__main__":
         dict_info, symbols_ = ls.get_code_info_stock_usa(debug=True)
     else:
         dict_info, symbols_ = ls.get_code_info_future_oversea(debug=True)
+
+    # dict_table = {
+    #     '국내주식': 'stock_info',
+    #     '국내주식ETF': 'stock_etf_info',
+    #     '국내주식ETN': 'stock_etn_info',
+    #     '지수선물': 'future_info',
+    #     '야간선물': 'future_nt_info',
+    #     '해외주식': 'stock_usa_info',
+    #     '해외선물': 'future_os_info'
+    # }
+    #
+    # import sqlite3
+    # import pandas as pd
+    # conn = sqlite3.connect('../_database/code_info.db')
+    # df = pd.DataFrame.from_dict(dict_info, orient='index')
+    # df.to_sql(dict_table[gubun_], conn, if_exists='replace')
+    # conn.close()
 
     def real_data_print(data):
         print(f'[{now()}] {data}')

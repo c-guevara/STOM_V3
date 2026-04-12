@@ -4,8 +4,26 @@ import numpy as np
 import pandas as pd
 from utility.setting_base import ui_num
 from trade.ls_rest_api import LsRestData
+from PyQt5.QtCore import QThread, pyqtSignal
 from utility.static import now, timedelta_sec, get_vi_price, str_hms, now_cme, now_utc, threading_timer, \
     set_builtin_print
+
+
+class MonitorReceivQ(QThread):
+    signal1 = pyqtSignal(tuple)
+    signal2 = pyqtSignal(str)
+
+    def __init__(self, receivQ):
+        super().__init__()
+        self.receivQ = receivQ
+
+    def run(self):
+        while True:
+            data = self.receivQ.get()
+            if data.__class__ == tuple:
+                self.signal1.emit(data)
+            elif data.__class__ == str:
+                self.signal2.emit(data)
 
 
 class BaseReceiver:

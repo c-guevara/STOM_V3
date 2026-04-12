@@ -1,28 +1,11 @@
 
 import sys
+from PyQt5.QtCore import QTimer
 from trade.ls_rest_api import LsRestData
 from PyQt5.QtWidgets import QApplication
-from trade.base_receiver import BaseReceiver
 from utility.static import now, error_decorator
-from PyQt5.QtCore import QThread, pyqtSignal, QTimer
+from trade.base_receiver import BaseReceiver, MonitorReceivQ
 from trade.ls_rest_api import LsRestAPI, LsWebSocketReceiver
-
-
-class MonitorReceivQ(QThread):
-    signal1 = pyqtSignal(tuple)
-    signal2 = pyqtSignal(str)
-
-    def __init__(self, receivQ):
-        super().__init__()
-        self.receivQ = receivQ
-
-    def run(self):
-        while True:
-            data = self.receivQ.get()
-            if data.__class__ == tuple:
-                self.signal1.emit(data)
-            elif data.__class__ == str:
-                self.signal2.emit(data)
 
 
 class StockReceiver(BaseReceiver):
@@ -31,7 +14,7 @@ class StockReceiver(BaseReceiver):
 
         app = QApplication(sys.argv)
 
-        self.ls = LsRestAPI(self.windowQ, self.access, self.secret)
+        self.ls = LsRestAPI(self.windowQ, self.access_key, self.secret_key)
         self.token = self.ls.create_token()
 
         self._get_code_info()

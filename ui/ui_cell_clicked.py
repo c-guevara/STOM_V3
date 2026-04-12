@@ -29,7 +29,7 @@ def cell_clicked_01(ui, row, col):
     code = ui.dict_code.get(name, name)
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
-    show_dialog(ui, name, tickcount, searchdate, col)
+    show_dialog(ui, code, tickcount, searchdate, col)
 
 
 # noinspection PyUnusedLocal
@@ -74,7 +74,7 @@ def cell_clicked_03(ui, row, col):
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-    show_dialog(ui, name, tickcount, searchdate, 4)
+    show_dialog(ui, code, tickcount, searchdate, 4)
 
 
 # noinspection PyUnusedLocal
