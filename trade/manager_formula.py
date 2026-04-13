@@ -1,7 +1,7 @@
 
 import sqlite3
 from utility.static import dt_ymdhms
-from trade.strategy_globals_func import StrategyGlobalsFunc
+from trade.stg_globals_func import StrategyGlobalsFunc
 
 dict_fm_count = {
     '선:일반': 1,
@@ -53,7 +53,7 @@ def get_formula_data(forchart, col_idx):
     return fm_list, dict_fm, fm_tcnt
 
 
-class FormulaManager(StrategyGlobalsFunc):
+class ManagerFormula(StrategyGlobalsFunc):
     def __init__(self, fm_list, dict_set, is_tick, dict_findex):
         super().__init__()
         self.fm_list      = fm_list

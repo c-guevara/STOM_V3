@@ -317,8 +317,8 @@ class Total:
         data = [f'{self.vars}', int(self.betting), seed, tc, atc, mhct, ah, pc, mc, wr, app, tpp, mdd, tsg, tpi, cagr, self.buystg, self.sellstg, self.optivars]
         df = pd.DataFrame([data], columns=columns_vc, index=[self.file_name])
         con = sqlite3.connect(DB_BACKTEST)
-        df.to_sql(self.savename, con, if_exists='append', chunksize=1000)
-        self.df_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=1000)
+        df.to_sql(self.savename, con, if_exists='append', chunksize=2000)
+        self.df_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=2000)
         con.close()
 
         self.wq.put((ui_num['상세기록'], self.df_tsg))

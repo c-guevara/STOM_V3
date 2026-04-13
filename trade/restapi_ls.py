@@ -7,7 +7,7 @@ import requests
 import websockets
 from traceback import format_exc
 from utility.setting_base import ui_num
-from trade.ls_rest_data import LsRestData
+from trade.restapi_ls_data import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
 from utility.static import now, timedelta_sec
 
@@ -105,108 +105,6 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, list(dict_data.keys())
 
-    def get_code_info_future(self, debug=False):
-        """지수선물종목정보1 ['구분'], 지수선물종목정보2 ['구분'], '파생상품증거금조회' ['종목대분류코드', '종목중분류코드']
-        t8432(코스피200), t8435(미니코스피200, 코스닥150) 조회 TR이 다름
-        구분: '' (코스피200), 'MF' (미니코스피200), 'SF' (코스닥150)"""
-        dict_data = {}
-
-        tr_name = '지수선물종목정보1'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='')
-        코스피200_종목코드 = data[out_block][0]['shcode']
-        dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
-
-        tr_name = '지수선물종목정보2'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='MF')
-        미니코스피200_종목코드 = data[out_block][0]['shcode']
-        dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
-
-        data = self._post(tr_name, 구분='SF')
-        코스닥150_종목코드 = data[out_block][0]['shcode']
-        dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
-
-        tr_name = '파생상품증거금조회'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
-        for data in data[out_block]:
-            name = data['ShtnHanglIsuNm']
-            if name == 'KOSPI200':
-                dict_data[코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.05,
-                    '틱가치': 250_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '미니KOSPI200':
-                dict_data[미니코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.02,
-                    '틱가치': 50_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '코스닥150':
-                dict_data[코스닥150_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.1,
-                    '틱가치': 100_000,
-                    '소숫점자리수': 1
-                })
-
-        if debug: print(dict_data)
-        return dict_data, list(dict_data.keys())
-
-    def get_code_info_future_night(self, debug=False):
-        """야간선물종목정보 ['구분'], 구분: 'NF' (코스피200선물), 'NQF' (코스닥150선물)"""
-        dict_data = {}
-
-        tr_name = '야간선물종목정보'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='NFU')
-        코스피200_종목코드 = data[out_block][0]['shcode']
-        dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
-
-        data = self._post(tr_name, 구분='NMF')
-        미니코스피200_종목코드 = data[out_block][0]['shcode']
-        dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
-
-        time.sleep(1)
-
-        data = self._post(tr_name, 구분='NQF')
-        코스닥150_종목코드 = data[out_block][0]['shcode']
-        dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
-
-        tr_name = '파생상품증거금조회'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
-        for data in data[out_block]:
-            name = data['ShtnHanglIsuNm']
-            if name == 'KOSPI200':
-                dict_data[코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.05,
-                    '틱가치': 250_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '미니KOSPI200':
-                dict_data[미니코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.02,
-                    '틱가치': 50_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '코스닥150':
-                dict_data[코스닥150_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.1,
-                    '틱가치': 100_000,
-                    '소숫점자리수': 1
-                })
-
-        if debug: print(dict_data)
-        return dict_data, list(dict_data.keys())
-
     def get_code_info_stock_usa(self, debug=False):
         """해외주식종목정보 ['지연구분', '국가구분', '거래소구분', '조회갯수', '연속구분']
         거래소구분: '1' (뉴욕거래소), '2' (나스닥)
@@ -236,6 +134,122 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, keysymbols
 
+    def get_code_info_future(self, debug=False):
+        """지수선물종목정보1 ['구분'], 지수선물종목정보2 ['구분'], '파생상품증거금조회' ['종목대분류코드', '종목중분류코드']
+        t8432(코스피200), t8435(미니코스피200, 코스닥150) 조회 TR이 다름
+        구분: '' (코스피200), 'MF' (미니코스피200), 'SF' (코스닥150)"""
+        dict_data = {}
+        dict_expcode = {}
+
+        tr_name = '지수선물종목정보1'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        data = self._post(tr_name, 구분='')
+        data = data[out_block][0]
+        코스피200_종목코드 = data['shcode']
+        dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
+        dict_expcode[코스피200_종목코드] = data['expcode']
+
+        tr_name = '지수선물종목정보2'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        data = self._post(tr_name, 구분='MF')
+        data = data[out_block][0]
+        미니코스피200_종목코드 = data['shcode']
+        dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
+        dict_expcode[미니코스피200_종목코드] = data['expcode']
+
+        data = self._post(tr_name, 구분='SF')
+        data = data[out_block][0]
+        코스닥150_종목코드 = data['shcode']
+        dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
+        dict_expcode[코스닥150_종목코드] = data['expcode']
+
+        tr_name = '파생상품증거금조회'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
+        for data in data[out_block]:
+            name = data['ShtnHanglIsuNm']
+            if name == 'KOSPI200':
+                dict_data[코스피200_종목코드].update({
+                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                    '호가단위': 0.05,
+                    '틱가치': 250_000,
+                    '소숫점자리수': 2
+                })
+            elif name == '미니KOSPI200':
+                dict_data[미니코스피200_종목코드].update({
+                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                    '호가단위': 0.02,
+                    '틱가치': 50_000,
+                    '소숫점자리수': 2
+                })
+            elif name == '코스닥150':
+                dict_data[코스닥150_종목코드].update({
+                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                    '호가단위': 0.1,
+                    '틱가치': 100_000,
+                    '소숫점자리수': 1
+                })
+
+        if debug: print(dict_data)
+        return dict_data, list(dict_data.keys()), dict_expcode
+
+    def get_code_info_future_night(self, debug=False):
+        """야간선물종목정보 ['구분'], 구분: 'NF' (코스피200선물), 'NQF' (코스닥150선물)"""
+        dict_data = {}
+        dict_expcode = {}
+
+        tr_name = '야간선물종목정보'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        data = self._post(tr_name, 구분='NFU')
+        data = data[out_block][0]
+        코스피200_종목코드 = data['shcode']
+        dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
+        dict_expcode[코스피200_종목코드] = data['expcode']
+
+        data = self._post(tr_name, 구분='NMF')
+        data = data[out_block][0]
+        미니코스피200_종목코드 = data['shcode']
+        dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
+        dict_expcode[미니코스피200_종목코드] = data['expcode']
+
+        time.sleep(1)
+
+        data = self._post(tr_name, 구분='NQF')
+        data = data[out_block][0]
+        코스닥150_종목코드 = data['shcode']
+        dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
+        dict_expcode[코스닥150_종목코드] = data['expcode']
+
+        tr_name = '파생상품증거금조회'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
+        for data in data[out_block]:
+            name = data['ShtnHanglIsuNm']
+            if name == 'KOSPI200':
+                dict_data[코스피200_종목코드].update({
+                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                    '호가단위': 0.05,
+                    '틱가치': 250_000,
+                    '소숫점자리수': 2
+                })
+            elif name == '미니KOSPI200':
+                dict_data[미니코스피200_종목코드].update({
+                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                    '호가단위': 0.02,
+                    '틱가치': 50_000,
+                    '소숫점자리수': 2
+                })
+            elif name == '코스닥150':
+                dict_data[코스닥150_종목코드].update({
+                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                    '호가단위': 0.1,
+                    '틱가치': 100_000,
+                    '소숫점자리수': 1
+                })
+
+        if debug: print(dict_data)
+        return dict_data, list(dict_data.keys()), dict_expcode
+
     def get_code_info_future_oversea(self, debug=False):
         """해외선물종목정보 ['구분']"""
         tr_name = '해외선물종목정보'
@@ -260,19 +274,19 @@ class LsRestAPI:
         data = self._post(tr_name, 레코드갯수=1, 잔고생성구분='1')
         return int(data[out_block]['D2Dps'])
 
-    def get_balance_future(self):
-        """지수선물예수금 ['레코드갯수']"""
-        tr_name = '지수선물예수금'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 레코드갯수=1)
-        return int(data[out_block]['Dps'])
-
     def get_balance_stock_usa(self):
         """해외주식예수금 ['레코드갯수', '통화코드']"""
         tr_name = '해외주식예수금'
         out_block = LsRestData.tr_data[tr_name]['out_block']
         data = self._post(tr_name, 레코드갯수=1, 통화코드='USD')
         return int(data[out_block]['FcurrDps'])
+
+    def get_balance_future(self):
+        """지수선물예수금 ['레코드갯수']"""
+        tr_name = '지수선물예수금'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        data = self._post(tr_name, 레코드갯수=1)
+        return int(data[out_block]['Dps'])
 
     def get_balance_future_oversea(self):
         """ 해외선물예수금 ['계좌구분코드', '거래일자']"""
@@ -308,6 +322,32 @@ class LsRestAPI:
         tr_name = '국내주식취소주문'
         out_block = LsRestData.tr_data[tr_name]['out_block']
         data = self._post(tr_name, 원주문번호=원주문번호, 종목코드=종목코드, 주문수량=주문수량)
+        return data[out_block]['OrdNo'], data['rsp_msg']
+
+    def order_stock_usa(self, 종목코드, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형, 원주문번호=''):
+        """해외주식일반주문
+        ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
+        tr_name = '해외주식일반주문'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
+        호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
+        if 주문구분 in ('매수', '매도'):
+            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 주문시장코드=주문시장코드, 종목코드=종목코드,
+                              주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
+        else:
+            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
+                              종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
+        return data[out_block]['OrdNo'], data['rsp_msg']
+
+    def order_modify_stock_usa(self, 종목코드, 원주문번호, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형):
+        """해외주식정정주문
+        ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
+        tr_name = '해외주식정정주문'
+        out_block = LsRestData.tr_data[tr_name]['out_block']
+        주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
+        호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
+        data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
+                          종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
         return data[out_block]['OrdNo'], data['rsp_msg']
 
     def order_future(self, 종목코드, 주문구분, 주문가격, 주문수량, 호가유형):
@@ -357,32 +397,6 @@ class LsRestAPI:
         tr_name = '야간선물취소주문'
         out_block = LsRestData.tr_data[tr_name]['out_block']
         data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
-
-    def order_stock_usa(self, 종목코드, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형, 원주문번호=''):
-        """해외주식일반주문
-        ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
-        tr_name = '해외주식일반주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
-        호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
-        if 주문구분 in ('매수', '매도'):
-            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 주문시장코드=주문시장코드, 종목코드=종목코드,
-                              주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
-        else:
-            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
-                              종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
-        return data[out_block]['OrdNo'], data['rsp_msg']
-
-    def order_modify_stock_usa(self, 종목코드, 원주문번호, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형):
-        """해외주식정정주문
-        ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
-        tr_name = '해외주식정정주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
-        호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
-        data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
-                          종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
         return data[out_block]['OrdNo'], data['rsp_msg']
 
     def order_future_oversea(self, 종목코드, 주문구분, 주문가격, 주문수량, 주문유형, 조건주문가격=0):
@@ -648,9 +662,9 @@ if __name__ == "__main__":
     elif gubun_ == '국내주식ETN':
         dict_info, symbols_ = ls.get_code_info_stock(etfgubun=2, debug=True)
     elif gubun_ == '지수선물':
-        dict_info, symbols_ = ls.get_code_info_future(debug=True)
+        dict_info, symbols_, _ = ls.get_code_info_future(debug=True)
     elif gubun_ == '야간선물':
-        dict_info, symbols_ = ls.get_code_info_future_night(debug=True)
+        dict_info, symbols_, _ = ls.get_code_info_future_night(debug=True)
     elif gubun_ == '해외주식':
         dict_info, symbols_ = ls.get_code_info_stock_usa(debug=True)
     else:

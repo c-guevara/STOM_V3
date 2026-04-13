@@ -10,7 +10,7 @@ import pandas as pd
 from copy import deepcopy
 from threading import Lock
 from traceback import format_exc
-from trade.formula_manager import FormulaManager, get_formula_data
+from trade.manager_formula import ManagerFormula, get_formula_data
 from utility.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm, thread_decorator
 from utility.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_BACKTEST, DB_CODE_INFO, DB_SETTING, DB_STRATEGY, \
     columns_hj, code_info_tables
@@ -32,7 +32,6 @@ class ChartHogaQuerySound:
         self.market_info  = market_infos[1]
         self.dict_name    = {}
         self.dict_findex  = {}
-        self.fi           = {}
         self.arry_kosp    = None
         self.arry_kosd    = None
         self.hoga_name    = None
@@ -70,21 +69,6 @@ class ChartHogaQuerySound:
         self.is_tick = self.dict_set['타임프레임']
         factor_list  = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex = {factor: i for i, factor in enumerate(factor_list)}
-        self.fi = {
-            '현재가': self.dict_findex['현재가'],
-            '시가': self.dict_findex['시가'],
-            '고가': self.dict_findex['고가'],
-            '저가': self.dict_findex['저가'],
-            '등락율': self.dict_findex['등락율'],
-            '시가총액': self.dict_findex.get('시가총액', 0),
-            'VI가격': self.dict_findex.get('VI가격', 0),
-            '호가시작': self.dict_findex['매도호가5'],
-            '호가종료': self.dict_findex['매수호가5'] + 1,
-            '잔량시작': self.dict_findex['매도잔량5'],
-            '잔량종료': self.dict_findex['매수잔량5'] + 1,
-            '매도총잔': self.dict_findex['매도총잔량'],
-            '매수총잔': self.dict_findex['매수총잔량']
-        }
 
     def __del__(self):
         self.con1.close()
@@ -267,23 +251,56 @@ class ChartHogaQuerySound:
 
         if df is not None and len(df) > 0:
             data = list(df.iloc[0])
+            현재가 = data[self.dict_findex['현재가']]
+            등락율 = data[self.dict_findex['등락율']]
+            시가 = data[self.dict_findex['시가']]
+            고가 = data[self.dict_findex['고가']]
+            저가 = data[self.dict_findex['저가']]
+
+            매도총잔량 = data[self.dict_findex['매도총잔량']]
+            매도잔량5 = data[self.dict_findex['매도잔량5']]
+            매도잔량4 = data[self.dict_findex['매도잔량4']]
+            매도잔량3 = data[self.dict_findex['매도잔량3']]
+            매도잔량2 = data[self.dict_findex['매도잔량2']]
+            매도잔량1 = data[self.dict_findex['매도잔량1']]
+            매수잔량1 = data[self.dict_findex['매수잔량1']]
+            매수잔량2 = data[self.dict_findex['매수잔량2']]
+            매수잔량3 = data[self.dict_findex['매수잔량3']]
+            매수잔량4 = data[self.dict_findex['매수잔량4']]
+            매수잔량5 = data[self.dict_findex['매수잔량5']]
+            매수총잔량 = data[self.dict_findex['매수총잔량']]
+
+            매도호가5 = data[self.dict_findex['매도호가5']]
+            매도호가4 = data[self.dict_findex['매도호가4']]
+            매도호가3 = data[self.dict_findex['매도호가3']]
+            매도호가2 = data[self.dict_findex['매도호가2']]
+            매도호가1 = data[self.dict_findex['매도호가1']]
+            매수호가1 = data[self.dict_findex['매수호가1']]
+            매수호가2 = data[self.dict_findex['매수호가2']]
+            매수호가3 = data[self.dict_findex['매수호가3']]
+            매수호가4 = data[self.dict_findex['매수호가4']]
+            매수호가5 = data[self.dict_findex['매수호가5']]
+
             if self.market_gubun < 4:
-                hj = [
-                    name, data[self.fi['현재가']], data[self.fi['등락율']], data[self.fi['시가총액']], data[self.fi['VI가격']],
-                    data[self.fi['시가']], data[self.fi['고가']], data[self.fi['저가']]
-                ]
+                시가총액 = data[self.dict_findex['시가총액']]
+                VI가격 = data[self.dict_findex['VI가격']]
+                hj = [name, 현재가, 등락율, 시가총액, VI가격, 시가, 고가, 저가]
             elif self.market_gubun == 4:
-                hj = [
-                    name, data[self.fi['현재가']], data[self.fi['등락율']], data[self.fi['시가총액']], 0,
-                    data[self.fi['시가']], data[self.fi['고가']], data[self.fi['저가']]
-                ]
+                시가총액 = data[self.dict_findex['시가총액']]
+                hj = [name, 현재가, 등락율, 시가총액, 0, 시가, 고가, 저가]
             else:
-                hj = [
-                    name, data[self.fi['현재가']], data[self.fi['등락율']], 0, 0,
-                    data[self.fi['시가']], data[self.fi['고가']], data[self.fi['저가']]
-                ]
-            jr = [data[self.fi['매도총잔']]] + data[self.fi['잔량시작']:self.fi['잔량종료']] + [data[self.fi['매수총잔']]]
-            hg = [data[self.fi['고가']]] + data[self.fi['호가시작']:self.fi['호가종료']] + [data[self.fi['저가']]]
+                hj = [name, 현재가, 등락율, 0, 0, 시가, 고가, 저가]
+
+            jr = [
+                매도총잔량,
+                매도잔량5, 매도잔량4, 매도잔량3, 매도잔량2, 매도잔량1, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5,
+                매수총잔량
+            ]
+            hg = [
+                고가,
+                매도호가5, 매도호가4, 매도호가3, 매도호가2, 매도호가1, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5,
+                저가
+            ]
 
             df_hj = pd.DataFrame([hj], columns=columns_hj)
             df_hg = pd.DataFrame({'잔량': jr, '호가': hg})
@@ -305,11 +322,11 @@ class ChartHogaQuerySound:
             cur.execute(data[1], data[2])
             con.commit()
         elif len(data) == 4:
-            data[1].to_sql(data[2], con, if_exists=data[3], chunksize=1000)
+            data[1].to_sql(data[2], con, if_exists=data[3], chunksize=2000)
 
     def _dataframe_to_sql(self, data, con):
         if len(data) == 4:
-            data[1].to_sql(data[2], con, if_exists=data[3], chunksize=1000)
+            data[1].to_sql(data[2], con, if_exists=data[3], chunksize=2000)
 
     def _backtest_query(self, data):
         con = sqlite3.connect(DB_BACKTEST)
@@ -359,7 +376,7 @@ class ChartHogaQuerySound:
                 df['시간'] = df['index'].apply(lambda x: int(str(x)[8:]))
                 df = df[df['시간'] <= int(data[1])]
                 df.drop(columns=['시간'], inplace=True)
-                df.to_sql('moneytop', con, index=False, if_exists='replace', chunksize=1000)
+                df.to_sql('moneytop', con, index=False, if_exists='replace', chunksize=2000)
                 mtlist = list(set(';'.join(df['거래대금순위'].to_list()[29:]).split(';')))
                 for code in table_list:
                     if code in mtlist:
@@ -368,7 +385,7 @@ class ChartHogaQuerySound:
                         df = df[df['시간'] <= int(data[1])]
                         df.drop(columns=['시간'], inplace=True)
                         if len(df) > 0:
-                            df.to_sql(code, con, index=False, if_exists='replace', chunksize=1000)
+                            df.to_sql(code, con, index=False, if_exists='replace', chunksize=2000)
                         else:
                             cur.execute(f'DROP TABLE "{code}"')
                     elif code != 'moneytop':
@@ -381,7 +398,7 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['DB관리'], '일자DB가 존재하지 않습니다.'))
 
     def _db_now_time_delete(self, data):
-        DB_FILE = f"{self.market_info['일자디비경로'][self.is_tick]}.db"
+        DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         try:
             df = pd.read_sql('SELECT * FROM moneytop', con)
@@ -392,7 +409,7 @@ class ChartHogaQuerySound:
             df['시간'] = df['index'].apply(lambda x: int(str(x)[8:]))
             df = df[df['시간'] <= int(data[1])]
             df.drop(columns=['시간'], inplace=True)
-            df.to_sql('moneytop', con, index=False, if_exists='replace', chunksize=1000)
+            df.to_sql('moneytop', con, index=False, if_exists='replace', chunksize=2000)
             mtlist = list(set(';'.join(df['거래대금순위'].to_list()[29:]).split(';')))
 
             df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
@@ -406,7 +423,7 @@ class ChartHogaQuerySound:
                         df = df[df['시간'] <= int(data[1])]
                         df.drop(columns=['시간'], inplace=True)
                         if len(df) > 0:
-                            df.to_sql(code, con, index=False, if_exists='replace', chunksize=1000)
+                            df.to_sql(code, con, index=False, if_exists='replace', chunksize=2000)
                         else:
                             cur.execute(f'DROP TABLE "{code}"')
                     elif code != 'moneytop':
@@ -419,7 +436,7 @@ class ChartHogaQuerySound:
         con.close()
 
     def _db_now_time_change(self, data):
-        DB_FILE = f"{self.market_info['일자디비경로'][self.is_tick]}.db"
+        DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
         table_list = df['name'].to_list()
@@ -434,7 +451,7 @@ class ChartHogaQuerySound:
                     df['index'] = df['index'] - 10000
                 else:
                     df['index'] = df['index'] - 100
-                df.to_sql(code, con, index=False, if_exists='append', chunksize=1000)
+                df.to_sql(code, con, index=False, if_exists='append', chunksize=2000)
                 self.windowQ.put((ui_num['DB관리'], f'당일DB [{code}] 체결시간 조정 중 ... [{i + 1}/{last}]'))
             self.windowQ.put((ui_num['DB관리'], '당일DB 체결시간 조정 완료'))
         else:
@@ -454,7 +471,7 @@ class ChartHogaQuerySound:
             con = sqlite3.connect(BACK_FILE)
             code_info_table_name = self.market_info['종목디비']
             df = pd.read_sql(f'SELECT * FROM {code_info_table_name}', self.con4)
-            df.to_sql(code_info_table_name, con, index=False, if_exists='replace', chunksize=1000)
+            df.to_sql(code_info_table_name, con, index=False, if_exists='replace', chunksize=2000)
 
             file_list = [x for x in file_list if int(data[1]) <= int(x.split(first_name)[1].replace('.db', '')) <= int(data[2])]
             if file_list:
@@ -485,7 +502,7 @@ class ChartHogaQuerySound:
             con = sqlite3.connect(BACK_FILE)
             code_info_table_name = self.market_info['종목디비']
             df = pd.read_sql(f'SELECT * FROM {code_info_table_name}', self.con4)
-            df.to_sql(code_info_table_name, con, index=False, if_exists='replace', chunksize=1000)
+            df.to_sql(code_info_table_name, con, index=False, if_exists='replace', chunksize=2000)
 
             file_list = [x for x in file_list if int(data[1]) <= int(x.split(first_name)[1].replace('.db', '')) <= int(data[2])]
             if file_list:
@@ -497,7 +514,7 @@ class ChartHogaQuerySound:
                     for code in table_list:
                         df = pd.read_sql(f'SELECT * FROM "{code}"', con2)
                         if len(df) > 0:
-                            df.to_sql(code, con, index=False, if_exists='append', chunksize=1000)
+                            df.to_sql(code, con, index=False, if_exists='append', chunksize=2000)
                     con2.close()
                     self.windowQ.put((ui_num['DB관리'], f'백테DB [{db_name}] 데이터 추가 중 ... [{i + 1}/{last}]'))
                 self.windowQ.put((ui_num['DB관리'], f'백테DB [{data[1]} ~ {data[2]}] 데이터 추가 완료'))
@@ -508,7 +525,7 @@ class ChartHogaQuerySound:
             self.windowQ.put((ui_num['DB관리'], '일자DB가 존재하지 않습니다.'))
 
     def _db_back_add(self):
-        DB_FILE = f"{self.market_info['일자디비경로'][self.is_tick]}.db"
+        DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         try:
             df = pd.read_sql('SELECT * FROM moneytop', con)
@@ -532,7 +549,7 @@ class ChartHogaQuerySound:
             else:
                 code_info_table_name = self.market_info['종목디비']
                 df = pd.read_sql(f'SELECT * FROM {code_info_table_name}', self.con4)
-                df.to_sql(code_info_table_name, con2, index=False, if_exists='replace', chunksize=1000)
+                df.to_sql(code_info_table_name, con2, index=False, if_exists='replace', chunksize=2000)
 
                 df = pd.read_sql("SELECT name FROM sqlite_master WHERE TYPE = 'table'", con)
                 table_list = df['name'].to_list()
@@ -540,7 +557,7 @@ class ChartHogaQuerySound:
                 for i, code in enumerate(table_list):
                     df = pd.read_sql(f'SELECT * FROM "{code}"', con)
                     if len(df) > 0:
-                        df.to_sql(code, con2, index=False, if_exists='append', chunksize=1000)
+                        df.to_sql(code, con2, index=False, if_exists='append', chunksize=2000)
                     self.windowQ.put((ui_num['DB관리'], f'백테DB [{code}] 데이터 추가 중 ... [{i + 1}/{last}]'))
                 self.windowQ.put((ui_num['DB관리'], '당일DB 데이터, 백테DB로 추가 완료'))
                 con2.close()
@@ -551,7 +568,7 @@ class ChartHogaQuerySound:
                     self.windowQ.put((ui_num['DB관리'], f'당일DB {DB_FILE} 삭제 완료'))
 
     def _db_now_day_divide(self):
-        DB_FILE = f"{self.market_info['일자디비경로'][self.is_tick]}.db"
+        DB_FILE = self.market_info['당일디비'][self.is_tick]
         con = sqlite3.connect(DB_FILE)
         try:
             df = pd.read_sql('SELECT * FROM moneytop', con)
@@ -564,13 +581,13 @@ class ChartHogaQuerySound:
             table_list = df['name'].to_list()
             if table_list:
                 last = len(table_list)
+                first_name = f"{self.market_info['일자디비경로'][self.is_tick].split('/')[2]}_"
                 for i, code in enumerate(table_list):
                     for day in day_list:
                         df = pd.read_sql(f'SELECT * FROM "{code}" WHERE "index" LIKE "{day}%"', con)
                         if len(df) > 0:
-                            first_name = f"{self.market_info['일자디비경로'][self.is_tick].split('/')[2]}_"
                             con2 = sqlite3.connect(f'{DB_PATH}/{first_name}{day}.db')
-                            df.to_sql(code, con2, index=False, if_exists='replace', chunksize=1000)
+                            df.to_sql(code, con2, index=False, if_exists='replace', chunksize=2000)
                             con2.close()
                     self.windowQ.put((ui_num['DB관리'], f'당일DB [{code}] 데이터 분리 중 ... [{i + 1}/{last}]'))
                 self.windowQ.put((ui_num['DB관리'], '당일DB 데이터, 일자DB로 분리 완료'))
@@ -823,7 +840,7 @@ class ChartHogaQuerySound:
             fm_list, dict_fm, fm_tcnt = get_formula_data(True, arry.shape[1])
             if fm_tcnt > 0:
                 arry = np.column_stack((arry, np.zeros((arry.shape[0], fm_tcnt))))
-                fm = FormulaManager(deepcopy(fm_list), self.dict_set, self.is_tick, self.dict_findex)
+                fm = ManagerFormula(deepcopy(fm_list), self.dict_set, self.is_tick, self.dict_findex)
                 fm.update_all_data(code, arry, self.market_gubun, w_unit)
 
             if self.is_tick: xticks = [dt_ymdhms(str(int(x))).timestamp() for x in arry[:, 0]]

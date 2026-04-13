@@ -4,7 +4,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from utility.static import now, error_decorator
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from trade.ls_rest_api import LsRestAPI, LsRestData, LsWebSocketReceiver
+from trade.restapi_ls import LsRestAPI, LsRestData, LsWebSocketReceiver
 
 
 class FutureReceiver(BaseReceiver):
@@ -37,19 +37,19 @@ class FutureReceiver(BaseReceiver):
 
     def _get_code_info(self):
         if '지수선물' in self.dict_set['거래소']:
-            self.dict_info, self.codes = self.ls.get_code_info_future()
+            self.dict_info, self.codes, self.dict_expc = self.ls.get_code_info_future()
         else:
-            self.dict_info, self.codes = self.ls.get_code_info_future_night()
-        self.traderQ.put(('종목정보', self.dict_info))
+            self.dict_info, self.codes, self.dict_expc = self.ls.get_code_info_future_night()
+        self.traderQ.put(('종목정보', (self.dict_info, self.dict_expc)))
 
     @error_decorator
     def _convert_real_data(self, data):
-        start = now()
-        tr_cd = data['header']['tr_cd']
-        body  = data['body']
+        body = data['body']
         if body is None:
             return
 
+        start = now()
+        tr_cd = data['header']['tr_cd']
         if tr_cd == self.tr_cd_hoga:
             int_hms = int(body['hotime'])
             if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:

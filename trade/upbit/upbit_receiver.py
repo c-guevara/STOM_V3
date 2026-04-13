@@ -2,8 +2,8 @@
 import sys
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
-from trade.upbit.upbit_restapi import get_symbols_info
-from trade.upbit.upbit_restapi import UpbitWebSocketReceiver
+from trade.restapi_upbit import get_symbols_info
+from trade.restapi_upbit import UpbitWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
 from utility.static import now, str_ymdhms_utc, error_decorator
 

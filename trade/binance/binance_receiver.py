@@ -5,7 +5,7 @@ import binance
 from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from trade.binance.binance_websocket import BinanceWebSocketReceiver
+from trade.restapi_binance import BinanceWebSocketReceiver
 from utility.static import now, now_utc, str_ymd, error_decorator, str_ymdhms_utc
 
 

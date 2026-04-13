@@ -1,22 +1,4 @@
 
-with open('./utility/blacklist_stock.txt') as f:
-    stockreadlines = f.readlines()
-with open('./utility/blacklist_future.txt') as f:
-    futurereadlines = f.readlines()
-with open('./utility/blacklist_coin.txt') as f:
-    coinreadlines = f.readlines()
-
-blacklist_stock = []
-blacklist_future = []
-blacklist_coin = []
-for readline in stockreadlines:
-    blacklist_stock.append(readline.strip())
-for readline in futurereadlines:
-    blacklist_future.append(readline.strip())
-for readline in coinreadlines:
-    blacklist_coin.append(readline.strip())
-
-
 def load_settings():
     import sqlite3
     import pandas as pd
@@ -136,10 +118,6 @@ def load_settings():
             '텔레그램아이디17': int(de_text(EN_KEY, df_t['chatingid'][17])) if df_t_not_empty and df_t['chatingid'][17] else None,
             '텔레그램봇토큰18':     de_text(EN_KEY, df_t['bot_token'][18])  if df_t_not_empty and df_t['bot_token'][18] else None,
             '텔레그램아이디18': int(de_text(EN_KEY, df_t['chatingid'][18])) if df_t_not_empty and df_t['chatingid'][18] else None,
-
-            '주식블랙리스트': blacklist_stock,
-            '해선블랙리스트': blacklist_future,
-            '코인블랙리스트': blacklist_coin,
 
             '매수전략':     df_s['매수전략'][0],
             '매도전략':     df_s['매도전략'][0],
@@ -262,9 +240,6 @@ def load_settings():
             '매도손절수익금청산': df_so['매도손절수익금청산'][0],
             '매도손절수익금':    df_so['매도손절수익금'][0],
 
-            '리시버프로파일링': False,
-            '트레이더프로파일링': False,
-            '전략연산프로파일링': False,
             '백테엔진프로파일링': False
         }
     except fernet.InvalidToken:

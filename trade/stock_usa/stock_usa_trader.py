@@ -1,12 +1,12 @@
 
 import sys
-import pandas as pd
 from PyQt5.QtCore import QTimer
-from trade.ls_rest_api import LsRestAPI
+from trade.restapi_ls import LsRestAPI
+from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
-from utility.setting_base import ui_num,  columns_jg
+from trade.restapi_ls_data import LsRestData
 from trade.base_trader import BaseTrader, MonitorTraderQ
-from utility.static import now, timedelta_sec, error_decorator, get_profit_stock_os
+from utility.static import now, timedelta_sec, get_profit_stock_os
 
 
 class StockUsaTrader(BaseTrader):
@@ -15,18 +15,13 @@ class StockUsaTrader(BaseTrader):
 
         app = QApplication(sys.argv)
 
-        self.dict_order = {
-            '매수': {},
-            '매도': {}
-        }
-
         self.ls = LsRestAPI(self.windowQ, self.access_key, self.secret_key)
         self.token = self.ls.create_token()
 
         self._get_balances()
 
         if not self.dict_set['모의투자']:
-            from trade.ls_rest_api import LsWebSocketTrader
+            from trade.restapi_ls import LsWebSocketTrader
             self.ws_thread = LsWebSocketTrader(self.market_info['마켓이름'], self.token, self.windowQ)
             self.ws_thread.signal.connect(self._convert_order_data)
             self.ws_thread.start()
@@ -89,15 +84,15 @@ class StockUsaTrader(BaseTrader):
                 ]
 
                 self._update_chegeollist(
-                    index, 종목코드, 종목명, f'{주문구분} 접수', 주문수량, 0, 주문수량, 0, index[:14], 주문가격, od_no
+                    index, 종목코드, 종목명, f'{주문구분}접수', 주문수량, 0, 주문수량, 0, index[:14], 주문가격, od_no
                 )
 
                 self.windowQ.put((
-                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분} 접수] {종목명} | {주문가격} | {주문수량}'
+                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}접수] {종목명} | {주문가격} | {주문수량}'
                 ))
             else:
                 self._put_order_complete('매수취소', 종목코드)
-                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분} 실패] {종목명} | {주문가격} | {주문수량}'))
+                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}실패] {종목명} | {주문가격} | {주문수량}'))
                 self.windowQ.put((ui_num['기본로그'], msg))
 
         elif 주문구분 in ('매수정정', '매도정정'):
@@ -107,7 +102,7 @@ class StockUsaTrader(BaseTrader):
             od_no, msg = self.ls.order_modify_stock_usa(종목코드, 원주문번호, 주문구분_, 주문시장코드, 주문수량, 주문가격, 주문유형)
             if od_no == '0':
                 self.windowQ.put((
-                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분} 실패] {종목명} | {주문가격} | {주문수량}'
+                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}실패] {종목명} | {주문가격} | {주문수량}'
                 ))
                 self.windowQ.put((ui_num['기본로그'], msg))
 
@@ -117,7 +112,7 @@ class StockUsaTrader(BaseTrader):
             od_no, msg = self.ls.order_stock_usa(종목코드, '취소', 주문시장코드, 주문수량, 주문가격, 주문유형, 원주문번호)
             if od_no == '0':
                 self.windowQ.put((
-                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분} 실패] {종목명} | {주문가격} | {주문수량} | {주문구분}'
+                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}실패] {종목명} | {주문가격} | {주문수량} | {주문구분}'
                 ))
                 self.windowQ.put((ui_num['기본로그'], msg))
 
@@ -125,120 +120,44 @@ class StockUsaTrader(BaseTrader):
         self.receivQ.put(('주문목록', self._get_order_code_list()))
 
     def _convert_order_data(self, data):
-        pass
+        body = data['body']
+        if body is None:
+            return
 
-    @error_decorator
-    def _update_chejan_data(self, 주문구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 주문시간, 주문번호):
-        index = self._get_index()
-        종목명 = self.dict_info[종목코드]['종목명']
+        체결유형 = body['sOrdxctPtnCode']
+        if 체결유형 in (11, 12, 13):
+            매매구분 = body['sOrdPtnCode']
+            주문구분 = LsRestData.해외주식주문체결코드[매매구분]
+            체결구분 = LsRestData.해외주식주문체결코드[체결유형]
+            종목코드 = body['sShtnIsuNo']
+            주문수량 = int(body['sOrdQty'])
+            체결수량 = int(body['sExecQty'])
+            미체결수량 = int(body['sUnercQty'])
+            체결가격 = int(body['sExecPrc'])
+            주문가격 = int(body['sOrdPrc'])
+            체결시간 = f"{self.str_today}{int(int(body['sExecTime']) / 1000)}"
+            주문번호 = body['sOrdNo']
+            self._update_chejan_data(주문구분, 체결구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 체결시간, 주문번호)
 
-        if 주문구분 == '시드부족':
-            self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 주문시간, 주문가격, 주문번호)
+    def _get_order_buy_price(self, 종목코드, 주문구분, 주문가격):
+        매수지정가호가번호 = self.dict_set['매수지정가호가번호']
+        return round(주문가격 + 0.01 * 매수지정가호가번호, 2)
 
-        elif 주문구분 in ('매수', '매도'):
-            if 주문구분 == '매수':
-                # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
-                if 종목코드 in self.dict_jg:
-                    보유수량 = round(self.dict_jg[종목코드]['보유수량'] + 체결수량, 8)
-                    매입금액 = int(self.dict_jg[종목코드]['매입금액'] + 체결수량 * 체결가격)
-                    매수가 = round(매입금액 / 보유수량, 4)
-                    평가금액, 수익금, 수익률 = get_profit_stock_os(매입금액, 보유수량 * 체결가격)
-                    self.dict_jg[종목코드].update({
-                        '매수가': 매수가,
-                        '현재가': 체결가격,
-                        '수익률': 수익률,
-                        '평가손익': 수익금,
-                        '매입금액': 매입금액,
-                        '평가금액': 평가금액,
-                        '보유수량': 보유수량,
-                        '매수시간': 주문시간
-                    })
-                else:
-                    매입금액 = int(체결수량 * 체결가격)
-                    평가금액, 수익금, 수익률 = get_profit_stock_os(매입금액, 체결수량 * 체결가격)
-                    self.dict_jg[종목코드] = {
-                        '종목명': 종목명,
-                        '매수가': 체결가격,
-                        '현재가': 체결가격,
-                        '수익률': 수익률,
-                        '평가손익': 수익금,
-                        '매입금액': 매입금액,
-                        '평가금액': 평가금액,
-                        '보유수량': 체결수량,
-                        '분할매수횟수': 0,
-                        '분할매도횟수': 0,
-                        '매수시간': 주문시간
-                    }
+    def _get_order_sell_price(self, 종목코드, 주문구분, 주문가격):
+        매도지정가호가번호 = self.dict_set['매도지정가호가번호']
+        return round(주문가격 + 0.01 * 매도지정가호가번호, 2)
 
-                if 미체결수량 == 0:
-                    self.dict_jg[종목코드]['분할매수횟수'] += 1
-                    if 종목코드 in self.dict_order[주문구분]:
-                        del self.dict_order[주문구분][종목코드]
+    def _get_modify_buy_price(self, 현재가, 정정호가, 종목코드):
+        return round(현재가 - 정정호가, 2)
 
-            else:
-                if 종목코드 not in self.dict_jg: return
-                매수가 = self.dict_jg[종목코드]['매수가']
-                보유수량 = round(self.dict_jg[종목코드]['보유수량'] - 체결수량, 8)
-                if 보유수량 != 0:
-                    매입금액 = int(매수가 * 보유수량)
-                    평가금액, 수익금, 수익률 = get_profit_stock_os(매입금액, 보유수량 * 체결가격)
-                    # ['종목명', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간']
-                    self.dict_jg[종목코드].update({
-                        '현재가': 체결가격,
-                        '수익률': 수익률,
-                        '평가손익': 수익금,
-                        '매입금액': 매입금액,
-                        '평가금액': 평가금액,
-                        '보유수량': 보유수량
-                    })
-                else:
-                    del self.dict_jg[종목코드]
+    def _get_modify_sell_price(self, 현재가, 정정호가, 종목코드):
+        return round(현재가 + 정정호가, 2)
 
-                if 미체결수량 == 0:
-                    if 보유수량 > 0:
-                        self.dict_jg[종목코드]['분할매도횟수'] += 1
-                    if 종목코드 in self.dict_order[주문구분]:
-                        del self.dict_order[주문구분][종목코드]
+    def _get_profit(self, 매입금액, 보유금액):
+        return get_profit_stock_os(매입금액, 보유금액)
 
-                매입금액 = 매수가 * 체결수량
-                평가금액, 수익금, 수익률 = get_profit_stock_os(매입금액, 체결수량 * 체결가격)
-                if -100 < 수익률 < 100: self._update_tradelist(index, 종목명, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간)
-                if 수익률 < 0: self.dict_info[종목코드]['손절거래시간'] = timedelta_sec(self.dict_set['매수금지손절간격초'])
+    def _get_hogaunit(self, 주문가격또는종목코드):
+        return 0.01
 
-            self.dict_jg = dict(sorted(self.dict_jg.items(), key=lambda x: x[1]['매입금액'], reverse=True))
-
-            if 미체결수량 == 0:
-                self._put_order_complete(주문구분 + '완료', 종목코드)
-            self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 주문시간, 주문가격, 주문번호)
-
-            if 주문구분 == '매수':
-                self.dict_intg['예수금'] -= 체결수량 * 체결가격
-                if self.dict_set['모의투자']:
-                    self.dict_intg['추정예수금'] -= 체결수량 * 체결가격
-            else:
-                self.dict_intg['예수금'] += 매입금액 + 수익금
-                self.dict_intg['추정예수금'] += 매입금액 + 수익금
-
-            if self.dict_jg:
-                df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
-            else:
-                df_jg = pd.DataFrame(columns=columns_jg)
-            self.queryQ.put(('거래디비', df_jg, 'c_jangolist', 'replace'))
-            if self.dict_set['알림소리']: self.soundQ.put(f"{종목코드} {주문구분}하였습니다.")
-            self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분} 체결] {종목코드} | {체결가격} | {체결수량}'))
-
-        elif 주문구분 in ('매수취소', '매도취소'):
-            if 주문구분 == '매수취소':
-                self.dict_intg['추정예수금'] += 주문수량 * 주문가격
-
-            if 종목코드 in self.dict_order[주문구분]:
-                del self.dict_order[주문구분][종목코드]
-
-            self._put_order_complete(주문구분, 종목코드)
-            self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 주문시간, 주문가격, 주문번호)
-
-            if self.dict_set['알림소리']: self.soundQ.put(f"{종목명} {주문구분}하였습니다.")
-            self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}] {종목명} | {주문가격} | {주문수량}'))
-
-        self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
-        self.receivQ.put(('주문목록', self._get_order_code_list()))
+    def _get_order_code_list(self):
+        return tuple(self.dict_order['매수']) + tuple(self.dict_order['매도'])

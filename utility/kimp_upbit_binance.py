@@ -12,7 +12,7 @@ from PyQt5.QtWidgets import QApplication
 from utility.setting_base import ui_num, columns_kp
 from PyQt5.QtCore import QThread, pyqtSignal, QTimer
 from binance import AsyncClient, BinanceSocketManager
-from trade.upbit.upbit_restapi import get_symbols_info
+from trade.restapi_upbit import get_symbols_info
 from utility.static import comma2float, thread_decorator
 
 

@@ -94,7 +94,7 @@ except:
         return volatility
 
 
-class RiskAnalyzer:
+class ManagerRisk:
     def __init__(self, market_type: str, columns: list):
         """market_type: 'stock', 'coin', 'future'"""
         self.market_type = market_type

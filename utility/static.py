@@ -322,6 +322,33 @@ def timedelta_day(day, std_time=None):
     return now() + datetime.timedelta(days=float(day)) if std_time is None else std_time + datetime.timedelta(days=float(day))
 
 
+def get_inthms(market_gubun):
+    if market_gubun < 4 or market_gubun in (6, 7):
+        return int(str_hms())
+    elif market_gubun in (4, 8):
+        return int(str_hms(now_cme()))
+    else:
+        return int(str_hms(now_utc()))
+
+
+def get_str_ymdhms(market_gubun):
+    if market_gubun < 4 or market_gubun in (6, 7):
+        return str_ymdhms()
+    elif market_gubun in (4, 8):
+        return str_ymdhms(now_cme())
+    else:
+        return str_ymdhms(now_utc())
+
+
+def get_str_ymdhmsf(market_gubun):
+    if market_gubun < 4 or market_gubun in (6, 7):
+        return str_ymdhmsf()
+    elif market_gubun in (4, 8):
+        return str_ymdhmsf(now_cme())
+    else:
+        return str_ymdhmsf(now_utc())
+
+
 def threading_timer(sec, func, args=None):
     from threading import Timer
     if args is None:

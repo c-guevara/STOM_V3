@@ -69,7 +69,7 @@ def show_dialog(ui, code, tickcount, searchdate, col):
         if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, True, code)
-    elif col < 4 or ui.focusWidget() in (ui.gj_tableWidgettt, ui.cj_tableWidgettt, ui.gj_tableWidgettt, ui.cj_tableWidgettt):
+    elif col < 4 or ui.focusWidget() in (ui.gj_tableWidgettt, ui.cj_tableWidgettt):
         if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, False, code)

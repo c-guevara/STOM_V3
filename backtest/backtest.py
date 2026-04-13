@@ -9,7 +9,6 @@ from traceback import format_exc
 from utility.static import now, str_ymdhms
 from backtest.back_static_numba import get_result, bootstrap_test
 from utility.setting_base import DB_STRATEGY, DB_BACKTEST, ui_num, columns_vj
-from utility.setting_user import stockreadlines, coinreadlines, futurereadlines
 from backtest.back_static import plot_show, get_moneytop_query, get_result_dataframe, add_mdd
 
 
@@ -145,7 +144,8 @@ class BackTest:
             self._sys_exit(True)
 
         df_tsg, df_bct = get_result_dataframe(self.market_gubun, list_tsg, arry_bct)
-        if self.blacklist: self._insert_blacklist(df_tsg)
+        if self.blacklist:
+            self._insert_blacklist(df_tsg)
 
         arry_tsg = np.array(df_tsg[['보유시간', '매도시간', '수익률', '수익금', '수익금합계']].copy(), dtype='float64')
         arry_bct = np.sort(arry_bct, axis=0)[::-1]
@@ -249,46 +249,34 @@ class BackTest:
         data = [int(self.betting), seed, tc, atc, mhct, ah, pc, mc, wr, app, tpp, mdd, tsg, tpi, cagr, self.buystg, self.sellstg]
         df = pd.DataFrame([data], columns=columns_vj, index=[save_time])
         con = sqlite3.connect(DB_BACKTEST)
-        df.to_sql(self.savename, con, if_exists='append', chunksize=1000)
-        df_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=1000)
+        df.to_sql(self.savename, con, if_exists='append', chunksize=2000)
+        df_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=2000)
         con.close()
         self.wq.put((ui_num['상세기록'], df_tsg))
 
     def _insert_blacklist(self, df_tsg):
+        insert_blacklist = []
         name_list = df_tsg['종목명'].unique()
-        dict_code = {name: code for code, name in self.dict_cn.items()}
-
         for name in name_list:
-            if name not in dict_code:
-                continue
-            code = dict_code[name]
             df_tsg_code = df_tsg[df_tsg['종목명'] == name]
             trade_count = len(df_tsg_code)
             total_eyun = df_tsg_code['수익금'].sum()
             if trade_count >= 10 and total_eyun < 0:
-                if self.ui_gubun == 'S':
-                    if code + '\n' not in stockreadlines:
-                        stockreadlines.append(code + '\n')
-                        self.insertblacklist.append(code)
-                elif self.ui_gubun == 'SF':
-                    if code + '\n' not in futurereadlines:
-                        futurereadlines.append(code + '\n')
-                        self.insertblacklist.append(code)
-                else:
-                    if code + '\n' not in coinreadlines:
-                        coinreadlines.append(code + '\n')
-                        self.insertblacklist.append(code)
+                insert_blacklist.append(name)
 
-        if self.insertblacklist:
-            if self.ui_gubun == 'S':
-                with open('./utility/blacklist_stock.txt', 'w') as f:
-                    f.write(''.join(stockreadlines))
-            elif self.ui_gubun == 'SF':
-                with open('./utility/blacklist_future.txt', 'w') as f:
-                    f.write(''.join(futurereadlines))
+        if insert_blacklist:
+            con = sqlite3.connect(DB_STRATEGY)
+            cur = con.cursor()
+            df = pd.read_sql('SELECT * FROM strategy', con).set_index('index')
+            if df['블랙리스트'][0] != '':
+                blacklist = str(df['블랙리스트'][0]).split(';')
+                blacklist += insert_blacklist
+                blacklist = ';'.join(blacklist)
             else:
-                with open('./utility/blacklist_coin.txt', 'w') as f:
-                    f.write(''.join(coinreadlines))
+                blacklist = ';'.join(insert_blacklist)
+            cur.execute(f"UPDATE strategy SET 블랙리스트 = '{blacklist}'")
+            con.commit()
+            con.close()
 
     def _sys_exit(self, cancel):
         if cancel:

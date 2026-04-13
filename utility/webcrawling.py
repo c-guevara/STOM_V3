@@ -490,12 +490,17 @@ class WebCrawling(QThread):
 
             for name, symbol in symbols.items():
                 url  = f"https://api.binance.com/api/v3/klines?symbol={symbol}&interval=1m&limit=1000"
-                resp = requests.get(url, headers=self.headers, timeout=10)
-                data = resp.json()
-
-                time_list = [int(kline[0] / 1000) for kline in data]
-                price_list = [float(kline[4]) for kline in data]
-                change_list = [round((price / float(data[0][4]) - 1)  * 100, 2) for price in price_list]
+                try:
+                    resp = requests.get(url, headers=self.headers, timeout=10)
+                    data = resp.json()
+                except:
+                    time_list = []
+                    price_list = []
+                    change_list = []
+                else:
+                    time_list = [int(kline[0] / 1000) for kline in data]
+                    price_list = [float(kline[4]) for kline in data]
+                    change_list = [round((price / float(data[0][4]) - 1)  * 100, 2) for price in price_list]
 
                 if time_list:
                     df = pd.DataFrame({

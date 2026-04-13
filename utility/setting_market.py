@@ -22,28 +22,22 @@ from backtest.backengine_binance_min2 import BackEngineBinanceMin2
 
 from trade.stock_korea.stock_trader import StockTrader
 from trade.stock_korea.stock_receiver import StockReceiver
-from trade.stock_korea.stock_strategy_min import StockStrategyMin
-from trade.stock_korea.stock_strategy_tick import StockStrategyTick
+from trade.stock_korea.stock_strategy import StockStrategy
 from trade.stock_usa.stock_usa_trader import StockUsaTrader
 from trade.stock_usa.stock_usa_receiver import StockUsaReceiver
-from trade.stock_usa.stock_usa_strategy_min import StockUsaStrategyMin
-from trade.stock_usa.stock_usa_strategy_tick import StockUsaStrategyTick
+from trade.stock_usa.stock_usa_strategy import StockUsaStrategy
 from trade.upbit.upbit_trader import UpbitTrader
 from trade.upbit.upbit_receiver import UpbitReceiver
-from trade.upbit.upbit_strategy_min import UpbitStrategyMin
-from trade.upbit.upbit_strategy_tick import UpbitStrategyTick
+from trade.upbit.upbit_strategy import UpbitStrategy
 from trade.future.future_trader import FutureTrader
 from trade.future.future_receiver import FutureReceiver
-from trade.future.future_strategy_min import FutureStrategyMin
-from trade.future.future_strategy_tick import FutureStrategyTick
+from trade.future.future_strategy import FutureStrategy
 from trade.future_oversea.future_os_trader import FutureOsTrader
 from trade.future_oversea.future_os_receiver import FutureOsReceiver
-from trade.future_oversea.future_os_strategy_min import FutureOsStrategyMin
-from trade.future_oversea.future_os_strategy_tick import FutureOsStrategyTick
+from trade.future_oversea.future_os_strategy import FutureOsStrategy
 from trade.binance.binance_trader import BinanceTrader
 from trade.binance.binance_receiver import BinanceReceiver
-from trade.binance.binance_strategy_min import BinanceStrategyMin
-from trade.binance.binance_strategy_tick import BinanceStrategyTick
+from trade.binance.binance_strategy import BinanceStrategy
 
 DB_STOCK_TICK            = './_database/stock_tick.db'
 DB_STOCK_MIN             = './_database/stock_min.db'
@@ -125,8 +119,7 @@ list_stock_tick = [
 
 list_stock_min = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '분당매수수량', '분당매도수량', '시가총액',
-    'VI해제시간', 'VI가격', 'VI호가단위',
-    '분봉시가', '분봉고가', '분봉저가',
+    'VI해제시간', 'VI가격', 'VI호가단위', '분봉시가', '분봉고가', '분봉저가',
     '분당거래대금', '고저평균대비등락율', '저가대비고가등락율', '분당매수금액', '분당매도금액',
     '당일매수금액', '최고매수금액', '최고매수가격', '당일매도금액', '최고매도금액', '최고매도가격',
     '매도호가1', '매도호가2', '매도호가3', '매도호가4', '매도호가5', '매수호가1', '매수호가2', '매수호가3', '매수호가4', '매수호가5',
@@ -218,7 +211,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_stock_min,      1: list_stock_tick},
         '팩터개수': {0: len_list_stock_min,  1: len_list_stock_tick},
         '각도계수': {0: [5, 0.01],           1: [5, 0.01]},
-        '프로세스': {0: StockReceiver, 1: StockTrader, 2: [StockStrategyMin, StockStrategyTick]},
+        '프로세스': {0: StockReceiver, 1: StockTrader, 2: StockStrategy},
         '백테엔진': {
             0: {0: BackEngineStockMin,  1: BackEngineStockTick},
             1: {0: BackEngineStockMin2, 1: BackEngineStockTick2}
@@ -245,7 +238,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_stock_min,        1: list_stock_tick},
         '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
         '각도계수': {0: [5, 0.01],             1: [5, 0.01]},
-        '프로세스': {0: StockReceiver, 1: StockTrader, 2: [StockStrategyMin, StockStrategyTick]},
+        '프로세스': {0: StockReceiver, 1: StockTrader, 2: StockStrategy},
         '백테엔진': {
             0: {0: BackEngineStockMin,  1: BackEngineStockTick},
             1: {0: BackEngineStockMin2, 1: BackEngineStockTick2}
@@ -272,7 +265,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_stock_min,        1: list_stock_tick},
         '팩터개수': {0: len_list_stock_min,    1: len_list_stock_tick},
         '각도계수': {0: [5, 0.01],             1: [5, 0.01]},
-        '프로세스': {0: StockReceiver, 1: StockTrader, 2: [StockStrategyMin, StockStrategyTick]},
+        '프로세스': {0: StockReceiver, 1: StockTrader, 2: StockStrategy},
         '백테엔진': {
             0: {0: BackEngineStockMin,  1: BackEngineStockTick},
             1: {0: BackEngineStockMin2, 1: BackEngineStockTick2}
@@ -299,7 +292,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_stock_usa_min,      1: list_stock_usa_tick},
         '팩터개수': {0: len_list_stock_usa_min,  1: len_list_stock_usa_tick},
         '각도계수': {0: [5, 0.01],               1: [5, 0.01]},
-        '프로세스': {0: StockUsaReceiver, 1: StockUsaTrader, 2: [StockUsaStrategyMin, StockUsaStrategyTick]},
+        '프로세스': {0: StockUsaReceiver, 1: StockUsaTrader, 2: StockUsaStrategy},
         '백테엔진': {
             0: {0: BackEngineStockOsMin,  1: BackEngineStockOsTick},
             1: {0: BackEngineStockOsMin2, 1: BackEngineStockOsTick2}
@@ -326,7 +319,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_basic_min,      1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,  1: len_list_basic_tick},
         '각도계수': {0: [10, 0.000_000_01],  1: [10, 0.000_000_01]},
-        '프로세스': {0: UpbitReceiver, 1: UpbitTrader, 2: [UpbitStrategyMin, UpbitStrategyTick]},
+        '프로세스': {0: UpbitReceiver, 1: UpbitTrader, 2: UpbitStrategy},
         '백테엔진': {
             0: {0: BackEngineUpbitMin,  1: BackEngineUpbitTick},
             1: {0: BackEngineUpbitMin2, 1: BackEngineUpbitTick2}
@@ -353,7 +346,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_basic_min,      1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,  1: len_list_basic_tick},
         '각도계수': {0: [100, 0.000_000_05], 1: [100, 0.000_000_05]},
-        '프로세스': {0: FutureReceiver, 1: FutureTrader, 2: [FutureStrategyMin, FutureStrategyTick]},
+        '프로세스': {0: FutureReceiver, 1: FutureTrader, 2: FutureStrategy},
         '백테엔진': {
             0: {0: BackEngineFutureMin,  1: BackEngineFutureTick},
             1: {0: BackEngineFutureMin2, 1: BackEngineFutureTick2}
@@ -380,7 +373,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_basic_min,        1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,    1: len_list_basic_tick},
         '각도계수': {0: [100, 0.000_000_05],   1: [100, 0.000_000_05]},
-        '프로세스': {0: FutureReceiver, 1: FutureTrader, 2: [FutureStrategyMin, FutureStrategyTick]},
+        '프로세스': {0: FutureReceiver, 1: FutureTrader, 2: FutureStrategy},
         '백테엔진': {
             0: {0: BackEngineFutureMin,  1: BackEngineFutureTick},
             1: {0: BackEngineFutureMin2, 1: BackEngineFutureTick2}
@@ -407,7 +400,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_basic_min,        1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,    1: len_list_basic_tick},
         '각도계수': {0: [100, 0.000_000_05],   1: [100, 0.000_000_05]},
-        '프로세스': {0: FutureOsReceiver, 1: FutureOsTrader, 2: [FutureOsStrategyMin, FutureOsStrategyTick]},
+        '프로세스': {0: FutureOsReceiver, 1: FutureOsTrader, 2: FutureOsStrategy},
         '백테엔진': {
             0: {0: BackEngineFutureMin,  1: BackEngineFutureTick},
             1: {0: BackEngineFutureMin2, 1: BackEngineFutureTick2}
@@ -434,7 +427,7 @@ DICT_MARKET_INFO = {
         '팩터목록': {0: list_basic_min,          1: list_basic_tick},
         '팩터개수': {0: len_list_basic_min,      1: len_list_basic_tick},
         '각도계수': {0: [10, 0.000_000_01],      1: [10, 0.000_000_01]},
-        '프로세스': {0: BinanceReceiver, 1: BinanceTrader, 2: [BinanceStrategyMin, BinanceStrategyTick]},
+        '프로세스': {0: BinanceReceiver, 1: BinanceTrader, 2: BinanceStrategy},
         '백테엔진': {
             0: {0: BackEngineBinanceMin,  1: BackEngineBinanceTick},
             1: {0: BackEngineBinanceMin2, 1: BackEngineBinanceTick2}

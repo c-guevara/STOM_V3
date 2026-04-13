@@ -1,11 +1,11 @@
 
 import sys
 from PyQt5.QtCore import QTimer
-from trade.ls_rest_api import LsRestData
+from trade.restapi_ls import LsRestData
 from PyQt5.QtWidgets import QApplication
 from utility.static import now, error_decorator
+from trade.restapi_ls import LsRestAPI, LsWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from trade.ls_rest_api import LsRestAPI, LsWebSocketReceiver
 
 
 class StockUsaReceiver(BaseReceiver):
@@ -43,12 +43,12 @@ class StockUsaReceiver(BaseReceiver):
 
     @error_decorator
     def _convert_real_data(self, data):
-        start = now()
-        tr_cd = data['header']['tr_cd']
-        body  = data['body']
+        body = data['body']
         if body is None:
             return
 
+        start = now()
+        tr_cd = data['header']['tr_cd']
         if tr_cd == self.tr_cd_hoga:
             int_hms = int(body['loctime'])
             if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:

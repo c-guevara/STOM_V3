@@ -713,7 +713,7 @@ class HistoryBuffer:
         return self.count
 
 
-class MicrostructureAnalyzer:
+class ManagerMicrostructure:
     def __init__(self, market_type: str, columns: list, data_cnt: int = 1800, history_cnt: int = 30):
         """
         초기화

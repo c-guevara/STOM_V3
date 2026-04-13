@@ -4,11 +4,11 @@ import numpy as np
 import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
-from trade.risk_analyzer import RiskAnalyzer
-from trade.formula_manager import get_formula_data
-from trade.strategy_globals_func import StrategyGlobalsFunc
-from trade.microstructure_analyzer import MicrostructureAnalyzer
-from utility.setting_base import indicator, ui_num, BACK_TEMP, DB_STRATEGY
+from trade.manager_risk import ManagerRisk
+from trade.manager_formula import get_formula_data
+from trade.stg_globals_func import StrategyGlobalsFunc
+from trade.manager_microstruc import ManagerMicrostructure
+from utility.setting_base import indicator, ui_num, BACK_TEMP, DB_STRATEGY, DB_SETTING
 from utility.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
     set_builtin_print, get_profile_text
 from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_sell_conds, get_back_load_code_query, \
@@ -55,6 +55,7 @@ class BackEngineBase(StrategyGlobalsFunc):
         self.hour            = None
         self.pr              = None
         self.info_for_order  = None
+        self.black_list      = None
 
         self.market_gubun    = None
         self.market_info     = None
@@ -109,8 +110,9 @@ class BackEngineBase(StrategyGlobalsFunc):
         self.sma_list      = get_ema_list(self.is_tick)
 
         self.ma_round_unit = self.market_info['반올림단위']
-        self.angle_pct_cf  = self.market_info['각도계수'][self.is_tick][0]
-        self.angle_dtm_cf  = self.market_info['각도계수'][self.is_tick][1]
+        angle_cf           = self.market_info['각도계수'][self.is_tick]
+        self.angle_pct_cf  = angle_cf[0]
+        self.angle_dtm_cf  = angle_cf[1]
         factor_list        = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex   = {factor: i for i, factor in enumerate(factor_list)}
         self.base_cnt      = self.dict_findex['관심종목'] + 1
@@ -132,12 +134,12 @@ class BackEngineBase(StrategyGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.ms_analyzer = MicrostructureAnalyzer(self.market_info['마켓구분'], factor_list)
-        self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'], factor_list)
+        self.ms_analyzer = ManagerMicrostructure(self.market_info['마켓구분'], factor_list)
+        self.rk_analyzer = ManagerRisk(self.market_info['마켓구분'], factor_list)
 
-        self._set_passticks()
+        self._set_passticks_and_blacklist()
 
-    def _set_passticks(self):
+    def _set_passticks_and_blacklist(self):
         def compile_condition(x):
             if self.is_tick:
                 return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
@@ -154,6 +156,14 @@ class BackEngineBase(StrategyGlobalsFunc):
             stg_list  = dfpt['전략코드'].to_list()
             stg_list  = [compile_condition(x) for x in stg_list]
             self.dict_condition = dict(zip(name_list, stg_list))
+
+        con  = sqlite3.connect(DB_SETTING)
+        dfbl = pd.read_sql('SELECT * FROM strategy', con).set_index('index')
+        con.close()
+
+        blacklist = dfbl['블랙리스트'][0]
+        if blacklist != '':
+            self.black_list = blacklist.split(';')
 
     def _main_loop(self):
         while True:
@@ -542,20 +552,16 @@ class BackEngineBase(StrategyGlobalsFunc):
                 self._back_stop(1)
                 return
 
-            if self.is_oms:
-                if self.dict_set['매수금지블랙리스트'] and \
-                        code in self.dict_set['블랙리스트'] and self.back_type != '백파인더':
-                    self.tq.put('백테완료')
-                    continue
-
-            if self.market_gubun == 1:
+            if self.market_gubun < 9:
                 self.code = code
                 self.name = self.dict_info.get(self.code, {}).get('종목명', self.code)
-            elif self.market_gubun == 2:
-                self.code = code
-                self.name = self.dict_info[code]['종목명']
             else:
                 self.code = self.name = code
+
+            if self.is_oms:
+                if self.dict_set['매수금지블랙리스트'] and self.name in self.black_list and self.back_type != '백파인더':
+                    self.tq.put('백테완료')
+                    continue
 
             last = len(self.arry_code) - 1
             if last > 0:

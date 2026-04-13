@@ -1,14 +1,12 @@
 
 import sys
 import binance
-import pandas as pd
 from PyQt5.QtCore import QTimer
 from traceback import format_exc
+from utility.setting_base import ui_num
 from PyQt5.QtWidgets import QApplication
-from utility.setting_base import ui_num, columns_jgcf
 from trade.base_trader import BaseTrader, MonitorTraderQ
-from utility.static import now, timedelta_sec, error_decorator, get_profit_coin_future_short, \
-    get_profit_coin_future_long
+from utility.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, get_str_ymdhms
 
 
 class BinanceTrader(BaseTrader):
@@ -17,19 +15,12 @@ class BinanceTrader(BaseTrader):
 
         app = QApplication(sys.argv)
 
-        self.dict_order = {
-            'BUY_LONG': {},
-            'SELL_LONG': {},
-            'SELL_SHORT': {},
-            'BUY_SHORT': {}
-        }
-
         self.binance = binance.Client(self.access_key, self.secret_key)
 
         self._get_balances()
 
         if not self.dict_set['모의투자']:
-            from trade.binance.binance_websocket import BinanceWebSocketTrader
+            from trade.restapi_binance import BinanceWebSocketTrader
             self.ws_thread = BinanceWebSocketTrader(self.access_key, self.secret_key, self.windowQ)
             self.ws_thread.signal.connect(self._convert_order_data)
             self.ws_thread.start()
@@ -112,7 +103,7 @@ class BinanceTrader(BaseTrader):
                 ))
             else:
                 self._put_order_complete(f'{주문구분}_CANCEL', 종목코드)
-                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분} 실패] {종목명} | {주문가격} | {주문수량}'))
+                self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}_FAIL] {종목명} | {주문가격} | {주문수량}'))
         else:
             ret = self.binance.futures_cancel_order(symbol=종목코드, orderId=원주문번호)
             if ret is not None:
@@ -120,7 +111,7 @@ class BinanceTrader(BaseTrader):
             else:
                 self.windowQ.put((
                     ui_num['기본로그'],
-                    f'{format_exc()}\n주문 관리 시스템 알림 - [{주문구분} 실패] {종목명} | {주문가격} | {주문수량}'
+                    f'{format_exc()}\n주문 관리 시스템 알림 - [{주문구분}_FAIL] {종목명} | {주문가격} | {주문수량}'
                 ))
 
         self.order_time = timedelta_sec(0.2)
@@ -197,176 +188,37 @@ class BinanceTrader(BaseTrader):
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 홈페이지 주문은 기록되지 않습니다.'))
             else:
                 if cc > 0 or 'CANCEL' in p:
-                    ct = self._get_str_ymdhms()
-                    self._update_chejan_data(p, code, oc, cc, mc, cp, op, ct, on)
+                    ct = get_str_ymdhms(self.market_gubun)
+                    self._update_chejan_data_coin_future(p, code, oc, cc, mc, cp, op, ct, on)
 
-    @error_decorator
-    def _update_chejan_data(self, 주문구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 주문시간, 주문번호):
-        index = self._get_index()
-        종목명 = self.dict_info[종목코드]['종목명']
+    def _get_order_buy_price(self, 종목코드, 주문구분, 주문가격):
+        매수지정가호가번호 = self.dict_set['매수지정가호가번호']
+        소숫점자리수 = self.dict_info[종목코드]['가격소숫점자리수']
+        호가차이 = self.dict_info[종목코드]['호가단위'] * 매수지정가호가번호
+        return round(주문가격 + 호가차이, 소숫점자리수) if 주문구분 == 'BUY_LONG' else round(주문가격 - 호가차이, 소숫점자리수)
 
-        if 주문구분 in ('BUY_LONG', 'SELL_SHORT', 'SELL_LONG', 'BUY_SHORT'):
-            if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
-                # ['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량', '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']
-                if 종목코드 in self.dict_jg:
-                    보유수량 = round(self.dict_jg[종목코드]['보유수량'] + 체결수량, self.dict_info[종목코드]['소숫점자리수'])
-                    매입금액 = round(self.dict_jg[종목코드]['매입금액'] + 체결수량 * 체결가격, 4)
-                    매수가 = round(매입금액 / 보유수량, 8)
-                    보유금액 = round(체결가격 * 보유수량, 4)
-                    if 주문구분 == 'BUY_LONG':
-                        평가금액, 수익금, 수익률 = get_profit_coin_future_long(
-                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                        )
-                    else:
-                        평가금액, 수익금, 수익률 = get_profit_coin_future_short(
-                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                        )
-                    self.dict_jg[종목코드].update({
-                        '매수가': 매수가,
-                        '현재가': 체결가격,
-                        '수익률': 수익률,
-                        '평가손익': 수익금,
-                        '매입금액': 매입금액,
-                        '평가금액': 평가금액,
-                        '보유수량': 보유수량,
-                        '매수시간': 주문시간
-                    })
-                else:
-                    매입금액 = 보유금액 = round(체결가격 * 체결수량, 4)
-                    if self.dict_set['바이낸스선물고정레버리지']:
-                        레버리지 = self.dict_set['바이낸스선물고정레버리지값']
-                    else:
-                        레버리지 = self.dict_order[주문구분][종목코드][4]
-                    if 주문구분 == 'BUY_LONG':
-                        포지션 = 'LONG'
-                        평가금액, 수익금, 수익률 = get_profit_coin_future_long(
-                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                        )
-                    else:
-                        포지션 = 'SHORT'
-                        평가금액, 수익금, 수익률 = get_profit_coin_future_short(
-                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                        )
-                    self.dict_jg[종목코드] = {
-                        '종목명': 종목명,
-                        '포지션': 포지션,
-                        '매수가': 체결가격,
-                        '현재가': 체결가격,
-                        '수익률': 수익률,
-                        '평가손익': 수익금,
-                        '매입금액': 매입금액,
-                        '평가금액': 평가금액,
-                        '보유수량': 체결수량,
-                        '분할매수횟수': 0,
-                        '분할매도횟수': 0,
-                        '매수시간': 주문시간,
-                        '레버리지': 레버리지
-                    }
+    def _get_order_sell_price(self, 종목코드, 주문구분, 주문가격):
+        매도지정가호가번호 = self.dict_set['매도지정가호가번호']
+        소숫점자리수 = self.dict_info[종목코드]['가격소숫점자리수']
+        호가차이 = self.dict_info[종목코드]['호가단위'] * 매도지정가호가번호
+        return round(주문가격 + 호가차이, 소숫점자리수) if 주문구분 == 'SELL_LONG' else round(주문가격 - 호가차이, 소숫점자리수)
 
-                if 미체결수량 == 0:
-                    self.dict_jg[종목코드]['분할매수횟수'] += 1
-                    if 종목코드 in self.dict_order[주문구분]:
-                        del self.dict_order[주문구분][종목코드]
+    def _get_modify_buy_price(self, 현재가, 정정호가, 종목코드):
+        return round(현재가 - 정정호가, self.dict_info[종목코드]['가격소숫점자리수'])
 
-            else:
-                if 종목코드 not in self.dict_jg: return
-                포지션 = self.dict_jg[종목코드]['포지션']
-                매수가 = self.dict_jg[종목코드]['매수가']
-                보유수량 = round(self.dict_jg[종목코드]['보유수량'] - 체결수량, self.dict_info[종목코드]['소숫점자리수'])
-                if 보유수량 != 0:
-                    매입금액 = round(매수가 * 보유수량, 4)
-                    보유금액 = round(체결가격 * 보유수량, 4)
-                    if 주문구분 == 'SELL_LONG':
-                        평가금액, 수익금, 수익률 = get_profit_coin_future_long(
-                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                        )
-                    else:
-                        평가금액, 수익금, 수익률 = get_profit_coin_future_short(
-                            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                        )
-                    """['종목명', '포지션', '매수가', '현재가', '수익률', '평가손익', '매입금액', '평가금액', '보유수량',
-                        '분할매수횟수', '분할매도횟수', '매수시간', '레버리지']"""
-                    self.dict_jg[종목코드].update({
-                        '현재가': 체결가격,
-                        '수익률': 수익률,
-                        '평가손익': 수익금,
-                        '매입금액': 매입금액,
-                        '평가금액': 평가금액,
-                        '보유수량': 보유수량
-                    })
-                else:
-                    del self.dict_jg[종목코드]
+    def _get_modify_sell_price(self, 현재가, 정정호가, 종목코드):
+        return round(현재가 + 정정호가, self.dict_info[종목코드]['가격소숫점자리수'])
 
-                if 미체결수량 == 0:
-                    if 보유수량 > 0:
-                        self.dict_jg[종목코드]['분할매도횟수'] += 1
-                    if 종목코드 in self.dict_order[주문구분]:
-                        del self.dict_order[주문구분][종목코드]
+    def _get_profit_long(self, 매입금액, 보유금액):
+        return get_profit_coin_future_long(
+            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
+        )
 
-                매입금액 = round(매수가 * 체결수량, 4)
-                보유금액 = round(체결가격 * 체결수량, 4)
-                if 주문구분 == 'SELL_LONG':
-                    평가금액, 수익금, 수익률 = get_profit_coin_future_long(
-                        매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                    )
-                else:
-                    평가금액, 수익금, 수익률 = get_profit_coin_future_short(
-                        매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
-                    )
-                if -100 < 수익률 < 100:
-                    self._update_tradelist(index, 종목명, 포지션, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간)
-                if 수익률 < 0: self.dict_info[종목코드]['손절거래시간'] = timedelta_sec(self.dict_set['매수금지손절간격초'])
+    def _get_profit_short(self, 매입금액, 보유금액):
+        return get_profit_coin_future_short(
+            매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
+        )
 
-            self.dict_jg = dict(sorted(self.dict_jg.items(), key=lambda x: x[1]['매입금액'], reverse=True))
-
-            if 미체결수량 == 0:
-                self._put_order_complete(f'{주문구분}_COMPLETE', 종목코드)
-            self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 주문시간, 주문가격, 주문번호)
-
-            if self.dict_set['모의투자']:
-                if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
-                    self.dict_intg['예수금'] -= 체결수량 * 체결가격
-                    self.dict_intg['추정예수금'] -= 체결수량 * 체결가격
-                else:
-                    self.dict_intg['예수금'] += 매입금액 + 수익금
-                    self.dict_intg['추정예수금'] += 매입금액 + 수익금
-
-            if self.dict_jg:
-                df_jg = pd.DataFrame.from_dict(self.dict_jg, orient='index')
-            else:
-                df_jg = pd.DataFrame(columns=columns_jgcf)
-            self.queryQ.put(('거래디비', df_jg, self.market_info['잔고디비'], 'replace'))
-            if self.dict_set['알림소리']:
-                text = ''
-                if 주문구분 == 'BUY_LONG':     text = '롱포지션을 진입'
-                elif 주문구분 == 'SELL_SHORT': text = '숏포지션을 진입'
-                elif 주문구분 == 'SELL_LONG':  text = '롱포지션을 청산'
-                elif 주문구분 == 'BUY_SHORT':  text = '숏포지션을 청산'
-                self.soundQ.put(f"{종목코드} {text}하였습니다.")
-            self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}] {종목명} | {체결가격} | {체결수량}'))
-
-        elif 주문구분 == '시드부족':
-            self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 주문시간, 주문가격, 주문번호)
-
-        elif 주문구분 in ('BUY_LONG_CANCEL', 'SELL_SHORT_CANCEL', 'SELL_LONG_CANCEL', 'BUY_SHORT_CANCEL'):
-            if 주문구분 in ('BUY_LONG_CANCEL', 'SELL_SHORT_CANCEL'):
-                self.dict_intg['추정예수금'] += 주문수량 * 주문가격
-
-            gubun_ = 주문구분.replace('_CANCEL', '')
-            if 종목코드 in self.dict_order[gubun_]:
-                del self.dict_order[gubun_][종목코드]
-
-            self._put_order_complete(주문구분, 종목코드)
-            self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 주문시간, 주문가격, 주문번호)
-
-            if self.dict_set['알림소리']:
-                text = ''
-                if 주문구분 == 'BUY_LONG_CANCEL':     text = '롱포지션 진입을 취소'
-                elif 주문구분 == 'SELL_SHORT_CANCEL': text = '숏포지션 진입을 취소'
-                elif 주문구분 == 'SELL_LONG_CANCEL':  text = '롱포지션 청산을 취소'
-                elif 주문구분 == 'BUY_SHORT_CANCEL':  text = '숏포지션 청산을 취소'
-                self.soundQ.put(f"{종목코드} {text}하였습니다.")
-            self.windowQ.put((ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}] {종목명} | {주문가격} | {주문수량}'))
-
-        self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
-        self.receivQ.put(('주문목록', self._get_order_code_list()))
+    def _get_order_code_list(self):
+        return tuple(self.dict_order['BUY_LONG']) + tuple(self.dict_order['SELL_SHORT']) + \
+            tuple(self.dict_order['SELL_LONG']) + tuple(self.dict_order['BUY_SHORT'])

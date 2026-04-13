@@ -28,10 +28,10 @@ class DrawRealChart(DrawChartBase):
         self.is_min = self.chart_cnt in (6, 8) or (self.chart_cnt == 10 and self.ui.ct_pushButtonnn_05.text() == 'CHART III')
 
         curr_last_index = self.ui.ctpg_arry[-1, 0]
-        self.samr_code = self.ui.ctpg_code == self.code
+        self.same_code = self.ui.ctpg_code == self.code
         self.same_time = self.last_index == curr_last_index
 
-        if not self.samr_code:
+        if not self.same_code:
             if self.is_min:
                 self.ui.ctpg_xticks = [dt_ymdhms(f'{str(int(x))}00').timestamp() for x in self.ui.ctpg_arry[:, 0]]
             else:

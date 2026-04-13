@@ -91,7 +91,7 @@ class BackFinder:
             save_time = str_ymdhms()
             con = sqlite3.connect(DB_BACKTEST)
             df = pd.DataFrame.from_dict(dict_back, orient='index')
-            df.to_sql(f"{self.market_info['전략구분']}_bf_{self.buystg_name}_{save_time}", con, if_exists='append', chunksize=1000)
+            df.to_sql(f"{self.market_info['전략구분']}_bf_{self.buystg_name}_{save_time}", con, if_exists='append', chunksize=2000)
             con.close()
             self.wq.put((ui_num['백테스트'], '백파인터 결과값 저장 완료'))
         else:

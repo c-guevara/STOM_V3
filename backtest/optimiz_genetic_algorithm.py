@@ -439,7 +439,7 @@ class OptimizeGeneticAlgorithm:
         for std, vars_list in rs_list[:rank]:
             data = [[optistandard, std, f'{vars_list}', buystg, sellstg]]
             df = pd.DataFrame(data, columns=['기준', '기준값', '범위설정', '매수코드', '매도코드'], index=[str_ymdhms()])
-            df.to_sql(self.savename, con, if_exists='append', chunksize=1000)
+            df.to_sql(self.savename, con, if_exists='append', chunksize=2000)
         con.close()
         self.high_vars = rs_list[0][1]
         self.wq.put((ui_num['백테스트'], f'{self.backname} 상위100위 결과 저장 완료'))

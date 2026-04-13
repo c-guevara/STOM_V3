@@ -400,7 +400,7 @@ class OptimizeConditions:
             data = [[self.optistandard, key, buyconds, sellconds]]
             df = pd.DataFrame(data, columns=['기준', '기준값', '매수코드', '매도코드'], index=[str_ymdhms()])
             con = sqlite3.connect(DB_BACKTEST)
-            df.to_sql(self.savename, con, if_exists='append', chunksize=1000)
+            df.to_sql(self.savename, con, if_exists='append', chunksize=2000)
             con.close()
 
     def _show_top_conds(self):
@@ -437,7 +437,7 @@ class OptimizeConditions:
 
         df = pd.DataFrame({'조건별출현빈도': [text]}, index=[str_ymdhms()])
         con = sqlite3.connect(DB_BACKTEST)
-        df.to_sql(f'{self.savename}_conds', con, if_exists='append', chunksize=1000)
+        df.to_sql(f'{self.savename}_conds', con, if_exists='append', chunksize=2000)
         con.close()
 
     def _sys_exit(self, cancel):

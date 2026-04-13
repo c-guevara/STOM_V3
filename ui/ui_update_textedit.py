@@ -121,22 +121,11 @@ class UpdateTextedit:
             if '전략연산 프로세스 데이터 저장 중 ...' in text:
                 self.data_save = True
 
-            elif data[0] == ui_num['기본로그'] and \
-                    ('리시버 종료' in data[1] or '트레이더 종료' in data[1] or '전략연산 종료' in data[1]):
-                if '리시버 종료' in data[1]:
-                    if receiver_process_alive(self.ui):
-                        self.ui.proc_receiver.kill()
-                elif '트레이더 종료' in data[1]:
-                    if trader_process_alive(self.ui):
-                        self.ui.proc_trader.kill()
-                elif '전략연산 종료' in data[1]:
-                    if strategy_process_alive(self.ui):
-                        for p in self.ui.proc_strategys:
-                            p.kill()
-                    if self.data_save and self.ui.dict_set['디비자동관리']:
-                        self._auto_database_control(1)
-                    else:
-                        self._shut_down_check()
+            elif data[0] == ui_num['기본로그'] and '전략연산 종료' in data[1]:
+                if self.data_save and self.ui.dict_set['디비자동관리']:
+                    self._auto_database_control(1)
+                else:
+                    self._shut_down_check()
 
             elif '휴무 종료' in data[1]:
                 self._shut_down_check(force=True)
@@ -160,21 +149,18 @@ class UpdateTextedit:
                 self.ui.soundQ.put('데이터베이스 자동관리를 시작합니다.')
             if not self.ui.dialog_db.isVisible():
                 self.ui.dialog_db.show()
-            self.ui.sdb_tapWidgettt_01.setCurrentIndex(self.ui.sdb_index1)
             qtest_qwait(2)
             dbbutton_clicked_09(self.ui)
         elif gubun == 2:
             if not self.ui.dialog_db.isVisible():
                 self.ui.dialog_db.show()
-            self.ui.sdb_tapWidgettt_01.setCurrentIndex(self.ui.sdb_index1)
             qtest_qwait(2)
             dbbutton_clicked_08(self.ui)
         elif gubun == 3:
             if self.ui.dialog_db.isVisible():
                 self.ui.dialog_db.close()
             self.ui.teleQ.put('데이터베이스 자동관리 완료')
-            self.ui.windowQ.put((ui_num['기본로그'], '데이터베이스 자동관리 완료'))
-            qtest_qwait(2)
+            self.ui.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 데이터베이스 자동관리 완료'))
             self.ui.auto_mode = False
             self._shut_down_check()
 

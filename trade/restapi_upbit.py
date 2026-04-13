@@ -39,7 +39,7 @@ def get_symbols_info():
     return dict_data, list(dict_data.keys())
 
 
-class Upbit:
+class UpbitRestAPI:
     def __init__(self, access, secret):
         self.access = access
         self.secret = secret

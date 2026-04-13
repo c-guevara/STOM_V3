@@ -1,15 +1,20 @@
 
+import time
 import sqlite3
+import numpy as np
 import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
-from utility.setting_base import indicator
-from trade.risk_analyzer import RiskAnalyzer
-from trade.formula_manager import get_formula_data
-from trade.strategy_globals_func import StrategyGlobalsFunc
-from utility.static import get_ema_list, now, set_builtin_print
-from trade.microstructure_analyzer import MicrostructureAnalyzer
+from trade.manager_risk import ManagerRisk
+from trade.manager_formula import get_formula_data
+from utility.setting_base import indicator, DB_SETTING
+from trade.stg_globals_func import StrategyGlobalsFunc
+from trade.manager_microstruc import ManagerMicrostructure
 from utility.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
+# noinspection PyUnusedImports
+from utility.static import now, dt_ymdhms, timedelta_sec, get_hogaunit_stock, get_profit_stock, str_ymdhms, \
+    get_ema_list, set_builtin_print, get_hogaunit_coin, get_profit_stock_os, get_profit_coin, now_cme, now_utc, \
+    get_indicator
 
 
 class BaseStrategy(StrategyGlobalsFunc):
@@ -30,6 +35,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.market_gubun    = market_info[0]
         self.market_info     = market_info[1]
 
+        self.is_running      = True
         self.buystrategy     = None
         self.sellstrategy    = None
         self.chart_code      = None
@@ -42,15 +48,29 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.dict_jg: dict[str, dict[str, int | float]] = {}
         self.dict_profit: dict[str, list] = {}
 
+        if self.market_gubun < 6:
+            self.dict_signal = {
+                '매수': [],
+                '매도': []
+            }
+        else:
+            self.dict_signal = {
+                'BUY_LONG': [],
+                'SELL_SHORT': [],
+                'SELL_LONG': [],
+                'BUY_SHORT': []
+            }
+
         self.dict_info       = {}
-        self.dict_signal     = {}
         self.dict_buy_num    = {}
         self.dict_signal_num = {}
         self.indi_settings   = []
+        self.black_list      = []
 
         self.jgrv_count      = 0
         self.int_tujagm      = 0
         self.비중조절기준       = 0
+        self.vitime_cnt      = 0
 
         self.avg_list        = [self.dict_set['평균값계산틱수']]
         self.rolling_window  = self.dict_set['평균값계산틱수']
@@ -62,14 +82,17 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.sma_list        = get_ema_list(self.is_tick)
 
         self.ma_round_unit   = self.market_info['반올림단위']
-        self.angle_pct_cf    = self.market_info['각도계수'][self.is_tick][0]
-        self.angle_dtm_cf    = self.market_info['각도계수'][self.is_tick][1]
+        angle_cf             = self.market_info['각도계수'][self.is_tick]
+        self.angle_pct_cf    = angle_cf[0]
+        self.angle_dtm_cf    = angle_cf[1]
         factor_list          = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex     = {factor: i for i, factor in enumerate(factor_list)}
         self.data_cnt        = self.market_info['팩터개수'][self.is_tick]
 
         self.base_cnt        = self.dict_findex['관심종목'] + 1
         self.area_cnt        = self.dict_findex['당일거래대금각도'] + 1
+        if self.market_gubun < 4:
+            self.vitime_cnt  = self.dict_findex['VI해제시간']
 
         if self.is_tick:
             self.dict_findex['초당매도수금액'] = self.dict_findex['초당매수금액']
@@ -84,19 +107,24 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
 
-        self.ms_analyzer = MicrostructureAnalyzer(self.market_info['마켓구분'], factor_list)
-        self.rk_analyzer = RiskAnalyzer(self.market_info['마켓구분'], factor_list)
+        self.ms_analyzer = ManagerMicrostructure(self.market_info['마켓구분'], factor_list)
+        self.rk_analyzer = ManagerRisk(self.market_info['마켓구분'], factor_list)
 
         set_builtin_print(self.windowQ)
+        self._set_formula_data()
+        self._set_strategy_and_blacklist()
+        self._main_loop()
 
     def _set_formula_data(self):
+        """수식관리자 데이터 처리"""
         self.fm_list, dict_fm, self.fm_tcnt = get_formula_data(False, self.data_cnt)
         self.windowQ.put((ui_num['사용자수식'], deepcopy(self.fm_list), dict_fm, self.fm_tcnt))
         if self.fm_list:
             for fm in self.fm_list:
                 fm[8] = compile(fm[-2], '<string>', 'exec')
 
-    def _update_stringategy(self):
+    def _set_strategy_and_blacklist(self):
+        """전략 및 블랙리스트 데이터 처리"""
         table_name_stg_buy       = f"{self.market_info['전략구분']}_buy"
         table_name_stg_sell      = f"{self.market_info['전략구분']}_sell"
         table_name_stg_optibuy   = f"{self.market_info['전략구분']}_optibuy"
@@ -114,9 +142,18 @@ class BaseStrategy(StrategyGlobalsFunc):
         if len(dfpt) > 0:
             self._set_passticks(dfpt)
 
+        con  = sqlite3.connect(DB_SETTING)
+        dfbl = pd.read_sql('SELECT * FROM strategy', con).set_index('index')
+        con.close()
+
+        blacklist = dfbl['블랙리스트'][0]
+        if blacklist != '':
+            self.black_list = blacklist.split(';')
+
         self.set_globals_func()
 
     def _set_strategy(self, dfs, dfos, dfb, dfob):
+        """전략 컴파일 처리"""
         if self.dict_set['매도전략'] in dfs.index:
             self.sellstrategy = compile(dfs['전략코드'][self.dict_set['매도전략']], '<string>', 'exec')
         elif self.dict_set['매도전략'] in dfos.index:
@@ -135,6 +172,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         self._set_buy_strategy(buytxt)
 
     def _set_buy_strategy(self, buytxt):
+        """보조지표 설정 처리"""
         self.buystrategy, indistg = self.get_buy_indi_stg(buytxt)
         if indistg is not None:
             try:
@@ -144,6 +182,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.indi_settings = list(self.indicator.values())
 
     def get_buy_indi_stg(self, buytxt):
+        """매수전략, 보조지표 설정 분리"""
         lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
         buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
         indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
@@ -164,6 +203,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         return buystg, indistg
 
     def _set_passticks(self, dfpt):
+        """경과틱수 데이터 처리"""
         def compile_condition(x):
             return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
 
@@ -173,12 +213,22 @@ class BaseStrategy(StrategyGlobalsFunc):
         self.dict_condition = dict(zip(name_list, stg_list))
 
     def _main_loop(self):
+        """전략연산큐를 모니터하는 메인루프"""
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략 연산 시작"))
-        while True:
+        while self.is_running:
             try:
                 data = self.stgQ.get()
                 if data.__class__ == list:
-                    self._strategy(data)
+                    if self.market_gubun < 6:
+                        if self.is_tick:
+                            self._strategy_tick(data)
+                        else:
+                            self._strategy_min(data)
+                    else:
+                        if self.is_tick:
+                            self._strategy_future_tick(data)
+                        else:
+                            self._strategy_future_min(data)
                 elif data.__class__ == tuple:
                     self._update_tuple(data)
                 elif data.__class__ == str:
@@ -187,7 +237,12 @@ class BaseStrategy(StrategyGlobalsFunc):
                 from traceback import format_exc
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
+        import sys
+        time.sleep(1)
+        sys.exit()
+
     def _update_tuple(self, data):
+        """전략연산큐로 들어온 듀플 데이터 처리"""
         gubun, data = data
         if gubun == '잔고목록':
             self.dict_jg = data
@@ -235,13 +290,14 @@ class BaseStrategy(StrategyGlobalsFunc):
             self.chart_code = data
         elif gubun == '설정변경':
             self.dict_set = data
-            self._update_stringategy()
+            self._set_strategy_and_blacklist()
         elif gubun == '종목정보':
             self.dict_info = data
         elif gubun == '데이터저장':
             self._save_data(data)
 
     def _update_string(self, data):
+        """전략연산큐로 들어온 스트링 데이터 처리"""
         if data == '매수전략중지':
             self.buystrategy = None
             self.teleQ.put('매수전략 중지 완료')
@@ -249,9 +305,1028 @@ class BaseStrategy(StrategyGlobalsFunc):
             self.sellstrategy = None
             self.teleQ.put('매도전략 중지 완료')
         elif data == '프로세스종료':
+            self.is_running = False
             self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략연산 종료"))
 
+    # noinspection PyUnusedLocal
+    def _strategy_tick(self, data):
+        """현물 전략연산 처리"""
+        if self.market_gubun < 4:
+            체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
+                VI해제시간, VI가격, VI호가단위, \
+                초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
+                당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
+            data[self.vitime_cnt] = int(str_ymdhms(VI해제시간))
+            self.hoga_unit = 호가단위 = get_hogaunit_stock(현재가)
+        elif self.market_gubun == 4:
+            체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
+                초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
+                당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
+            self.hoga_unit = 호가단위 = 0.01
+        else:
+            체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
+                초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
+                당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
+            self.hoga_unit = 호가단위 = get_hogaunit_coin(현재가)
+
+        시분초, 순매수금액 = int(str(체결시간)[8:]), 초당매수금액 - 초당매도금액
+
+        self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
+        self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
+        self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
+        self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
+
+        new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
+        new_data_tick[:self.base_cnt] = data[:self.base_cnt]
+
+        pre_data = self.dict_data.get(종목코드)
+        if pre_data is not None:
+            self.dict_data[종목코드] = np.concatenate([pre_data, [new_data_tick]])
+        else:
+            self.dict_data[종목코드] = np.array([new_data_tick])
+
+        self.arry_code = self.dict_data[종목코드]
+        self.tick_count = 데이터길이 = len(self.arry_code)
+        self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
+
+        리스크점수 = 0
+        if 데이터길이 >= self.rolling_window:
+            self.arry_code[-1, self.base_cnt:self.data_cnt] = self._get_parameter_area(self.rolling_window)
+
+            if self.dict_set['시장미시구조분석']:
+                self.ms_analyzer.update_data(self.code, self.arry_code)
+            if self.dict_set['시장리스크분석']:
+                리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
+
+        self._update_high_low(종목코드, 현재가)
+
+        if self.dict_condition:
+            if 종목코드 not in self.dict_cond_indexn:
+                self.dict_cond_indexn[종목코드] = {}
+            for k, v in self.dict_condition.items():
+                exec(v)
+
+        if 데이터길이 >= self.rolling_window and self.fm_list:
+            for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
+                self.check, self.line, self.up, self.down = None, None, None, None
+
+                exec(stg)
+
+                if data_type == '선:일반':
+                    if self.line is not None:
+                        self.arry_code[self.indexn, col_idx] = self.line
+
+                elif data_type == '선:조건':
+                    if self.check is not None and self.line is not None:
+                        if self.check:
+                            self.arry_code[self.indexn, col_idx] = self.line
+                        else:
+                            pre_line = self.arry_code[self.indexn - 1, col_idx]
+                            if pre_line > 0:
+                                self.arry_code[self.indexn, col_idx] = pre_line
+
+                elif data_type == '범위':
+                    if self.check is not None and self.up is not None and self.down is not None:
+                        self.arry_code[self.indexn, col_idx] = 1.0 if self.check else 0.0
+                        self.arry_code[self.indexn, col_idx + 1] = self.up
+                        self.arry_code[self.indexn, col_idx + 2] = self.down
+
+                elif data_type == '화살표:일반':
+                    if self.check is not None and self.check:
+                        price = self.arry_code[self.indexn, self.dict_findex[fname]]
+                        self.arry_code[self.indexn, col_idx] = price
+
+        if 데이터길이 >= self.rolling_window:
+            jg_data = self.dict_jg.get(종목코드)
+            if jg_data:
+                if 종목코드 not in self.dict_buy_num:
+                    self.dict_buy_num[종목코드] = self.indexn
+                _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
+                _, 수익금, 수익률 = self._get_profit(매입금액, 보유수량 * 현재가)
+                profit_data = self.dict_profit.get(종목코드)
+                if profit_data:
+                    if 수익률 > profit_data[0]:
+                        profit_data[0] = 수익률
+                    elif 수익률 < profit_data[1]:
+                        profit_data[1] = 수익률
+                    최고수익률, 최저수익률 = profit_data
+                else:
+                    self.dict_profit[종목코드] = [수익률, 수익률]
+                    최고수익률 = 최저수익률 = 수익률
+                보유시간 = self._get_hold_time(매수시간)
+                매수틱번호 = self.dict_buy_num[종목코드]
+            else:
+                매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                    최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0
+
+            self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
+
+            BBT = not self.dict_set['매수금지시간'] or \
+                not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+            BLK = not self.dict_set['매수금지블랙리스트'] or 종목명 not in self.black_list
+            NIB = 종목코드 not in self.dict_signal['매수']
+            NIS = 종목코드 not in self.dict_signal['매도']
+
+            A = 관심종목 and NIB and 매수가 == 0
+            B = self.dict_set['매수분할시그널']
+            C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['매수분할횟수']
+            D = NIB and self.dict_set['매도취소매수시그널'] and not NIS
+
+            if BBT and BLK and (A or (B and C) or C or D):
+                self.info_for_buy = D, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+
+                if A or (B and C) or D:
+                    매수 = True
+                    if self.buystrategy is not None:
+                        exec(self.buystrategy)
+
+                elif C:
+                    매수 = False
+                    분할매수기준수익률 = \
+                        round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
+                    if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
+                        매수 = True
+                    elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
+                        매수 = True
+
+                    if 매수:
+                        self.Buy()
+
+            SBT = not self.dict_set['매도금지시간'] or \
+                not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+            SCC = self.dict_set['매수분할횟수'] == 1 or \
+                not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+            NIB = 종목코드 not in self.dict_signal['매수']
+
+            A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
+            B = self.dict_set['매도분할시그널']
+            C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['매도분할횟수']
+            D = NIS and self.dict_set['매수취소매도시그널'] and not NIB
+            E = NIB and NIS and 매수가 != 0 and self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+            F = NIB and NIS and 매수가 != 0 and self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+            G = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+            H = NIB and NIS and 매수가 != 0 and self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+
+            if SBT and (A or (B and C) or C or D or E or F or G or H):
+                강제청산 = E or F or G or H
+                전량매도 = A or 강제청산
+                self.info_for_sell = D, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+
+                매도 = False
+                if A or (B and C) or D:
+                    if self.sellstrategy is not None:
+                        exec(self.sellstrategy)
+
+                elif C or 강제청산:
+                    if C:
+                        if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
+                            매도 = True
+                        elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
+                            매도 = True
+                    elif 강제청산:
+                        매도 = True
+
+                    if 매도:
+                        self.Sell()
+
+        if 관심종목:
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
+            self.dict_gj[종목코드] = {
+                '종목명': 종목명,
+                'per': 등락율,
+                'hlp': 고저평균대비등락율,
+                'lhp': 저가대비고가등락율,
+                'ch': 체결강도,
+                'tm': 초당거래대금,
+                'dm': 당일거래대금,
+                'bm': 당일매수금액,
+                'sm': 당일매도금액
+            }
+
+        if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
+            self.windowQ.put((ui_num['실시간차트'], 종목코드, self.arry_code))
+
+        if 틱수신시간 != 0:
+            gap = (now() - 틱수신시간).total_seconds()
+            self.windowQ.put((ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
+
+    # noinspection PyUnusedLocal
+    def _strategy_min(self, data):
+        if self.market_gubun < 4:
+            체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
+                VI해제시간, VI가격, VI호가단위, 분봉시가, 분봉고가, 분봉저가, \
+                분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, \
+                당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
+            data[self.vitime_cnt] = int(str_ymdhms(VI해제시간))
+            self.hoga_unit = 호가단위 = get_hogaunit_stock(현재가)
+        elif self.market_gubun == 4:
+            체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
+                분봉시가, 분봉고가, 분봉저가, \
+                분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, \
+                당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
+            self.hoga_unit = 호가단위 = 0.01
+        else:
+            체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
+                분봉시가, 분봉고가, 분봉저가, \
+                분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, \
+                당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+                매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+                매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+                매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
+            self.hoga_unit = 호가단위 = self.dict_info[종목코드]['호가단위']
+
+        시분초, 순매수금액 = int(str(체결시간)[8:] + '00'), 분당매수금액 - 분당매도금액
+
+        self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
+        self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
+        self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
+        self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
+
+        if 전략연산:
+            new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
+            new_data_tick[:self.base_cnt] = data[:self.base_cnt]
+
+            pre_data = self.dict_data.get(종목코드)
+            if pre_data is not None:
+                self.dict_data[종목코드] = np.concatenate([pre_data, [new_data_tick]])
+            else:
+                self.dict_data[종목코드] = np.array([new_data_tick])
+
+            self.arry_code = self.dict_data[종목코드]
+            self.tick_count = 데이터길이 = len(self.arry_code)
+            self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
+
+            if 데이터길이 >= self.rolling_window:
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
+
+            indicator_list = get_indicator(
+                self.arry_code[:, self.dict_findex['현재가']],
+                self.arry_code[:, self.dict_findex['분봉고가']],
+                self.arry_code[:, self.dict_findex['분봉저가']],
+                self.arry_code[:, self.dict_findex['분당거래대금']],
+                self.indi_settings
+            )
+            self.arry_code[-1, self.area_cnt:self.data_cnt] = indicator_list
+
+            AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
+                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
+
+            self._update_high_low(종목코드, 분봉고가, 분봉저가)
+
+            if self.dict_condition:
+                if 종목코드 not in self.dict_cond_indexn:
+                    self.dict_cond_indexn[종목코드] = {}
+                for k, v in self.dict_condition.items():
+                    exec(v)
+
+            if 데이터길이 >= self.rolling_window and self.fm_list:
+                for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
+                    self.check, self.line, self.up, self.down = None, None, None, None
+
+                    exec(stg)
+
+                    if data_type == '선:일반':
+                        if self.line is not None:
+                            self.arry_code[self.indexn, col_idx] = self.line
+
+                    elif data_type == '선:조건':
+                        if self.check is not None and self.line is not None:
+                            if self.check:
+                                self.arry_code[self.indexn, col_idx] = self.line
+                            else:
+                                pre_line = self.arry_code[self.indexn - 1, col_idx]
+                                if pre_line > 0:
+                                    self.arry_code[self.indexn, col_idx] = pre_line
+
+                    elif data_type == '범위':
+                        if self.check is not None and self.up is not None and self.down is not None:
+                            self.arry_code[self.indexn, col_idx] = 1.0 if self.check else 0.0
+                            self.arry_code[self.indexn, col_idx + 1] = self.up
+                            self.arry_code[self.indexn, col_idx + 2] = self.down
+
+                    elif data_type == '화살표:일반':
+                        if self.check is not None and self.check:
+                            if fname == '현재가':
+                                price = 분봉저가 if style == 6 else 분봉고가
+                            else:
+                                price = self.arry_code[self.indexn, self.dict_findex[fname]]
+                            self.arry_code[self.indexn, col_idx] = price
+
+            if 데이터길이 >= self.rolling_window:
+                jg_data = self.dict_jg.get(종목코드)
+                if jg_data:
+                    if 종목코드 not in self.dict_buy_num:
+                        self.dict_buy_num[종목코드] = self.indexn
+                    _, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간 = jg_data.values()
+                    _, 수익금, 수익률 = self._get_profit(매입금액, 보유수량 * 현재가)
+                    profit_data = self.dict_profit.get(종목코드)
+                    if profit_data:
+                        if 수익률 > profit_data[0]:
+                            profit_data[0] = 수익률
+                        elif 수익률 < profit_data[1]:
+                            profit_data[1] = 수익률
+                        최고수익률, 최저수익률 = profit_data
+                    else:
+                        self.dict_profit[종목코드] = [수익률, 수익률]
+                        최고수익률 = 최저수익률 = 수익률
+                    보유시간 = self._get_hold_time_min(매수시간)
+                    매수틱번호 = self.dict_buy_num[종목코드]
+                else:
+                    매수틱번호, 수익금, 수익률, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                        최고수익률, 최저수익률 = 0, 0, 0, 0, 0, 0, 0, now(), 0, 0, 0
+
+                self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
+
+                BBT = not self.dict_set['매수금지시간'] or \
+                    not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+                BLK = not self.dict_set['매수금지블랙리스트'] or 종목명 not in self.black_list
+                NIB = 종목코드 not in self.dict_signal['매수']
+                NIS = 종목코드 not in self.dict_signal['매도']
+
+                A = 관심종목 and NIB and 매수가 == 0
+                B = self.dict_set['매수분할시그널']
+                C = NIB and 매수가 != 0 and 분할매수횟수 < self.dict_set['매수분할횟수']
+                D = NIB and self.dict_set['매도취소매수시그널'] and not NIS
+
+                if BBT and BLK and (A or (B and C) or C or D):
+                    self.info_for_signal = D, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+
+                    if A or (B and C) or D:
+                        매수 = True
+                        if self.buystrategy is not None:
+                            exec(self.buystrategy)
+
+                    elif C:
+                        매수 = False
+                        분할매수기준수익률 = round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set[
+                            '매수분할고정수익률'] else 수익률
+                        if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
+                            매수 = True
+                        elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
+                            매수 = True
+
+                        if 매수:
+                            self.Buy()
+
+                SBT = not self.dict_set['매도금지시간'] or \
+                    not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+                SCC = self.dict_set['매수분할횟수'] == 1 or \
+                    not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+                NIB = 종목코드 not in self.dict_signal['매수']
+
+                A = NIB and NIS and SCC and 매수가 != 0 and self.dict_set['매도분할횟수'] == 1
+                B = self.dict_set['매도분할시그널']
+                C = NIB and NIS and SCC and 매수가 != 0 and 분할매도횟수 < self.dict_set['매도분할횟수']
+                D = NIS and self.dict_set['매수취소매도시그널'] and not NIB
+                E = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                F = NIB and NIS and 매수가 != 0 and \
+                    self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+
+                if SBT and (A or (B and C) or C or D or E or F):
+                    강제청산 = E or F
+                    전량매도 = A or 강제청산
+                    self.info_for_signal = \
+                        D, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+
+                    매도 = False
+                    if A or (B and C) or D:
+                        if self.sellstrategy is not None:
+                            exec(self.sellstrategy)
+
+                    elif C or 강제청산:
+                        if C:
+                            if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
+                                매도 = True
+                            elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
+                                매도 = True
+                        elif 강제청산:
+                            매도 = True
+
+                        if 매도:
+                            self.Sell()
+        else:
+            pre_data = self.dict_data.get(종목코드)
+            if pre_data is None:
+                pre_data = np.empty((0, self.data_cnt + self.fm_tcnt), dtype=np.float64)
+            self.tick_count = 데이터길이 = len(pre_data) + 1
+            self.indexn = 데이터길이 - 1
+
+        if 관심종목:
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
+            self.dict_gj[종목코드] = {
+                '종목명': 종목명,
+                'per': 등락율,
+                'hlp': 고저평균대비등락율,
+                'lhp': 저가대비고가등락율,
+                'ch': 체결강도,
+                'tm': 분당거래대금,
+                'dm': 당일거래대금,
+                'bm': 당일매수금액,
+                'sm': 당일매도금액
+            }
+
+        if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
+            if not 전략연산:
+                new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
+                new_data_tick[:self.base_cnt] = data[:self.base_cnt]
+                self.arry_code = np.concatenate([pre_data, [new_data_tick]])
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
+                self.arry_code[-1, self.area_cnt:self.data_cnt] = get_indicator(
+                    self.arry_code[:, self.dict_findex['현재가']],
+                    self.arry_code[:, self.dict_findex['분봉고가']],
+                    self.arry_code[:, self.dict_findex['분봉저가']],
+                    self.arry_code[:, self.dict_findex['분당거래대금']],
+                    self.indi_settings
+                )
+                if self.fm_list:
+                    for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
+                        self.check, self.line, self.up, self.down = None, None, None, None
+
+                        exec(stg)
+
+                        if data_type == '선:일반':
+                            if self.line is not None:
+                                self.arry_code[self.indexn, col_idx] = self.line
+
+                        elif data_type == '선:조건':
+                            if self.check is not None and self.line is not None:
+                                if self.check:
+                                    self.arry_code[self.indexn, col_idx] = self.line
+                                else:
+                                    pre_line = self.arry_code[self.indexn - 1, col_idx]
+                                    if pre_line > 0:
+                                        self.arry_code[self.indexn, col_idx] = pre_line
+
+                        elif data_type == '범위':
+                            if self.check is not None and self.up is not None and self.down is not None:
+                                self.arry_code[self.indexn, col_idx] = 1.0 if self.check else 0.0
+                                self.arry_code[self.indexn, col_idx + 1] = self.up
+                                self.arry_code[self.indexn, col_idx + 2] = self.down
+
+                        elif data_type == '화살표:일반':
+                            if self.check is not None and self.check:
+                                if fname == '현재가':
+                                    price = 분봉저가 if style == 6 else 분봉고가
+                                else:
+                                    price = self.arry_code[self.indexn, self.dict_findex[fname]]
+                                self.arry_code[self.indexn, col_idx] = price
+
+            self.windowQ.put((ui_num['실시간차트'], 종목코드, self.arry_code))
+
+        if 틱수신시간 != 0:
+            gap = (now() - 틱수신시간).total_seconds()
+            self.windowQ.put((ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
+
+    # noinspection PyUnusedLocal
+    def _strategy_future_tick(self, data):
+        체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
+            초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
+            당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+            매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+            매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
+
+        시분초, 순매수금액 = int(str(체결시간)[8:]), 초당매수금액 - 초당매도금액
+        self.hoga_unit = 호가단위 = self.dict_info[종목코드]['호가단위']
+
+        self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
+        self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
+        self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
+        self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
+
+        new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
+        new_data_tick[:self.base_cnt] = data[:self.base_cnt]
+
+        pre_data = self.dict_data.get(종목코드)
+        if pre_data is not None:
+            self.dict_data[종목코드] = np.concatenate([pre_data, [new_data_tick]])
+        else:
+            self.dict_data[종목코드] = np.array([new_data_tick])
+
+        self.arry_code = self.dict_data[종목코드]
+        self.tick_count = 데이터길이 = len(self.arry_code)
+        self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
+
+        리스크점수 = 0
+        if 데이터길이 >= self.rolling_window:
+            self.arry_code[-1, self.base_cnt:self.data_cnt] = self._get_parameter_area(self.rolling_window)
+
+            if self.dict_set['시장미시구조분석']:
+                self.ms_analyzer.update_data(self.code, self.arry_code)
+            if self.dict_set['시장리스크분석']:
+                리스크점수 = self.rk_analyzer.get_risk_score(self.arry_code)
+
+        self._update_high_low(종목코드, 현재가)
+
+        if self.dict_condition:
+            if 종목코드 not in self.dict_cond_indexn:
+                self.dict_cond_indexn[종목코드] = {}
+            for k, v in self.dict_condition.items():
+                exec(v)
+
+        if 데이터길이 >= self.rolling_window and self.fm_list:
+            for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
+                self.check, self.line, self.up, self.down = None, None, None, None
+
+                exec(stg)
+
+                if data_type == '선:일반':
+                    if self.line is not None:
+                        self.arry_code[self.indexn, col_idx] = self.line
+
+                elif data_type == '선:조건':
+                    if self.check is not None and self.line is not None:
+                        if self.check:
+                            self.arry_code[self.indexn, col_idx] = self.line
+                        else:
+                            pre_line = self.arry_code[self.indexn - 1, col_idx]
+                            if pre_line > 0:
+                                self.arry_code[self.indexn, col_idx] = pre_line
+
+                elif data_type == '범위':
+                    if self.check is not None and self.up is not None and self.down is not None:
+                        self.arry_code[self.indexn, col_idx] = 1.0 if self.check else 0.0
+                        self.arry_code[self.indexn, col_idx + 1] = self.up
+                        self.arry_code[self.indexn, col_idx + 2] = self.down
+
+                elif data_type == '화살표:일반':
+                    if self.check is not None and self.check:
+                        price = self.arry_code[self.indexn, self.dict_findex[fname]]
+                        self.arry_code[self.indexn, col_idx] = price
+
+        if 데이터길이 >= self.rolling_window:
+            jg_data = self.dict_jg.get(종목코드)
+            if jg_data:
+                if 종목코드 not in self.dict_buy_num:
+                    self.dict_buy_num[종목코드] = self.indexn
+                _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 레버리지 = jg_data.values()
+                if 포지션 == 'LONG':
+                    _, 수익금, 수익률 = self._get_profit_long(매입금액, 보유수량 * 현재가)
+                else:
+                    _, 수익금, 수익률 = self._get_profit_short(매입금액, 보유수량 * 현재가)
+                profit_data = self.dict_profit.get(종목코드)
+                if profit_data:
+                    if 수익률 > profit_data[0]:
+                        profit_data[0] = 수익률
+                    elif 수익률 < profit_data[1]:
+                        profit_data[1] = 수익률
+                    최고수익률, 최저수익률 = profit_data
+                else:
+                    self.dict_profit[종목코드] = [수익률, 수익률]
+                    최고수익률 = 최저수익률 = 수익률
+                보유시간 = self._get_hold_time(매수시간)
+                매수틱번호 = self.dict_buy_num[종목코드]
+            else:
+                포지션, 매수틱번호, 수익금, 수익률, 레버리지, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                    최고수익률, 최저수익률 = None, 0, 0, 0, 1, 0, 0, 0, 0, now(), 0, 0, 0
+
+            self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
+
+            BBT  = not self.dict_set['매수금지시간'] or \
+                not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+            BLK  = not self.dict_set['매수금지블랙리스트'] or 종목명 not in self.black_list
+            NIBL = 종목코드 not in self.dict_signal['BUY_LONG']
+            NISS = 종목코드 not in self.dict_signal['SELL_SHORT']
+            NISL = 종목코드 not in self.dict_signal['SELL_LONG']
+            NIBS = 종목코드 not in self.dict_signal['BUY_SHORT']
+            A    = 관심종목 and NIBL and 포지션 is None
+            B    = 관심종목 and NISS and 포지션 is None
+            C    = self.dict_set['매수분할시그널']
+            D    = NIBL and 포지션 == 'LONG' and 분할매수횟수 < self.dict_set['매수분할횟수']
+            E    = NISS and 포지션 == 'SHORT' and 분할매수횟수 < self.dict_set['매수분할횟수']
+            F    = NIBL and self.dict_set['매도취소매수시그널'] and not NISL
+            G    = NISS and self.dict_set['매도취소매수시그널'] and not NIBS
+
+            if BBT and BLK and (A or B or (C and D) or (C and E) or D or E or F or G):
+                self.info_for_buy = F or G, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+
+                if A or B or (C and (D or E)) or F or G:
+                    BUY_LONG, SELL_SHORT = True, True
+                    if self.buystrategy is not None:
+                        exec(self.buystrategy)
+
+                elif D or E:
+                    BUY_LONG, SELL_SHORT = False, False
+                    분할매수기준수익률 = \
+                        round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
+                    if D:
+                        if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
+                            BUY_LONG   = True
+                        elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
+                            BUY_LONG   = True
+                    elif E:
+                        if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
+                            SELL_SHORT = True
+                        elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
+                            SELL_SHORT = True
+
+                    if BUY_LONG or SELL_SHORT:
+                        self.Buy(BUY_LONG)
+
+            SBT  = not self.dict_set['매도금지시간'] or \
+                not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+            SCC  = self.dict_set['매수분할횟수'] == 1 or \
+                not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+            NIBL = 종목코드 not in self.dict_signal['BUY_LONG']
+            NISS = 종목코드 not in self.dict_signal['SELL_SHORT']
+
+            A = NIBL and NISL and SCC and 포지션 == 'LONG' and self.dict_set['매도분할횟수'] == 1
+            B = NISS and NIBS and SCC and 포지션 == 'SHORT' and self.dict_set['매도분할횟수'] == 1
+            C = self.dict_set['매도분할시그널']
+            D = NIBL and NISL and SCC and 포지션 == 'LONG' and 분할매도횟수 < self.dict_set['매도분할횟수']
+            E = NISS and NIBS and SCC and 포지션 == 'SHORT' and 분할매도횟수 < self.dict_set['매도분할횟수']
+            F = NISL and self.dict_set['매수취소매도시그널'] and not NIBL
+            G = NIBS and self.dict_set['매수취소매도시그널'] and not NISS
+            H = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+            J = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+            K = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+            L = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+            M = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+            N = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+            P = NIBL and NISL and 포지션 == 'LONG' and \
+                self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+            Q = NISS and NIBS and 포지션 == 'SHORT' and \
+                self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+            R = NIBL and NISL and 포지션 == 'LONG' and 수익률 * 레버리지 < -90
+            S = NISS and NIBS and 포지션 == 'SHORT' and 수익률 * 레버리지 < -90
+
+            if SBT and (A or B or (C and D) or (C and E) or D or E or F or G or H or J or K or L or M or N or P or Q or R or S):
+                강제청산 = H or J or K or L or M or N or P or Q or R or S
+                전량매도 = A or B or 강제청산
+                self.info_for_sell = \
+                    F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1
+
+                SELL_LONG, BUY_SHORT = False, False
+                if A or B or (C and D) or (C and E) or F or G:
+                    if self.sellstrategy is not None:
+                        exec(self.sellstrategy)
+
+                elif D or E or 강제청산:
+                    if H or K or M or P or R:
+                        SELL_LONG = True
+                    elif J or L or N or Q or S:
+                        BUY_SHORT = True
+                    elif D:
+                        if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
+                            SELL_LONG = True
+                        elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
+                            SELL_LONG = True
+                    elif E:
+                        if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
+                            BUY_SHORT = True
+                        elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
+                            BUY_SHORT = True
+
+                    if (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):
+                        self.Sell(SELL_LONG)
+
+        if 관심종목:
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
+            self.dict_gj[종목코드] = {
+                '종목명': 종목명,
+                'per': 등락율,
+                'hlp': 고저평균대비등락율,
+                'lhp': 저가대비고가등락율,
+                'ch': 체결강도,
+                'tm': 초당거래대금,
+                'dm': 당일거래대금,
+                'bm': 당일매수금액,
+                'sm': 당일매도금액
+            }
+
+        if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
+            self.windowQ.put((ui_num['실시간차트'], 종목코드, self.arry_code))
+
+        if 틱수신시간 != 0:
+            gap = (now() - 틱수신시간).total_seconds()
+            self.windowQ.put((ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
+
+    # noinspection PyUnusedLocal
+    def _strategy_future_min(self, data):
+        체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
+            분봉시가, 분봉고가, 분봉저가, \
+            분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, \
+            당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
+            매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5, 매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5, \
+            매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5, 매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5, \
+            매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
+        시분초 = int(str(체결시간)[8:] + '00')
+        순매수금액 = 분당매수금액 - 분당매도금액
+        self.hoga_unit = 호가단위 = self.dict_info[종목코드]['호가단위']
+
+        self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
+        self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
+        self.bhogainfo[:] = [매수호가1, 매수호가2, 매수호가3, 매수호가4, 매수호가5]
+        self.bhreminfo[:] = [매수잔량1, 매수잔량2, 매수잔량3, 매수잔량4, 매수잔량5]
+
+        if 전략연산:
+            new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
+            new_data_tick[:self.base_cnt] = data[:self.base_cnt]
+
+            pre_data = self.dict_data.get(종목코드)
+            if pre_data is not None:
+                self.dict_data[종목코드] = np.concatenate([pre_data, [new_data_tick]])
+            else:
+                self.dict_data[종목코드] = np.array([new_data_tick])
+
+            self.arry_code = self.dict_data[종목코드]
+            self.tick_count = 데이터길이 = len(self.arry_code)
+            self.code, self.name, self.index, self.indexn = 종목코드, 종목명, 체결시간, 데이터길이 - 1
+
+            if 데이터길이 >= self.rolling_window:
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
+
+            indicator_list = get_indicator(
+                self.arry_code[:, self.dict_findex['현재가']],
+                self.arry_code[:, self.dict_findex['분봉고가']],
+                self.arry_code[:, self.dict_findex['분봉저가']],
+                self.arry_code[:, self.dict_findex['분당거래대금']],
+                self.indi_settings
+            )
+            self.arry_code[-1, self.area_cnt:self.data_cnt] = indicator_list
+
+            AD, ADOSC, ADXR, APO, AROOND, AROONU, ATR, BBU, BBM, BBL, CCI, DIM, DIP, MACD, MACDS, MACDH, MFI, MOM, \
+                OBV, PPO, ROC, RSI, SAR, STOCHSK, STOCHSD, STOCHFK, STOCHFD, WILLR = indicator_list
+
+            self._update_high_low(종목코드, 분봉고가, 분봉저가)
+
+            if self.dict_condition:
+                if 종목코드 not in self.dict_cond_indexn:
+                    self.dict_cond_indexn[종목코드] = {}
+                for k, v in self.dict_condition.items():
+                    try:
+                        exec(v)
+                    except:
+                        self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 경과틱수 연산오류'))
+
+            if 데이터길이 >= self.rolling_window and self.fm_list:
+                for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
+                    self.check, self.line, self.up, self.down = None, None, None, None
+
+                    exec(stg)
+
+                    if data_type == '선:일반':
+                        if self.line is not None:
+                            self.arry_code[self.indexn, col_idx] = self.line
+
+                    elif data_type == '선:조건':
+                        if self.check is not None and self.line is not None:
+                            if self.check:
+                                self.arry_code[self.indexn, col_idx] = self.line
+                            else:
+                                pre_line = self.arry_code[self.indexn - 1, col_idx]
+                                if pre_line > 0:
+                                    self.arry_code[self.indexn, col_idx] = pre_line
+
+                    elif data_type == '범위':
+                        if self.check is not None and self.up is not None and self.down is not None:
+                            self.arry_code[self.indexn, col_idx] = 1.0 if self.check else 0.0
+                            self.arry_code[self.indexn, col_idx + 1] = self.up
+                            self.arry_code[self.indexn, col_idx + 2] = self.down
+
+                    elif data_type == '화살표:일반':
+                        if self.check is not None and self.check:
+                            if fname == '현재가':
+                                price = 분봉저가 if style == 6 else 분봉고가
+                            else:
+                                price = self.arry_code[self.indexn, self.dict_findex[fname]]
+                            self.arry_code[self.indexn, col_idx] = price
+
+            if 데이터길이 >= self.rolling_window:
+                jg_data = self.dict_jg.get(종목코드)
+                if jg_data:
+                    if 종목코드 not in self.dict_buy_num:
+                        self.dict_buy_num[종목코드] = self.indexn
+                    _, 포지션, 매수가, _, _, _, 매입금액, _, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 레버리지 = jg_data.values()
+                    if 포지션 == 'LONG':
+                        _, 수익금, 수익률 = self._get_profit_long(매입금액, 보유수량 * 현재가)
+                    else:
+                        _, 수익금, 수익률 = self._get_profit_short(매입금액, 보유수량 * 현재가)
+                    profit_data = self.dict_profit.get(종목코드)
+                    if profit_data:
+                        if 수익률 > profit_data[0]:
+                            profit_data[0] = 수익률
+                        elif 수익률 < profit_data[1]:
+                            profit_data[1] = 수익률
+                        최고수익률, 최저수익률 = profit_data
+                    else:
+                        self.dict_profit[종목코드] = [수익률, 수익률]
+                        최고수익률 = 최저수익률 = 수익률
+                    보유시간 = self._get_hold_time_min(매수시간)
+                    매수틱번호 = self.dict_buy_num[종목코드]
+                else:
+                    포지션, 매수틱번호, 수익금, 수익률, 레버리지, 매수가, 보유수량, 분할매수횟수, 분할매도횟수, 매수시간, 보유시간, \
+                        최고수익률, 최저수익률 = None, 0, 0, 0, 1, 0, 0, 0, 0, now(), 0, 0, 0
+
+                소숫점자리수 = self.dict_info[종목코드]['소숫점자리수']
+                self.profit, self.hold_time, self.indexb = 수익률, 보유시간, 매수틱번호
+
+                BBT  = not self.dict_set['매수금지시간'] or \
+                    not (self.dict_set['매수금지시작시간'] < 시분초 < self.dict_set['매수금지종료시간'])
+                BLK  = not self.dict_set['매수금지블랙리스트'] or 종목명 not in self.black_list
+                NIBL = 종목코드 not in self.dict_signal['BUY_LONG']
+                NISS = 종목코드 not in self.dict_signal['SELL_SHORT']
+                NISL = 종목코드 not in self.dict_signal['SELL_LONG']
+                NIBS = 종목코드 not in self.dict_signal['BUY_SHORT']
+                A    = 관심종목 and NIBL and 포지션 is None
+                B    = 관심종목 and NISS and 포지션 is None
+                C    = self.dict_set['매수분할시그널']
+                D    = NIBL and 포지션 == 'LONG' and 분할매수횟수 < self.dict_set['매수분할횟수']
+                E    = NISS and 포지션 == 'SHORT' and 분할매수횟수 < self.dict_set['매수분할횟수']
+                F    = NIBL and self.dict_set['매도취소매수시그널'] and not NISL
+                G    = NISS and self.dict_set['매도취소매수시그널'] and not NIBS
+
+                if BBT and BLK and (A or B or (C and D) or (C and E) or D or E or F or G):
+                    self.info_for_buy = F or G, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1, 소숫점자리수
+
+                    if A or B or (C and (D or E)) or F or G:
+                        BUY_LONG, SELL_SHORT = True, True
+                        if self.buystrategy is not None:
+                            try:
+                                exec(self.buystrategy)
+                            except:
+                                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
+                    elif D or E:
+                        BUY_LONG, SELL_SHORT = False, False
+                        분할매수기준수익률 = \
+                            round((현재가 / self._현재가N(-1) - 1) * 100, 2) if self.dict_set['매수분할고정수익률'] else 수익률
+                        if D:
+                            if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
+                                BUY_LONG   = True
+                            elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
+                                BUY_LONG   = True
+                        elif E:
+                            if self.dict_set['매수분할하방'] and 분할매수기준수익률 < -self.dict_set['매수분할하방수익률']:
+                                SELL_SHORT = True
+                            elif self.dict_set['매수분할상방'] and 분할매수기준수익률 > self.dict_set['매수분할상방수익률']:
+                                SELL_SHORT = True
+
+                        if BUY_LONG or SELL_SHORT:
+                            self.Buy(BUY_LONG)
+
+                SBT  = not self.dict_set['매도금지시간'] or \
+                    not (self.dict_set['매도금지시작시간'] < 시분초 < self.dict_set['매도금지종료시간'])
+                SCC  = self.dict_set['매수분할횟수'] == 1 or \
+                    not self.dict_set['매도금지매수횟수'] or 분할매수횟수 > self.dict_set['매도금지매수횟수값']
+                NIBL = 종목코드 not in self.dict_signal['BUY_LONG']
+                NISS = 종목코드 not in self.dict_signal['SELL_SHORT']
+
+                A = NIBL and NISL and SCC and 포지션 == 'LONG' and self.dict_set['매도분할횟수'] == 1
+                B = NISS and NIBS and SCC and 포지션 == 'SHORT' and self.dict_set['매도분할횟수'] == 1
+                C = self.dict_set['매도분할시그널']
+                D = NIBL and NISL and SCC and 포지션 == 'LONG' and 분할매도횟수 < self.dict_set['매도분할횟수']
+                E = NISS and NIBS and SCC and 포지션 == 'SHORT' and 분할매도횟수 < self.dict_set['매도분할횟수']
+                F = NISL and self.dict_set['매수취소매도시그널'] and not NIBL
+                G = NIBS and self.dict_set['매수취소매도시그널'] and not NISS
+                H = NIBL and NISL and 포지션 == 'LONG' and \
+                    self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+                J = NISS and NIBS and 포지션 == 'SHORT' and \
+                    self.dict_set['매도익절수익률청산'] and 수익률 > self.dict_set['매도익절수익률']
+                K = NIBL and NISL and 포지션 == 'LONG' and \
+                    self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+                L = NISS and NIBS and 포지션 == 'SHORT' and \
+                    self.dict_set['매도익절수익금청산'] and 수익금 > self.dict_set['매도익절수익금']
+                M = NIBL and NISL and 포지션 == 'LONG' and \
+                    self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                N = NISS and NIBS and 포지션 == 'SHORT' and \
+                    self.dict_set['매도손절수익률청산'] and 수익률 < -self.dict_set['매도손절수익률']
+                P = NIBL and NISL and 포지션 == 'LONG' and \
+                    self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+                Q = NISS and NIBS and 포지션 == 'SHORT' and \
+                    self.dict_set['매도손절수익금청산'] and 수익금 < -self.dict_set['매도손절수익금']
+                R = NIBL and NISL and 포지션 == 'LONG' and 수익률 * 레버리지 < -90
+                S = NISS and NIBS and 포지션 == 'SHORT' and 수익률 * 레버리지 < -90
+
+                if SBT and (A or B or (C and D) or (C and E) or D or E or F or G or H or J or K or L or M or N or P or Q or R or S):
+                    강제청산 = H or J or K or L or M or N or P or Q or R or S
+                    전량매도 = A or B or 강제청산
+                    self.info_for_sell = \
+                        F or G, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1, 소숫점자리수
+
+                    SELL_LONG, BUY_SHORT = False, False
+                    if A or B or (C and D) or (C and E) or F or G:
+                        if self.sellstrategy is not None:
+                            try:
+                                exec(self.sellstrategy)
+                            except:
+                                self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매도전략'))
+
+                    elif D or E or 강제청산:
+                        if H or K or M or P or R:
+                            SELL_LONG = True
+                        elif J or L or N or Q or S:
+                            BUY_SHORT = True
+                        elif D:
+                            if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
+                                SELL_LONG = True
+                            elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
+                                SELL_LONG = True
+                        elif E:
+                            if self.dict_set['매도분할하방'] and 수익률 < -self.dict_set['매도분할하방수익률'] * (분할매도횟수 + 1):
+                                BUY_SHORT = True
+                            elif self.dict_set['매도분할상방'] and 수익률 > self.dict_set['매도분할상방수익률'] * (분할매도횟수 + 1):
+                                BUY_SHORT = True
+
+                        if (포지션 == 'LONG' and SELL_LONG) or (포지션 == 'SHORT' and BUY_SHORT):
+                            self.Sell(SELL_LONG)
+
+        else:
+            pre_data = self.dict_data.get(종목코드)
+            if pre_data is None:
+                pre_data = np.empty((0, self.data_cnt + self.fm_tcnt), dtype=np.float64)
+            self.tick_count = 데이터길이 = len(pre_data) + 1
+            self.indexn = 데이터길이 - 1
+
+        if 관심종목:
+            """['종목명', 'per', 'hlp', 'lhp', 'ch', 'tm', 'dm', 'bm', 'sm']"""
+            self.dict_gj[종목코드] = {
+                '종목명': 종목명,
+                'per': 등락율,
+                'hlp': 고저평균대비등락율,
+                'lhp': 저가대비고가등락율,
+                'ch': 체결강도,
+                'tm': 분당거래대금,
+                'dm': 당일거래대금,
+                'bm': 당일매수금액,
+                'sm': 당일매도금액
+            }
+
+        if self.chart_code == 종목코드 and 데이터길이 >= self.rolling_window:
+            if not 전략연산:
+                new_data_tick = np.zeros(self.data_cnt + self.fm_tcnt, dtype=np.float64)
+                new_data_tick[:self.base_cnt] = data[:self.base_cnt]
+                self.arry_code = np.concatenate([pre_data, [new_data_tick]])
+                self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
+                self.arry_code[-1, self.area_cnt:self.data_cnt] = get_indicator(
+                    self.arry_code[:, self.dict_findex['현재가']],
+                    self.arry_code[:, self.dict_findex['분봉고가']],
+                    self.arry_code[:, self.dict_findex['분봉저가']],
+                    self.arry_code[:, self.dict_findex['분당거래대금']],
+                    self.indi_settings
+                )
+                if self.fm_list:
+                    for name, _, _, fname, data_type, _, _, style, stg, col_idx in self.fm_list:
+                        self.check, self.line, self.up, self.down = None, None, None, None
+
+                        exec(stg)
+
+                        if data_type == '선:일반':
+                            if self.line is not None:
+                                self.arry_code[self.indexn, col_idx] = self.line
+
+                        elif data_type == '선:조건':
+                            if self.check is not None and self.line is not None:
+                                if self.check:
+                                    self.arry_code[self.indexn, col_idx] = self.line
+                                else:
+                                    pre_line = self.arry_code[self.indexn - 1, col_idx]
+                                    if pre_line > 0:
+                                        self.arry_code[self.indexn, col_idx] = pre_line
+
+                        elif data_type == '범위':
+                            if self.check is not None and self.up is not None and self.down is not None:
+                                self.arry_code[self.indexn, col_idx] = 1.0 if self.check else 0.0
+                                self.arry_code[self.indexn, col_idx + 1] = self.up
+                                self.arry_code[self.indexn, col_idx + 2] = self.down
+
+                        elif data_type == '화살표:일반':
+                            if self.check is not None and self.check:
+                                if fname == '현재가':
+                                    price = 분봉저가 if style == 6 else 분봉고가
+                                else:
+                                    price = self.arry_code[self.indexn, self.dict_findex[fname]]
+                                self.arry_code[self.indexn, col_idx] = price
+
+            self.windowQ.put((ui_num['실시간차트'], 종목코드, self.arry_code))
+
+        if 틱수신시간 != 0:
+            gap = (now() - 틱수신시간).total_seconds()
+            self.windowQ.put((ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
+
     def _get_parameter_area(self, rw):
+        """구간연산 데이터 처리"""
         if self.is_tick:
             return [
                 self._이동평균(self.sma_list[0], calc=True), self._이동평균(self.sma_list[1], calc=True),
@@ -274,6 +1349,7 @@ class BaseStrategy(StrategyGlobalsFunc):
             ]
 
     def Buy(self, buy_long=False):
+        """매수시그널 처리"""
         취소시그널, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_buy
         if 취소시그널:
             주문수량 = 0
@@ -308,6 +1384,7 @@ class BaseStrategy(StrategyGlobalsFunc):
                 self.traderQ.put((signal_gubun, self.code, self.name, 예상체결가, 주문수량, now(), False))
 
     def _get_buy_count(self, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율):
+        """매수수량 계산"""
         if self.dict_set['비중조절'][0] == 0:
             betting = self.int_tujagm
         else:
@@ -338,6 +1415,7 @@ class BaseStrategy(StrategyGlobalsFunc):
         return 매수수량
 
     def Sell(self, sell_long=False):
+        """매도시그널 처리"""
         취소시그널, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_sell
         if 취소시그널:
             주문수량 = 0
@@ -372,6 +1450,7 @@ class BaseStrategy(StrategyGlobalsFunc):
                 self.traderQ.put((signal_gubun, self.code, self.name, 예상체결가, 주문수량, now(), True if 강제청산 else False))
 
     def _get_sell_count(self, 분할매도횟수, 보유수량):
+        """매도수량 계산"""
         if self.dict_set['매도분할횟수'] == 1:
             return 보유수량
         else:
@@ -384,6 +1463,7 @@ class BaseStrategy(StrategyGlobalsFunc):
             return 매도수량
 
     def _put_gsjm_and_delete_hilo(self):
+        """관심종목 데이터 푸시 및 최고수익률 데이터 정리"""
         if self.dict_gj:
             self.dict_gj = dict(sorted(self.dict_gj.items(), key=lambda x: x[1]['dm'], reverse=True))
             df_gj = pd.DataFrame.from_dict(self.dict_gj, orient='index')
@@ -395,6 +1475,7 @@ class BaseStrategy(StrategyGlobalsFunc):
             self.dict_profit = {k: v for k, v in self.dict_profit.items() if k in self.dict_jg}
 
     def _save_data(self, codes):
+        """데이터 저장"""
         for code in self.dict_data.copy():
             if code not in codes:
                 del self.dict_data[code]
@@ -415,15 +1496,17 @@ class BaseStrategy(StrategyGlobalsFunc):
             self.windowQ.put((ui_num['기본로그'], f'시스템 명령 실행 알림 - 데이터 저장 쓰기소요시간은 [{save_time:.6f}]초입니다.'))
         con.close()
 
-        if self.market_gubun < 5:
+        if self.market_gubun in (1, 2, 4):
             if self.gubun != 7:
                 self.stgQs[self.gubun + 1].put(('데이터저장', codes))
             else:
-                self.stgQs[self.gubun].put('프로세스종료')
+                for q in self.stgQs:
+                    q.put('프로세스종료')
         else:
             self.stgQ.put('프로세스종료')
 
     def _update_high_low(self, 종목코드, 현재가또는분봉고가, 분봉저가=None):
+        """당일 고가 및 저가 데이터 처리"""
         if 분봉저가 is None:
             high_low = self.high_low.get(종목코드)
             if high_low:
@@ -447,14 +1530,26 @@ class BaseStrategy(StrategyGlobalsFunc):
             else:
                 self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
 
-    def _strategy(self, data):
-        pass
+    def _get_profit(self, 매입금액, 보유금액):
+        return 0
 
-    def _get_order_price(self, 거래금액, 주문수량):
+    def _get_profit_long(self, 매입금액, 보유금액):
+        return 0
+
+    def _get_profit_short(self, 매입금액, 보유금액):
+        return 0
+
+    def _get_hold_time(self, 매수시간):
+        return 0
+
+    def _get_hold_time_min(self, 매수시간):
         return 0
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         return 0
 
     def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
+        return 0
+
+    def _get_order_price(self, 거래금액, 주문수량):
         return 0

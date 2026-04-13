@@ -305,7 +305,7 @@ class Total:
 
             save_file_name = f"{self.savename}_{self.buystg_name}_{self.optistandard}_{self.file_name}"
             con = sqlite3.connect(DB_BACKTEST)
-            df_all_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=1000)
+            df_all_tsg.to_sql(save_file_name, con, if_exists='append', chunksize=2000)
             con.close()
             self.wq.put((ui_num['상세기록'], df_all_tsg))
 

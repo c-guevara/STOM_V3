@@ -178,8 +178,8 @@ def trade_process_start(ui):
         ui.proc_trader.start()
 
     if not strategy_process_alive(ui):
-        target = ui.market_info['프로세스'][2][ui.dict_set['타임프레임']]
-        if ui.market_gubun < 5:
+        target = ui.market_info['프로세스'][2]
+        if ui.market_gubun in (1, 2, 4):
             for i in range(8):
                 p = Process(target=target, args=(i, ui.qlist, ui.dict_set, ui.market_infos))
                 p.start()

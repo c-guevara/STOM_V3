@@ -1,11 +1,11 @@
 
 import sys
 from PyQt5.QtCore import QTimer
-from trade.ls_rest_api import LsRestData
+from trade.restapi_ls import LsRestData
 from PyQt5.QtWidgets import QApplication
 from utility.static import now, error_decorator
+from trade.restapi_ls import LsRestAPI, LsWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from trade.ls_rest_api import LsRestAPI, LsWebSocketReceiver
 
 
 class StockReceiver(BaseReceiver):
@@ -43,16 +43,13 @@ class StockReceiver(BaseReceiver):
 
     @error_decorator
     def _convert_real_data(self, data):
-        start = now()
-        tr_cd = data['header']['tr_cd']
-        body  = data['body']
+        body = data['body']
         if body is None:
             return
 
+        start = now()
+        tr_cd = data['header']['tr_cd']
         if tr_cd == self.tr_cd_hoga:
-            market = body['exchname']
-            if market != 'KRX':
-                return
             int_hms = int(body['hotime'])
             if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
                 return
@@ -69,13 +66,13 @@ class StockReceiver(BaseReceiver):
                 float(body['bidho9']), float(body['bidho10'])
             ]
             hoga_samount = [
-                float(body['krx_krx_offerrem1']), float(body['krx_offerrem2']), float(body['krx_offerrem3']),
+                float(body['krx_offerrem1']), float(body['krx_offerrem2']), float(body['krx_offerrem3']),
                 float(body['krx_offerrem4']), float(body['krx_offerrem5']), float(body['krx_offerrem6']),
                 float(body['krx_offerrem7']), float(body['krx_offerrem8']), float(body['krx_offerrem9']),
                 float(body['krx_offerrem10'])
             ]
             hoga_bamount = [
-                int(body['krx_krx_bidrem1']), int(body['krx_bidrem2']), int(body['krx_bidrem3']), int(body['krx_bidrem4']),
+                int(body['krx_bidrem1']), int(body['krx_bidrem2']), int(body['krx_bidrem3']), int(body['krx_bidrem4']),
                 int(body['krx_bidrem5']), int(body['krx_bidrem6']), int(body['krx_bidrem7']), int(body['krx_bidrem8']),
                 int(body['krx_bidrem9']), int(body['krx_bidrem10'])
             ]
