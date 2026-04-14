@@ -3,8 +3,9 @@ import pyqtgraph as pg
 from PyQt5.QtGui import QColor
 from ui.draw_chart.draw_crosshair import CrossHair
 from ui.draw_chart.draw_label_text import get_label_text
-from ui.create_widget.set_style import qfont12, color_fg_bt, color_bg_bt, color_bg_ld
+from utility.static_method.static import set_builtin_print
 from ui.draw_chart.draw_chart_items import CandlestickItem, VolumeBarItem, AreaItem
+from ui.create_widget.set_style import qfont12, color_fg_bt, color_bg_bt, color_bg_ld
 
 
 class DrawChartBase:
@@ -47,6 +48,7 @@ class DrawChartBase:
             (80, 80, 80),
             (60, 60, 60)
         ]
+        set_builtin_print(self.ui.windowQ)
 
     def fi(self, fname):
         return self.ui.dict_findex[fname]

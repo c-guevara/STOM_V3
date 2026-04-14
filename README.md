@@ -2,15 +2,17 @@
 
 - STOM은 1초스냅샷 또는 1분봉 데이터를 기반으로 하는 단타전용 시스템트레이딩툴입니다.
 - 단순한 자동매매를 넘어 강력한 백테스트, 최적화, 전진분석, 주문관리시스템(OMS)이 적용되어 있습니다.
-- 키움증권 국내주식, 해외선물, 업비트, 바이낸스선물 거래소의 API가 연동되어 있습니다.
+- LS증권 국내주식, ETF, ETN, 국내선물, 해외선물 및 업비트, 바이낸스선물 거래소의 API가 연동되어 있습니다.
 - 기본 230여개의 전략모듈이 있으며 사용자 팩터를 만들 수 있는 수식관리자가 포함되어 있습니다.
 - 수식관리자는 단순한 차트 표시용이 아니라 작성한 수식명으로 전략 및 백테에서 바로 사용이 가능합니다.
 - 최적화 알고리즘은 그리드, 유전, 교차검증, 베이지안을 지원하며 OPTUNA의 각종 샘플러까지 포함되어 있습니다.
 - 조건최적화는 여러가지 조건을 무작위로 조합하여 백테스트하면서 전략을 자동으로 생성합니다.
 - 전략 텍스트의 버전관리(버전번호 자동넘버링 및 텍스트 비교) 시스템을 통해 전략을 쉽게 관리할 수 있습니다. 
 - STOM LIVE 탭에서는 사용자들의 당일실현손익 및 백테결과를 확인할 수 있습니다.
-- 소스코드가 5만줄이 넘지만, 파이썬 기본 문법 정도만 배우면 누구나 쉽게 사용할 수 있도록 설계되었습니다.
+- 소스코드가 4만줄이 넘지만, 파이썬 기본 문법 정도만 배우면 누구나 쉽게 사용할 수 있도록 설계되었습니다.
 - 설치 및 사용방법을 포함한 STOM에 대한 모든 강의는 아래 유튜브에 공개되어 있습니다.
+
+
 - [**STOM YouTube**](https://www.youtube.com/@stomlive)
 - [**STOM Community**](https://cafe.naver.com/stom)
 
@@ -23,14 +25,16 @@
 - 업데이트는 부가적으로 제공되는 것이며 영구 지속되지 않을 수 있습니다.
 - 사용상 발생한 불이익은 사용자 본인의 책임입니다.
 
-|   버전   |    시리얼키     |    주요기능    |   실행제한   |       기능제한       | 변조감지 |
-|:------:|:-----------:|:----------:|:--------:|:----------------:|:----:|
-| **무료** | STOM_PUBLIC | 백테스트, 백파인더 |  IP당 1개  | 최적화 및 전진분석 사용불가능 |  O   |
-| **유료** |  구독결재 발급키   | 최적화, 전진분석  | 실행 제한 없음 |  모든 기능 사용 제한 없음  |  X   |
+|   버전   |    시리얼키     |  실행제한  | 커뮤니티카페 | 구글드라이브 | 단톡방 |
+|:------:|:-----------:|:------:|:------:|:------:|:---:|
+| **무료** | STOM_PUBLIC | IP당 1개 |   O    |   X    |  X  |
+| **유료** |  구독결재 발급키   | 제한 없음  |   O    |   O    |  O  |
 
 - **무료버전 사용방법**: 설정탭 시리얼키 입력란에 STOM_PUBLIC이라고 입력 후 저장
-- 무료버전은 파일편집 후 제한 기능 우회 실행 시 변조를 감지하여 프로그램이 종료됩니다.
-- 유료버전은 사용자편의에 맞게 소스코드를 자유롭게 수정하여 사용할 수 있습니다.
+- 커뮤니티용 카페는 누구나 자유롭게 이용할 수 있습니다. (자유가입, 자동등업)
+- 데이터 공유용 구글드라이브 및 단톡방은 구독결재 후에 이용할 수 있습니다.
+
+
 - [**구독결재문의**](https://cafe.naver.com/stom)
 - [**비지니스문의**](mailto:youseonho@naver.com)
 
@@ -38,46 +42,74 @@
 
 ```
 STOM/
-├── stom.bat                            # 메인 실행 파일
-├── stom_stock.bat                      # 국내주식 모드 실행
-├── stom_coin.bat                       # 코인 모드 실행
-├── stom_future.bat                     # 해외선물 모드 실행
-├── pip_install_32.bat                  # 32비트 라이브러리 설치
-├── pip_install_64.bat                  # 64비트 라이브러리 설치
+├── stom.bat                            # 메인 실행용 배치 파일
+├── stom_login.bat                      # 자동 로그인 모드로 실행용 배치 파일
+├── stom.py                             # 메인 UI 실행 파일
+├── pip_install.bat                     # 라이브러리 설치
+├── _license.txt                        # 라이선스 파일
+├── _update.txt                         # 업데이트 목록
 │
-├── backtest/                           # 백테스트 및 최적화
-│   ├── backengine_*.py                 # 백테스트 엔진
+├── backtest/                           # 백테스트 엔진
 │   ├── backfinder.py                   # 백파인더
 │   ├── backtest.py                     # 백테스트
-│   ├── optimiz*.py                     # 최적화, 교차검증, GA, OPTUNA, 
+│   ├── optimiz.py                      # 그리드, 검증, 교차검증, OPTUNA 최적화 및 최적화 테스트 
+│   ├── optimiz_conditions.py           # 조건 최적화
+│   ├── optimiz_genetic_algorithm.py    # 유전 알고리즘(GA) 최적화
 │   ├── rolling_walk_forward_test.py    # 전진분석
-│   └── graph/                          # 백테스트 결과 그래프 저장
+│   ├── backengine_base.py              # 주문관리 미적용 백테스트 엔진 베이스 클래스
+│   ├── backengine_base_oms.py          # 주문관리 적용 백테스트 엔진 베이스 클래스
+│   ├── _graph/                         # 백테스트 결과 그래프 저장
+│   ├── stock_korea/                    # 국내주식 백테스트 엔진
+│   ├── stock_usa/                      # 해외주식 백테스트 엔진
+│   ├── upbit/                          # 업비트 백테스트 엔진
+│   ├── future/                         # 국내선물 백테스트 엔진
+│   ├── future_oversea/                 # 해외선물 백테스트 엔진
+│   └── binance/                        # 바이낸스선물 백테스트 엔진
 │
 ├── trade/                              # 실시간 트레이딩 모듈
-│   ├── base_strategy.py                # 전략 기반 클래스 (230개+ 템플릿)
-│   ├── formula_manager.py              # 사용자 팩터, 수식관리자
-│   ├── risk_analyzer.py                # 리스크 분석
-│   ├── microstructure_analyzer.py      # 시장미시구조 분석
+│   ├── analyzer_microstruc.py          # 시장미시구조 분석
+│   ├── analyzer_risk.py                # 리스크 분석
+│   ├── stg_globals_func.py             # 전략 기반 클래스(230여개의 전략 모듈)
+│   ├── base_receiver.py                # 리시버용 베이스 클래스
+│   ├── base_strategy.py                # 전략연산용 베이스 클래스
+│   ├── base_trader.py                  # 트레이더용 베이스 클래스
 │   ├── stock_korea/                    # 국내주식 API 연동
-│   ├── future_oversea/                 # 해외선물 API 연동
+│   ├── stock_usa/                      # 해외주식 API 연동
 │   ├── upbit/                          # 업비트 API 연동
-│   └── binance/                        # 바이낸스 API 연동
+│   ├── future/                         # 국내선물 API 연동
+│   ├── future_oversea/                 # 해외선물 API 연동
+│   └── binance/                        # 바이낸스선물 API 연동
 │
-├── ui/                                 # PyQt5 기반 GUI
-│   ├── set_*.py                        # UI 설정 및 레이아웃
-│   ├── ui_*.py                         # UI 이벤트 및 동작 처리
-│   └── icon/                           # 아이콘 리소스
+├── ui/                                 # UI
+│   ├── ui_mainwindow.pyd               # 메인 UI 및 시리얼키 인증 클래스
+│   ├── _icon/                          # 아이콘 리소스
+│   ├── create_widget/                  # 위젯 생성
+│   ├── draw_chart/                     # 차트 그리기
+│   ├── event_activate/                 # 콤보박스 액티브 처리
+│   ├── event_change/                   # 체인지 이벤트 처리
+│   ├── event_click/                    # 마우스 클릭 이벤트 처리
+│   ├── event_keypress/                 # 키보드 입력 이벤트 처리
+│   └── update_widget/                  # 웨젯 업데이트 처리
 │
 ├── utility/                            # 공통 유틸리티
-│   ├── chart_hoga_query_sound.py       # 차트, 호가, 쿼리, 사운드
-│   ├── telegram_bot.py                 # 텔레그램봇
-│   ├── webcrawling.py                  # 웹크롤링
-│   └── ai_agent/                       # AI 에이전트용 전략 설명
-│   └── imagefiles/                     # 주요 화면 스크린샷
-│   └── pycharm/                        # 파이참 규칙 및 테마
+│   ├── _imagefiles/                    # 각종 스크린샷
+│   ├── _pycharm/                       # 파이참 규칙 및 테마
+│   ├── ai_agent/                       # AI 에이전트용 rules 파일
+│   └── db_control/                     # 데이터베이스 관리 모듈
+│   └── settings/                       # 설정 관리 모듈
+│   └── static_method/                  # 공통 사용 모듈
+│   └── sub_process_and_thread/         # 서브 프로세스 및 서브 스레드 모듈
 │
-├── _database/                          # 데이터베이스
-└── _log/                               # 로그
+├── _database/                          # 데이터베이스용 폴더
+│   ├── code_info.db                    # 거래소별 종목정보 저장용 DB
+│   ├── setting.db                      # 설정 저장용 DB
+│   ├── strategy.db                     # 전략 저장용 DB
+│   ├── backtest.db                     # 백테스트 결과 저장용 DB
+│   ├── optuna.db                       # OPTUNA 최적화 결과 저장용 DB
+│   ├── tradelist.db                    # 체결목록, 거래목록, 당일실현손익, 잔고목록용 DB
+│   └── strategy_versions/              # 전략 버전 관리 시스템용 폴더
+│
+└── _log/                               # 로그용 폴더
 ```
 
 ## 기술 스택

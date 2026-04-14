@@ -1,7 +1,5 @@
 
 ICON_PATH         = './ui/_icon'
-STOCK_LOGIN_PATH  = './trade/stock_korea/login_kiwoom'
-FUTURE_LOGIN_PATH = './trade/future_oversea/login_future'
 GRAPH_PATH        = './backtest/_graph'
 BACK_TEMP         = './backtest/_temp'
 DB_PATH           = './_database'

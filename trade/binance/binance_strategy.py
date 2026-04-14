@@ -10,8 +10,8 @@ class BinanceStrategy(BaseStrategy):
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
-    def _get_hogaunit(self, 주문가격또는종목코드):
-        return self.dict_info[주문가격또는종목코드]['호가단위']
+    def _get_hogaunit(self, 종목코드):
+        return self.dict_info[종목코드]['호가단위']
 
     def _get_profit_long(self, 매입금액, 보유금액):
         return get_profit_coin_future_long(

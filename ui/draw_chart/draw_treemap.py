@@ -1,7 +1,7 @@
 
 import pandas as pd
 from utility.settings.setting_base import ui_num
-from utility.static_method.static import error_decorator
+from utility.static_method.static import error_decorator, set_builtin_print
 
 
 class DrawTremap:
@@ -16,6 +16,7 @@ class DrawTremap:
         self.tm_dt   = False
         self.tm_mc1  = 0
         self.tm_mc2  = 0
+        set_builtin_print(self.ui.windowQ)
 
     @error_decorator
     def draw_treemap(self, data):

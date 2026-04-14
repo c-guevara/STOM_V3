@@ -10,8 +10,8 @@ class StockStrategy(BaseStrategy):
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
-    def _get_hogaunit(self, 주문가격또는종목코드):
-        return get_hogaunit_stock(주문가격또는종목코드)
+    def _get_hogaunit(self, 주문가격):
+        return get_hogaunit_stock(주문가격)
 
     def _get_profit(self, 매입금액, 보유금액):
         return get_profit_stock(매입금액, 보유금액)

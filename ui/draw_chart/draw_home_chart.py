@@ -1,5 +1,5 @@
 
-from utility.static_method.static import error_decorator
+from utility.static_method.static import error_decorator, set_builtin_print
 
 
 class DrawHomeChart:
@@ -23,6 +23,7 @@ class DrawHomeChart:
             'ADA/USDT': 14,
             'LINK/USDT': 15,
         }
+        set_builtin_print(self.ui.windowQ)
 
     @error_decorator
     def draw_home_chart(self, data):

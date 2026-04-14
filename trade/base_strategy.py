@@ -798,7 +798,7 @@ class BaseStrategy(StgGlobalsFunc):
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간 = data
 
         시분초, 순매수금액 = int(str(체결시간)[8:]), 초당매수금액 - 초당매도금액
-        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
+        self.hoga_unit = 호가단위 = self._get_hogaunit(종목코드)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]
@@ -1029,7 +1029,7 @@ class BaseStrategy(StgGlobalsFunc):
             매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목, 종목코드, 종목명, 틱수신시간, 전략연산 = data
 
         시분초, 순매수금액 = int(str(체결시간)[8:] + '00'), 분당매수금액 - 분당매도금액
-        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
+        self.hoga_unit = 호가단위 = self._get_hogaunit(종목코드)
 
         self.shogainfo[:] = [매도호가1, 매도호가2, 매도호가3, 매도호가4, 매도호가5]
         self.shreminfo[:] = [매도잔량1, 매도잔량2, 매도잔량3, 매도잔량4, 매도잔량5]

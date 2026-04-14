@@ -19,7 +19,7 @@ class ImportProgressHook:
             'utility.static_method.static',
             'utility.sub_process_and_thread.chart_hoga_query_sound',
             'ui.create_widget.set_text_stg_button',
-    
+
             'ui.create_widget.set_icon',
             'ui.create_widget.set_table',
             'ui.create_widget.set_log_tap',
@@ -34,7 +34,7 @@ class ImportProgressHook:
             'ui.create_widget.set_dialog_chart',
             'ui.create_widget.set_dialog_formula',
             'ui.create_widget.set_dialog_strategy',
-    
+
             'ui.draw_chart.draw_treemap',
             'ui.draw_chart.draw_chart_db',
             'ui.etcetera.load_database',
@@ -44,7 +44,7 @@ class ImportProgressHook:
             'ui.update_widget.update_textedit',
             'ui.etcetera.process_alive',
             'ui.update_widget.update_tablewidget',
-    
+
             'ui.etcetera.etc',
             'ui.update_widget.update_progressbar',
             'ui.event_click.button_clicked_shortcut',

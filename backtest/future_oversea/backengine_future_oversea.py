@@ -4,8 +4,8 @@ from utility.static_method.static import get_profit_future_os_long, get_profit_f
 
 
 class BackEngineFutureOversea(BackEngineFuture):
-    def _get_hogaunit(self, 주문가격또는종목코드):
-        return self.dict_info[주문가격또는종목코드]['호가단위']
+    def _get_hogaunit(self, 종목코드):
+        return self.dict_info[종목코드]['호가단위']
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         return int(betting / 현재가)

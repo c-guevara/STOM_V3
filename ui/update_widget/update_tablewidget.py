@@ -5,8 +5,9 @@ from ui.draw_chart.draw_label_text import get_label_text
 from PyQt5.QtWidgets import QTableWidgetItem, QHeaderView
 from ui.etcetera.process_alive import receiver_process_alive
 from utility.settings.setting_base import ui_num, columns_hg, columns_hj
-from utility.static_method.static import change_format, comma2int, comma2float, dt_ymdhms, error_decorator
 from ui.create_widget.set_style import color_fg_bt, color_fg_dk, color_fg_bc, color_bf_bt, color_bf_dk, color_ct_hg
+from utility.static_method.static import change_format, comma2int, comma2float, dt_ymdhms, error_decorator, \
+    set_builtin_print
 
 
 class NumericItem(QTableWidgetItem):
@@ -144,6 +145,7 @@ class UpdateTablewidget:
             '등락율각도', '고저평균대비등락율', '저가대비고가등락율', '당일매수금액', '당일매도금액', '최고매수금액',
             '최고매도금액', '최고매수가격', '최고매도가격', '누적초당매수수량', '누적초당매도수량', '매도수5호가잔량합'
         ]
+        set_builtin_print(self.ui.windowQ)
 
     # noinspection PyUnresolvedReferences
     @error_decorator
@@ -316,11 +318,14 @@ class UpdateTablewidget:
                     color = color_fg_bt if arry[i, columns_list.index('총평가손익')] >= 0 else color_fg_dk
                     item.setForeground(color)
 
-                elif gubun in ui_num['체결목록']:
+                elif gubun == ui_num['체결목록']:
                     order_gubun = arry[i, 1]
-                    if order_gubun == '매수':   item.setForeground(color_fg_bt)
-                    elif order_gubun == '매도': item.setForeground(color_fg_dk)
-                    elif '취소' in order_gubun: item.setForeground(color_fg_bc)
+                    if order_gubun == '매수' or order_gubun == 'BUY_LONG' or order_gubun == 'SELL_SHORT':
+                        item.setForeground(color_fg_bt)
+                    elif order_gubun == '매도':
+                        item.setForeground(color_fg_dk)
+                    elif '취소' in order_gubun or 'CANCEL' in order_gubun:
+                        item.setForeground(color_fg_bc)
 
                 elif gubun in self.uinums_hogatick and not self.ui.database_chart:
                     if column == '체결수량':

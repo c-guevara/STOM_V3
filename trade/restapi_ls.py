@@ -8,8 +8,8 @@ import websockets
 from traceback import format_exc
 from trade.restapi_lsdata import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
-from utility.static_method.static import now
 from utility.settings.setting_base import ui_num
+from utility.static_method.static import now, set_builtin_print, error_decorator
 
 
 class LsRestAPI:
@@ -21,6 +21,7 @@ class LsRestAPI:
         self.token   = None
         self.tr_cont = False
         self.tr_cont_key = ''
+        set_builtin_print(self.windowQ)
 
     def _post(self, gubun: str, cont='N', cont_key='', **kwargs):
         """요청용 데이터(url, headers, params) 생성 및 전송
@@ -73,6 +74,7 @@ class LsRestAPI:
         self.token = data['access_token']
         return self.token
 
+    @error_decorator
     def get_code_info_stock(self, etfgubun=0, debug=False):
         """국내주식종목정보 ['구분'], '국내주식상장주수' ['종목코드', '거래소구분코드']
         etfgubun: 0 (코스피 + 코스닥), 1 (ETF), 2 (ETN)
@@ -105,6 +107,7 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, list(dict_data.keys())
 
+    @error_decorator
     def get_code_info_stock_usa(self, debug=False):
         """해외주식종목정보 ['지연구분', '국가구분', '거래소구분', '조회갯수', '연속구분']
         거래소구분: '1' (뉴욕거래소), '2' (나스닥)
@@ -134,6 +137,7 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, keysymbols
 
+    @error_decorator
     def get_code_info_future(self, debug=False):
         """지수선물종목정보1 ['구분'], 지수선물종목정보2 ['구분'], '파생상품증거금조회' ['종목대분류코드', '종목중분류코드']
         t8432(코스피200), t8435(미니코스피200, 코스닥150) 조회 TR이 다름
@@ -193,6 +197,7 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, list(dict_data.keys()), dict_expcode
 
+    @error_decorator
     def get_code_info_future_night(self, debug=False):
         """야간선물종목정보 ['구분'], 구분: 'NF' (코스피200선물), 'NQF' (코스닥150선물)"""
         dict_data = {}
@@ -250,6 +255,7 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, list(dict_data.keys()), dict_expcode
 
+    @error_decorator
     def get_code_info_future_oversea(self, debug=False):
         """해외선물종목정보 ['구분']"""
         tr_name = '해외선물종목정보'
@@ -267,6 +273,7 @@ class LsRestAPI:
         if debug: print(dict_data)
         return dict_data, list(dict_data.keys())
 
+    @error_decorator
     def get_balance_stock(self):
         """국내주식예수금 ['레코드갯수', '잔고생성구분']"""
         tr_name = '국내주식예수금'
@@ -274,6 +281,7 @@ class LsRestAPI:
         data = self._post(tr_name, 레코드갯수=1, 잔고생성구분='1')
         return int(data[out_block]['D2Dps'])
 
+    @error_decorator
     def get_balance_stock_usa(self):
         """해외주식예수금 ['레코드갯수', '통화코드']"""
         tr_name = '해외주식예수금'
@@ -281,6 +289,7 @@ class LsRestAPI:
         data = self._post(tr_name, 레코드갯수=1, 통화코드='USD')
         return int(data[out_block]['FcurrDps'])
 
+    @error_decorator
     def get_balance_future(self):
         """지수선물예수금 ['레코드갯수']"""
         tr_name = '지수선물예수금'
@@ -288,6 +297,7 @@ class LsRestAPI:
         data = self._post(tr_name, 레코드갯수=1)
         return int(data[out_block]['Dps'])
 
+    @error_decorator
     def get_balance_future_oversea(self):
         """ 해외선물예수금 ['계좌구분코드', '거래일자']"""
         tr_name = '해외선물예수금'
@@ -295,6 +305,7 @@ class LsRestAPI:
         data = self._post(tr_name, 계좌구분코드='1', 거래일자=LsRestData.당일일자)
         return int(data[out_block]['FcurrOrdAbleAmt'])
 
+    @error_decorator
     def order_stock(self, 종목코드, 주문구분, 주문수량, 주문가격, 호가유형):
         """국내주식일반주문
         ['종목코드', '주문수량', '주문가격', '주문구분코드', '호가유형코드', '신용거래코드', '대출일', '주문조건코드', '회원사번호']"""
@@ -307,6 +318,7 @@ class LsRestAPI:
                           신용거래코드='000', 대출일='', 주문조건코드=주문조건코드, 회원사번호='')
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_modify_stock(self, 종목코드, 원주문번호, 주문수량, 주문가격, 호가유형):
         """국내주식정정주문 ['원주문번호', '종목코드', '주문수량', '호가유형코드', '주문조건코드', '주문가격']"""
         tr_name = '국내주식정정주문'
@@ -317,6 +329,7 @@ class LsRestAPI:
                           주문조건코드=주문조건코드, 주문가격=주문가격)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_cancel_stock(self, 종목코드, 원주문번호, 주문수량):
         """국내주식취소주문 ['원주문번호', '종목코드', '주문수량']"""
         tr_name = '국내주식취소주문'
@@ -324,6 +337,7 @@ class LsRestAPI:
         data = self._post(tr_name, 원주문번호=원주문번호, 종목코드=종목코드, 주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_stock_usa(self, 종목코드, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형, 원주문번호=''):
         """해외주식일반주문
         ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
@@ -339,6 +353,7 @@ class LsRestAPI:
                               종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_modify_stock_usa(self, 종목코드, 원주문번호, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형):
         """해외주식정정주문
         ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
@@ -350,6 +365,7 @@ class LsRestAPI:
                           종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_future(self, 종목코드, 주문구분, 주문가격, 주문수량, 호가유형):
         """지수선물일반주문 ['종목코드', '주문구분코드', '호가유형코드', '주문가격', '주문수량']"""
         tr_name = '지수선물일반주문'
@@ -359,6 +375,7 @@ class LsRestAPI:
         data = self._post(tr_name, 종목코드=종목코드, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_modify_future(self, 종목코드, 원주문번호, 주문가격, 주문수량, 호가유형):
         """지수선물정정주문 ['종목코드', '원주문번호', '호가유형코드', '주문가격', '주문수량']"""
         tr_name = '지수선물정정주문'
@@ -367,6 +384,7 @@ class LsRestAPI:
         data = self._post(tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_cancel_future(self, 종목코드, 원주문번호, 주문수량):
         """지수선물취소주문 ['종목코드', '원주문번호', '주문수량']"""
         tr_name = '지수선물취소주문'
@@ -374,6 +392,7 @@ class LsRestAPI:
         data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_future_night(self, 종목코드, 주문구분, 주문가격, 주문수량, 호가유형):
         """야간선물일반주문 ['종목코드', '주문구분코드', '호가유형코드', '주문가격', '주문수량']"""
         tr_name = '야간선물일반주문'
@@ -384,6 +403,7 @@ class LsRestAPI:
                           주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_modify_future_night(self, 종목코드, 원주문번호, 주문가격, 주문수량, 호가유형):
         """야간선물정정주문 ['종목코드', '원주문번호', '호가유형코드', '주문가격', '주문수량']"""
         tr_name = '야간선물정정주문'
@@ -392,6 +412,7 @@ class LsRestAPI:
         data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_cancel_future_night(self, 종목코드, 원주문번호, 주문수량):
         """야간선물취소주문 ['종목코드', '원주문번호', '주문수량']"""
         tr_name = '야간선물취소주문'
@@ -399,6 +420,7 @@ class LsRestAPI:
         data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
         return data[out_block]['OrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_future_oversea(self, 종목코드, 주문구분, 주문가격, 주문수량, 주문유형, 조건주문가격=0):
         """해외선물일반주문
         ['주문일자', '종목코드', '주문구분', '주문구분코드', '호가유형코드', '통화코드', '주문가격', '조건주문가격', '주문수량',
@@ -412,6 +434,7 @@ class LsRestAPI:
                           주문수량=주문수량, 상품코드='000000', 만기년월='000001', 거래소코드=' ')
         return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_modify_future_oversea(self, 종목코드, 원주문번호, 주문구분, 주문가격, 주문수량, 주문유형, 조건주문가격=0):
         """해외선물정정주문
         ['주문일자', '원주문번호', '종목코드', '주문구분', '주문구분코드', '호가유형코드', '통화코드', '주문가격', '조건주문가격',
@@ -425,6 +448,7 @@ class LsRestAPI:
                           조건주문가격=조건주문가격, 주문수량=주문수량, 상품코드='', 만기년월='', 거래소코드=' ')
         return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
 
+    @error_decorator
     def order_cancel_future_oversea(self, 종목코드, 원주문번호):
         """해외선물취소주문 ['주문일자', '종목코드', '원주문번호', '주문구분', '상품구분코드', '거래소코드']"""
         tr_name = '해외선물취소주문'
@@ -491,7 +515,7 @@ class LsWebSocketReceiver(QThread):
             await self.websocket.send(json.dumps(data))
             await asyncio.sleep(0.02)
 
-            if i % 100 == 0:
+            if i % 100 == 0 or i == last - 1:
                 self.windowQ.put(
                     (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
                 )
@@ -502,7 +526,7 @@ class LsWebSocketReceiver(QThread):
             await self.websocket.send(json.dumps(data))
             await asyncio.sleep(0.02)
 
-            if i % 100 == 0:
+            if i % 100 == 0 or i == last - 1:
                 self.windowQ.put(
                     (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
                 )

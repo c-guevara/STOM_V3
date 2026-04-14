@@ -763,7 +763,7 @@ class BackEngineBase(StgGlobalsFunc):
                 매도총잔량, 매수총잔량, 매도수5호가잔량합, 관심종목 = self.arry_code[self.indexn, 1:self.base_cnt]
 
         시분초, 순매수금액 = int(str(체결시간)[8:]), 초당매수금액 - 초당매도금액
-        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가)
+        self.hoga_unit = 호가단위 = self._get_hogaunit(현재가 if self.market_gubun < 6 else self.code)
         종목명, 종목코드, 데이터길이, 체결시간, 시분초 = self.name, self.code, self.tick_count, self.index, int(str(self.index)[8:])
 
         리스크점수 = 0

@@ -1,5 +1,4 @@
 
-import re
 import jwt
 import json
 import uuid
@@ -11,6 +10,7 @@ from traceback import format_exc
 from urllib.parse import unquote, urlencode
 from PyQt5.QtCore import QThread, pyqtSignal
 from utility.settings.setting_base import ui_num
+from utility.static_method.static import set_builtin_print, error_decorator
 
 
 def get_symbols_info():
@@ -40,9 +40,10 @@ def get_symbols_info():
 
 
 class UpbitRestAPI:
-    def __init__(self, access, secret):
-        self.access = access
-        self.secret = secret
+    def __init__(self, access, secret, windowQ):
+        self.access  = access
+        self.secret  = secret
+        self.windowQ = windowQ
 
         self.주문구분 = {
             '매수': 'bid',
@@ -64,6 +65,7 @@ class UpbitRestAPI:
             '최유리IOC': 'ioc',
             '최유리FOK': 'fok',
         }
+        set_builtin_print(self.windowQ)
 
     def _headers(self, query=None):
         payload = {
@@ -97,11 +99,13 @@ class UpbitRestAPI:
         response = requests.delete(url, headers=headers, data=json.dumps(data))
         return response.json()
 
+    @error_decorator
     def get_balances(self):
         url = 'https://api.upbit.com/v1/accounts'
         ret = self._get(url)
         return int(float(ret[0]['balance']))
 
+    @error_decorator
     def order_coin(self, 종목코드='', 주문구분='', 주문유형='', 주문금액=0, 주문수량=0):
         url = 'https://api.upbit.com/v1/orders'
         data = {
@@ -122,21 +126,11 @@ class UpbitRestAPI:
 
         return self._post(url, data)
 
+    @error_decorator
     def order_cancel(self, od_no):
         url = 'https://api.upbit.com/v1/order'
         data = {'uuid': od_no}
         return self._delete(url, data)
-
-    def get_order_info(self, od_no, state='wait', page=1, limit=100):
-        p = re.compile(r'^\w+-\w+-\w+-\w+-\w+$')
-        is_uuid = len(p.findall(od_no)) > 0
-        if is_uuid:
-            url = 'https://api.upbit.com/v1/order'
-            data = {'uuid': od_no}
-        else:
-            url = 'https://api.upbit.com/v1/orders'
-            data = {'market': od_no, 'state': state, 'page': page, 'limit': limit, 'order_by': 'desc'}
-        return self._get(url, data)
 
 
 class UpbitWebSocketReceiver(QThread):

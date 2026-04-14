@@ -5,7 +5,8 @@ from PyQt5.QtWidgets import QApplication
 from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
 from trade.restapi_upbit import UpbitRestAPI, UpbitWebSocketTrader
-from utility.static_method.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc, error_decorator
+from utility.static_method.static import now, timedelta_sec, get_hogaunit_coin, get_profit_coin, str_ymdhms_utc, \
+    error_decorator
 
 
 class UpbitTrader(BaseTrader):
@@ -21,7 +22,7 @@ class UpbitTrader(BaseTrader):
             'cancel': '취소'
         }
 
-        self.upbit = UpbitRestAPI(self.access_key, self.secret_key)
+        self.upbit = UpbitRestAPI(self.access_key, self.secret_key, self.windowQ)
 
         self._get_balances()
 

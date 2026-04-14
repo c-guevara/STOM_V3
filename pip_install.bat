@@ -22,7 +22,7 @@ if '%errorlevel%' NEQ '0' (
 
     echo.
     echo ========================================
-    echo    STOM 64-bit Library Installation
+    echo    STOM Library Installation
     echo ========================================
     echo.
 
@@ -49,7 +49,7 @@ if '%errorlevel%' NEQ '0' (
 
     echo.
     echo ========================================
-    echo    64-bit Library Installation Complete!
+    echo    STOM Library Installation Complete!
     echo ========================================
     echo.
     pause

@@ -7,8 +7,8 @@ class BackEngineUpbit(BackEngineBase):
     def _update_globals_func(self, dict_add_func):
         globals().update(dict_add_func)
 
-    def _get_hogaunit(self, 주문가격또는종목코드):
-        return get_hogaunit_coin(주문가격또는종목코드)
+    def _get_hogaunit(self, 주문가격):
+        return get_hogaunit_coin(주문가격)
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         return round(betting / 현재가, 8)
