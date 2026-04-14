@@ -3,11 +3,12 @@ import os
 import pandas as pd
 from multiprocessing import Process
 from PyQt5.QtWidgets import QMessageBox
+from ui.etcetera.process_alive import receiver_process_alive
 from utility.settings.setting_base import GRAPH_PATH, ui_num
 from ui.create_widget.set_style import style_bc_bb, style_bc_st
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QSize, QEasingCurve
-from utility.static_method.static import qtest_qwait, error_decorator, cme_normal_open, now, thread_decorator
-from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
+from utility.static_method.static import qtest_qwait, error_decorator, cme_normal_open, now, thread_decorator, \
+    get_inthms
 
 
 @error_decorator
@@ -81,11 +82,19 @@ def mnbutton_c_clicked_03(ui, auto=False):
             QMessageBox.critical(ui, '오류 알림', '웹뷰어창이 열린 상태에서는 수동시작할 수 없습니다.\n웹뷰어창을 닫고 재시도하십시오.\n')
             return
 
-        buttonReply = QMessageBox.question(
-            ui, '수동 시작',
-            f"{ui.market_info['마켓이름']} 매매시스템 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n",
-            QMessageBox.Yes | QMessageBox.No, QMessageBox.No
-        )
+        inthms = get_inthms(ui.market_gubun)
+        if inthms > ui.dict_set['전략종료시간']:
+            buttonReply = QMessageBox.critical(
+                ui, '수동 시작',
+                f"현재 시간이 {ui.market_info['마켓이름']} 전략종료시간 이후입니다.\n로그인을 진행해도 관심종목이 보이지 않으며 매매가 진행되지 않습니다.\n계속하시겠습니까?\n",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+            )
+        else:
+            buttonReply = QMessageBox.question(
+                ui, '수동 시작',
+                f"{ui.market_info['마켓이름']} 매매시스템 시작합니다.\n이미 실행 중이라면 기존 프로세스는 종료됩니다.\n계속하시겠습니까?\n",
+                QMessageBox.Yes | QMessageBox.No, QMessageBox.No
+            )
 
     if buttonReply == QMessageBox.Yes:
         if auto:
@@ -101,12 +110,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
 
         mnbutton_c_clicked_01(ui, 1)
         if receiver_process_alive(ui):
-            ui.proc_receiver.kill()
-        if strategy_process_alive(ui):
-            for p in ui.proc_strategys:
-                p.kill()
-        if trader_process_alive(ui):
-            ui.proc_trader.kill()
+            ui.receivQ.put('프로그램종료')
             qtest_qwait(3)
 
         acc_no = ui.market_info['계정번호']
