@@ -21,7 +21,7 @@ def return_press_01(ui):
         name = ui.dict_name.get(code, code)
         ui.ct_lineEdittttt_04.setText(code)
         ui.ct_lineEdittttt_05.setText(name)
-        show_dialog(ui, code, tickcount, searchdate, 4)
+        show_dialog(ui, code, name, tickcount, searchdate, 4)
     elif ui.dialog_chart.focusWidget() == ui.ct_tableWidgett_01:
         row = ui.ct_tableWidgett_01.currentIndex().row()
         item = ui.ct_tableWidgett_01.item(row, 0)

@@ -59,12 +59,12 @@ def show_dialog_graph(ui, df):
 
 
 @error_decorator
-def show_dialog(ui, code, tickcount, searchdate, col):
+def show_dialog(ui, code, name, tickcount, searchdate, col):
     if col == 0:
         if ui.market_gubun < 4:
-            show_dialog_hoga(ui, True, code)
-        else:
             show_dialog_web(ui, True, code)
+        else:
+            show_dialog_hoga(ui, True, code)
     elif col == 1:
         if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
@@ -83,7 +83,10 @@ def show_dialog(ui, code, tickcount, searchdate, col):
         if ui.market_gubun < 4:
             show_dialog_web(ui, False, code)
         show_dialog_hoga(ui, False, code)
-        show_dialog_chart(ui, False, code, tickcount, searchdate, starttime, endtime)
+        if ui.market_gubun in (6, 7):
+            show_dialog_chart(ui, False, name, tickcount, searchdate, starttime, endtime)
+        else:
+            show_dialog_chart(ui, False, code, tickcount, searchdate, starttime, endtime)
 
 
 @error_decorator

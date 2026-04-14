@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 from utility.settings.setting_base import columns_dt, columns_dd, ui_num
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
 from ui.event_click.button_clicked_backtest_engine import backengine_start, backengine_show
-from ui.event_click.button_clicked_backengine import backtest_engine_kill, sdbutton_clicked_04
+from ui.event_click.button_clicked_backtest_start import backtest_engine_kill, sdbutton_clicked_04
 from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdhmsf, str_ymdhms, error_decorator
 

@@ -1484,7 +1484,11 @@ class BaseStrategy(StgGlobalsFunc):
             for i, code in enumerate(self.dict_data):
                 df = pd.DataFrame(self.dict_data[code][:, :cllen], columns=columns_)
                 df['index'] = df['index'].astype('int64')
-                df.to_sql(code, con, index=False, if_exists='append', chunksize=2000)
+                if self.market_gubun in (6, 7):
+                    name = self.dict_info[code]['종목명']
+                    df.to_sql(name, con, index=False, if_exists='append', chunksize=2000)
+                else:
+                    df.to_sql(code, con, index=False, if_exists='append', chunksize=2000)
                 log_text = f'시스템 명령 실행 알림 - 전략연산 프로세스 데이터 저장 중 ... [{self.gubun + 1}]{i + 1}/{last}'
                 self.windowQ.put((ui_num['기본로그'], log_text))
             save_time = (now() - start).total_seconds()

@@ -485,7 +485,10 @@ class BaseReceiver:
         if self.int_mtdt is None:
             self.int_mtdt = dt_std
         elif self.int_mtdt < dt_std:
-            self.dict_mtop[self.int_mtdt] = ';'.join(self.list_gsjm)
+            if self.market_gubun in (6, 7):
+                self.dict_mtop[self.int_mtdt] = ';'.join([v['종목명'] for v in self.dict_info.values()])
+            else:
+                self.dict_mtop[self.int_mtdt] = ';'.join(self.list_gsjm)
             self.int_mtdt = dt_std
 
     def _update_hoga_window_rem(self, dt, code, hoga_tamount, hoga_seprice, hoga_buprice, hoga_samount, hoga_bamount):

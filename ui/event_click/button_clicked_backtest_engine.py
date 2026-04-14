@@ -50,7 +50,7 @@ def backengine_show(ui):
 # noinspection PyUnresolvedReferences
 @thread_decorator
 def backengine_start(ui):
-    from ui.event_click.button_clicked_backengine import backtest_engine_kill
+    from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
     ui.back_engining = True
     ui.startday   = int(ui.be_dateEdittttt_01.date().toString('yyyyMMdd'))
     ui.endday     = int(ui.be_dateEdittttt_02.date().toString('yyyyMMdd'))
@@ -109,8 +109,7 @@ def backengine_start(ui):
     try:
         is_tick = ui.dict_set['타임프레임']
         con = sqlite3.connect(ui.market_info['백테디비'][is_tick])
-        code_info_table_name = ui.market_info['종목디비']
-        df = pd.read_sql(f'SELECT * FROM {code_info_table_name}', con).set_index('index')
+        df = pd.read_sql(f"SELECT * FROM {ui.market_info['종목디비']}", con).set_index('index')
         dict_info = df.to_dict('index')
         query = get_moneytop_query(is_tick, ui.startday, ui.endday, ui.starttime, ui.endtime)
         df_mt = pd.read_sql(query, con)
@@ -121,7 +120,7 @@ def backengine_start(ui):
         df_mt.set_index('index', inplace=True)
         con.close()
     except:
-        if ui.market_gubun < 5 and len(dict_info) < 100:
+        if ui.market_gubun not in (6, 7, 8) and len(dict_info) < 100:
             ui.windowQ.put((ui_num['백테엔진'], '종목명 테이블이 갱신되지 않았습니다. 수동로그인(Alt + S)을 1회 실행하시오.'))
         else:
             ui.windowQ.put((ui_num['백테엔진'], '백테디비에 데이터가 존재하지 않습니다. 디비관리창(Alt + D)에서 백테디비를 생성하십시오.'))
@@ -319,6 +318,6 @@ def backtest_process_kill(ui, coin, enginekill):
     ui.back_schedul = False
 
     if enginekill:
-        from ui.event_click.button_clicked_backengine import backtest_engine_kill
+        from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
         backtest_engine_kill(ui)
     ui.back_cancelling = False

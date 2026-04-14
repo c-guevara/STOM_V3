@@ -8,7 +8,7 @@ from utility.settings.setting_base import DB_PATH
 from PyQt5.QtWidgets import QMessageBox, QLineEdit
 from ui.create_widget.set_style import style_bc_bt
 from ui.create_widget.set_text import famous_saying
-from ui.event_click.button_clicked_backengine import backtest_engine_kill
+from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
 from utility.static_method.static import de_text, en_text, qtest_qwait, error_decorator
 
 

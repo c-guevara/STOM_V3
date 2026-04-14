@@ -40,7 +40,7 @@ def key_press_event(_ui, event):
                 code = _ui.dict_code.get(name, name)
                 _ui.ct_lineEdittttt_04.setText(code)
                 _ui.ct_lineEdittttt_05.setText(name)
-                show_dialog(_ui, code, tickcount, searchdate, col)
+                show_dialog(_ui, code, name, tickcount, searchdate, col)
 
         elif _ui.focusWidget() in (_ui.ds_tableWidgetttt, _ui.ds_tableWidgetttt):
             if _ui.focusWidget() == _ui.ds_tableWidgetttt:
@@ -57,7 +57,7 @@ def key_press_event(_ui, event):
                 _ui.ct_lineEdittttt_04.setText(code)
                 _ui.ct_lineEdittttt_05.setText(name)
                 _ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
-                show_dialog(_ui, code, tickcount, searchdate, 4)
+                show_dialog(_ui, code, name, tickcount, searchdate, 4)
 
         elif _ui.focusWidget() in (_ui.ns_tableWidgetttt, _ui.cns_tableWidgettt):
             row  = _ui.focusWidget().currentIndex().row()
