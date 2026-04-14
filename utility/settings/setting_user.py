@@ -15,7 +15,7 @@ def load_settings():
     df_t  = pd.read_sql('SELECT * FROM telegram', con).set_index('index')
     df_s  = pd.read_sql('SELECT * FROM strategy', con).set_index('index')
     df_b  = pd.read_sql('SELECT * FROM back', con).set_index('index')
-    df_e  = pd.read_sql('SELECT * FROM etcetera', con).set_index('index')
+    df_e  = pd.read_sql('SELECT * FROM etc', con).set_index('index')
     df_bo = pd.read_sql('SELECT * FROM buyorder', con).set_index('index')
     df_so = pd.read_sql('SELECT * FROM sellorder', con).set_index('index')
     con.close()
