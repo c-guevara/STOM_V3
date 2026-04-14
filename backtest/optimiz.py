@@ -21,7 +21,7 @@ class Total:
     """최적화를 실행하는 클래스입니다.
     Optuna를 사용하여 파라미터 최적화를 수행합니다.
     """
-    
+
     def __init__(self, wq, sq, tq, teleQ, mq, lq, bstq_list, backname, market_gubun, market_info, dict_set):
         """최적화 엔진을 초기화합니다.
         Args:

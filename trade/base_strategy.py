@@ -20,7 +20,7 @@ class BaseStrategy(StgGlobalsFunc):
     매수/매도 전략을 컴파일하고, 보조지표를 설정하며,
     실시간 데이터를 기반으로 전략을 실행합니다.
     """
-    
+
     def __init__(self, gubun, qlist, dict_set, market_info):
         """전략 엔진을 초기화합니다.
         Args:

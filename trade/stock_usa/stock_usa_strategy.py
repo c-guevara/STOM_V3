@@ -7,7 +7,7 @@ class StockUsaStrategy(BaseStrategy):
     """미국 주식 전략 클래스입니다.
     BaseStrategy를 상속받아 미국 주식 시장 전략을 실행합니다.
     """
-    
+
     def __init__(self, gubun, qlist, dict_set, market_info):
         """전략을 초기화합니다.
         Args:
@@ -69,7 +69,7 @@ class StockUsaStrategy(BaseStrategy):
             현재가 (float): 현재가
             매수가 (float): 매수가
             oc_ratio (float): 분할 비율
-            
+
         Returns:
             int: 매수 수량
         """
@@ -81,7 +81,7 @@ class StockUsaStrategy(BaseStrategy):
             보유수량 (int): 보유 수량
             보유비율 (float): 보유 비율
             oc_ratio (float): 분할 비율
-            
+
         Returns:
             int: 매도 수량
         """

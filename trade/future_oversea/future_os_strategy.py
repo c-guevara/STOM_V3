@@ -7,7 +7,7 @@ class FutureOsStrategy(BaseStrategy):
     """해외 선물 전략 클래스입니다.
     BaseStrategy를 상속받아 해외 선물 시장 전략을 실행합니다.
     """
-    
+
     def __init__(self, gubun, qlist, dict_set, market_info):
         """전략을 초기화합니다.
         Args:
@@ -29,7 +29,7 @@ class FutureOsStrategy(BaseStrategy):
         """호가 단위를 반환합니다.
         Args:
             종목코드 (str): 종목 코드
-            
+
         Returns:
             float: 호가 단위
         """

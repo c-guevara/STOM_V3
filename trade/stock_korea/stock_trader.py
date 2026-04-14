@@ -13,7 +13,7 @@ class StockTrader(BaseTrader):
     """국내 주식 트레이더 클래스입니다.
     BaseTrader를 상속받아 국내 주식 시장 주문을 실행합니다.
     """
-    
+
     def __init__(self, qlist, dict_set, market_infos):
         """트레이더를 초기화합니다.
         Args:

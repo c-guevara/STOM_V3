@@ -11,7 +11,7 @@ class FutureReceiver(BaseReceiver):
     """선물 데이터 수신 클래스입니다.
     BaseReceiver를 상속받아 선물 시장 데이터를 수신합니다.
     """
-    
+
     def __init__(self, qlist, dict_set, market_infos):
         """수신기를 초기화합니다.
         Args:

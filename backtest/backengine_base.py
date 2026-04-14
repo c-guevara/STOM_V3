@@ -20,7 +20,7 @@ class BackEngineBase(StgGlobalsFunc):
     주문 관리 시스템(OMS)이 적용되지 않은 백테스트 엔진으로,
     데이터 로드, 전략 실행, 기본 매수/매도 로직을 처리합니다.
     """
-    
+
     def __init__(self, gubun, shared_cnt, lock, wq, tq, bq, beq_list, bstq_list, dict_set, profile=False):
         """백테스트 엔진을 초기화합니다.
         Args:

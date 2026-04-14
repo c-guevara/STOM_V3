@@ -48,7 +48,7 @@ class BaseTrader:
     체결 목록, 잔고 목록, 거래 목록을 관리하며,
     주문 생성, 취소, 정정 기능을 제공합니다.
     """
-    
+
     def __init__(self, qlist, dict_set, market_infos):
         """트레이더를 초기화합니다.
         Args:

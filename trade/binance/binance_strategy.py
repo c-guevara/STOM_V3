@@ -7,7 +7,7 @@ class BinanceStrategy(BaseStrategy):
     """바이낸스 전략 클래스입니다.
     BaseStrategy를 상속받아 바이낸스 시장 전략을 실행합니다.
     """
-    
+
     def __init__(self, gubun, qlist, dict_set, market_info):
         """전략을 초기화합니다.
         Args:

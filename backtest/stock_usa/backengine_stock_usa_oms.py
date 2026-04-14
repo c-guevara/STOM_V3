@@ -7,7 +7,7 @@ class BackEngineStockUsaOms(BackEngineBaseOms):
     """미국 주식 OMS 백테스트 엔진 클래스입니다.
     BackEngineBaseOms를 상속받아 미국 주식 시장 특화 OMS 로직을 구현합니다.
     """
-    
+
     def _update_globals_func(self, dict_add_func):
         """전역 함수를 업데이트합니다.
         Args:

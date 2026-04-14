@@ -7,7 +7,7 @@ class BackEngineBinanceOms(BackEngineFutureOms):
     """바이낸스 OMS 백테스트 엔진 클래스입니다.
     BackEngineFutureOms를 상속받아 바이낸스 시장 특화 OMS 로직을 구현합니다.
     """
-    
+
     def _get_hogaunit(self, 호가빼기데이터):
         """호가 단위를 반환합니다.
         Args:

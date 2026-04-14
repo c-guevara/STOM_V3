@@ -16,7 +16,7 @@ class BackTest:
     """백테스트를 실행하는 클래스입니다.
     전략을 컴파일하고 데이터를 로드하여 백테스트를 실행합니다.
     """
-    
+
     def __init__(self, sc, wq, sq, tq, lq, teleQ, beq_list, bstq_list, backname, dict_set, market_infos, betting,
                  avgtime, startday, endday, starttime, endtime, buystg_name, sellstg_name, back_count, blacklist,
                  schedul, back_club):

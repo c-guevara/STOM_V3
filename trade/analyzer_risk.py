@@ -98,7 +98,7 @@ class AnalyzerRisk:
     """리스크 분석을 수행하는 클래스입니다.
     RSI, 변동성 등 리스크 관련 지표를 계산합니다.
     """
-    
+
     def __init__(self, market_type: str, columns: list):
         """리스크 분석기를 초기화합니다.
         Args:
