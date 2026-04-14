@@ -11,13 +11,11 @@ from utility.static_method.static import now, timedelta_sec, get_profit_coin_fut
 
 class BinanceTrader(BaseTrader):
     """바이낸스 트레이더 클래스입니다.
-    
     BaseTrader를 상속받아 바이낸스 시장 주문을 실행합니다.
     """
     
     def __init__(self, qlist, dict_set, market_infos):
         """트레이더를 초기화합니다.
-        
         Args:
             qlist (list): 큐 리스트
             dict_set (dict): 설정 딕셔너리
@@ -57,6 +55,7 @@ class BinanceTrader(BaseTrader):
         app.exec_()
 
     def _get_balances(self):
+        """잔고를 조회합니다."""
         if self.dict_set['모의투자']:
             yesugm = self._get_yesugm_for_paper_trading()
         else:
@@ -65,6 +64,10 @@ class BinanceTrader(BaseTrader):
         self._set_yesugm_and_noti(yesugm)
 
     def _send_order(self, data):
+        """주문을 전송합니다.
+        Args:
+            data: 데이터
+        """
         curr_time = now()
         if curr_time < self.order_time:
             next_time = (self.order_time - curr_time).total_seconds()
@@ -130,6 +133,7 @@ class BinanceTrader(BaseTrader):
         self.receivQ.put(('주문목록', self._get_order_code_list()))
 
     def _set_position(self):
+        """포지션을 설정합니다."""
         if self.dict_set['바이낸스선물고정레버리지']:
             self.dict_lvrg = {x: self.dict_set['바이낸스선물고정레버리지값'] for x in self.dict_info}
         else:
@@ -153,6 +157,10 @@ class BinanceTrader(BaseTrader):
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 마진타입 및 레버리지 설정 완료'))
 
     def _set_leverage(self, dict_dlhp):
+        """레버리지를 설정합니다.
+        Args:
+            dict_dlhp: 레버리지 설정 딕셔너리
+        """
         for code in self.dict_info:
             lhp = dict_dlhp.get(code)
             if lhp:
@@ -165,6 +173,12 @@ class BinanceTrader(BaseTrader):
                     pass
 
     def _get_leverage(self, lhp):
+        """레버리지를 반환합니다.
+        Args:
+            lhp: 레버리지 설정
+        Returns:
+            레버리지
+        """
         leverage = 1
         for min_area, max_area, lvrg in self.dict_set['바이낸스선물변동레버리지값']:
             if min_area <= lhp < max_area:
@@ -173,6 +187,10 @@ class BinanceTrader(BaseTrader):
         return leverage
 
     def _convert_order_data(self, data):
+        """주문 데이터를 변환합니다.
+        Args:
+            data: 데이터
+        """
         if data['e'] == 'ACCOUNT_UPDATE':
             try:
                 bal_list = data['a']['B']
@@ -204,33 +222,83 @@ class BinanceTrader(BaseTrader):
                     self._update_chejan_data_coin_future(p, code, oc, cc, mc, cp, op, ct, on)
 
     def _get_order_buy_price(self, 종목코드, 주문구분, 주문가격):
+        """매수 주문 가격을 반환합니다.
+        Args:
+            종목코드: 종목 코드
+            주문구분: 주문 구분
+            주문가격: 주문 가격
+        Returns:
+            매수 주문 가격
+        """
         매수지정가호가번호 = self.dict_set['매수지정가호가번호']
         소숫점자리수 = self.dict_info[종목코드]['가격소숫점자리수']
         호가차이 = self.dict_info[종목코드]['호가단위'] * 매수지정가호가번호
         return round(주문가격 + 호가차이, 소숫점자리수) if 주문구분 == 'BUY_LONG' else round(주문가격 - 호가차이, 소숫점자리수)
 
     def _get_order_sell_price(self, 종목코드, 주문구분, 주문가격):
+        """매도 주문 가격을 반환합니다.
+        Args:
+            종목코드: 종목 코드
+            주문구분: 주문 구분
+            주문가격: 주문 가격
+        Returns:
+            매도 주문 가격
+        """
         매도지정가호가번호 = self.dict_set['매도지정가호가번호']
         소숫점자리수 = self.dict_info[종목코드]['가격소숫점자리수']
         호가차이 = self.dict_info[종목코드]['호가단위'] * 매도지정가호가번호
         return round(주문가격 + 호가차이, 소숫점자리수) if 주문구분 == 'SELL_LONG' else round(주문가격 - 호가차이, 소숫점자리수)
 
     def _get_modify_buy_price(self, 현재가, 정정호가, 종목코드):
+        """매수 정정 가격을 반환합니다.
+        Args:
+            현재가: 현재가
+            정정호가: 정정 호가
+            종목코드: 종목 코드
+        Returns:
+            매수 정정 가격
+        """
         return round(현재가 - 정정호가, self.dict_info[종목코드]['가격소숫점자리수'])
 
     def _get_modify_sell_price(self, 현재가, 정정호가, 종목코드):
+        """매도 정정 가격을 반환합니다.
+        Args:
+            현재가: 현재가
+            정정호가: 정정 호가
+            종목코드: 종목 코드
+        Returns:
+            매도 정정 가격
+        """
         return round(현재가 + 정정호가, self.dict_info[종목코드]['가격소숫점자리수'])
 
     def _get_profit_long(self, 매입금액, 보유금액):
+        """롱 수익을 계산합니다.
+        Args:
+            매입금액: 매입 금액
+            보유금액: 보유 금액
+        Returns:
+            롱 수익
+        """
         return get_profit_coin_future_long(
             매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
         )
 
     def _get_profit_short(self, 매입금액, 보유금액):
+        """숏 수익을 계산합니다.
+        Args:
+            매입금액: 매입 금액
+            보유금액: 보유 금액
+        Returns:
+            숏 수익
+        """
         return get_profit_coin_future_short(
             매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
         )
 
     def _get_order_code_list(self):
+        """주문 종목 코드 리스트를 반환합니다.
+        Returns:
+            주문 종목 코드 리스트
+        """
         return tuple(self.dict_order['BUY_LONG']) + tuple(self.dict_order['SELL_SHORT']) + \
             tuple(self.dict_order['SELL_LONG']) + tuple(self.dict_order['BUY_SHORT'])

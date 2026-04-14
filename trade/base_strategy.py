@@ -17,21 +17,17 @@ from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema
 
 class BaseStrategy(StgGlobalsFunc):
     """실시간 전략 연산을 담당하는 기본 클래스입니다.
-    
     매수/매도 전략을 컴파일하고, 보조지표를 설정하며,
     실시간 데이터를 기반으로 전략을 실행합니다.
     """
     
     def __init__(self, gubun, qlist, dict_set, market_info):
         """전략 엔진을 초기화합니다.
-        
         Args:
             gubun (int): 전략 구분 번호
-            qlist (list): 큐 리스트 [windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ]
+            qlist (list): 큐 리스트
             dict_set (dict): 설정 딕셔너리
             market_info (list): 마켓 정보 리스트 [마켓구분, 마켓정보]
-        """
-        """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
            0        1       2      3       4      5      6      7       8        9       10     11
         """
@@ -128,11 +124,7 @@ class BaseStrategy(StgGlobalsFunc):
         self._main_loop()
 
     def _set_formula_data(self):
-        """수식 관리자 데이터를 처리합니다.
-        
-        데이터베이스에서 수식을 읽어 컴파일합니다.
-        """
-        """수식관리자 데이터 처리"""
+        """공식 데이터를 설정합니다."""
         self.fm_list, dict_fm, self.fm_tcnt = get_formula_data(False, self.data_cnt)
         self.windowQ.put((ui_num['사용자수식'], deepcopy(self.fm_list), dict_fm, self.fm_tcnt))
         if self.fm_list:
@@ -140,11 +132,7 @@ class BaseStrategy(StgGlobalsFunc):
                 fm[8] = compile(fm[-2], '<string>', 'exec')
 
     def _set_strategy_and_blacklist(self):
-        """전략 및 블랙리스트 데이터를 처리합니다.
-        
-        데이터베이스에서 매수/매도 전략과 블랙리스트를 읽어 설정합니다.
-        """
-        """전략 및 블랙리스트 데이터 처리"""
+        """전략과 블랙리스트를 설정합니다."""
         first_name               = self.market_info['전략구분']
         table_name_stg_buy       = f"{first_name}_buy"
         table_name_stg_sell      = f"{first_name}_sell"
@@ -174,7 +162,13 @@ class BaseStrategy(StgGlobalsFunc):
         self.set_globals_func()
 
     def _set_strategy(self, dfs, dfos, dfb, dfob):
-        """전략 컴파일 처리"""
+        """전략을 설정합니다.
+        Args:
+            dfs: 매수 전략
+            dfos: 매도 전략
+            dfb: 매수 블랙리스트
+            dfob: 매도 블랙리스트
+        """
         if self.dict_set['매도전략'] in dfs.index:
             self.sellstrategy = compile(dfs['전략코드'][self.dict_set['매도전략']], '<string>', 'exec')
         elif self.dict_set['매도전략'] in dfos.index:
@@ -193,7 +187,10 @@ class BaseStrategy(StgGlobalsFunc):
         self._set_buy_strategy(buytxt)
 
     def _set_buy_strategy(self, buytxt):
-        """보조지표 설정 처리"""
+        """매수 전략을 설정합니다.
+        Args:
+            buytxt: 매수 전략 텍스트
+        """
         self.buystrategy, indistg = self.get_buy_indi_stg(buytxt)
         if indistg is not None:
             try:
@@ -203,15 +200,12 @@ class BaseStrategy(StgGlobalsFunc):
         self.indi_settings = list(self.indicator.values())
 
     def get_buy_indi_stg(self, buytxt):
-        """매수 지표 전략을 가져옵니다.
-        
+        """매수 지표 전략을 반환합니다.
         Args:
-            buytxt (str): 매수 전략 텍스트
-            
+            buytxt: 매수 전략 텍스트
         Returns:
-            str: 매수 지표 전략
+            지표 전략 텍스트
         """
-        """매수전략, 보조지표 설정 분리"""
         lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
         buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
         indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
@@ -232,7 +226,10 @@ class BaseStrategy(StgGlobalsFunc):
         return buystg, indistg
 
     def _set_passticks(self, dfpt):
-        """경과틱수 데이터 처리"""
+        """패스 틱을 설정합니다.
+        Args:
+            dfpt: 패스 틱 데이터프레임
+        """
         def compile_condition(x):
             return compile(f'if {x}:\n    self.dict_cond_indexn[종목코드][k] = self.indexn', '<string>', 'exec')
 
@@ -242,7 +239,7 @@ class BaseStrategy(StgGlobalsFunc):
         self.dict_condition = dict(zip(name_list, stg_list))
 
     def _main_loop(self):
-        """전략연산큐를 모니터하는 메인루프"""
+        """메인 루프를 실행합니다."""
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 전략 연산 시작"))
         while self.is_running:
             try:
@@ -271,7 +268,10 @@ class BaseStrategy(StgGlobalsFunc):
         sys.exit()
 
     def _update_tuple(self, data):
-        """전략연산큐로 들어온 듀플 데이터 처리"""
+        """튜플을 업데이트합니다.
+        Args:
+            data: 데이터
+        """
         gubun, data = data
         if gubun == '잔고목록':
             self.dict_jg = data
@@ -326,7 +326,10 @@ class BaseStrategy(StgGlobalsFunc):
             self._save_data(data)
 
     def _update_string(self, data):
-        """전략연산큐로 들어온 스트링 데이터 처리"""
+        """문자열을 업데이트합니다.
+        Args:
+            data: 데이터
+        """
         if data == '매수전략중지':
             self.buystrategy = None
             self.teleQ.put('매수전략 중지 완료')
@@ -339,7 +342,10 @@ class BaseStrategy(StgGlobalsFunc):
 
     # noinspection PyUnusedLocal
     def _strategy_tick(self, data):
-        """현물 전략연산 처리"""
+        """틱 전략을 실행합니다.
+        Args:
+            data: 데이터
+        """
         if self.market_gubun < 4:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
                 VI해제시간, VI가격, VI호가단위, \
@@ -548,6 +554,10 @@ class BaseStrategy(StgGlobalsFunc):
 
     # noinspection PyUnusedLocal
     def _strategy_min(self, data):
+        """분봉 전략을 실행합니다.
+        Args:
+            data: 데이터
+        """
         if self.market_gubun < 4:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, 시가총액, \
                 VI해제시간, VI가격, VI호가단위, 분봉시가, 분봉고가, 분봉저가, \
@@ -820,6 +830,10 @@ class BaseStrategy(StgGlobalsFunc):
 
     # noinspection PyUnusedLocal
     def _strategy_future_tick(self, data):
+        """선물 틱 전략을 실행합니다.
+        Args:
+            data: 데이터
+        """
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, \
             초당거래대금, 고저평균대비등락율, 저가대비고가등락율, 초당매수금액, 초당매도금액, \
             당일매수금액, 최고매수금액, 최고매수가격, 당일매도금액, 최고매도금액, 최고매도가격, \
@@ -1050,6 +1064,10 @@ class BaseStrategy(StgGlobalsFunc):
 
     # noinspection PyUnusedLocal
     def _strategy_future_min(self, data):
+        """선물 분봉 전략을 실행합니다.
+        Args:
+            data: 데이터
+        """
         체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 분당매수수량, 분당매도수량, \
             분봉시가, 분봉고가, 분봉저가, \
             분당거래대금, 고저평균대비등락율, 저가대비고가등락율, 분당매수금액, 분당매도금액, \
@@ -1351,7 +1369,12 @@ class BaseStrategy(StgGlobalsFunc):
             self.windowQ.put((ui_num['타임로그'], f'전략스 연산 시간 알림 - 수신시간과 연산시간의 차이는 [{gap:.6f}]초입니다.'))
 
     def _get_parameter_area(self, rw):
-        """구간연산 데이터 처리"""
+        """파라미터 영역을 반환합니다.
+        Args:
+            rw: 로우
+        Returns:
+            파라미터 영역
+        """
         if self.is_tick:
             return [
                 self._이동평균(self.sma_list[0], calc=True), self._이동평균(self.sma_list[1], calc=True),
@@ -1375,11 +1398,9 @@ class BaseStrategy(StgGlobalsFunc):
 
     def Buy(self, buy_long=False):
         """매수 주문을 실행합니다.
-        
         Args:
-            buy_long (bool): 롱 포지션 여부. 기본값은 False입니다.
+            buy_long: 롱 매수 여부
         """
-        """매수시그널 처리"""
         취소시그널, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_buy
         if 취소시그널:
             주문수량 = 0
@@ -1414,7 +1435,15 @@ class BaseStrategy(StgGlobalsFunc):
                 self.traderQ.put((signal_gubun, self.code, self.name, 예상체결가, 주문수량, now(), False))
 
     def _get_buy_count(self, 분할매수횟수, 매수가, 현재가, 저가대비고가등락율):
-        """매수수량 계산"""
+        """매수 수량을 계산합니다.
+        Args:
+            분할매수횟수: 분할 매수 횟수
+            매수가: 매수가
+            현재가: 현재가
+            저가대비고가등락율: 저가대비고가등락율
+        Returns:
+            매수 수량
+        """
         if self.dict_set['비중조절'][0] == 0:
             betting = self.int_tujagm
         else:
@@ -1446,11 +1475,9 @@ class BaseStrategy(StgGlobalsFunc):
 
     def Sell(self, sell_long=False):
         """매도 주문을 실행합니다.
-        
         Args:
-            sell_long (bool): 롱 포지션 매도 여부. 기본값은 False입니다.
+            sell_long: 롱 매도 여부
         """
-        """매도시그널 처리"""
         취소시그널, 전량매도, 강제청산, 보유수량, 분할매도횟수, 매수가, 현재가, 저가대비고가등락율, 매도호가1, 매수호가1 = self.info_for_sell
         if 취소시그널:
             주문수량 = 0
@@ -1485,7 +1512,13 @@ class BaseStrategy(StgGlobalsFunc):
                 self.traderQ.put((signal_gubun, self.code, self.name, 예상체결가, 주문수량, now(), True if 강제청산 else False))
 
     def _get_sell_count(self, 분할매도횟수, 보유수량):
-        """매도수량 계산"""
+        """매도 수량을 계산합니다.
+        Args:
+            분할매도횟수: 분할 매도 횟수
+            보유수량: 보유 수량
+        Returns:
+            매도 수량
+        """
         if self.dict_set['매도분할횟수'] == 1:
             return 보유수량
         else:
@@ -1498,7 +1531,7 @@ class BaseStrategy(StgGlobalsFunc):
             return 매도수량
 
     def _put_gsjm_and_delete_hilo(self):
-        """관심종목 데이터 푸시 및 최고수익률 데이터 정리"""
+        """관심종목에 추가하고 고저를 삭제합니다."""
         if self.dict_gj:
             self.dict_gj = dict(sorted(self.dict_gj.items(), key=lambda x: x[1]['dm'], reverse=True))
             df_gj = pd.DataFrame.from_dict(self.dict_gj, orient='index')
@@ -1510,7 +1543,10 @@ class BaseStrategy(StgGlobalsFunc):
             self.dict_profit = {k: v for k, v in self.dict_profit.items() if k in self.dict_jg}
 
     def _save_data(self, codes):
-        """데이터 저장"""
+        """데이터를 저장합니다.
+        Args:
+            codes: 종목 코드들
+        """
         for code in self.dict_data.copy():
             if code not in codes:
                 del self.dict_data[code]
@@ -1545,7 +1581,12 @@ class BaseStrategy(StgGlobalsFunc):
             self.stgQ.put('프로세스종료')
 
     def _update_high_low(self, 종목코드, 현재가또는분봉고가, 분봉저가=None):
-        """당일 고가 및 저가 데이터 처리"""
+        """고저를 업데이트합니다.
+        Args:
+            종목코드: 종목 코드
+            현재가또는분봉고가: 현재가 또는 분봉 고가
+            분봉저가: 분봉 저가
+        """
         if 분봉저가 is None:
             high_low = self.high_low.get(종목코드)
             if high_low:
@@ -1570,28 +1611,91 @@ class BaseStrategy(StgGlobalsFunc):
                 self.high_low[종목코드] = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
 
     def _get_hogaunit(self, 주문가격또는종목코드):
+        """호가 단위를 반환합니다.
+        Args:
+            주문가격또는종목코드: 주문 가격 또는 종목 코드
+        Returns:
+            호가 단위
+        """
         return 0
 
     def _get_profit(self, 매입금액, 보유금액):
+        """수익을 계산합니다.
+        Args:
+            매입금액: 매입 금액
+            보유금액: 보유 금액
+        Returns:
+            수익
+        """
         return 0
 
     def _get_profit_long(self, 매입금액, 보유금액):
+        """롱 수익을 계산합니다.
+        Args:
+            매입금액: 매입 금액
+            보유금액: 보유 금액
+        Returns:
+            롱 수익
+        """
         return 0
 
     def _get_profit_short(self, 매입금액, 보유금액):
+        """숏 수익을 계산합니다.
+        Args:
+            매입금액: 매입 금액
+            보유금액: 보유 금액
+        Returns:
+            숏 수익
+        """
         return 0
 
     def _get_hold_time(self, 매수시간):
+        """보유 시간을 계산합니다.
+        Args:
+            매수시간: 매수 시간
+        Returns:
+            보유 시간
+        """
         return 0
 
     def _get_hold_time_min(self, 매수시간):
+        """보유 시간(분)을 계산합니다.
+        Args:
+            매수시간: 매수 시간
+        Returns:
+            보유 시간(분)
+        """
         return 0
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
+        """매수 수량을 설정합니다.
+        Args:
+            betting: 베팅 금액
+            현재가: 현재가
+            매수가: 매수가
+            oc_ratio: 분할 비율
+        Returns:
+            매수 수량
+        """
         return 0
 
     def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
+        """매도 수량을 설정합니다.
+        Args:
+            보유수량: 보유 수량
+            보유비율: 보유 비율
+            oc_ratio: 분할 비율
+        Returns:
+            매도 수량
+        """
         return 0
 
     def _get_order_price(self, 거래금액, 주문수량):
+        """주문 가격을 계산합니다.
+        Args:
+            거래금액: 거래 금액
+            주문수량: 주문 수량
+        Returns:
+            주문 가격
+        """
         return 0

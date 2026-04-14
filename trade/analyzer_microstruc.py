@@ -628,6 +628,10 @@ class HistoryBuffer:
                  'buy_volume', 'sell_volume', 'total_volume', 'weighted_depth_ratio']
 
     def __init__(self, maxlen: int):
+        """히스토리 버퍼를 초기화합니다.
+        Args:
+            maxlen: 최대 길이
+        """
         self.maxlen = maxlen
         self.ptr = 0
         self.count = 0
@@ -649,7 +653,19 @@ class HistoryBuffer:
     def append(self, curr_price: float, imbalance: float, buy_volume: float, sell_volume: float,
                total_volume: float, weighted_depth_ratio: float, ask_prices: np.ndarray, bid_prices: np.ndarray,
                ask_qtys: np.ndarray, bid_qtys: np.ndarray):
-        """데이터 추가 (딕셔너리 오버헤드 제거)"""
+        """데이터를 추가합니다.
+        Args:
+            curr_price: 현재가
+            imbalance: 불균형
+            buy_volume: 매수 수량
+            sell_volume: 매도 수량
+            ask_prices: 매도 호가 가격 배열
+            bid_prices: 매수 호가 가격 배열
+            ask_qtys: 매도 호가 수량 배열
+            bid_qtys: 매수 호가 수량 배열
+            total_volume: 총 수량
+            weighted_depth_ratio: 가중 깊이 비율
+        """
         idx = self.ptr
 
         self.curr_price[idx] = curr_price
@@ -669,22 +685,27 @@ class HistoryBuffer:
             self.count += 1
 
     def get_prices_array(self) -> np.ndarray:
-        """가격 배열 직접 반환 (뷰 기반 최적화)"""
+        """가격 배열을 반환합니다.
+        Returns:
+            가격 배열
+        """
         if self.count < self.maxlen:
             return self.curr_price[:self.count]
         return np.concatenate([self.curr_price[self.ptr:], self.curr_price[:self.ptr]])
 
     def get_volumes_array(self) -> np.ndarray:
-        """거래량 배열 직접 반환 (뷰 기반 최적화)"""
+        """수량 배열을 반환합니다.
+        Returns:
+            수량 배열
+        """
         if self.count < self.maxlen:
             return self.total_volume[:self.count]
         return np.concatenate([self.total_volume[self.ptr:], self.total_volume[:self.ptr]])
 
     def get_qtys_arrays(self) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        ask/bid 잔량 배열 직접 반환 (iceberg detection용)
-        Returns: (ask_qtys, bid_qtys) 각각 (n, 5) shape
-        뷰 기반 최적화로 메모리 복사 최소화
+        """호가 수량 배열들을 반환합니다.
+        Returns:
+            (매도 호가 수량 배열, 매수 호가 수량 배열) 튜플
         """
         if self.count < self.maxlen:
             return self.ask_qtys[:self.count], self.bid_qtys[:self.count]
@@ -693,9 +714,9 @@ class HistoryBuffer:
         return ask, bid
 
     def get_prices_arrays(self) -> Tuple[np.ndarray, np.ndarray]:
-        """
-        ask/bid 가격 배열 직접 반환
-        Returns: (ask_prices, bid_prices) 각각 (n, 5) shape
+        """호가 가격 배열들을 반환합니다.
+        Returns:
+            (매도 호가 가격 배열, 매수 호가 가격 배열) 튜플
         """
         if self.count < self.maxlen:
             return self.ask_prices[:self.count], self.bid_prices[:self.count]
@@ -704,25 +725,33 @@ class HistoryBuffer:
         return ask, bid
 
     def get_imbalance_array(self) -> np.ndarray:
-        """imbalance 배열 직접 반환"""
+        """불균형 배열을 반환합니다.
+        Returns:
+            불균형 배열
+        """
         if self.count < self.maxlen:
             return self.imbalance[:self.count]
         return np.concatenate([self.imbalance[self.ptr:], self.imbalance[:self.ptr]])
 
     def __len__(self) -> int:
+        """현재 길이를 반환합니다.
+        Returns:
+            현재 길이
+        """
         return self.count
 
 
 class AnalyzerMicrostructure:
+    """시장 미시구조 분석기 클래스입니다.
+    호가 데이터를 분석하여 시장 조작 패턴을 탐지합니다.
+    """
     def __init__(self, market_type: str, columns: list, data_cnt: int = 1800, history_cnt: int = 30):
-        """
-        초기화
-
+        """분석기를 초기화합니다.
         Args:
-            market_type: 'stock', 'coin', 'future' (시장 종류)
-            columns: 데이터 칼럼 리스트
-            data_cnt: 종목별 최대 히스토리 저장 크기 (슬라이딩 윈도우)
-            history_cnt: 전처리 데이터 히스토리 크기
+            market_type: 시장 타입
+            columns: 컬럼 리스트
+            data_cnt: 데이터 카운트
+            history_cnt: 히스토리 카운트
         """
         # 기본 설정
         self._price_risk_cache = {}
@@ -747,9 +776,7 @@ class AnalyzerMicrostructure:
         self._log_depth_ratio_threshold = np.log(self.params['depth_ratio_threshold'])
 
     def _setup_parameters(self):
-        """
-        시장 종류와 데이터 타입에 따른 파라미터 설정
-        """
+        """분석 파라미터를 설정합니다."""
         # 주식 1초 스냅샷 파라미터 (고빈도, 저지연, 변동성 적음)
         if self.market_type == 'stock':
             self.params = {
@@ -791,6 +818,7 @@ class AnalyzerMicrostructure:
             }
 
     def _setup_columns(self):
+        """컬럼을 설정합니다."""
         # 칼럼 인덱스 매핑 (빠른 접근용)
         col_index = {col: idx for idx, col in enumerate(self.columns)}
         self.idx_curr_price = col_index.get('현재가', 0)
@@ -802,37 +830,30 @@ class AnalyzerMicrostructure:
         self.idx_bid_qty    = [col_index.get(f'매수잔량{i}', 0) for i in range(1, 6)]
 
     def update_data(self, code: str, tick_data: np.ndarray):
-        """
-        데이터 전처리 및 시장구조분석
-
+        """데이터를 업데이트합니다.
         Args:
-            code: 종목코드
-            tick_data: 2차원 numpy 배열 (shape: [n_ticks, n_features])
+            code: 종목 코드
+            tick_data: 틱 데이터
         """
         self._calculate_processed_data(code, tick_data)
 
     def get_signal(self, buy_cf: float, sell_cf: float) -> Tuple[str, float, float]:
-        """
-        리스크분석, 신호 생성
-
+        """시그널을 반환합니다.
         Args:
-            buy_cf: 매수 신호 생성용 계수
-            sell_cf: 매도 신호 생성용 계수
-
+            buy_cf: 매수 신뢰도
+            sell_cf: 매도 신뢰도
         Returns:
-            Tuple[str, float, float]: (신호타입, 신뢰도, 리스크)
+            (시그널, 리스크, 신뢰도) 튜플
         """
         total_risk = self._analyze_risk()
         signal, confidence = self._analyze_signal(buy_cf, sell_cf)
         return signal, confidence, total_risk
 
     def _calculate_processed_data(self, code: str, tick_data: np.ndarray):
-        """
-        데이터 전처리, 시장구조분석 (2차원 배열 바로 처리 버전)
-
+        """전처리 데이터를 계산합니다.
         Args:
-            code: 종목코드
-            tick_data: 2차원 numpy 배열 (shape: [n_ticks, n_features])
+            code: 종목 코드
+            tick_data: 틱 데이터
         """
         if len(tick_data) < self.history_cnt:
             return
@@ -923,9 +944,11 @@ class AnalyzerMicrostructure:
         }
 
     def _detect_layering(self, hist_buffer: HistoryBuffer) -> List[Tuple]:
-        """
-        레이어링 조작 감지 (Numba JIT 최적화 버전)
-        Numba 컴파일된 함수 사용으로 C급 성능 달성
+        """레이어링을 탐지합니다.
+        Args:
+            hist_buffer: 히스토리 버퍼
+        Returns:
+            시그널 리스트
         """
         n = len(hist_buffer)
         if n < 10:
@@ -986,8 +1009,11 @@ class AnalyzerMicrostructure:
         return layering_signals
 
     def _detect_pump_dump(self, hist_buffer: HistoryBuffer) -> List[Tuple]:
-        """
-        펌프 앤 덤프 탐지 (Numba JIT 최적화 버전)
+        """펌프 앤 덤프를 탐지합니다.
+        Args:
+            hist_buffer: 히스토리 버퍼
+        Returns:
+            시그널 리스트
         """
         prices = hist_buffer.get_prices_array()
         volumes = hist_buffer.get_volumes_array()
@@ -1015,8 +1041,11 @@ class AnalyzerMicrostructure:
         return pump_dump_signals
 
     def _detect_iceberg(self, hist_buffer: HistoryBuffer) -> List[Tuple]:
-        """
-        아이스버그 주문 탐지 (Numba JIT 최적화 버전)
+        """아이스버그 주문을 탐지합니다.
+        Args:
+            hist_buffer: 히스토리 버퍼
+        Returns:
+            시그널 리스트
         """
         n = len(hist_buffer)
         if n < 10:
@@ -1058,8 +1087,11 @@ class AnalyzerMicrostructure:
         return iceberg_signals
 
     def _detect_stop_hunt(self, hist_buffer: HistoryBuffer) -> List[Tuple]:
-        """
-        스탑로스 털기 패턴 감지 (Numba JIT 최적화 버전)
+        """스탑 헌팅을 탐지합니다.
+        Args:
+            hist_buffer: 히스토리 버퍼
+        Returns:
+            시그널 리스트
         """
         prices = hist_buffer.get_prices_array()
         volumes = hist_buffer.get_volumes_array()
@@ -1085,8 +1117,14 @@ class AnalyzerMicrostructure:
         return stop_hunt_signals
 
     def _calculate_overall_risk(self, layering_signals, pump_dump_signals, iceberg_signals, stop_hunt_signals) -> Dict:
-        """
-        종합 리스크 평가 (for문 최적화 버전)
+        """전체 리스크를 계산합니다.
+        Args:
+            layering_signals: 레이어링 시그널
+            pump_dump_signals: 펌프 앤 덤프 시그널
+            iceberg_signals: 아이스버그 시그널
+            stop_hunt_signals: 스탑 헌팅 시그널
+        Returns:
+            리스크 딕셔너리
         """
         total_signals = len(layering_signals) + len(pump_dump_signals) + len(iceberg_signals) + len(stop_hunt_signals)
 
@@ -1120,7 +1158,10 @@ class AnalyzerMicrostructure:
         }
 
     def _analyze_risk(self):
-        """리스크 분석"""
+        """리스크를 분석합니다.
+        Returns:
+            리스크 딕셔너리
+        """
         if self.curr_data is None:
             return 1.0
 
@@ -1138,7 +1179,13 @@ class AnalyzerMicrostructure:
         return total_risk
 
     def _analyze_signal(self, buy_cf, sell_cf):
-        """최종 신호 분석"""
+        """시그널을 분석합니다.
+        Args:
+            buy_cf: 매수 신뢰도
+            sell_cf: 매도 신뢰도
+        Returns:
+            시그널 딕셔너리
+        """
         if self.curr_data is None:
             return 'hold', 0.0
 
@@ -1148,11 +1195,9 @@ class AnalyzerMicrostructure:
         return final_signal, confidence
 
     def _calculate_market_risk(self) -> float:
-        """
-        시장 리스크 계산
-
+        """시장 리스크를 계산합니다.
         Returns:
-            float: 시장 리스크 (0.0 - 1.0)
+            시장 리스크
         """
 
         # 불균형 리스크 (절대값이 클수록 위험)
@@ -1164,11 +1209,9 @@ class AnalyzerMicrostructure:
         return (imbalance_risk + depth_risk) / 2
 
     def _calculate_manipulation_risk(self) -> float:
-        """
-        조작 리스크 계산
-
+        """조작 리스크를 계산합니다.
         Returns:
-            float: 조작 리스크 (0.0 - 1.0)
+            조작 리스크
         """
         risk_level = self.curr_data['overall_risk']['risk_level']
         total_signals = self.curr_data['overall_risk']['total_signals']
@@ -1185,10 +1228,9 @@ class AnalyzerMicrostructure:
         return (base_risk + signal_risk) / 2
 
     def _calculate_liquidity_risk(self) -> float:
-        """유동성 리스크 계산
-
+        """유동성 리스크를 계산합니다.
         Returns:
-            float: 유동성 리스크 (0.0 - 1.0)
+            유동성 리스크
         """
         # 총 깊이 계산
         curr_price = self.curr_data['curr_price']
@@ -1206,10 +1248,12 @@ class AnalyzerMicrostructure:
         return (depth_risk + concentration_risk) / 2
 
     def _analyze_order_flow(self, buy_cf, sell_cf) -> str:
-        """주문 흐름 분석
-
+        """주문 흐름을 분석합니다.
+        Args:
+            buy_cf: 매수 신뢰도
+            sell_cf: 매도 신뢰도
         Returns:
-            str: 주문 흐름 신호 ('buy', 'sell', 'hold')
+            시그널
         """
         # 시장 지표 추출
         imbalance = self.curr_data['imbalance']
@@ -1257,15 +1301,12 @@ class AnalyzerMicrostructure:
             return 'hold'
 
     def _calculate_confidence(self, signal: str, total_risk: float) -> float:
-        """
-        신호 신뢰도 계산
-
+        """신뢰도를 계산합니다.
         Args:
-            signal: 매매 신호
-            total_risk: 총리스크
-
+            signal: 시그널
+            total_risk: 전체 리스크
         Returns:
-            float: 신호 신뢰도 (0.1 - 1.0)
+            신뢰도
         """
         # 시장 상태에서 주요 지표 추출
         imbalance = abs(self.curr_data['imbalance'])
@@ -1301,12 +1342,15 @@ class AnalyzerMicrostructure:
         return final_confidence
 
     def clear_code_data(self, code):
-        """종목 데이터 초기화"""
+        """종목 데이터를 삭제합니다.
+        Args:
+            code: 종목 코드
+        """
         self.curr_data = None
         if code in self.data_history:
             del self.data_history[code]
 
     def clear_data(self):
-        """전체 데이터 초기화"""
+        """모든 데이터를 삭제합니다."""
         self.curr_data = None
         self.data_history = defaultdict(lambda: HistoryBuffer(self.history_cnt))

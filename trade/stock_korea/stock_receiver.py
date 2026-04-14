@@ -10,13 +10,11 @@ from utility.static_method.static import now, error_decorator
 
 class StockReceiver(BaseReceiver):
     """국내 주식 데이터 수신 클래스입니다.
-    
     BaseReceiver를 상속받아 국내 주식 시장 데이터를 수신합니다.
     """
     
     def __init__(self, qlist, dict_set, market_infos):
         """수신기를 초기화합니다.
-        
         Args:
             qlist (list): 큐 리스트
             dict_set (dict): 설정 딕셔너리
@@ -49,6 +47,7 @@ class StockReceiver(BaseReceiver):
         app.exec_()
 
     def _get_code_info(self):
+        """종목 정보를 조회합니다."""
         self.dict_info, self.codes = self.ls.get_code_info_stock(self.market_gubun-1)
         if self.market_gubun < 3:
             self.dict_sgbn = {code: i % 8 for i, code in enumerate(self.codes)}
@@ -61,6 +60,10 @@ class StockReceiver(BaseReceiver):
 
     @error_decorator
     def _convert_real_data(self, data):
+        """실시간 데이터를 변환합니다.
+        Args:
+            data: 데이터
+        """
         body = data['body']
         if body is None:
             return

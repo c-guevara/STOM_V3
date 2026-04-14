@@ -5,13 +5,11 @@ from utility.static_method.static import now_utc, dt_ymdhms, get_profit_coin_fut
 
 class BinanceStrategy(BaseStrategy):
     """바이낸스 전략 클래스입니다.
-    
     BaseStrategy를 상속받아 바이낸스 시장 전략을 실행합니다.
     """
     
     def __init__(self, gubun, qlist, dict_set, market_info):
         """전략을 초기화합니다.
-        
         Args:
             gubun (int): 구분 번호
             qlist (list): 큐 리스트
@@ -22,7 +20,6 @@ class BinanceStrategy(BaseStrategy):
 
     def _update_globals_func(self, dict_add_func):
         """전역 함수를 업데이트합니다.
-        
         Args:
             dict_add_func (dict): 추가할 전역 함수 딕셔너리
         """
@@ -30,38 +27,32 @@ class BinanceStrategy(BaseStrategy):
 
     def _get_hogaunit(self, 종목코드):
         """호가 단위를 반환합니다.
-        
         Args:
             종목코드 (str): 종목 코드
-            
         Returns:
             float: 호가 단위
         """
         return self.dict_info[종목코드]['호가단위']
 
     def _get_profit_long(self, 매입금액, 보유금액):
-        """롱 포지션 수익을 계산합니다.
-        
+        """롱 수익을 계산합니다.
         Args:
-            매입금액 (float): 매입 금액
-            보유금액 (float): 보유 금액
-            
+            매입금액: 매입 금액
+            보유금액: 보유 금액
         Returns:
-            tuple: (평가금액, 수익금, 수익률)
+            롱 수익
         """
         return get_profit_coin_future_long(
             매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
         )
 
     def _get_profit_short(self, 매입금액, 보유금액):
-        """숏 포지션 수익을 계산합니다.
-        
+        """숏 수익을 계산합니다.
         Args:
-            매입금액 (float): 매입 금액
-            보유금액 (float): 보유 금액
-            
+            매입금액: 매입 금액
+            보유금액: 보유 금액
         Returns:
-            tuple: (평가금액, 수익금, 수익률)
+            숏 수익
         """
         return get_profit_coin_future_short(
             매입금액, 보유금액, '시장가' in self.dict_set['매수주문유형'], '시장가' in self.dict_set['매도주문유형']
@@ -69,34 +60,54 @@ class BinanceStrategy(BaseStrategy):
 
     def _get_hold_time(self, 매수시간):
         """보유 시간을 계산합니다.
-        
         Args:
-            매수시간 (datetime): 매수 시간
-            
+            매수시간: 매수 시간
         Returns:
-            float: 보유 시간 (초)
+            보유 시간
         """
         return (now_utc() - dt_ymdhms(매수시간)).total_seconds()
 
     def _get_hold_time_min(self, 매수시간):
-        """보유 시간을 분 단위로 계산합니다.
-        
+        """보유 시간(분)을 계산합니다.
         Args:
-            매수시간 (datetime): 매수 시간
-            
+            매수시간: 매수 시간
         Returns:
-            int: 보유 시간 (분)
+            보유 시간(분)
         """
         return int((now_utc() - dt_ymdhms(매수시간)).total_seconds() / 60)
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
+        """매수 수량을 설정합니다.
+        Args:
+            betting: 베팅 금액
+            현재가: 현재가
+            매수가: 매수가
+            oc_ratio: 분할 비율
+        Returns:
+            매수 수량
+        """
         소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수']
         return round(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100, 소숫점자리수)
 
     def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
+        """매도 수량을 설정합니다.
+        Args:
+            보유수량: 보유 수량
+            보유비율: 보유 비율
+            oc_ratio: 분할 비율
+        Returns:
+            매도 수량
+        """
         소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수']
         return round(보유수량 / 보유비율 * oc_ratio, 소숫점자리수)
 
     def _get_order_price(self, 거래금액, 주문수량):
+        """주문 가격을 계산합니다.
+        Args:
+            거래금액: 거래 금액
+            주문수량: 주문 수량
+        Returns:
+            주문 가격
+        """
         소숫점자리수 = self.dict_info[self.code]['가격소숫점자리수']
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0.0

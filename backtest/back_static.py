@@ -8,7 +8,10 @@ from utility.static_method.static import thread_decorator
 
 @thread_decorator
 def RunOptunaServer():
-    """Optuna 대시보드 서버를 실행합니다."""
+    """Optuna 대시보드 서버를 실행합니다.
+    Returns:
+        None
+    """
     from optuna_dashboard import run_server
     from utility.settings.setting_base import DB_OPTUNA
     try:
@@ -19,12 +22,10 @@ def RunOptunaServer():
 
 def get_trade_info(gubun):
     """거래 정보 딕셔너리를 반환합니다.
-    
     Args:
-        gubun (int): 구분 (1: 기본, 2: OMS, 기타: 일일)
-        
+        gubun: 구분 (1: 기본, 2: OMS, 기타: 일일)
     Returns:
-        dict: 거래 정보 딕셔너리
+        거래 정보 딕셔너리
     """
     from utility.static_method.static import dt_ymd
     buy_time = dt_ymd('20000101')
@@ -79,16 +80,14 @@ def get_trade_info(gubun):
 
 def get_back_load_code_query(is_tick, code, days, starttime, endtime):
     """백테스트 데이터 로드 쿼리를 생성합니다.
-    
     Args:
-        is_tick (bool): 틱 데이터 여부
-        code (str): 종목 코드
-        days (list): 일자 리스트
-        starttime (int): 시작 시간
-        endtime (int): 종료 시간
-        
+        is_tick: 틱 데이터 여부
+        code: 종목 코드
+        days: 일자 리스트
+        starttime: 시작 시간
+        endtime: 종료 시간
     Returns:
-        str: SQL 쿼리
+        SQL 쿼리 문자열
     """
     conditions = []
     for day in days:
@@ -106,16 +105,14 @@ def get_back_load_code_query(is_tick, code, days, starttime, endtime):
 
 def get_moneytop_query(is_tick, startday, endday, starttime, endtime):
     """거래대금 순위 쿼리를 생성합니다.
-    
     Args:
-        is_tick (bool): 틱 데이터 여부
-        startday (int): 시작 일자
-        endday (int): 종료 일자
-        starttime (int): 시작 시간
-        endtime (int): 종료 시간
-        
+        is_tick: 틱 데이터 여부
+        startday: 시작 일자
+        endday: 종료 일자
+        starttime: 시작 시간
+        endtime: 종료 시간
     Returns:
-        str: SQL 쿼리
+        SQL 쿼리 문자열
     """
     if is_tick:
         sindex = startday * 1000000 + starttime
@@ -129,14 +126,12 @@ def get_moneytop_query(is_tick, startday, endday, starttime, endtime):
 
 def get_buy_stg(buytxt, gubun, wq):
     """매수 전략을 컴파일합니다.
-    
     Args:
-        buytxt (str): 매수 전략 텍스트
-        gubun (int): 구분
-        wq (multiprocessing.Queue): 윈도우 큐
-        
+        buytxt: 매수 전략 텍스트
+        gubun: 구분
+        wq: 윈도우 큐
     Returns:
-        tuple: (매수 전략, 지표 전략)
+        (매수 전략, 지표 전략) 튜플
     """
     lines   = [line for line in buytxt.split('\n') if line and line[0] != '#']
     buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
@@ -160,6 +155,14 @@ def get_buy_stg(buytxt, gubun, wq):
 
 
 def get_sell_stg(sellstg, gubun, wq):
+    """매도 전략을 컴파일합니다.
+    Args:
+        sellstg: 매도 전략 텍스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        (매도 전략, 매도조건 딕셔너리) 튜플
+    """
     sellstg = 'self.sell_cond = 0\n' + sellstg
     sellstg, dict_cond = set_sell_cond(sellstg.split('\n'))
     try:
@@ -171,6 +174,14 @@ def get_sell_stg(sellstg, gubun, wq):
 
 
 def get_buy_conds(buy_conds, gubun, wq):
+    """매수 조건을 컴파일합니다.
+    Args:
+        buy_conds: 매수 조건 리스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        컴파일된 매수 조건
+    """
     buy_conds = 'if not (' + \
                 '):\n    매수 = False\nelif not ('.join(buy_conds) + \
                 '):\n    매수 = False\nif 매수:\n    self.Buy()'
@@ -183,6 +194,14 @@ def get_buy_conds(buy_conds, gubun, wq):
 
 
 def get_sell_conds(sell_conds, gubun, wq):
+    """매도 조건을 컴파일합니다.
+    Args:
+        sell_conds: 매도 조건 리스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        (컴파일된 매도 조건, 매도조건 딕셔너리) 튜플
+    """
     sell_conds = 'self.sell_cond = 0\nif not (' + \
                  '):\n    매도 = True\nelif not ('.join(sell_conds) + \
                  '):\n    매도 = True\nif 매도:\n    self.Sell()'
@@ -196,6 +215,12 @@ def get_sell_conds(sell_conds, gubun, wq):
 
 
 def set_sell_cond(selllist):
+    """매도 조건을 설정합니다.
+    Args:
+        selllist: 매도 전략 라인 리스트
+    Returns:
+        (처리된 매도 전략, 매도조건 딕셔너리) 튜플
+    """
     count = 1
     sellstg = ''
     dict_cond = {0: '전략종료청산', 1000: '분할매도', 1001: '익절청산', 1002: '손절청산'}
@@ -210,6 +235,14 @@ def set_sell_cond(selllist):
 
 
 def get_buy_stg_future(buystg, gubun, wq):
+    """선물 매수 전략을 컴파일합니다.
+    Args:
+        buystg: 매수 전략 텍스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        (매수 전략, 지표 전략) 튜플
+    """
     lines   = [line for line in buystg.split('\n') if line and line[0] != '#']
     buystg  = '\n'.join(line for line in lines if 'self.indicator' not in line)
     indistg = '\n'.join(line for line in lines if 'self.indicator' in line)
@@ -232,6 +265,14 @@ def get_buy_stg_future(buystg, gubun, wq):
 
 
 def get_sell_stg_future(sellstg, gubun, wq):
+    """선물 매도 전략을 컴파일합니다.
+    Args:
+        sellstg: 매도 전략 텍스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        (매도 전략, 매도조건 딕셔너리) 튜플
+    """
     sellstg = 'self.sell_cond = 0\n' + sellstg
     sellstg, dict_cond = set_sell_cond_future(sellstg.split('\n'))
     try:
@@ -243,6 +284,15 @@ def get_sell_stg_future(sellstg, gubun, wq):
 
 
 def get_buy_conds_future(is_long, buy_conds, gubun, wq):
+    """선물 매수 조건을 컴파일합니다.
+    Args:
+        is_long: 롱 포지션 여부
+        buy_conds: 매수 조건 리스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        컴파일된 매수 조건
+    """
     if is_long:
         buy_conds = 'if not (' + \
                     '):\n    BUY_LONG = False\nelif not ('.join(buy_conds) + \
@@ -260,6 +310,15 @@ def get_buy_conds_future(is_long, buy_conds, gubun, wq):
 
 
 def get_sell_conds_future(is_long, sell_conds, gubun, wq):
+    """선물 매도 조건을 컴파일합니다.
+    Args:
+        is_long: 롱 포지션 여부
+        sell_conds: 매도 조건 리스트
+        gubun: 구분
+        wq: 윈도우 큐
+    Returns:
+        (컴파일된 매도 조건, 매도조건 딕셔너리) 튜플
+    """
     if is_long:
         sell_conds = 'self.sell_cond = 0\nif ' + ':\n    SELL_LONG = True\nelif '.join(
             sell_conds) + ':\n    SELL_LONG = True\nif SELL_LONG:\n    self.Sell(SELL_LONG)'
@@ -276,6 +335,12 @@ def get_sell_conds_future(is_long, sell_conds, gubun, wq):
 
 
 def set_sell_cond_future(selllist):
+    """선물 매도 조건을 설정합니다.
+    Args:
+        selllist: 매도 전략 라인 리스트
+    Returns:
+        (처리된 매도 전략, 매도조건 딕셔너리) 튜플
+    """
     count = 1
     sellstg = ''
     dict_cond = {0: '전략종료청산', 1000: '분할매도', 1001: '익절청산', 1002: '손절청산'}
@@ -295,6 +360,15 @@ def set_sell_cond_future(selllist):
 
 
 def send_result(result, dict_train, dict_valid=None, exponential=False):
+    """백테스트 결과를 전송합니다.
+    Args:
+        result: 결과 데이터 튜플
+        dict_train: 학습 데이터 딕셔너리
+        dict_valid: 검증 데이터 딕셔너리
+        exponential: 지수 가중치 적용 여부
+    Returns:
+        업데이트된 기준값
+    """
     gubun, wq, mq, pre_hstd, optistd, opti_kind, vturn, vkey, vars_list, _, _, std_list, _ = result
     if gubun in ('최적화', '최적화테스트'):
         if opti_kind == 1:
@@ -359,6 +433,13 @@ def send_result(result, dict_train, dict_valid=None, exponential=False):
 
 
 def get_text2(std, pre_hstd):
+    """결과 텍스트2를 생성합니다.
+    Args:
+        std: 기준값
+        pre_hstd: 이전 기준값
+    Returns:
+        (텍스트, 업데이트된 기준값, 전송여부) 튜플
+    """
     text = f'<font color=#ffffa0> MERGE[{std:,.2f}]</font>'
     if std > pre_hstd:
         text = f'{text}<font color=#54d2f9> [기준값갱신]</font>'
@@ -371,6 +452,15 @@ def get_text2(std, pre_hstd):
 
 
 def get_text3(gubun, optistd, std_list, result):
+    """결과 텍스트3를 생성합니다.
+    Args:
+        gubun: 구분
+        optistd: 최적화 기준
+        std_list: 기준값 리스트
+        result: 결과 데이터 튜플
+    Returns:
+        (텍스트, 기준값) 튜플
+    """
     tc, atc, pc, mc, wr, ah, app, tpp, tsg, mhct, seed, cagr, tpi, mdd, mdd_ = result
     if tpp < 0 < tsg: tsg = -float('inf')
     mddt  = f'{mdd_:,.0f}' if 'G' in optistd and optistd != 'CAGR' else f'{mdd:,.2f}%'
@@ -383,6 +473,15 @@ def get_text3(gubun, optistd, std_list, result):
 
 
 def get_optistd_text(optistd, std_list, result, pre_text):
+    """최적화 기준 텍스트를 생성합니다.
+    Args:
+        optistd: 최적화 기준
+        std_list: 기준값 리스트
+        result: 결과 데이터 튜플
+        pre_text: 이전 텍스트
+    Returns:
+        (텍스트, 기준값) 튜플
+    """
     mdd_low, mdd_high, mhct_low, mhct_high, wr_low, wr_high, ap_low, ap_high, atc_low, atc_high, cagr_low, cagr_high, tpi_low, tpi_high = std_list
     tc, atc, pc, mc, wr, ah, app, tpp, tsg, mhct, seed, cagr, tpi, mdd, mdd_ = result
     std_true = (mdd_low <= mdd <= mdd_high and mhct_low <= mhct <= mhct_high and wr_low <= wr <= wr_high and
@@ -429,6 +528,14 @@ def get_optistd_text(optistd, std_list, result, pre_text):
 
 
 def get_yf_ticker(code, startday, endday):
+    """Yahoo Finance에서 티커 데이터를 가져옵니다.
+    Args:
+        code: 종목 코드
+        startday: 시작 일자
+        endday: 종료 일자
+    Returns:
+        주가 데이터프레임
+    """
     import yfinance as yf
     start_str  = str(startday)
     end_str    = str(endday)
@@ -440,6 +547,12 @@ def get_yf_ticker(code, startday, endday):
 
 
 def get_interval(total_sec):
+    """시간 간격을 반환합니다.
+    Args:
+        total_sec: 총 초수
+    Returns:
+        시간 간격 문자열
+    """
     if total_sec <= 1800:
         return '3min'
     elif total_sec <= 3600:
@@ -454,7 +567,30 @@ def get_interval(total_sec):
 def plot_show(gubun, is_tick, teleQ, df_tsg, df_bct, market_gubun, seed, mdd, startday, endday, starttime, endtime,
               list_days, backname, back_text, label_text, save_file_name, schedul, notplotshow,
               buy_vars=None, sell_vars=None):
-
+    """백테스트 결과를 시각화합니다.
+    Args:
+        gubun: 구분
+        is_tick: 틱 데이터 여부
+        teleQ: 텔레그램 큐
+        df_tsg: 거래 결과 데이터프레임
+        df_bct: 보유 결과 데이터프레임
+        market_gubun: 마켓 구분
+        seed: 초기 자금
+        mdd: 최대 낙폭
+        startday: 시작 일자
+        endday: 종료 일자
+        starttime: 시작 시간
+        endtime: 종료 시간
+        list_days: 일자 리스트
+        backname: 백테스트 이름
+        back_text: 백테스트 텍스트
+        label_text: 라벨 텍스트
+        save_file_name: 저장 파일명
+        schedul: 스케줄 여부
+        notplotshow: 플롯 표시 여부
+        buy_vars: 매수 변수
+        sell_vars: 매도 변수
+    """
     from utility.settings.setting_base import GRAPH_PATH
     from matplotlib import pyplot as plt, font_manager, gridspec
     from utility.static_method.static import dt_hms, dt_hm, dt_ymd, dt_ymdhms, dt_ymdhm, str_ymd_ios, str_ymdhms_ios
@@ -651,6 +787,14 @@ def plot_show(gubun, is_tick, teleQ, df_tsg, df_bct, market_gubun, seed, mdd, st
 
 
 def get_result_dataframe(market_gubun, list_tsg, arry_bct):
+    """결과 데이터프레임을 생성합니다.
+    Args:
+        market_gubun: 마켓 구분
+        list_tsg: 거래 결과 리스트
+        arry_bct: 보유 결과 배열
+    Returns:
+        (거래 데이터프레임, 보유 데이터프레임) 튜플
+    """
     columns1 = [
         'index', '종목명', '포지션' if market_gubun > 5 else '시가총액', '매수시간', '매도시간',
         '보유시간', '매수가', '매도가', '매수금액', '매도금액', '수익률', '수익금', '매도조건', '추가매수시간'
@@ -671,10 +815,12 @@ def get_result_dataframe(market_gubun, list_tsg, arry_bct):
 
 
 def add_mdd(arry_tsg, result):
-    """
-    arry_tsg
-    보유시간, 매도시간, 수익률, 수익금, 수익금합계
-       0       1       2       3      4
+    """MDD를 계산하여 결과에 추가합니다.
+    Args:
+        arry_tsg: 거래 결과 배열 (보유시간, 매도시간, 수익률, 수익금, 수익금합계)
+        result: 결과 데이터 튜플
+    Returns:
+        MDD가 추가된 결과 튜플
     """
     try:
         array = arry_tsg[:, 4]

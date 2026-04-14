@@ -6,7 +6,6 @@ from utility.static_method.static import dt_ymdhms, dt_ymdhm
 
 class StgGlobalsFunc:
     """전략 전역 함수를 제공하는 기본 클래스입니다.
-    
     백테스트 및 실시간 트레이딩에서 사용되는 전역 함수들을 제공합니다.
     """
     
@@ -60,12 +59,10 @@ class StgGlobalsFunc:
 
     def _calc_fill_amount(self, 주문수량, 호가배열, 잔량배열):
         """체결 금액을 계산합니다.
-        
         Args:
             주문수량 (int): 주문 수량
             호가배열 (np.ndarray): 호가 배열
             잔량배열 (np.ndarray): 잔량 배열
-            
         Returns:
             tuple: (거래금액, 체결성공여부)
         """
@@ -81,7 +78,6 @@ class StgGlobalsFunc:
 
     def _now(self):
         """현재 시간을 반환합니다.
-        
         Returns:
             datetime: 현재 시간
         """
@@ -89,11 +85,9 @@ class StgGlobalsFunc:
 
     def _parameter_previous(self, cidx, pre):
         """이전 파라미터를 반환합니다.
-        
         Args:
             cidx (int): 컬럼 인덱스
             pre (int): 이전 틱 수
-            
         Returns:
             float: 파라미터 값
         """

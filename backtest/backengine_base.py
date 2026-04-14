@@ -17,25 +17,23 @@ from backtest.back_static import get_buy_stg, get_sell_stg, get_buy_conds, get_s
 
 class BackEngineBase(StgGlobalsFunc):
     """백테스트 엔진의 기본 클래스입니다.
-    
     주문 관리 시스템(OMS)이 적용되지 않은 백테스트 엔진으로,
     데이터 로드, 전략 실행, 기본 매수/매도 로직을 처리합니다.
     """
     
     def __init__(self, gubun, shared_cnt, lock, wq, tq, bq, beq_list, bstq_list, dict_set, profile=False):
         """백테스트 엔진을 초기화합니다.
-        
         Args:
-            gubun (int): 엔진 구분 번호
-            shared_cnt (multiprocessing.Value): 공유 카운터
-            lock (multiprocessing.Lock): 공유 락
-            wq (multiprocessing.Queue): 윈도우 큐
-            tq (multiprocessing.Queue): 트레이더 큐
-            bq (multiprocessing.Queue): 백테스트 큐
-            beq_list (list): 백테스트 엔진 큐 리스트
-            bstq_list (list): 백테스트 전략 큐 리스트
-            dict_set (dict): 설정 딕셔너리
-            profile (bool): 프로파일링 여부. 기본값은 False입니다.
+            gubun: 엔진 구분 번호
+            shared_cnt: 공유 카운터
+            lock: 공유 락
+            wq: 윈도우 큐
+            tq: 트레이더 큐
+            bq: 백테스트 큐
+            beq_list: 백테스트 엔진 큐 리스트
+            bstq_list: 백테스트 전략 큐 리스트
+            dict_set: 설정 딕셔너리
+            profile: 프로파일링 여부
         """
         super().__init__()
         self.gubun           = gubun
@@ -117,7 +115,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _update_sub_vars(self):
         """하위 변수들을 업데이트합니다.
-        
         마켓 구분, 시장 정보, OMS 적용 여부, 호가 잔량 범위 등
         백테스트에 필요한 변수들을 설정에서 가져와 업데이트합니다.
         """
@@ -166,7 +163,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _set_passticks_and_blacklist(self):
         """패스틱스 조건과 블랙리스트를 설정합니다.
-        
         데이터베이스에서 패스틱스 전략을 읽어 컴파일하고,
         블랙리스트를 설정합니다.
         """
@@ -197,7 +193,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _main_loop(self):
         """백테스트 엔진의 메인 루프입니다.
-        
         큐에서 데이터를 받아 백테스트 유형에 따라 적절한 처리를 수행합니다.
         지원하는 백테스트 유형: 최적화, 전진분석, GA최적화, 조건최적화, 백테스트, 백파인더.
         """
@@ -213,7 +208,7 @@ class BackEngineBase(StgGlobalsFunc):
                             self.endday    = data[4]
                             self.starttime = data[5]
                             self.endtime   = data[6]
-                            if self.market_gubun in (1, 3):
+                            if self.market_gubun < 6:
                                 self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
                                 self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
@@ -237,7 +232,7 @@ class BackEngineBase(StgGlobalsFunc):
                             self.endday    = data[4]
                             self.starttime = data[5]
                             self.endtime   = data[6]
-                            if self.market_gubun in (1, 3):
+                            if self.market_gubun < 6:
                                 self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
                                 self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
@@ -264,7 +259,7 @@ class BackEngineBase(StgGlobalsFunc):
                             self.endday    = data[4]
                             self.starttime = data[5]
                             self.endtime   = data[6]
-                            if self.market_gubun in (1, 3):
+                            if self.market_gubun < 6:
                                 self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
                                 self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
@@ -294,7 +289,7 @@ class BackEngineBase(StgGlobalsFunc):
                             self.dict_sconds  = {}
                             error = False
                             for i in range(20):
-                                if self.market_gubun in (1, 3):
+                                if self.market_gubun < 6:
                                     buystg = get_buy_conds(data[2][i], self.gubun, self.wq)
                                     sellstg, dict_cond = get_sell_conds(data[3][i], self.gubun, self.wq)
                                 else:
@@ -317,7 +312,7 @@ class BackEngineBase(StgGlobalsFunc):
                             self.endday    = data[4]
                             self.starttime = data[5]
                             self.endtime   = data[6]
-                            if self.market_gubun in (1, 3):
+                            if self.market_gubun < 6:
                                 self.buystg, self.indistg = get_buy_stg(data[7], self.gubun, self.wq)
                                 self.sellstg, self.dict_sconds = get_sell_stg(data[8], self.gubun, self.wq)
                             else:
@@ -339,7 +334,8 @@ class BackEngineBase(StgGlobalsFunc):
                             try:
                                 self.buystg = compile(data[6], '<string>', 'exec')
                             except:
-                                if self.gubun == 0: self.wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
+                                if self.gubun == 0:
+                                    self.wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
                                 self._back_stop()
                             else:
                                 self.opti_kind = data[7]
@@ -369,12 +365,10 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _data_load(self, data):
         """백테스트 데이터를 로드합니다.
-        
         데이터베이스에서 종목 데이터를 읽어와 롤링 데이터를 추가하고,
         공유 메모리 또는 파일에 저장합니다.
-        
         Args:
-            data (tuple): 로드에 필요한 데이터 튜플
+            data: 로드에 필요한 데이터 튜플
         """
         def load(days):
             try:
@@ -463,12 +457,10 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _check_avg_list(self, avg_list):
         """평균값 틱수 목록을 검증합니다.
-        
         백테 엔진 구동 시 포함되지 않은 평균값 틱수가 있으면
         백테스트를 중지합니다.
-        
         Args:
-            avg_list (list): 평균값 틱수 목록
+            avg_list: 평균값 틱수 목록
         """
         not_in_list = [x for x in avg_list if x not in self.avg_list]
         if len(not_in_list) > 0 and self.gubun == 0:
@@ -478,7 +470,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _check_day_and_time(self):
         """날짜와 시간 범위를 확인하고 설정합니다.
-        
         이전 데이터 로딩과 현재 설정이 동일한지 확인하고,
         틱/분봉에 따른 단위를 설정합니다.
         """
@@ -494,9 +485,8 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _back_stop(self, gubun=0):
         """백테스트를 중지합니다.
-        
         Args:
-            gubun (int): 중지 구분. 0:일반, 1:사용자요청, 2:완료알림, 3:오류. 기본값은 0입니다.
+            gubun: 중지 구분 (0:일반, 1:사용자요청, 2:완료알림, 3:오류)
         """
         self.back_type = None
         if gubun in (0, 1):
@@ -508,7 +498,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _init_trade_info(self):
         """거래 정보를 초기화합니다.
-        
         백테스트에 필요한 거래 관련 변수들을 초기화하고,
         OMS 적용 여부에 따라 적절한 구조로 설정합니다.
         """
@@ -543,9 +532,8 @@ class BackEngineBase(StgGlobalsFunc):
     # noinspection PyUnresolvedReferences
     def _get_array_data(self):
         """공유 메모리 또는 파일에서 배열 데이터를 가져옵니다.
-        
         Returns:
-            str or None: 종목 코드. 데이터가 없으면 None을 반환합니다.
+            종목 코드. 데이터가 없으면 None을 반환합니다.
         """
         shared_info = None
         with self.shared_lock:
@@ -594,7 +582,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _update_formula_data(self):
         """사용자 수식 데이터를 업데이트합니다.
-        
         데이터베이스에서 수식을 읽어 컴파일하고 전역 함수를 설정합니다.
         """
         total_cnt = self.base_cnt + 5 + self.add_cnt * len(self.avg_list)
@@ -606,7 +593,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _back_test(self):
         """백테스트를 실행합니다.
-        
         데이터를 순회하며 전략을 실행하고 매수/매도 시그널을 처리합니다.
         프로파일링이 활성화된 경우 성능 측정을 수행합니다.
         """
@@ -687,14 +673,13 @@ class BackEngineBase(StgGlobalsFunc):
 
     def Buy(self, buy_long=False):
         """매수 주문을 실행합니다.
-        
         Args:
-            buy_long (bool): 롱 포지션 여부. 기본값은 False입니다.
+            buy_long: 롱 포지션 여부
         """
         self._get_buy_count()
         주문수량 = self.curr_trade_info['주문수량']
         if 주문수량 > 0:
-            if self.market_gubun in (1, 3) or buy_long:
+            if self.market_gubun < 6 or buy_long:
                 호가배열 = self.shogainfo[:self.buy_hj_limit]
                 잔량배열 = self.shreminfo[:self.buy_hj_limit]
             else:
@@ -703,7 +688,7 @@ class BackEngineBase(StgGlobalsFunc):
 
             거래금액, 체결완료 = self._calc_fill_amount(주문수량, 호가배열, 잔량배열)
             if 체결완료:
-                보유중 = 1 if self.market_gubun in (1, 3) or buy_long else 2
+                보유중 = 1 if self.market_gubun < 6 or buy_long else 2
                 매수가 = self._get_order_price(거래금액, 주문수량)
                 매수시간 = dt_ymdhms(str(self.index)) if self.is_tick else dt_ymdhm(str(self.index))
                 self.curr_trade_info.update({
@@ -720,7 +705,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _get_buy_count(self):
         """매수 수량을 계산합니다.
-        
         비중 조절 설정에 따라 배팅 금액을 조절하고,
         현재가에 따른 주문 수량을 계산합니다.
         """
@@ -753,23 +737,22 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _get_hold_info(self, 보유수량, 매수가, 현재가, 최고수익률, 최저수익률, 매수틱번호, 매수시간):
         """보유 정보를 계산합니다.
-        
         Args:
-            보유수량 (int): 보유 수량
-            매수가 (float): 매수 가격
-            현재가 (float): 현재 가격
-            최고수익률 (float): 최고 수익률
-            최저수익률 (float): 최저 수익률
-            매수틱번호 (int): 매수 틱 번호
-            매수시간 (datetime): 매수 시간
-            
+            보유수량: 보유 수량
+            매수가: 매수 가격
+            현재가: 현재 가격
+            최고수익률: 최고 수익률
+            최저수익률: 최저 수익률
+            매수틱번호: 매수 틱 번호
+            매수시간: 매수 시간
         Returns:
-            tuple: (포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간)
+            (포지션, 수익금, 수익률, 최고수익률, 최저수익률, 보유시간) 튜플
         """
         포지션, _, 수익금, 수익률 = self._get_profit_info(현재가, 매수가, 보유수량)
         if 수익률 > 최고수익률:   self.curr_trade_info['최고수익률'] = 최고수익률 = 수익률
         elif 수익률 < 최저수익률: self.curr_trade_info['최저수익률'] = 최저수익률 = 수익률
         now_time = self._now()
+        # noinspection PyUnresolvedReferences
         보유시간 = (now_time - 매수시간).total_seconds() if self.is_tick else int((now_time - 매수시간).total_seconds() / 60)
         self.curr_trade_info['주문수량'] = 보유수량
         self.indexb = 매수틱번호
@@ -777,13 +760,12 @@ class BackEngineBase(StgGlobalsFunc):
 
     def Sell(self, sell_long=False):
         """매도 주문을 실행합니다.
-        
         Args:
-            sell_long (bool): 롱 포지션 매도 여부. 기본값은 False입니다.
+            sell_long: 롱 포지션 매도 여부
         """
         주문수량 = self.curr_trade_info['주문수량']
         if 주문수량 > 0:
-            if self.market_gubun in (1, 3) or sell_long:
+            if self.market_gubun < 6 or sell_long:
                 호가배열 = self.bhogainfo[:self.sell_hj_limit]
                 잔량배열 = self.bhreminfo[:self.sell_hj_limit]
             else:
@@ -797,7 +779,6 @@ class BackEngineBase(StgGlobalsFunc):
 
     def _last_sell(self):
         """마지막 틱에서 매도를 처리합니다.
-        
         일일 마지막 틱에서 보유 중인 포지션을 청산합니다.
         """
         호가데이터 = self.arry_code[self.indexn, self.hoga_sidex:self.hoga_eidex]
@@ -812,7 +793,7 @@ class BackEngineBase(StgGlobalsFunc):
                 self.curr_trade_info = self.trade_info[vturn][vkey]
                 if self.curr_trade_info['보유중'] > 0:
                     주문수량 = self.curr_trade_info['보유수량']
-                    if self.market_gubun in (1, 3) or self.curr_trade_info['보유중'] == 1:
+                    if self.market_gubun < 6 or self.curr_trade_info['보유중'] == 1:
                         호가배열 = 매수호가배열[:self.sell_hj_limit]
                         잔량배열 = 매수잔량배열[:self.sell_hj_limit]
                     else:
@@ -828,8 +809,8 @@ class BackEngineBase(StgGlobalsFunc):
                     self._calculation_eyun()
 
     def _calculation_eyun(self):
-        """
-        보유중, 매수가, 매도가, 주문수량, 보유수량, 최고수익률, 최저수익률, 매수틱번호, 매수시간 = self.curr_trade_info.values()
+        """수익을 계산하고 결과를 전송합니다.
+        거래 완료 후 수익금, 수익률 등을 계산하고 백테스트 결과를 큐에 전송합니다.
         """
         vturn, vkey = self.info_for_order[-2:]
         _, 매수가, 매도가, 주문수량, _, _, _, 매수틱번호, 매수시간 = self.curr_trade_info.values()
@@ -848,6 +829,9 @@ class BackEngineBase(StgGlobalsFunc):
 
     # noinspection PyUnusedLocal
     def _strategy(self):
+        """전략을 실행합니다.
+        현재 틱 데이터를 기반으로 매수/매도 전략을 실행합니다.
+        """
         if self.market_gubun < 4:
             체결시간, 현재가, 시가, 고가, 저가, 등락율, 당일거래대금, 체결강도, 초당매수수량, 초당매도수량, 시가총액, \
                 VI해제시간, VI가격, VI호가단위, \
@@ -1016,6 +1000,11 @@ class BackEngineBase(StgGlobalsFunc):
                 exec(self.sellstg)
 
     def _update_highlow(self, 현재가또는분봉고가=None, 분봉저가=None):
+        """고가/저가 정보를 업데이트합니다.
+        Args:
+            현재가또는분봉고가: 현재가 또는 분봉 고가
+            분봉저가: 분봉 저가
+        """
         if 분봉저가 is None:
             if self.high_low:
                 if 현재가또는분봉고가 >= self.high_low[0]:
@@ -1038,16 +1027,54 @@ class BackEngineBase(StgGlobalsFunc):
                 self.high_low = [현재가또는분봉고가, self.indexn, 분봉저가, self.indexn]
 
     def _get_hogaunit(self, 주문가격또는종목코드):
+        """호가 단위를 반환합니다.
+        Args:
+            주문가격또는종목코드: 주문 가격 또는 종목 코드
+        Returns:
+            호가 단위
+        """
         pass
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
+        """매수 수량을 설정합니다.
+        Args:
+            betting: 배팅 금액
+            현재가: 현재 가격
+            매수가: 매수 가격
+            oc_ratio: OC 비율
+        Returns:
+            매수 수량
+        """
         return 0
 
     def _get_order_price(self, 거래금액, 주문수량):
+        """주문 가격을 계산합니다.
+        Args:
+            거래금액: 거래 금액
+            주문수량: 주문 수량
+        Returns:
+            주문 가격
+        """
         return 0
 
     def _get_last_sell_price(self, 매도금액, 보유수량, 미체결수량):
+        """마지막 매도 가격을 계산합니다.
+        Args:
+            매도금액: 매도 금액
+            보유수량: 보유 수량
+            미체결수량: 미체결 수량
+        Returns:
+            매도 가격
+        """
         return 0
 
     def _get_profit_info(self, 현재가, 매수가, 보유수량):
+        """수익 정보를 계산합니다.
+        Args:
+            현재가: 현재 가격
+            매수가: 매수 가격
+            보유수량: 보유 수량
+        Returns:
+            (포지션, 평가금액, 수익금, 수익률) 튜플
+        """
         return None, 0, 0, 0

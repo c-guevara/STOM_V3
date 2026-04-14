@@ -14,7 +14,6 @@ from backtest.back_static import plot_show, get_moneytop_query, get_result_dataf
 
 class BackTest:
     """백테스트를 실행하는 클래스입니다.
-    
     전략을 컴파일하고 데이터를 로드하여 백테스트를 실행합니다.
     """
     
@@ -22,31 +21,30 @@ class BackTest:
                  avgtime, startday, endday, starttime, endtime, buystg_name, sellstg_name, back_count, blacklist,
                  schedul, back_club):
         """백테스트를 초기화합니다.
-        
         Args:
-            sc (multiprocessing.Value): 공유 카운터
-            wq (multiprocessing.Queue): 윈도우 큐
-            sq (multiprocessing.Queue): 전략 큐
-            tq (multiprocessing.Queue): 트레이더 큐
-            lq (multiprocessing.Queue): 로그 큐
-            teleQ (multiprocessing.Queue): 텔레그램 큐
-            beq_list (list): 백테스트 엔진 큐 리스트
-            bstq_list (list): 백테스트 전략 큐 리스트
-            backname (str): 백테스트 이름
-            dict_set (dict): 설정 딕셔너리
-            market_infos (list): 마켓 정보 리스트
-            betting (float): 배팅 금액
-            avgtime (int): 평균 시간
-            startday (int): 시작 일자
-            endday (int): 종료 일자
-            starttime (int): 시작 시간
-            endtime (int): 종료 시간
-            buystg_name (str): 매수 전략 이름
-            sellstg_name (str): 매도 전략 이름
-            back_count (int): 백테스트 카운트
-            blacklist (list): 블랙리스트
-            schedul (bool): 스케줄 여부
-            back_club (str): 백테스트 클럽
+            sc: 공유 카운터
+            wq: 윈도우 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            lq: 로그 큐
+            teleQ: 텔레그램 큐
+            beq_list: 백테스트 엔진 큐 리스트
+            bstq_list: 백테스트 전략 큐 리스트
+            backname: 백테스트 이름
+            dict_set: 설정 딕셔너리
+            market_infos: 마켓 정보 리스트
+            betting: 배팅 금액
+            avgtime: 평균 시간
+            startday: 시작 일자
+            endday: 종료 일자
+            starttime: 시작 시간
+            endtime: 종료 시간
+            buystg_name: 매수 전략 이름
+            sellstg_name: 매도 전략 이름
+            back_count: 백테스트 카운트
+            blacklist: 블랙리스트
+            schedul: 스케줄 여부
+            back_club: 백테스트 클럽
         """
         self.shared_cnt   = sc
         self.wq           = wq
@@ -97,7 +95,6 @@ class BackTest:
     # noinspection PyUnresolvedReferences
     def _start(self):
         """백테스트를 시작합니다.
-        
         데이터를 로드하고 전략을 컴파일한 후 백테스트를 실행합니다.
         """
         con   = sqlite3.connect(self.market_info['백테디비'][self.is_tick])
@@ -175,6 +172,11 @@ class BackTest:
         self._sys_exit(False)
 
     def _report(self, list_tsg, arry_bct):
+        """백테스트 결과를 보고합니다.
+        Args:
+            list_tsg: 거래 결과 리스트
+            arry_bct: 보유 결과 배열
+        """
         if not list_tsg:
             self.wq.put((ui_num['백테스트'], '매수전략을 만족하는 경우가 없어 결과를 표시할 수 없습니다.'))
             self._sys_exit(True)
@@ -291,6 +293,7 @@ class BackTest:
         self.wq.put((ui_num['상세기록'], df_tsg))
 
     def _insert_blacklist(self, df_tsg):
+        """블랙리스트를 추가합니다."""
         insert_blacklist = []
         name_list = df_tsg['종목명'].unique()
         for name in name_list:
@@ -315,6 +318,10 @@ class BackTest:
             con.close()
 
     def _sys_exit(self, cancel):
+        """시스템을 종료합니다.
+        Args:
+            cancel: 취소 여부
+        """
         if cancel:
             self.wq.put((ui_num['백테스트'], f'{self.backname} STOP'))
         else:

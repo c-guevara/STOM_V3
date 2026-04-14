@@ -19,25 +19,23 @@ from backtest.back_static import send_result, plot_show, get_moneytop_query, get
 
 class Total:
     """최적화를 실행하는 클래스입니다.
-    
     Optuna를 사용하여 파라미터 최적화를 수행합니다.
     """
     
     def __init__(self, wq, sq, tq, teleQ, mq, lq, bstq_list, backname, market_gubun, market_info, dict_set):
         """최적화 엔진을 초기화합니다.
-        
         Args:
-            wq (multiprocessing.Queue): 윈도우 큐
-            sq (multiprocessing.Queue): 전략 큐
-            tq (multiprocessing.Queue): 트레이더 큐
-            teleQ (multiprocessing.Queue): 텔레그램 큐
-            mq (multiprocessing.Queue): 메시지 큐
-            lq (multiprocessing.Queue): 로그 큐
-            bstq_list (list): 백테스트 전략 큐 리스트
-            backname (str): 백테스트 이름
-            market_gubun (int): 마켓 구분
-            market_info (dict): 마켓 정보
-            dict_set (dict): 설정 딕셔너리
+            wq: 윈도우 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            teleQ: 텔레그램 큐
+            mq: 메시지 큐
+            lq: 로그 큐
+            bstq_list: 백테스트 전략 큐 리스트
+            backname: 백테스트 이름
+            market_gubun: 마켓 구분
+            market_info: 마켓 정보
+            dict_set: 설정 딕셔너리
         """
         self.wq           = wq
         self.sq           = sq
@@ -91,7 +89,6 @@ class Total:
 
     def _main_loop(self):
         """최적화 메인 루프를 실행합니다.
-        
         백테스트 결과를 수집하고 최적화를 수행합니다.
         """
         sc  = 0
@@ -202,6 +199,10 @@ class Total:
         sys.exit()
 
     def _back_info(self, data):
+        """백테스트 정보를 설정합니다.
+        Args:
+            data: 백테스트 정보 데이터
+        """
         self.betting      = data[1]
         self.startday     = data[2]
         self.endday       = data[3]
@@ -225,12 +226,24 @@ class Total:
             self.sub_total = 2
 
     def _get_send_data(self, vturn=0, vkey=0):
+        """전송 데이터를 생성합니다.
+        Args:
+            vturn: 회전 수
+            vkey: 키 값
+        Returns:
+            전송 데이터 리스트
+        """
         vars_copy = self.vars.copy()
         if self.opti_kind == 1:
             vars_copy[vturn] = self.vars_list[vturn][0][vkey]
         return ['최적화', self.wq, self.mq, self.hstd, self.optistandard, self.opti_kind, vturn, vkey, vars_copy, self.startday, self.endday, self.std_list, self.betting]
 
     def _report(self, list_tsg, arry_bct):
+        """결과를 보고합니다.
+        Args:
+            list_tsg: 거래 결과 리스트
+            arry_bct: 보유 결과 배열
+        """
         if not list_tsg:
             self.wq.put((ui_num['백테스트'], '매수전략을 만족하는 경우가 없어 결과를 표시할 수 없습니다.'))
             self.mq.put('백테스트 중지')
@@ -358,7 +371,26 @@ class Total:
 
 
 class Optimize:
+    """최적화 엔진 클래스입니다.
+    파라미터 최적화를 수행합니다.
+    """
     def __init__(self, sc, wq, bq, sq, tq, lq, teleQ, beq_list, bstq_list, multi, backname, dict_set, market_infos):
+        """최적화 엔진을 초기화합니다.
+        Args:
+            sc: 공유 카운터
+            wq: 윈도우 큐
+            bq: 백테스트 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            lq: 로그 큐
+            teleQ: 텔레그램 큐
+            beq_list: 백테스트 엔진 큐 리스트
+            bstq_list: 백테스트 전략 큐 리스트
+            multi: 멀티프로세스 여부
+            backname: 백테스트 이름
+            dict_set: 설정 딕셔너리
+            market_infos: 마켓 정보 리스트
+        """
         self.shared_cnt   = sc
         self.wq           = wq
         self.bq           = bq
@@ -390,6 +422,8 @@ class Optimize:
 
     # noinspection PyUnresolvedReferences
     def _start(self):
+        """최적화를 시작합니다.
+        """
         start_time = now()
         data = self.bq.get()
         if self.market_gubun < 4:
@@ -579,6 +613,18 @@ class Optimize:
         self._sys_exit(False)
 
     def _get_list_days(self, startday, endday, dt_endday, day_list, weeks_train, weeks_valid, weeks_test):
+        """날짜 리스트를 생성합니다.
+        Args:
+            startday: 시작 일자
+            endday: 종료 일자
+            dt_endday: 종료 일자 datetime
+            day_list: 일자 리스트
+            weeks_train: 학습 주 수
+            weeks_valid: 검증 주 수
+            weeks_test: 테스트 주 수
+        Returns:
+            날짜 리스트
+        """
         train_days_ = [startday, int(str_ymd(timedelta_day(-weeks_test * 7, dt_endday)))]
         valid_days_ = []
         if 'VC' in self.backname:
@@ -631,6 +677,16 @@ class Optimize:
         return list_days
 
     def _get_optomize_varslist(self, random_optivars, only_buy, only_sell, buy_first, sell_num):
+        """최적화 변수 리스트를 생성합니다.
+        Args:
+            random_optivars: 랜덤 최적화 변수
+            only_buy: 매수 전용 여부
+            only_sell: 매도 전용 여부
+            buy_first: 매수 우선 여부
+            sell_num: 매도 수
+        Returns:
+            (vars_type, len_vars, vars) 튜플
+        """
         vars_type   = []
         self.vars_  = []
 
@@ -678,6 +734,23 @@ class Optimize:
 
     def _optimize_grid(self, mq, back_count, len_vars, only_buy, only_sell, buy_first, sell_num, vars_type, ccount,
                        random_optivars, text_vars, optivars_name):
+        """그리드 최적화를 수행합니다.
+        Args:
+            mq: 메시지 큐
+            back_count: 백테스트 카운트
+            len_vars: 변수 길이
+            only_buy: 매수 전용 여부
+            only_sell: 매도 전용 여부
+            buy_first: 매수 우선 여부
+            sell_num: 매도 수
+            vars_type: 변수 타입
+            ccount: 카운터
+            random_optivars: 랜덤 최적화 변수
+            text_vars: 텍스트 변수
+            optivars_name: 최적화 변수 이름
+        Returns:
+            최고 기준값
+        """
 
         self.tq.put(('경우의수', back_count))
         self._back_start(('변수정보', self.vars_, 0))
@@ -768,6 +841,15 @@ class Optimize:
             hstd = high_ratio[2]
 
     def _check_optivalue_combination(self, mq, previous_high_std, vars_change_count, dict_turn_hvar_hstd):
+        """최적값 조합을 확인합니다.
+        Args:
+            mq: 메시지 큐
+            previous_high_std: 이전 최고 기준값
+            vars_change_count: 변수 변경 카운트
+            dict_turn_hvar_hstd: 회전별 최고 변수 기준값 딕셔너리
+        Returns:
+            (high_ratio, vars_change_count) 튜플
+        """
         self.wq.put((ui_num['백테스트'], '최적값 조합 확인 시작'))
         high_ratio = [0, previous_high_std, previous_high_std]
         std_set = sorted(set(v[1] for v in dict_turn_hvar_hstd.values()))
@@ -808,6 +890,13 @@ class Optimize:
         return high_ratio, vars_change_count
 
     def _fix_and_delete_vars_range(self, hstd, dict_turn_var_std, delete_varlist, deleted_varlist):
+        """변수 범위를 수정하고 삭제합니다.
+        Args:
+            hstd: 기준값
+            dict_turn_var_std: 회전별 변수 기준값 딕셔너리
+            delete_varlist: 삭제 변수 리스트
+            deleted_varlist: 삭제된 변수 리스트
+        """
         text = '\n'
         for vturn, var_std in dict_turn_var_std.items():
             len_std_set = len(set(var_std.values()))
@@ -837,6 +926,7 @@ class Optimize:
         return deleted_varlist
 
     def adjust_vars_range(self, best_params=None, deleted_varlist=None):
+        """범위를 자동으로 추가합니다."""
         text = '\n'
         for i, var in enumerate(self.vars_):
             len_var = len(var[0])
@@ -865,6 +955,21 @@ class Optimize:
 
     def _optimize_optuna(self, mq, back_count, only_buy, only_sell, buy_first, buy_num, sell_num,
                          optuna_fixvars, optuna_count, optuna_autostep, sampler, buystg_name):
+        """Optuna 최적화를 수행합니다.
+        Args:
+            mq: 메시지 큐
+            back_count: 백테스트 카운트
+            only_buy: 매수 전용 여부
+            only_sell: 매도 전용 여부
+            buy_first: 매수 우선 여부
+            buy_num: 매수 수
+            sell_num: 매도 수
+            optuna_fixvars: Optuna 고정 변수
+            optuna_count: Optuna 카운트
+            optuna_autostep: Optuna 자동 단계
+            sampler: 샘플러
+            buystg_name: 매수 전략 이름
+        """
 
         self.tq.put(('경우의수', back_count))
         self.wq.put((ui_num['백테스트'], f'{self.backname} OPTUNA 최적화 시작'))
@@ -924,6 +1029,15 @@ class Optimize:
                 self.wq.put((ui_num['백테스트'], f'self.vars[{i}]의 최적값 변경 [{pre_hvar} -> {high_var}]'))
 
     def _save_opti_vars(self, text_vars, optivars_name, only_buy, only_sell, buy_first, sell_num):
+        """최적화 변수를 저장합니다.
+        Args:
+            text_vars: 텍스트 변수
+            optivars_name: 최적화 변수 이름
+            only_buy: 매수 전용 여부
+            only_sell: 매도 전용 여부
+            buy_first: 매수 우선 여부
+            sell_num: 매도 수
+        """
         if 'T' not in self.backname:
             change = 0
             text_vars = text_vars.split('self.vars[0]')[0]
@@ -957,6 +1071,10 @@ class Optimize:
                 self.wq.put((ui_num['백테스트'], f'{self.backname} {optivars_name}의 최적값 갱신 완료'))
 
     def _back_start(self, data):
+        """백테스트를 시작합니다.
+        Args:
+            data: 백테스트 데이터
+        """
         self.shared_cnt.value = 0
         self.tq.put(data)
         for q in self.bstq_list:
@@ -965,6 +1083,10 @@ class Optimize:
             q.put(data)
 
     def _sys_exit(self, cancel):
+        """시스템을 종료합니다.
+        Args:
+            cancel: 취소 여부
+        """
         if cancel:
             self.wq.put((ui_num['백테스트'], f'{self.backname} STOP'))
         else:
@@ -974,7 +1096,16 @@ class Optimize:
 
 
 class StopWhenNotUpdateBestCallBack:
+    """Optuna 콜백 클래스입니다.
+    최고 값이 업데이트되지 않으면 중단합니다.
+    """
     def __init__(self, main, back_count, optuna_count):
+        """콜백을 초기화합니다.
+        Args:
+            main: 메인 객체
+            back_count: 백테스트 카운트
+            optuna_count: Optuna 카운트
+        """
         self.main         = main
         self.back_count   = back_count
         self.optuna_count = optuna_count
@@ -982,6 +1113,11 @@ class StopWhenNotUpdateBestCallBack:
         self.adjust_cnt   = max(self.len_vars, self.optuna_count)
 
     def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
+        """콜백을 호출합니다.
+        Args:
+            study: Optuna 스터디
+            trial: Optuna 트라이얼
+        """
         best_opt = study.best_value
         best_num = study.best_trial.number
         curr_num = trial.number

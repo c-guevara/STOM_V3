@@ -13,7 +13,18 @@ from utility.static_method.static import factorial, now, timedelta_day, timedelt
 
 
 class Total:
+    """조건 최적화를 실행하는 클래스입니다.
+    다양한 조건 조합을 테스트하여 최적 조건을 찾습니다.
+    """
     def __init__(self, wq, tq, mq, bstq_list, dict_set):
+        """조건 최적화를 초기화합니다.
+        Args:
+            wq: 윈도우 큐
+            tq: 트레이더 큐
+            mq: 메시지 큐
+            bstq_list: 백테스트 전략 큐 리스트
+            dict_set: 설정 딕셔너리
+        """
         self.wq           = wq
         self.tq           = tq
         self.mq           = mq
@@ -38,6 +49,9 @@ class Total:
         self._main_loop()
 
     def _main_loop(self):
+        """메인 루프를 실행합니다.
+        백테스트 결과를 수집하고 조건 최적화를 수행합니다.
+        """
         sc = 0
         bc = 0
         st = {}
@@ -121,6 +135,10 @@ class Total:
         sys.exit()
 
     def _back_info(self, data):
+        """백테스트 정보를 설정합니다.
+        Args:
+            data: 백테스트 정보 데이터
+        """
         self.betting      = data[1]
         self.startday     = data[2]
         self.endday       = data[3]
@@ -133,11 +151,36 @@ class Total:
             self.sub_total = 2
 
     def _get_send_data(self, vturn=0, vkey=0):
+        """전송 데이터를 생성합니다.
+        Args:
+            vturn: 회전 수
+            vkey: 키 값
+        Returns:
+            전송 데이터 리스트
+        """
         return ['조건최적화', self.wq, self.mq, self.stdp, self.optistandard, 0, vturn, vkey, None, self.startday, self.endday, self.std_list, self.betting]
 
 
 class OptimizeConditions:
+    """조건 최적화 엔진 클래스입니다.
+    다양한 조건 조합을 테스트하여 최적 조건을 찾습니다.
+    """
     def __init__(self, sc, wq, bq, sq, tq, lq, beq_list, bstq_list, multi, backname, dict_set, market_infos):
+        """조건 최적화 엔진을 초기화합니다.
+        Args:
+            sc: 공유 카운터
+            wq: 윈도우 큐
+            bq: 백테스트 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            lq: 로그 큐
+            beq_list: 백테스트 엔진 큐 리스트
+            bstq_list: 백테스트 전략 큐 리스트
+            multi: 멀티프로세스 여부
+            backname: 백테스트 이름
+            dict_set: 설정 딕셔너리
+            market_infos: 마켓 정보 리스트
+        """
         self.shared_cnt   = sc
         self.wq           = wq
         self.bq           = bq
@@ -171,6 +214,7 @@ class OptimizeConditions:
 
     # noinspection PyUnresolvedReferences
     def _start(self):
+        """조건 최적화를 시작합니다."""
         start_time = now()
         data = self.bq.get()
         if self.market_gubun < 4:
@@ -353,6 +397,10 @@ class OptimizeConditions:
         self._sys_exit(False)
 
     def _get_cond_list(self):
+        """조건 리스트를 생성합니다.
+        Returns:
+            (buyconds, sellconds) 튜플
+        """
         buyconds  = []
         sellconds = []
         limit_time = timedelta_sec(30)
@@ -373,6 +421,11 @@ class OptimizeConditions:
         return buyconds, sellconds
 
     def _show_top_condlist(self, rank, is_long):
+        """상위 조건 리스트를 표시합니다.
+        Args:
+            rank: 랭크
+            is_long: 롱 여부
+        """
         rs_list = sorted(self.result.items(), key=lambda x: x[0], reverse=True)
         for key, value in rs_list[:rank]:
             if self.market_gubun > 5:
@@ -404,6 +457,7 @@ class OptimizeConditions:
             con.close()
 
     def _show_top_conds(self):
+        """상위 조건을 표시합니다."""
         buy_conds_freq  = {}
         sell_conds_freq = {}
 
@@ -441,6 +495,10 @@ class OptimizeConditions:
         con.close()
 
     def _sys_exit(self, cancel):
+        """시스템을 종료합니다.
+        Args:
+            cancel: 취소 여부
+        """
         if cancel:
             self.wq.put((ui_num['백테스트'], f'{self.backname} STOP'))
         else:

@@ -16,7 +16,23 @@ from backtest.back_static import send_result, get_moneytop_query, plot_show, get
 
 
 class Total:
+    """롤링 워크 포워드 테스트를 실행하는 클래스입니다.
+    시간 기반 전진 분석을 수행합니다.
+    """
     def __init__(self, wq, sq, tq, teleQ, mq, bstq_list, backname, market_gubun, market_info, dict_set):
+        """롤링 워크 포워드 테스트를 초기화합니다.
+        Args:
+            wq: 윈도우 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            teleQ: 텔레그램 큐
+            mq: 메시지 큐
+            bstq_list: 백테스트 전략 큐 리스트
+            backname: 백테스트 이름
+            market_gubun: 마켓 구분
+            market_info: 마켓 정보
+            dict_set: 설정 딕셔너리
+        """
         self.wq           = wq
         self.sq           = sq
         self.tq           = tq
@@ -70,6 +86,9 @@ class Total:
         self._main_loop()
 
     def _main_loop(self):
+        """메인 루프를 실행합니다.
+        백테스트 결과를 수집하고 롤링 워크 포워드 테스트를 수행합니다.
+        """
         oc  = 0
         sc  = 0
         bc  = 0
@@ -187,6 +206,10 @@ class Total:
         sys.exit()
 
     def _back_info(self, data):
+        """백테스트 정보를 설정합니다.
+        Args:
+            data: 백테스트 정보 데이터
+        """
         self.betting      = data[1]
         self.startday_    = data[2]
         self.endday_      = data[3]
@@ -206,12 +229,25 @@ class Total:
             self.sub_total = 2
 
     def _get_send_data(self, vturn=0, vkey=0):
+        """전송 데이터를 생성합니다.
+        Args:
+            vturn: 회전 수
+            vkey: 키 값
+        Returns:
+            전송 데이터 리스트
+        """
         vars_copy = self.vars.copy()
         if self.opti_kind == 1:
             vars_copy[vturn] = self.vars_list[vturn][0][vkey]
         return ['최적화', self.wq, self.mq, self.hstd, self.optistandard, self.opti_kind, vturn, vkey, vars_copy, self.startday, self.endday, self.std_list, self.betting]
 
     def _report(self, list_tsg, arry_bct, oc):
+        """결과를 보고합니다.
+        Args:
+            list_tsg: 거래 결과 리스트
+            arry_bct: 보유 결과 배열
+            oc: 카운터
+        """
         startday = self.hstd_list[oc - 1][0]
         endday   = self.hstd_list[oc - 1][1]
         merge    = self.hstd_list[oc - 1][2]
@@ -320,7 +356,26 @@ class Total:
 
 
 class RollingWalkForwardTest:
+    """롤링 워크 포워드 테스트 엔진 클래스입니다.
+    시간 기반 전진 분석을 수행합니다.
+    """
     def __init__(self, sc, wq, bq, sq, tq, lq, teleQ, beq_list, bstq_list, multi, backname, dict_set, market_infos):
+        """롤링 워크 포워드 테스트 엔진을 초기화합니다.
+        Args:
+            sc: 공유 카운터
+            wq: 윈도우 큐
+            bq: 백테스트 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            lq: 로그 큐
+            teleQ: 텔레그램 큐
+            beq_list: 백테스트 엔진 큐 리스트
+            bstq_list: 백테스트 전략 큐 리스트
+            multi: 멀티프로세스 여부
+            backname: 백테스트 이름
+            dict_set: 설정 딕셔너리
+            market_infos: 마켓 정보 리스트
+        """
         self.shared_cnt   = sc
         self.wq           = wq
         self.bq           = bq
@@ -351,6 +406,7 @@ class RollingWalkForwardTest:
 
     # noinspection PyUnresolvedReferences
     def _start(self):
+        """롤링 워크 포워드 테스트를 시작합니다."""
         start_time = now()
         data = self.bq.get()
         if self.market_gubun < 4:
@@ -531,6 +587,17 @@ class RollingWalkForwardTest:
         self.sys_exit(False)
 
     def _get_list_days(self, startday, endday, weeks_train, weeks_valid, weeks_test, day_list):
+        """날짜 리스트를 생성합니다.
+        Args:
+            startday: 시작 일자
+            endday: 종료 일자
+            weeks_train: 학습 주 수
+            weeks_valid: 검증 주 수
+            weeks_test: 테스트 주 수
+            day_list: 일자 리스트
+        Returns:
+            날짜 리스트
+        """
         k = 0
         list_days_ = []
         dt_endday  = dt_ymd(str(endday))
@@ -585,6 +652,12 @@ class RollingWalkForwardTest:
         return list_days[::-1]
 
     def _get_optomize_varslist(self, random_optivars):
+        """최적화 변수 리스트를 생성합니다.
+        Args:
+            random_optivars: 랜덤 최적화 변수
+        Returns:
+            (vars_type, vars) 튜플
+        """
         vars_type   = []
         self.vars_  = []
         for i, var in enumerate(list(self.vars.values())):
@@ -628,6 +701,18 @@ class RollingWalkForwardTest:
         return vars_type, self.vars_[0][0]
 
     def _optimize_grid(self, mq, back_count, ccount, vars_type, startday, endday, in_count):
+        """그리드 최적화를 수행합니다.
+        Args:
+            mq: 메시지 큐
+            back_count: 백테스트 카운트
+            ccount: 카운터
+            vars_type: 변수 타입
+            startday: 시작 일자
+            endday: 종료 일자
+            in_count: 입력 카운트
+        Returns:
+            최고 기준값
+        """
         self.tq.put(('경우의수', back_count, startday, endday, in_count))
         self._back_start(('변수정보', self.vars_, 0, startday, endday, in_count))
 
@@ -701,6 +786,16 @@ class RollingWalkForwardTest:
         return hstd
 
     def _check_optivalue_combination(self, mq, previous_high_std, vars_change_count, dict_turn_hvar_hstd, startday, endday, in_count):
+        """최적값 조합을 확인합니다.
+        Args:
+            mq: 메시지 큐
+            previous_high_std: 이전 최고 기준값
+            vars_change_count: 변수 변경 카운트
+            dict_turn_hvar_hstd: 회전별 최고 변수 기준값 딕셔너리
+            startday: 시작 일자
+            endday: 종료 일자
+            in_count: 입력 카운트
+        """
         self.wq.put((ui_num['백테스트'], '최적값 조합 확인 시작'))
         high_ratio = [0, previous_high_std, previous_high_std]
         std_set = sorted(set(v[1] for v in dict_turn_hvar_hstd.values()))
@@ -741,6 +836,7 @@ class RollingWalkForwardTest:
         return high_ratio, vars_change_count
 
     def adjust_vars_range(self, best_params=None):
+        """범위를 자동으로 추가합니다."""
         text = '\n'
         for i, var in enumerate(self.vars_):
             len_var = len(var[0])
@@ -767,6 +863,21 @@ class RollingWalkForwardTest:
 
     def _optimize_optuna(self, mq, optuna_count, back_count, optuna_fixvars, optuna_autostep, buystg_name,
                          sampler, startday, endday, in_count):
+        """Optuna 최적화를 수행합니다.
+        Args:
+            mq: 메시지 큐
+            optuna_count: Optuna 카운트
+            back_count: 백테스트 카운트
+            optuna_fixvars: Optuna 고정 변수
+            optuna_autostep: Optuna 자동 단계
+            buystg_name: 매수 전략 이름
+            sampler: 샘플러
+            startday: 시작 일자
+            endday: 종료 일자
+            in_count: 입력 카운트
+        Returns:
+            최고 기준값
+        """
 
         self.dict_simple_vars = {}
         self.tq.put(('경우의수', back_count, startday, endday, in_count))
@@ -827,6 +938,10 @@ class RollingWalkForwardTest:
         return self.study.best_value
 
     def _back_start(self, data):
+        """백테스트를 시작합니다.
+        Args:
+            data: 백테스트 데이터
+        """
         self.shared_cnt.value = 0
         self.tq.put(data[:3])
         for q in self.bstq_list:
@@ -835,6 +950,10 @@ class RollingWalkForwardTest:
             q.put(data[:5])
 
     def sys_exit(self, cancel):
+        """시스템을 종료합니다.
+        Args:
+            cancel: 취소 여부
+        """
         if cancel:
             self.wq.put((ui_num['백테스트'], f'{self.backname} STOP'))
         else:
@@ -844,7 +963,16 @@ class RollingWalkForwardTest:
 
 
 class StopWhenNotUpdateBestCallBack:
+    """Optuna 콜백 클래스입니다.
+    최고 값이 업데이트되지 않으면 중단합니다.
+    """
     def __init__(self, main, back_count, optuna_count):
+        """콜백을 초기화합니다.
+        Args:
+            main: 메인 객체
+            back_count: 백테스트 카운트
+            optuna_count: Optuna 카운트
+        """
         self.main         = main
         self.back_count   = back_count
         self.optuna_count = optuna_count
@@ -852,6 +980,11 @@ class StopWhenNotUpdateBestCallBack:
         self.adjust_cnt   = max(self.len_vars, self.optuna_count)
 
     def __call__(self, study: optuna.study.Study, trial: optuna.trial.FrozenTrial) -> None:
+        """콜백을 호출합니다.
+        Args:
+            study: Optuna 스터디
+            trial: Optuna 트라이얼
+        """
         best_opt = study.best_value
         best_num = study.best_trial.number
         curr_num = trial.number

@@ -54,7 +54,17 @@ def get_formula_data(forchart, col_idx):
 
 
 class ManagerFormula(StgGlobalsFunc):
+    """포뮬러 매니저 클래스입니다.
+    보조지표 데이터를 관리하고 업데이트합니다.
+    """
     def __init__(self, fm_list, dict_set, is_tick, dict_findex):
+        """매니저를 초기화합니다.
+        Args:
+            fm_list: 포뮬러 리스트
+            dict_set: 설정 딕셔너리
+            is_tick: 틱 여부
+            dict_findex: 인덱스 딕셔너리
+        """
         super().__init__()
         self.fm_list      = fm_list
         self.dict_set     = dict_set
@@ -87,10 +97,21 @@ class ManagerFormula(StgGlobalsFunc):
         self.set_globals_func()
 
     def _update_globals_func(self, dict_add_func):
+        """전역 함수를 업데이트합니다.
+        Args:
+            dict_add_func: 추가할 전역 함수 딕셔너리
+        """
         globals().update(dict_add_func)
 
     # noinspection PyUnboundLocalVariable,PyUnusedLocal
     def update_all_data(self, code, arry, market_gubun, w_unit):
+        """모든 데이터를 업데이트합니다.
+        Args:
+            code: 종목 코드
+            arry: 데이터 배열
+            market_gubun: 마켓 구분
+            w_unit: 시간 단위
+        """
         self.code        = code
         self.arry_code   = arry
         self.avg_list    = [w_unit]

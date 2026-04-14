@@ -7,7 +7,18 @@ from backtest.back_static_numba import get_result
 
 
 class BackSubTotal:
+    """백테스트 결과를 집계하는 클래스입니다.
+    여러 백테스트 결과를 수집하고 통합합니다.
+    """
     def __init__(self, vkey, wq, tq, bstqs, buystd):
+        """백테스트 결과 집계기를 초기화합니다.
+        Args:
+            vkey: 키 값
+            wq: 윈도우 큐
+            tq: 트레이더 큐
+            bstqs: 백테스트 전략 큐 리스트
+            buystd: 매수 표준편차
+        """
         self.vkey         = vkey
         self.wq           = wq
         self.tq           = tq
@@ -37,6 +48,9 @@ class BackSubTotal:
         self._main_loop()
 
     def _main_loop(self):
+        """메인 루프를 실행합니다.
+        백테스트 결과를 수집하고 집계합니다.
+        """
         while True:
             try:
                 data = self.bstq.get()
@@ -87,6 +101,7 @@ class BackSubTotal:
                 self.wq.put((ui_num['시스템로그'], format_exc()))
 
     def _collect_data(self, data):
+        """백테스트 결과를 수집합니다."""
         _, 종목명, 시가총액또는포지션, 매수시간, 매도시간, 보유시간, 매수가, 매도가, 매수금액, 매도금액, 수익률, 수익금, 매도조건, \
             추가매수시간, 잔량없음, vturn, vkey = data
 
@@ -111,12 +126,14 @@ class BackSubTotal:
         if 잔량없음: arry_bct[mask, 1] += 1
 
     def _send_data(self):
+        """집계 결과를 전송합니다."""
         if self.ddict_tsg:
             self.bstqs[0].put(('개별결과', self.ddict_tsg[0][0], self.ddict_bct[0][0]))
         else:
             self.bstqs[0].put(('개별결과', None, None))
 
     def _concat_data(self, data):
+        """결과를 병합합니다."""
         _, list_tsg, arry_bct = data
         if list_tsg is not None:
             if self.arry_bct is None:
@@ -133,6 +150,7 @@ class BackSubTotal:
                 self.tq.put(('백테결과', self.list_tsg, self.arry_bct))
 
     def _send_subtotal(self):
+        """전체 결과를 전송합니다."""
         def send_result():
             if self.list_days is not None:
                 train_days, valid_days, test_days = self.list_days if self.in_out_cnt is None else self.list_days[self.in_out_cnt]
@@ -169,13 +187,14 @@ class BackSubTotal:
 
     @staticmethod
     def _get_sorted_array(list_tsg, arry_bct):
+        """보유금액 배열을 정렬합니다."""
         arry_tsg = np.array(list_tsg, dtype='float64')
         arry_tsg = arry_tsg[np.argsort(arry_tsg[:, 0])][:, 1:]
         arry_bct = np.sort(arry_bct[arry_bct[:, 1] > 0], axis=0)[::-1]
         return arry_tsg, arry_bct
 
     def _send_result(self, data):
-        """
+        """ 학습구간, 검증구간, 확인구간별 결괄르 전송합니다.
         arry_tsg dtype 'float64'
         보유시간, 매도시간, 수익률, 수익금, 수익금합계
            0       1       2      3      4

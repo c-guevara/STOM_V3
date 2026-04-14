@@ -15,7 +15,18 @@ from utility.static_method.static import now, timedelta_day, timedelta_sec, str_
 
 
 class Total:
+    """유전 알고리즘 최적화를 실행하는 클래스입니다.
+    유전 알고리즘을 사용하여 파라미터 최적화를 수행합니다.
+    """
     def __init__(self, wq, tq, mq, bstq_list, dict_set):
+        """유전 알고리즘 최적화를 초기화합니다.
+        Args:
+            wq: 윈도우 큐
+            tq: 트레이더 큐
+            mq: 메시지 큐
+            bstq_list: 백테스트 전략 큐 리스트
+            dict_set: 설정 딕셔너리
+        """
         self.wq           = wq
         self.tq           = tq
         self.mq           = mq
@@ -40,6 +51,9 @@ class Total:
         self._main_loop()
 
     def _main_loop(self):
+        """메인 루프를 실행합니다.
+        백테스트 결과를 수집하고 유전 알고리즘 최적화를 수행합니다.
+        """
         sc = 0
         bc = 0
         st = {}
@@ -129,6 +143,10 @@ class Total:
         sys.exit()
 
     def _back_info(self, data):
+        """백테스트 정보를 설정합니다.
+        Args:
+            data: 백테스트 정보 데이터
+        """
         self.betting      = data[1]
         self.startday     = data[2]
         self.endday       = data[3]
@@ -141,12 +159,38 @@ class Total:
             self.sub_total = 2
 
     def _get_send_data(self, vturn, vkey):
+        """전송 데이터를 생성합니다.
+        Args:
+            vturn: 회전 수
+            vkey: 키 값
+        Returns:
+            전송 데이터 리스트
+        """
         index = vturn * 20 + vkey
         return ['GA최적화', self.wq, self.mq, self.stdp, self.optistandard, 0, vturn, vkey, self.vars_lists[index], self.startday, self.endday, self.std_list, self.betting]
 
 
 class OptimizeGeneticAlgorithm:
+    """유전 알고리즘 최적화 엔진 클래스입니다.
+    유전 알고리즘을 사용하여 파라미터 최적화를 수행합니다.
+    """
     def __init__(self, sc, wq, bq, sq, tq, lq, beq_list, bstq_list, multi, backname, ui_gubun, dict_set, market_infos):
+        """유전 알고리즘 최적화 엔진을 초기화합니다.
+        Args:
+            sc: 공유 카운터
+            wq: 윈도우 큐
+            bq: 백테스트 큐
+            sq: 전략 큐
+            tq: 트레이더 큐
+            lq: 로그 큐
+            beq_list: 백테스트 엔진 큐 리스트
+            bstq_list: 백테스트 전략 큐 리스트
+            multi: 멀티프로세스 여부
+            backname: 백테스트 이름
+            ui_gubun: UI 구분
+            dict_set: 설정 딕셔너리
+            market_infos: 마켓 정보 리스트
+        """
         self.shared_cnt   = sc
         self.wq           = wq
         self.bq           = bq
@@ -181,6 +225,7 @@ class OptimizeGeneticAlgorithm:
 
     # noinspection PyUnresolvedReferences
     def _start(self):
+        """유전 알고리즘 최적화를 시작합니다."""
         start_time = now()
         data = self.bq.get()
         if self.market_gubun < 4:
@@ -389,6 +434,10 @@ class OptimizeGeneticAlgorithm:
         self._sys_exit(False)
 
     def _get_varslist(self):
+        """변수 리스트를 생성합니다.
+        Returns:
+            변수 리스트
+        """
         vars_lists = []
         limit_time = timedelta_sec(30)
         for _ in range(1000):
@@ -403,6 +452,12 @@ class OptimizeGeneticAlgorithm:
         return vars_lists
 
     def _set_optilist(self, count, rank, goal):
+        """최적화 리스트를 설정합니다.
+        Args:
+            count: 카운트
+            rank: 랭크
+            goal: 목표
+        """
         self.vars_list = [[] for _ in self.vars_list]
         rs_list = sorted(self.result.items(), key=lambda x: x[0], reverse=True)
 
@@ -434,6 +489,13 @@ class OptimizeGeneticAlgorithm:
                     self.vars_list[i].append(vars_)
 
     def _save_varslist(self, rank, optistandard, buystg, sellstg):
+        """변수 리스트를 저장합니다.
+        Args:
+            rank: 랭크
+            optistandard: 최적화 기준
+            buystg: 매수 전략
+            sellstg: 매도 전략
+        """
         rs_list = sorted(self.result.items(), key=lambda x: x[0], reverse=True)
         con = sqlite3.connect(DB_BACKTEST)
         for std, vars_list in rs_list[:rank]:
@@ -445,6 +507,10 @@ class OptimizeGeneticAlgorithm:
         self.wq.put((ui_num['백테스트'], f'{self.backname} 상위100위 결과 저장 완료'))
 
     def _sys_exit(self, cancel):
+        """시스템을 종료합니다.
+        Args:
+            cancel: 취소 여부
+        """
         if cancel:
             self.wq.put((ui_num['백테스트'], f'{self.backname} STOP'))
         else:

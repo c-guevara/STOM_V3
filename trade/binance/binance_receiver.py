@@ -11,13 +11,11 @@ from utility.static_method.static import now, now_utc, str_ymd, error_decorator,
 
 class BinanceReceiver(BaseReceiver):
     """바이낸스 데이터 수신 클래스입니다.
-    
     BaseReceiver를 상속받아 바이낸스 시장 데이터를 수신합니다.
     """
     
     def __init__(self, qlist, dict_set, market_info):
         """수신기를 초기화합니다.
-        
         Args:
             qlist (list): 큐 리스트
             dict_set (dict): 설정 딕셔너리
@@ -49,6 +47,7 @@ class BinanceReceiver(BaseReceiver):
         app.exec_()
 
     def _get_code_info(self):
+        """종목 정보를 조회합니다."""
         def get_decimal_place(float_):
             float_ = str(float(float_))
             float_ = float_.split('.')[1]
@@ -94,6 +93,10 @@ class BinanceReceiver(BaseReceiver):
 
     @error_decorator
     def _convert_real_data(self, data):
+        """실시간 데이터를 변환합니다.
+        Args:
+            data: 데이터
+        """
         if 'stream' not in data:
             return
 

@@ -96,27 +96,22 @@ except:
 
 class AnalyzerRisk:
     """리스크 분석을 수행하는 클래스입니다.
-    
     RSI, 변동성 등 리스크 관련 지표를 계산합니다.
     """
     
     def __init__(self, market_type: str, columns: list):
         """리스크 분석기를 초기화합니다.
-        
         Args:
             market_type (str): 마켓 타입 ('stock', 'coin', 'future')
             columns (list): 컬럼 리스트
         """
-        """market_type: 'stock', 'coin', 'future'"""
         self.market_type = market_type
         self.columns = columns
         self._setup_analysis_parameters()
         self._setup_columns()
 
     def _setup_columns(self):
-        """
-        시장 및 데이터 타입에 따른 칼럼 설정
-        """
+        """시장 및 데이터 타입에 따른 칼럼 설정"""
         # 칼럼 인덱스 매핑 (빠른 접근용)
         col_index = {col: idx for idx, col in enumerate(self.columns)}
         self.idx_curr_price = col_index.get('현재가', 1)
@@ -146,7 +141,9 @@ class AnalyzerRisk:
         self.idx_volume_angle = col_index.get('당일거래대금각도', 44)
 
     def _setup_analysis_parameters(self):
-        """시장 종류별 분석 파라미터 설정"""
+        """분석 파라미터를 설정합니다.
+        시장 종류별 분석 파라미터 설정
+        """
         if self.market_type == 'stock':
             self.params = {
                 # RSI 파라미터
@@ -281,7 +278,12 @@ class AnalyzerRisk:
             }
 
     def get_risk_score(self, arry_code: np.ndarray) -> float:
-        """리스크점수 계산"""
+        """리스크 점수를 반환합니다.
+        Args:
+            arry_code: 코드 데이터 배열
+        Returns:
+            리스크 점수
+        """
         try:
             analysis = self._analyze_market_data(arry_code)
             risk_score = self._calculate_risk_score(analysis)
@@ -290,7 +292,12 @@ class AnalyzerRisk:
             return 0.0
 
     def _analyze_market_data(self, arry_code: np.ndarray) -> dict:
-        """시장 데이터 분석"""
+        """시장 데이터를 분석합니다.
+        Args:
+            arry_code: 코드 데이터 배열
+        Returns:
+            분석 결과 딕셔너리
+        """
         current_prices = arry_code[:, self.idx_curr_price]    # 현재가
         volumes = arry_code[:, self.idx_volume]           # 거래대금
 
@@ -317,7 +324,12 @@ class AnalyzerRisk:
         }
 
     def _analyze_trend(self, prices: np.ndarray) -> dict:
-        """추세 분석"""
+        """추세를 분석합니다.
+        Args:
+            prices: 가격 배열
+        Returns:
+            추세 분석 결과 딕셔너리
+        """
         short_period = self.params['trend_short_period']
         medium_period = self.params['trend_medium_period']
         long_period = self.params['trend_long_period']
@@ -352,7 +364,12 @@ class AnalyzerRisk:
         }
 
     def _calculate_momentum(self, prices: np.ndarray) -> dict:
-        """모멘텀 분석"""
+        """모멘텀을 계산합니다.
+        Args:
+            prices: 가격 배열
+        Returns:
+            모멘텀 결과 딕셔너리
+        """
         strong_bullish_short = self.params['momentum_strong_bullish_short']
         strong_bullish_medium = self.params['momentum_strong_bullish_medium']
         strong_bearish_short = self.params['momentum_strong_bearish_short']
@@ -375,7 +392,12 @@ class AnalyzerRisk:
         }
 
     def _analyze_chegyeol_strength(self, arry_code: np.ndarray) -> dict:
-        """체결강도 분석"""
+        """체결 강도를 분석합니다.
+        Args:
+            arry_code: 코드 데이터 배열
+        Returns:
+            체결 강도 분석 결과 딕셔너리
+        """
         chegyeol_strength = arry_code[:, self.idx_chegyeol_strength]    # 체결강도
         chegyeol_avg = arry_code[:, self.idx_chegyeol_avg]              # 체결강도평균
         max_strength = arry_code[:, self.idx_max_strength]              # 최고체결강도
@@ -404,7 +426,12 @@ class AnalyzerRisk:
         }
 
     def _analyze_suyang_imbalance(self, arry_code: np.ndarray) -> dict:
-        """수량 불균형 분석"""
+        """수급 불균형을 분석합니다.
+        Args:
+            arry_code: 코드 데이터 배열
+        Returns:
+            수급 불균형 분석 결과 딕셔너리
+        """
         buy_suyang = arry_code[:, self.idx_buy_vol]   # 초당매수수량
         sell_suyang = arry_code[:, self.idx_sell_vol]  # 초당매도수량
 
@@ -439,7 +466,12 @@ class AnalyzerRisk:
         }
 
     def _analyze_price_position(self, arry_code: np.ndarray) -> dict:
-        """가격 위치 분석"""
+        """가격 위치를 분석합니다.
+        Args:
+            arry_code: 코드 데이터 배열
+        Returns:
+            가격 위치 분석 결과 딕셔너리
+        """
         current_price = arry_code[-1, self.idx_curr_price]
         high_low_avg_ratio = arry_code[:, self.idx_high_low_ratio]  # 고저평균대비등락율
         low_high_ratio = arry_code[:, self.idx_low_high_ratio]      # 저가대비고가등락율
@@ -479,7 +511,12 @@ class AnalyzerRisk:
         }
 
     def _analyze_angle_trend(self, arry_code: np.ndarray) -> dict:
-        """각도 추세 분석"""
+        """각도 추세를 분석합니다.
+        Args:
+            arry_code: 코드 데이터 배열
+        Returns:
+            각도 추세 분석 결과 딕셔너리
+        """
         change_angle = arry_code[:, self.idx_change_angle]    # 등락율각도
         volume_angle = arry_code[:, self.idx_volume_angle]    # 당일거래대금각도
 
@@ -510,7 +547,12 @@ class AnalyzerRisk:
         }
 
     def _analyze_volume_trend(self, volumes: np.ndarray) -> dict:
-        """거래량 추세 분석"""
+        """거래량 추세를 분석합니다.
+        Args:
+            volumes: 거래량 배열
+        Returns:
+            거래량 추세 분석 결과 딕셔너리
+        """
         recent_avg = np.mean(volumes[-5:])
         previous_avg = np.mean(volumes[-10:-5]) if len(volumes) >= 10 else recent_avg
         volume_change = (recent_avg - previous_avg) / previous_avg * 100 if previous_avg > 0 else 0
@@ -537,7 +579,12 @@ class AnalyzerRisk:
         }
 
     def _calculate_risk_score(self, analysis: dict) -> float:
-        """리스크 점수 계산 (0-100) - 모든 분석 요소 적극 반영"""
+        """리스크 점수를 계산합니다.
+        Args:
+            analysis: 분석 결과 딕셔너리
+        Returns:
+            리스크 점수
+        """
         rsi = analysis.get('rsi', 50)
         volatility = analysis.get('volatility', 0)
         trend = analysis.get('trend', {})
