@@ -27,9 +27,12 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
   const currency = currencyUnits[market]
 
   // 연월일 시간 포맷팅
-  const formattedTimestamp = timestamp ? new Date(timestamp).toLocaleString('ko-KR', {
+  const formattedDate = timestamp ? new Date(timestamp).toLocaleString('ko-KR', {
     month: '2-digit',
     day: '2-digit',
+    hour12: false
+  }).replace(/\./g, '').replace(/\//g, '/') : ''
+  const formattedTime = timestamp ? new Date(timestamp).toLocaleString('ko-KR', {
     hour: '2-digit',
     minute: '2-digit',
     second: '2-digit',
@@ -37,7 +40,8 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
   }).replace(/\./g, '').replace(/\//g, '') : ''
 
   const cards = [
-    { title: '일자 시간', value: formattedTimestamp, color: 'text-gray-600', icon: Clock },
+    { title: '일자', value: formattedDate, color: 'text-gray-600', icon: Clock, align: 'left' },
+    { title: '시간', value: formattedTime, color: 'text-gray-600', icon: Clock, align: 'right' },
     { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3 },
     { title: '총 매입금액', value: Math.floor(totalTrade.총매수금액).toLocaleString() + currency, color: 'text-blue-600', icon: Wallet },
     { title: '총 매도금액', value: Math.floor(totalTrade.총매도금액).toLocaleString() + currency, color: 'text-purple-600', icon: DollarSign },
@@ -46,7 +50,7 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
   ]
 
   return (
-    <div className="grid grid-cols-2 gap-3">
+    <div className="grid grid-cols-3 gap-3">
       {cards.map((card) => {
         const Icon = card.icon
         return (
@@ -56,7 +60,7 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
               <Icon className="w-4 h-4 text-gray-400" />
             </CardHeader>
             <CardContent className="p-3 pt-0">
-              <div className={`text-lg font-bold text-right ${card.color} ${card.title === '일자 시간' ? 'whitespace-nowrap' : ''}`}>
+              <div className={`text-lg font-bold ${card.align === 'right' ? 'text-right' : 'text-left'} ${card.color}`}>
                 {card.value}
               </div>
             </CardContent>
