@@ -6,7 +6,6 @@ import SummaryCards from '../components/SummaryCards'
 import JangoTable from '../components/JangoTable'
 import ChegeolTable from '../components/ChegeolTable'
 import TradeTable from '../components/TradeTable'
-import ProfitChart from '../components/ProfitChart'
 import AlertPanel from '../components/AlertPanel'
 import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon as MoonIcon, Plane, Bitcoin, CandlestickChart, Sun } from 'lucide-react'
 
@@ -94,7 +93,6 @@ export default function Dashboard() {
                     <JangoTable items={jangoItems} />
                     <ChegeolTable items={chegeolItems} />
                   </div>
-                  <ProfitChart trades={tradeItems} />
                   <TradeTable items={tradeItems} />
                 </>
               )}
