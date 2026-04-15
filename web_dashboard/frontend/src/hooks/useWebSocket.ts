@@ -15,6 +15,7 @@ export function useWebSocket(market: MarketType) {
   const isIntentionalCloseRef = useRef(false)
   const currentMarketRef = useRef(market)
   const connectingRef = useRef(false)  // 연결 진행 중 플래그
+  const lastDataRef = useRef<DashboardData | null>(null)  // 마지막 데이터 캐싱
 
   const connect = useCallback(() => {
     if (!isMountedRef.current || connectingRef.current) return
@@ -47,7 +48,22 @@ export function useWebSocket(market: MarketType) {
       if (!isMountedRef.current) return
       try {
         const message = JSON.parse(event.data) as DashboardData
+
+        // 데이터 변경 감지: 실제 데이터가 변경되었을 때만 업데이트
+        const lastData = lastDataRef.current
+        if (lastData) {
+          const jangoChanged = JSON.stringify(lastData.jangolist) !== JSON.stringify(message.jangolist)
+          const chegeolChanged = JSON.stringify(lastData.chegeollist) !== JSON.stringify(message.chegeollist)
+          const tradeChanged = JSON.stringify(lastData.tradelist) !== JSON.stringify(message.tradelist)
+          const totalTradeChanged = JSON.stringify(lastData.totaltradelist) !== JSON.stringify(message.totaltradelist)
+
+          if (!jangoChanged && !chegeolChanged && !tradeChanged && !totalTradeChanged) {
+            return  // 데이터가 변경되지 않으면 업데이트 스킵
+          }
+        }
+
         setData(message)
+        lastDataRef.current = message
       } catch (e) {
         console.error('[WebSocket] Failed to parse message:', e)
       }
