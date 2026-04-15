@@ -3,7 +3,7 @@ import asyncio
 import json
 from typing import Dict, List
 import pandas as pd
-from .database import DatabaseManager
+from database import DatabaseManager
 
 
 class WebSocketManager:

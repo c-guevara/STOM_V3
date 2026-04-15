@@ -1,6 +1,6 @@
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
 from fastapi.middleware.cors import CORSMiddleware
-from .websocket import WebSocketManager
+from websocket import WebSocketManager
 import uuid
 
 
@@ -26,7 +26,7 @@ async def root():
 
 @app.get("/api/market/{market}")
 async def get_market_data(market: str):
-    from .database import DatabaseManager
+    from database import DatabaseManager
     db = DatabaseManager()
     return {
         "jangolist": db.get_jangolist(market),
