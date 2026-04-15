@@ -13,9 +13,8 @@ function TradeTable({ items }: Props) {
       <CardHeader className="p-3 md:p-6">
         <CardTitle className="text-base md:text-xl">거래 내역</CardTitle>
       </CardHeader>
-      <CardContent className="p-0 md:p-6">
-        <div className="overflow-x-auto">
-          <Table>
+      <CardContent className="p-0 md:p-6 overflow-x-auto">
+        <Table>
             <TableHeader>
               <TableRow>
                 <TableHead className="text-xs md:text-sm">종목명</TableHead>
