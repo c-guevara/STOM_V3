@@ -116,7 +116,8 @@ export function useWebSocket(market: MarketType) {
   useEffect(() => {
     currentMarketRef.current = market
     reconnectAttemptsRef.current = 0
-    // 마켓 변경 시 데이터를 null로 리셋하지 않음
+    setData(null)  // 마켓 변경 시 데이터 리셋
+    lastDataRef.current = null
   }, [market])
 
   useEffect(() => {
