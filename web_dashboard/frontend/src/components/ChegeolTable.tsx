@@ -17,11 +17,11 @@ export default function ChegeolTable({ items }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs md:text-sm">종목명</TableHead>
-                <TableHead className="text-xs md:text-sm whitespace-nowrap">주문구분</TableHead>
-                <TableHead className="text-xs md:text-sm">체결가</TableHead>
-                <TableHead className="text-xs md:text-sm">체결수량</TableHead>
-                <TableHead className="text-xs md:text-sm hidden sm:table-cell">체결시간</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">종목명</TableHead>
+                <TableHead className="text-xs md:text-sm text-center whitespace-nowrap">주문구분</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">체결가</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">체결수량</TableHead>
+                <TableHead className="text-xs md:text-sm text-center hidden sm:table-cell">체결시간</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

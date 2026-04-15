@@ -17,10 +17,10 @@ function TradeTable({ items }: Props) {
         <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs md:text-sm">종목명</TableHead>
-                <TableHead className="text-xs md:text-sm">수익률</TableHead>
-                <TableHead className="text-xs md:text-sm">수익금</TableHead>
-                <TableHead className="text-xs md:text-sm">체결시간</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">종목명</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">수익률</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">수익금</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">체결시간</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>

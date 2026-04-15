@@ -18,12 +18,12 @@ function JangoTable({ items }: Props) {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead className="text-xs md:text-sm">종목명</TableHead>
-                <TableHead className="text-xs md:text-sm">매수가</TableHead>
-                <TableHead className="text-xs md:text-sm">현재가</TableHead>
-                <TableHead className="text-xs md:text-sm">수익률</TableHead>
-                <TableHead className="text-xs md:text-sm hidden sm:table-cell">평가손익</TableHead>
-                <TableHead className="text-xs md:text-sm hidden md:table-cell">보유수량</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">종목명</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">매수가</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">현재가</TableHead>
+                <TableHead className="text-xs md:text-sm text-center">수익률</TableHead>
+                <TableHead className="text-xs md:text-sm text-center hidden sm:table-cell">평가손익</TableHead>
+                <TableHead className="text-xs md:text-sm text-center hidden md:table-cell">보유수량</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
