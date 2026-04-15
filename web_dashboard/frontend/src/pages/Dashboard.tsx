@@ -75,7 +75,7 @@ export default function Dashboard() {
               <TabsTrigger
                 key={market}
                 value={market}
-                className="flex flex-col items-center gap-1 py-3 px-2 text-xs"
+                className="flex flex-col items-center gap-0.5 py-2 px-1 text-[10px]"
               >
                 {MARKET_ICONS[market]}
                 <span>{MARKET_NAMES[market]}</span>
@@ -84,15 +84,13 @@ export default function Dashboard() {
           </TabsList>
           
           {MARKETS.map((market) => (
-            <TabsContent key={market} value={market} className="space-y-4 md:space-y-6">
+            <TabsContent key={market} value={market} className="space-y-3">
               {data && (
                 <>
                   <SummaryCards totalTrade={data.totaltradelist} market={market} timestamp={data.timestamp} />
                   <AlertPanel alerts={data.alerts || []} />
-                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    <JangoTable items={jangoItems} />
-                    <ChegeolTable items={chegeolItems} />
-                  </div>
+                  <JangoTable items={jangoItems} />
+                  <ChegeolTable items={chegeolItems} />
                   <TradeTable items={tradeItems} />
                 </>
               )}
