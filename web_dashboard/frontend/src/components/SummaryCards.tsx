@@ -57,7 +57,7 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
               <Icon className="w-4 h-4 text-gray-400" />
             </CardHeader>
             <CardContent className="p-3 pt-0">
-              <div className={`text-lg font-bold text-right ${card.color}`}>
+              <div className={`text-lg font-bold text-right ${card.color} ${card.title === '일자 시간' ? 'whitespace-nowrap' : ''}`}>
                 {card.value}
               </div>
             </CardContent>
