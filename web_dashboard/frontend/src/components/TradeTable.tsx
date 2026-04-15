@@ -38,7 +38,6 @@ function TradeTable({ items }: Props) {
               ))}
             </TableBody>
           </Table>
-        </div>
       </CardContent>
     </Card>
   )
