@@ -68,9 +68,6 @@ export default function Dashboard() {
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}
             </button>
-            <div className="text-sm text-gray-500 h-10 flex items-center">
-              {connected ? '● 연결됨' : '○ 연결 안됨'}
-            </div>
           </div>
         </div>
         <Tabs value={selectedMarket} onValueChange={(v) => setSelectedMarket(v as MarketType)}>
@@ -89,12 +86,6 @@ export default function Dashboard() {
           
           {MARKETS.map((market) => (
             <TabsContent key={market} value={market} className="space-y-4 md:space-y-6">
-              {!connected && (
-                <div className="bg-yellow-100 text-yellow-800 p-3 md:p-4 rounded text-sm">
-                  연결 중...
-                </div>
-              )}
-              
               {data && (
                 <>
                   <SummaryCards totalTrade={data.totaltradelist} />
