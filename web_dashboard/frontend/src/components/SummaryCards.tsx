@@ -47,7 +47,7 @@ export default function SummaryCards({ totalTrade, market, timestamp }: Props) {
   ]
 
   return (
-    <div className="grid grid-cols-3 gap-3">
+    <div className="grid grid-cols-2 gap-3">
       {cards.map((card) => {
         const Icon = card.icon
         return (
