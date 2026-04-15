@@ -33,7 +33,14 @@ function TradeTable({ items }: Props) {
                   <TableCell className={`text-xs md:text-sm ${item.수익금 >= 0 ? 'text-green-600' : 'text-red-600'}`}>
                     {item.수익금.toLocaleString()}
                   </TableCell>
-                  <TableCell className="text-xs md:text-sm">{item.체결시간}</TableCell>
+                  <TableCell className="text-xs md:text-sm">
+                    {item.체결시간 ? new Date(item.체결시간).toLocaleTimeString('ko-KR', {
+                      hour: '2-digit',
+                      minute: '2-digit',
+                      second: '2-digit',
+                      hour12: false
+                    }) : '-'}
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
