@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { MarketType } from '../types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
@@ -8,7 +8,7 @@ import ChegeolTable from '../components/ChegeolTable'
 import TradeTable from '../components/TradeTable'
 import ProfitChart from '../components/ProfitChart'
 import AlertPanel from '../components/AlertPanel'
-import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon, Plane, Bitcoin, CandlestickChart } from 'lucide-react'
+import { TrendingUp, BarChart3, LineChart, Globe, Zap, Moon as MoonIcon, Plane, Bitcoin, CandlestickChart, Sun } from 'lucide-react'
 
 const MARKETS: MarketType[] = ['stock', 'stock_etf', 'stock_etn', 'stock_usa', 'future', 'future_nt', 'future_os', 'coin', 'coin_future']
 const MARKET_NAMES: Record<MarketType, string> = {
@@ -30,7 +30,7 @@ const getMarketIcon = (market: MarketType) => {
     stock_etn: <LineChart className="w-4 h-4" />,
     stock_usa: <Globe className="w-4 h-4" />,
     future: <Zap className="w-4 h-4" />,
-    future_nt: <Moon className="w-4 h-4" />,
+    future_nt: <MoonIcon className="w-4 h-4" />,
     future_os: <Plane className="w-4 h-4" />,
     coin: <Bitcoin className="w-4 h-4" />,
     coin_future: <CandlestickChart className="w-4 h-4" />
@@ -40,7 +40,17 @@ const getMarketIcon = (market: MarketType) => {
 
 export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
+  const [isDarkMode, setIsDarkMode] = useState(false)
   const { data, connected } = useWebSocket(selectedMarket)
+
+  // 다크 모드 토글 시 HTML 태그에 dark 클래스 추가/제거
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark')
+    } else {
+      document.documentElement.classList.remove('dark')
+    }
+  }, [isDarkMode])
 
   // useMemo로 items 데이터 캐싱 - 실제 데이터 변경 시에만 새로운 참조 생성
   const jangoItems = useMemo(() => data?.jangolist ?? [], [data?.jangolist])
@@ -52,8 +62,17 @@ export default function Dashboard() {
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h1 className="text-2xl md:text-3xl font-bold">STOM 트레이딩 대시보드</h1>
-          <div className="text-sm text-gray-500">
-            {connected ? '● 연결됨' : '○ 연결 안됨'}
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-lg bg-white/50 dark:bg-gray-800/50 backdrop-blur-sm border border-gray-200 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors"
+              aria-label="다크 모드 토글"
+            >
+              {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <MoonIcon className="w-5 h-5 text-gray-600" />}
+            </button>
+            <div className="text-sm text-gray-500">
+              {connected ? '● 연결됨' : '○ 연결 안됨'}
+            </div>
           </div>
         </div>
         <Tabs value={selectedMarket} onValueChange={(v) => setSelectedMarket(v as MarketType)}>
