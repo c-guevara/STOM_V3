@@ -41,11 +41,11 @@ async def get_market_data(market: str):
 async def websocket_endpoint(websocket: WebSocket, market: str):
     client_id = str(uuid.uuid4())
     await ws_manager.connect(websocket, client_id)
-    
+
     try:
         import asyncio
         asyncio.create_task(ws_manager.broadcast_data(market))
-        
+
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
