@@ -44,7 +44,7 @@ export default function SummaryCards({ totalTrade, market }: Props) {
               <Icon className="w-4 h-4 text-gray-400" />
             </CardHeader>
             <CardContent className="p-3 md:p-6 pt-0">
-              <div className={`text-lg md:text-2xl font-bold ${card.color}`}>
+              <div className={`text-lg md:text-2xl font-bold text-right ${card.color}`}>
                 {card.value}
               </div>
             </CardContent>
