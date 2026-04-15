@@ -38,7 +38,7 @@ const MARKET_ICONS: Record<MarketType, React.ReactNode> = {
 export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
   const [isDarkMode, setIsDarkMode] = useState(true)
-  const { data, connected } = useWebSocket(selectedMarket)
+  const { data } = useWebSocket(selectedMarket)
 
   // 다크 모드 토글 시 HTML 태그에 dark 클래스 추가/제거
   useEffect(() => {
