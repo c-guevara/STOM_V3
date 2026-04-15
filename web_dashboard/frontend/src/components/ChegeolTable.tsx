@@ -8,7 +8,7 @@ interface Props {
 
 export default function ChegeolTable({ items }: Props) {
   return (
-    <Card>
+    <Card className="rounded-xl border border-indigo-200/50 dark:border-indigo-800/50 bg-gradient-to-br from-white via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 shadow-lg hover:shadow-xl transition-all duration-200">
       <CardHeader className="p-3 md:p-6">
         <CardTitle className="text-base md:text-xl">실시간 체결 내역</CardTitle>
       </CardHeader>
