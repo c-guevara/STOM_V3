@@ -23,7 +23,7 @@ const MARKET_NAMES: Record<MarketType, string> = {
   coin_future: '코인선물'
 }
 
-const getMarketIcon = (market: MarketType) => {
+const getMarketIcon = useMemo(() => {
   const icons: Record<MarketType, React.ReactNode> = {
     stock: <TrendingUp className="w-4 h-4" />,
     stock_etf: <BarChart3 className="w-4 h-4" />,
@@ -35,8 +35,8 @@ const getMarketIcon = (market: MarketType) => {
     coin: <Bitcoin className="w-4 h-4" />,
     coin_future: <CandlestickChart className="w-4 h-4" />
   }
-  return icons[market]
-}
+  return (market: MarketType) => icons[market]
+}, [])
 
 export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
