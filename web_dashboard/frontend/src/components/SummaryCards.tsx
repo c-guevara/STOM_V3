@@ -10,14 +10,15 @@ export default function SummaryCards({ totalTrade }: Props) {
   if (!totalTrade) return null
 
   const cards = [
-    { title: '총 평가금액', value: totalTrade.총매도금액.toLocaleString() + '원', color: 'text-blue-600', icon: Wallet },
-    { title: '총 수익률', value: totalTrade.수익률.toFixed(2) + '%', color: totalTrade.수익률 >= 0 ? 'text-green-600' : 'text-red-600', icon: TrendingUp },
-    { title: '총 수익금', value: totalTrade.수익금합계.toLocaleString() + '원', color: totalTrade.수익금합계 >= 0 ? 'text-green-600' : 'text-red-600', icon: DollarSign },
-    { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3 }
+    { title: '거래 횟수', value: totalTrade.거래횟수.toString(), color: 'text-gray-600', icon: BarChart3 },
+    { title: '총 매입금액', value: totalTrade.총매수금액.toLocaleString() + '원', color: 'text-blue-600', icon: Wallet },
+    { title: '총 매도금액', value: totalTrade.총매도금액.toLocaleString() + '원', color: 'text-purple-600', icon: DollarSign },
+    { title: '총 수익금', value: totalTrade.수익금합계.toLocaleString() + '원', color: totalTrade.수익금합계 >= 0 ? 'text-green-600' : 'text-red-600', icon: TrendingUp },
+    { title: '총 수익률', value: totalTrade.수익률.toFixed(2) + '%', color: totalTrade.수익률 >= 0 ? 'text-green-600' : 'text-red-600', icon: TrendingUp }
   ]
 
   return (
-    <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+    <div className="grid grid-cols-2 md:grid-cols-5 gap-3 md:gap-4">
       {cards.map((card) => {
         const Icon = card.icon
         return (
