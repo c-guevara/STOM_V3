@@ -1,3 +1,4 @@
+import React from 'react'
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from './ui/table'
 import { Card, CardContent, CardHeader, CardTitle } from './ui/card'
 import { JangoItem } from '../types'
@@ -6,7 +7,7 @@ interface Props {
   items: JangoItem[]
 }
 
-export default function JangoTable({ items }: Props) {
+function JangoTable({ items }: Props) {
   return (
     <Card>
       <CardHeader className="p-3 md:p-6">
@@ -27,7 +28,7 @@ export default function JangoTable({ items }: Props) {
             </TableHeader>
             <TableBody>
               {items.map((item) => (
-                <TableRow key={item.index}>
+                <TableRow key={item.종목명}>
                   <TableCell className="font-medium text-xs md:text-sm">{item.종목명}</TableCell>
                   <TableCell className="text-xs md:text-sm">{item.매수가.toLocaleString()}</TableCell>
                   <TableCell className="text-xs md:text-sm">{item.현재가.toLocaleString()}</TableCell>
@@ -47,3 +48,5 @@ export default function JangoTable({ items }: Props) {
     </Card>
   )
 }
+
+export default React.memo(JangoTable)

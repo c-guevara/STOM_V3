@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useWebSocket } from '../hooks/useWebSocket'
 import { MarketType } from '../types'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '../components/ui/tabs'
@@ -26,18 +26,20 @@ export default function Dashboard() {
   const [selectedMarket, setSelectedMarket] = useState<MarketType>('stock')
   const { data, connected } = useWebSocket(selectedMarket)
 
+  // useMemo로 items 데이터 캐싱 - 실제 데이터 변경 시에만 새로운 참조 생성
+  const jangoItems = useMemo(() => data?.jangolist ?? [], [data?.jangolist])
+  const chegeolItems = useMemo(() => data?.chegeollist ?? [], [data?.chegeollist])
+  const tradeItems = useMemo(() => data?.tradelist ?? [], [data?.tradelist])
+
   return (
     <div className="min-h-screen bg-background p-4 md:p-6">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
-        모바일용 헤더
         <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
           <h1 className="text-2xl md:text-3xl font-bold">STOM 트레이딩 대시보드</h1>
           <div className="text-sm text-gray-500">
             {connected ? '● 연결됨' : '○ 연결 안됨'}
           </div>
         </div>
-        
-        모바일용 시장 선택 (드롭다운)
         <Tabs value={selectedMarket} onValueChange={(v) => setSelectedMarket(v as MarketType)}>
           <TabsList className="grid w-full grid-cols-3 sm:grid-cols-5 lg:grid-cols-9 h-auto">
             {MARKETS.map((market) => (
@@ -62,21 +64,14 @@ export default function Dashboard() {
               
               {data && (
                 <>
-                  요약 카드 - 모바일에서 2열, 데스크탑에서 4열
                   <SummaryCards totalTrade={data.totaltradelist} />
                   <AlertPanel alerts={data.alerts || []} />
-                  
-                  잔고/체결 테이블 - 모바일에서 수직 배치
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-                    <JangoTable items={data.jangolist} />
-                    <ChegeolTable items={data.chegeollist} />
+                    <JangoTable items={jangoItems} />
+                    <ChegeolTable items={chegeolItems} />
                   </div>
-                  
-                  차트 - 모바일에서 높이 축소
-                  <ProfitChart trades={data.tradelist} />
-                  
-                  거래 테이블 - 모바일에서 스크롤 가능
-                  <TradeTable items={data.tradelist} />
+                  <ProfitChart trades={tradeItems} />
+                  <TradeTable items={tradeItems} />
                 </>
               )}
             </TabsContent>
