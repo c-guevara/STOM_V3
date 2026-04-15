@@ -114,11 +114,19 @@ export function useWebSocket(market: MarketType) {
 
   // 현재 마켓 추적
   useEffect(() => {
+    const previousMarket = currentMarketRef.current
     currentMarketRef.current = market
     reconnectAttemptsRef.current = 0
     setData(null)  // 마켓 변경 시 데이터 리셋
     lastDataRef.current = null
-  }, [market])
+
+    // 거래소가 변경된 경우 기존 연결 강제 종료
+    if (previousMarket !== market && wsRef.current) {
+      console.log(`[WebSocket] Market changed from ${previousMarket} to ${market}, disconnecting old connection`)
+      disconnect(true)
+      connectingRef.current = false
+    }
+  }, [market, disconnect])
 
   useEffect(() => {
     // Strict Mode 대응: 이미 연결 중이거나 연결 진행 중이면 스킵
