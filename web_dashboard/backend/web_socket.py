@@ -8,16 +8,20 @@ from database import DatabaseManager
 
 class WebSocketManager:
     def __init__(self):
-        self.active_connections: Dict[str, WebSocket] = {}
+        self.active_connections: Dict[str, Dict[str, WebSocket]] = {}  # {market: {client_id: websocket}}
         self.db = DatabaseManager()
 
-    async def connect(self, websocket: WebSocket, client_id: str):
+    async def connect(self, websocket: WebSocket, client_id: str, market: str):
         await websocket.accept()
-        self.active_connections[client_id] = websocket
+        if market not in self.active_connections:
+            self.active_connections[market] = {}
+        self.active_connections[market][client_id] = websocket
 
-    def disconnect(self, client_id: str):
-        if client_id in self.active_connections:
-            del self.active_connections[client_id]
+    def disconnect(self, client_id: str, market: str):
+        if market in self.active_connections and client_id in self.active_connections[market]:
+            del self.active_connections[market][client_id]
+            if not self.active_connections[market]:
+                del self.active_connections[market]
 
     async def broadcast_data(self, market: str = "stock"):
         while True:
@@ -39,11 +43,13 @@ class WebSocketManager:
                 if alerts:
                     data["alerts"] = alerts
 
-                for connection in self.active_connections.values():
-                    try:
-                        await connection.send_json(data)
-                    except Exception as e:
-                        print(f"Data transmission error: {e}")
+                # 해당 거래소에 연결된 클라이언트에게만 데이터 전송
+                if market in self.active_connections:
+                    for connection in self.active_connections[market].values():
+                        try:
+                            await connection.send_json(data)
+                        except Exception as e:
+                            print(f"Data transmission error: {e}")
 
                 await asyncio.sleep(3)
             except Exception as e:

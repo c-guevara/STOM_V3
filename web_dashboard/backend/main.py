@@ -40,7 +40,7 @@ async def get_market_data(market: str):
 @app.websocket("/ws/{market}")
 async def websocket_endpoint(websocket: WebSocket, market: str):
     client_id = str(uuid.uuid4())
-    await ws_manager.connect(websocket, client_id)
+    await ws_manager.connect(websocket, client_id, market)
 
     try:
         import asyncio
@@ -49,10 +49,10 @@ async def websocket_endpoint(websocket: WebSocket, market: str):
         while True:
             await websocket.receive_text()
     except WebSocketDisconnect:
-        ws_manager.disconnect(client_id)
+        ws_manager.disconnect(client_id, market)
     except Exception as e:
         print(f"WebSocket error: {e}")
-        ws_manager.disconnect(client_id)
+        ws_manager.disconnect(client_id, market)
 
 
 if __name__ == "__main__":
