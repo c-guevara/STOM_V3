@@ -75,7 +75,7 @@ export default function Dashboard() {
   const tradeItems = useMemo(() => data?.tradelist ?? [], [data, selectedMarket])
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 p-4 md:p-6 relative overflow-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-indigo-100 via-purple-100 to-pink-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 p-4 md:p-6 relative overflow-hidden">
       <div className="max-w-7xl mx-auto space-y-4 md:space-y-6">
         <div className="flex flex-row items-center justify-between gap-2">
           <div className="flex items-center gap-2">
@@ -85,7 +85,7 @@ export default function Dashboard() {
             <div className="relative" ref={dropdownRef}>
               <button
                 onClick={() => setIsMarketDropdownOpen(!isMarketDropdownOpen)}
-                className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 hover:from-blue-600 hover:to-purple-600 dark:hover:from-blue-700 dark:hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+                className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-gray-700 dark:to-gray-800 hover:from-blue-600 hover:to-purple-600 dark:hover:from-gray-600 dark:hover:to-gray-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
                 aria-label="거래소 선택"
               >
                 <Menu className="w-5 h-5" />
@@ -110,7 +110,7 @@ export default function Dashboard() {
             </div>
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-blue-600 dark:to-purple-600 hover:from-blue-600 hover:to-purple-600 dark:hover:from-blue-700 dark:hover:to-purple-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
+              className="p-2 h-10 rounded-lg bg-gradient-to-r from-blue-500 to-purple-500 dark:from-gray-700 dark:to-gray-800 hover:from-blue-600 hover:to-purple-600 dark:hover:from-gray-600 dark:hover:to-gray-700 text-white shadow-md hover:shadow-lg transition-all duration-200"
               aria-label="다크 모드 토글"
             >
               {isDarkMode ? <Sun className="w-5 h-5" /> : <MoonIcon className="w-5 h-5" />}

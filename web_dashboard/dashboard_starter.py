@@ -14,12 +14,21 @@ class DashboardStarter(QObject):
         self.backend_process = None
         self.frontend_process = None
 
-    def _stream_output(self, pipe, prefix):
-        """서브프로세스 출력을 스트리밍하여 로그로 전송합니다."""
+    def _stream_output(self, pipe, prefix, is_stderr=False):
+        """서브프로세스 출력을 스트리밍하여 오류만 로그로 전송합니다."""
+        error_keywords = ['error', 'Error', 'ERROR', 'exception', 'Exception', 'EXCEPTION', 'failed', 'Failed', 'FAILED']
+        info_keywords = ['INFO', 'info']
+        
         for line in iter(pipe.readline, b''):
             text = line.decode('utf-8', errors='replace').strip()
             if text:
-                self.log_received.emit(f"웹대시보드 {prefix} - {text}")
+                # INFO 로그는 무시
+                if any(keyword in text for keyword in info_keywords):
+                    continue
+                # stderr는 무조건 오류로 간주, stdout은 오류 키워드가 있는 경우만 오류로 간주
+                is_error = is_stderr or any(keyword in text for keyword in error_keywords)
+                if is_error:
+                    self.log_received.emit(f"웹대시보드 {prefix} - {text}")
         pipe.close()
 
     def _get_startupinfo(self):
@@ -42,12 +51,12 @@ class DashboardStarter(QObject):
         )
         threading.Thread(
             target=self._stream_output,
-            args=(self.backend_process.stdout, "백엔드"),
+            args=(self.backend_process.stdout, "백엔드", False),
             daemon=True
         ).start()
         threading.Thread(
             target=self._stream_output,
-            args=(self.backend_process.stderr, "백엔드"),
+            args=(self.backend_process.stderr, "백엔드", True),
             daemon=True
         ).start()
 
@@ -63,12 +72,12 @@ class DashboardStarter(QObject):
         )
         threading.Thread(
             target=self._stream_output,
-            args=(self.frontend_process.stdout, "프론트엔드"),
+            args=(self.frontend_process.stdout, "프론트엔드", False),
             daemon=True
         ).start()
         threading.Thread(
             target=self._stream_output,
-            args=(self.frontend_process.stderr, "프론트엔드"),
+            args=(self.frontend_process.stderr, "프론트엔드", True),
             daemon=True
         ).start()
 

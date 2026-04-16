@@ -8,8 +8,19 @@ interface Props {
 }
 
 function TradeTable({ items }: Props) {
+  // 당일일자 필터링 (체결시간 형식: 20260416122457)
+  const today = new Date()
+  const todayStr = `${today.getFullYear()}${String(today.getMonth() + 1).padStart(2, '0')}${String(today.getDate()).padStart(2, '0')}`
+  
+  const filteredItems = items.filter(item => {
+    if (!item.체결시간) return false
+    const timeStr = String(item.체결시간)
+    const dateStr = timeStr.substring(0, 8)
+    return dateStr === todayStr
+  })
+
   return (
-    <Card className="rounded-xl border border-indigo-200/50 dark:border-indigo-800/50 bg-gradient-to-br from-white via-indigo-50 to-purple-50 dark:from-gray-900 dark:via-indigo-950 dark:to-purple-950 shadow-lg hover:shadow-xl transition-all duration-200">
+    <Card className="rounded-xl border border-indigo-200/50 dark:border-gray-700/50 bg-gradient-to-br from-white via-indigo-100 to-purple-100 dark:from-gray-900 dark:via-gray-800 dark:to-gray-900 shadow-lg hover:shadow-xl transition-all duration-200">
       <CardHeader className="p-3 md:p-6">
         <CardTitle className="text-base md:text-xl">거래 내역</CardTitle>
       </CardHeader>
@@ -24,7 +35,7 @@ function TradeTable({ items }: Props) {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {items.map((item) => (
+              {filteredItems.map((item) => (
                 <TableRow key={`${item.종목명}-${item.체결시간}`}>
                   <TableCell className="font-medium text-xs md:text-sm">{item.종목명}</TableCell>
                   <TableCell className={`text-xs md:text-sm ${item.수익률 >= 0 ? 'text-red-600' : 'text-blue-600'}`}>

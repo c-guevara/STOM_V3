@@ -124,8 +124,8 @@ class BaseTrader:
         self.order_time = now()
         self.jgcs_time  = self.get_jgcs_time()
 
-        set_builtin_print(self.windowQ)
         self._load_database()
+        set_builtin_print(self.windowQ)
 
     def _get_yesugm_for_paper_trading(self):
         """모의투스용 예수금을 반환합니다.
@@ -151,6 +151,9 @@ class BaseTrader:
         self.dict_intg['예수금'] = int(yesugm - 총매입금액)
         self.dict_intg['추정예수금'] = int(yesugm - 총매입금액)
         self.dict_intg['추정예탁자산'] = yesugm
+
+        if self.dict_td:
+            self._update_totaltradelist()
 
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 예수금 조회 완료"))
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 트레이더 시작"))

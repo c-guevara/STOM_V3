@@ -17,6 +17,7 @@ export function useWebSocket(market: MarketType) {
   const currentMarketRef = useRef(market)
   const connectingRef = useRef(false)  // 연결 진행 중 플래그
   const lastDataRef = useRef<DashboardData | null>(null)  // 마지막 데이터 캐싱
+  const marketDataRef = useRef<Record<MarketType, DashboardData | null>>({} as Record<MarketType, DashboardData | null>)  // 마켓별 데이터 분리 저장
 
   const connect = useCallback(() => {
     if (!isMountedRef.current || connectingRef.current) return
@@ -36,6 +37,7 @@ export function useWebSocket(market: MarketType) {
       setConnected(true)
       reconnectAttemptsRef.current = 0
       connectingRef.current = false
+      // 연결 성공 시 로딩 상태 유지 (데이터 수신 시 해제)
     }
 
     ws.onmessage = (event) => {
@@ -43,23 +45,15 @@ export function useWebSocket(market: MarketType) {
       try {
         const message = JSON.parse(event.data) as DashboardData
 
-        // 데이터 변경 감지: 실제 데이터가 변경되었을 때만 업데이트 (timestamp 제외)
-        const lastData = lastDataRef.current
-        if (lastData) {
-          const jangoChanged = JSON.stringify(lastData.jangolist) !== JSON.stringify(message.jangolist)
-          const chegeolChanged = JSON.stringify(lastData.chegeollist) !== JSON.stringify(message.chegeollist)
-          const tradeChanged = JSON.stringify(lastData.tradelist) !== JSON.stringify(message.tradelist)
-          const totalTradeChanged = JSON.stringify(lastData.totaltradelist) !== JSON.stringify(message.totaltradelist)
-          const alertsChanged = JSON.stringify(lastData.alerts) !== JSON.stringify(message.alerts)
+        // 마켓별 데이터 저장
+        marketDataRef.current[currentMarket] = message
 
-          if (!jangoChanged && !chegeolChanged && !tradeChanged && !totalTradeChanged && !alertsChanged) {
-            return  // 데이터가 변경되지 않으면 업데이트 스킵
-          }
+        // 현재 마켓의 데이터만 표시
+        if (currentMarket === currentMarketRef.current) {
+          setData(message)
+          lastDataRef.current = message
+          setIsLoading(false)
         }
-
-        setData(message)
-        lastDataRef.current = message
-        setIsLoading(false)
       } catch (e) {
         console.error('[WebSocket] Failed to parse message:', e)
       }
@@ -79,6 +73,12 @@ export function useWebSocket(market: MarketType) {
       // 의도적인 종료(탭 변경)시 재연결하지 않음
       if (isIntentionalCloseRef.current) {
         console.log(`[WebSocket] Intentional close, skipping reconnect for ${currentMarket}`)
+        return
+      }
+
+      // 마켓이 변경된 경우 재연결하지 않음
+      if (currentMarket !== currentMarketRef.current) {
+        console.log(`[WebSocket] Market changed from ${currentMarket} to ${currentMarketRef.current}, skipping reconnect`)
         return
       }
 
@@ -112,21 +112,28 @@ export function useWebSocket(market: MarketType) {
     const previousMarket = currentMarketRef.current
     const marketChanged = previousMarket !== market
 
-    currentMarketRef.current = market
-    reconnectAttemptsRef.current = 0
-    setData(null)  // 마켓 변경 시 데이터 리셋
-    lastDataRef.current = null
-
-    // 이미 연결 중이면 스킵
-    if (wsRef.current?.readyState === WebSocket.OPEN || wsRef.current?.readyState === WebSocket.CONNECTING) {
-      if (!marketChanged || currentMarketRef.current !== market) {
-        console.log(`[WebSocket] Already connected/connecting to ${market}, skipping`)
-        return
-      }
+    // 마켓이 변경되지 않으면 아무것도 하지 않음
+    if (!marketChanged) {
+      console.log(`[WebSocket] Market unchanged (${market}), skipping connection setup`)
+      return
     }
 
-    // 마켓이 변경된 경우 기존 연결 강제 종료
-    if (marketChanged && wsRef.current) {
+    currentMarketRef.current = market
+    reconnectAttemptsRef.current = 0
+
+    // 마켓 변경 시 해당 마켓의 데이터 표시 (있는 경우)
+    if (marketDataRef.current[market]) {
+      setData(marketDataRef.current[market])
+      lastDataRef.current = marketDataRef.current[market]
+      setIsLoading(false)
+    } else {
+      setData(null)
+      lastDataRef.current = null
+      setIsLoading(true)
+    }
+
+    // 기존 연결 강제 종료
+    if (wsRef.current) {
       console.log(`[WebSocket] Market changed from ${previousMarket} to ${market}, disconnecting old connection`)
       disconnect(true)
       connectingRef.current = false
@@ -140,7 +147,7 @@ export function useWebSocket(market: MarketType) {
       if (isMountedRef.current && !connectingRef.current) {
         connect()
       }
-    }, marketChanged ? 100 : 0)
+    }, 100)
 
     return () => {
       isMountedRef.current = false
@@ -148,6 +155,15 @@ export function useWebSocket(market: MarketType) {
       disconnect(true)  // 의도적인 종료
     }
   }, [market, connect, disconnect])
+
+  // 최초 마운트 시 연결 시도
+  useEffect(() => {
+    if (currentMarketRef.current === market && !wsRef.current) {
+      console.log(`[WebSocket] Initial connection to ${market}`)
+      setIsLoading(true)
+      connect()
+    }
+  }, [])
 
   return { data, isLoading, connected }
 }
