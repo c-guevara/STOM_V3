@@ -170,7 +170,7 @@ class CrossHair:
                     if rest > 30:
                         int_mpx += 60
 
-                if int_mpx not in self.ui.ctpg_xticks:
+                if self.ui.ctpg_xticks is None or int_mpx not in self.ui.ctpg_xticks:
                     return
 
                 xpoint = self.ui.ctpg_xticks.index(int_mpx)

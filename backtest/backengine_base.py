@@ -1096,7 +1096,7 @@ class BackEngineBase(StgGlobalsFunc):
         Returns:
             호가 단위
         """
-        pass
+        return 0
 
     def _set_buy_count(self, betting, 현재가, 매수가, oc_ratio):
         """매수 수량을 설정합니다.
