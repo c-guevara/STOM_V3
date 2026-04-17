@@ -74,7 +74,7 @@ def text_changed_05(ui):
             row_num = next((row for row in range(ui.jg_tableWidgettt.rowCount()) if ui.jg_tableWidgettt.item(row, 0).text() == name), None)
             columns = columns_jg if ui.market_gubun < 6 else columns_jgf if ui.market_gubun < 9 else columns_jgcf
             col_num = columns.index('보유수량')
-        except:
+        except Exception:
             order_price = float(ui.od_lineEdittttt_01.text())
             if ui.market_gubun in (1, 2, 3, 5, 9):
                 order_count = int(ui.dict_set['투자금'] * 1_000_000 / order_price)

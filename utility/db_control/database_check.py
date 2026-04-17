@@ -27,7 +27,7 @@ def database_check():
 
         try:
             read_key()
-        except:
+        except Exception:
             write_key()
 
         # --------------------------------------------------------------------------------------------------------------
@@ -851,5 +851,5 @@ def database_check():
 
         return True, None
 
-    except:
+    except Exception:
         return False, format_exc()

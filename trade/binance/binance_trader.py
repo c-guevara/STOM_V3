@@ -148,11 +148,11 @@ class BinanceTrader(BaseTrader):
                     else:
                         self.binance.futures_change_leverage(symbol=code, leverage=1)
                     self.binance.futures_change_margin_type(symbol=code, marginType=self.dict_set['바이낸스선물마진타입'])
-                except:
+                except Exception:
                     pass
             try:
                 self.binance.futures_change_position_mode(dualSidePosition=self.dict_set['바이낸스선물포지션'])
-            except:
+            except Exception:
                 pass
 
         self.windowQ.put((ui_num['기본로그'], '시스템 명령 실행 알림 - 마진타입 및 레버리지 설정 완료'))
@@ -170,7 +170,7 @@ class BinanceTrader(BaseTrader):
                     self.dict_lvrg[code] = leverage
                     if not self.dict_set['모의투자']:
                         self.binance.futures_change_leverage(symbol=code, leverage=leverage)
-                except:
+                except Exception:
                     pass
 
     def _get_leverage(self, lhp):
@@ -200,7 +200,7 @@ class BinanceTrader(BaseTrader):
                         self.dict_intg['추정예탁자산'] = float(bal_dict['wb'])
                         self.dict_intg['예수금'] = float(bal_dict['cw'])
                         break
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 유저 웹소켓'))
         elif data['e'] == 'ORDER_TRADE_UPDATE':
             try:
@@ -215,7 +215,7 @@ class BinanceTrader(BaseTrader):
                 cp = float(data['L'])
                 op = float(data['p'])
                 on = int(data['i'])
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 바이낸스 홈페이지 주문은 기록되지 않습니다.'))
             else:
                 if cc > 0 or 'CANCEL' in p:

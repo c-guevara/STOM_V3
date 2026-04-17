@@ -97,7 +97,7 @@ class BackSubTotal:
                         self.tq.put(('더미결과', self.vkey, self.dummy_tsg))
                         self._send_subtotal()
                     self.complete1 = False
-            except:
+            except Exception:
                 self.wq.put((ui_num['시스템로그'], format_exc()))
 
     def _collect_data(self, data):

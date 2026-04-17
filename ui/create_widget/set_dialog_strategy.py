@@ -53,7 +53,7 @@ class SetDialogStrategy:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_strategy.move(self.ui.dict_set['창위치'][20], self.ui.dict_set['창위치'][21])
-            except:
+            except Exception:
                 pass
 
         self.ui.button_index_list = [x for x in range(116, 206)]

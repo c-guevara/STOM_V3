@@ -261,7 +261,7 @@ class AnalyzerRisk:
             analysis = self._analyze_market_data(arry_code)
             risk_score = self._calculate_risk_score(analysis)
             return risk_score
-        except:
+        except Exception:
             return 0.0
 
     def _analyze_market_data(self, arry_code: np.ndarray) -> dict:

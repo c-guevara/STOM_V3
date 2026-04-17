@@ -17,7 +17,7 @@ def ssbutton_clicked_01(ui):
             ui.ss_comboBoxxxx_01.addItem(table)
     try:
         df = ui.dbreader.read_sql('백테디비', f"SELECT * FROM '{ui.ss_comboBoxxxx_01.currentText()}'").set_index('index')
-    except:
+    except Exception:
         pass
     else:
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
@@ -37,7 +37,7 @@ def ssbutton_clicked_02(ui):
             ui.ss_comboBoxxxx_02.addItem(table)
     try:
         df = ui.dbreader.read_sql('백테디비', f"SELECT * FROM '{ui.ss_comboBoxxxx_02.currentText()}'").set_index('index')
-    except:
+    except Exception:
         pass
     else:
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
@@ -57,7 +57,7 @@ def ssbutton_clicked_03(ui):
             ui.ss_comboBoxxxx_03.addItem(table)
     try:
         df = ui.dbreader.read_sql('백테디비', f"SELECT * FROM '{ui.ss_comboBoxxxx_03.currentText()}'").set_index('index')
-    except:
+    except Exception:
         pass
     else:
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
@@ -87,7 +87,7 @@ def ssbutton_clicked_04(ui):
         image2 = Image.open(f"{GRAPH_PATH}/{file_name}_.png")
         image1.show()
         image2.show()
-    except:
+    except Exception:
         QMessageBox.critical(ui, '오류 알림', '저장된 그래프 파일이 존재하지 않습니다.\n')
 
 

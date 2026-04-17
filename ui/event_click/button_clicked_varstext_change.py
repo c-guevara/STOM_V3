@@ -72,7 +72,7 @@ def get_optivars_to_gavars(ui, opti_vars_text):
                     if vars_gap < 0:
                         vars_curr = round(vars_curr, 2)
                 ga_vars_text = f'{ga_vars_text[:-2]}], {vars_high}]\n'
-    except:
+    except Exception:
         ui.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_optivars_to_gavars'))
 
     ga_vars_text = ga_vars_text.replace('vars_', 'self.vars')
@@ -104,7 +104,7 @@ def get_gavars_to_optivars(ui, ga_vars_text):
                 vars_start = vars_[i][0][0]
                 vars_end = vars_[i][0][-1]
             opti_vars_text = f'{opti_vars_text}vars_[{i}] = [[{vars_start}, {vars_end}, {vars_gap}], {vars_high}]\n'
-    except:
+    except Exception:
         ui.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_gavars_to_optivars'))
 
     opti_vars_text = opti_vars_text.replace('vars_', 'self.vars')

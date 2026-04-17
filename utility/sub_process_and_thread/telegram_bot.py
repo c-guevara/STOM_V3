@@ -35,6 +35,7 @@ class TelegramBot(QThread):
         self.loop          = None
         self.application   = None
         self.message_queue = None
+        self.bot_task      = None
         self.running       = False
 
     def run(self):
@@ -68,7 +69,7 @@ class TelegramBot(QThread):
                 .build()
             )
             self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
-            self.loop.create_task(self.start_bot())
+            self.bot_task = self.loop.create_task(self.start_bot())
 
         self.loop.run_forever()
 
@@ -93,12 +94,17 @@ class TelegramBot(QThread):
                 reply_markup=reply_markup
             )
 
-            while True:
-                update = await update_queue.get()
-                await self.application.process_update(update)
-                update_queue.task_done()
+            while self.running:
+                try:
+                    update = await asyncio.wait_for(update_queue.get(), timeout=1.0)
+                    await self.application.process_update(update)
+                    update_queue.task_done()
+                except asyncio.TimeoutError:
+                    continue
 
-        except:
+        except asyncio.CancelledError:
+            pass
+        except Exception:
             self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - start_bot'))
             self.running = False
 
@@ -151,8 +157,7 @@ class TelegramBot(QThread):
     async def restart_bot(self):
         change = False
         gubun = self.dict_set['거래소'][-2:]
-        if self.token != self.dict_set[f'텔레그램봇토큰{gubun}'] or \
-                self.chat_id != self.dict_set[f'텔레그램아이디{gubun}']:
+        if self.token != self.dict_set[f'텔레그램봇토큰{gubun}'] or self.chat_id != self.dict_set[f'텔레그램아이디{gubun}']:
             change = True
             self.token = self.dict_set[f'텔레그램봇토큰{gubun}']
             self.chat_id = self.dict_set[f'텔레그램아이디{gubun}']
@@ -160,6 +165,12 @@ class TelegramBot(QThread):
         if change:
             try:
                 self.running = False
+                if self.bot_task and not self.bot_task.done():
+                    self.bot_task.cancel()
+                    try:
+                        await self.bot_task
+                    except asyncio.CancelledError:
+                        pass
                 if self.application and self.application.running:
                     await self.application.updater.stop()
                     await self.application.stop()
@@ -175,8 +186,8 @@ class TelegramBot(QThread):
                         .build()
                     )
                     self.application.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.handle_message))
-                    await self.start_bot()
-            except:
+                    self.bot_task = self.loop.create_task(self.start_bot())
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - restart_bot'))
                 self.running = False
 
@@ -200,4 +211,19 @@ class TelegramBot(QThread):
     def stop(self):
         self.teleQ.put('스레드종료')
         if self.loop and self.loop.is_running():
-            self.loop.stop()
+            asyncio.run_coroutine_threadsafe(self._shutdown(), self.loop)
+
+    async def _shutdown(self):
+        """비동기 종료 작업을 수행합니다."""
+        self.running = False
+        if self.bot_task and not self.bot_task.done():
+            self.bot_task.cancel()
+            try:
+                await self.bot_task
+            except asyncio.CancelledError:
+                pass
+        if self.application and self.application.running:
+            await self.application.updater.stop()
+            await self.application.stop()
+            await self.application.shutdown()
+        self.loop.stop()

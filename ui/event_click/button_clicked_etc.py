@@ -194,31 +194,28 @@ def lvbutton_clicked_02(ui):
         ui: UI 클래스 인스턴스
     """
     df = ui.dbreader.read_sql('설정디비', 'SELECT * FROM main').set_index('index')
-    if len(df) > 0:
-        ui.lv_checkBoxxxx_01.setChecked(True) if df['바이낸스선물고정레버리지'][0] else ui.lv_checkBoxxxx_01.setChecked(False)
-        ui.lv_checkBoxxxx_02.setChecked(True) if not df['바이낸스선물고정레버리지'][0] else ui.lv_checkBoxxxx_02.setChecked(False)
-        ui.lv_lineEditttt_01.setText(str(df['바이낸스선물고정레버리지값'][0]))
-        binance_lvrg = []
-        for text in df['바이낸스선물변동레버리지값'][0].split('^'):
-            lvrg_list = text.split(';')
-            binance_lvrg.append(lvrg_list)
-        ui.lv_lineEditttt_02.setText(binance_lvrg[0][0])
-        ui.lv_lineEditttt_03.setText(binance_lvrg[0][1])
-        ui.lv_lineEditttt_04.setText(binance_lvrg[0][2])
-        ui.lv_lineEditttt_05.setText(binance_lvrg[1][0])
-        ui.lv_lineEditttt_06.setText(binance_lvrg[1][1])
-        ui.lv_lineEditttt_07.setText(binance_lvrg[1][2])
-        ui.lv_lineEditttt_08.setText(binance_lvrg[2][0])
-        ui.lv_lineEditttt_09.setText(binance_lvrg[2][1])
-        ui.lv_lineEditttt_10.setText(binance_lvrg[2][2])
-        ui.lv_lineEditttt_11.setText(binance_lvrg[3][0])
-        ui.lv_lineEditttt_12.setText(binance_lvrg[3][1])
-        ui.lv_lineEditttt_13.setText(binance_lvrg[3][2])
-        ui.lv_lineEditttt_14.setText(binance_lvrg[4][0])
-        ui.lv_lineEditttt_15.setText(binance_lvrg[4][1])
-        ui.lv_lineEditttt_16.setText(binance_lvrg[4][2])
-    else:
-        QMessageBox.critical(ui.dialog_leverage, '오류 알림', '기본 설정값이\n존재하지 않습니다.\n')
+    ui.lv_checkBoxxxx_01.setChecked(True) if df['바이낸스선물고정레버리지'][0] else ui.lv_checkBoxxxx_01.setChecked(False)
+    ui.lv_checkBoxxxx_02.setChecked(True) if not df['바이낸스선물고정레버리지'][0] else ui.lv_checkBoxxxx_02.setChecked(False)
+    ui.lv_lineEditttt_01.setText(str(df['바이낸스선물고정레버리지값'][0]))
+    binance_lvrg = []
+    for text in df['바이낸스선물변동레버리지값'][0].split('^'):
+        lvrg_list = text.split(';')
+        binance_lvrg.append(lvrg_list)
+    ui.lv_lineEditttt_02.setText(binance_lvrg[0][0])
+    ui.lv_lineEditttt_03.setText(binance_lvrg[0][1])
+    ui.lv_lineEditttt_04.setText(binance_lvrg[0][2])
+    ui.lv_lineEditttt_05.setText(binance_lvrg[1][0])
+    ui.lv_lineEditttt_06.setText(binance_lvrg[1][1])
+    ui.lv_lineEditttt_07.setText(binance_lvrg[1][2])
+    ui.lv_lineEditttt_08.setText(binance_lvrg[2][0])
+    ui.lv_lineEditttt_09.setText(binance_lvrg[2][1])
+    ui.lv_lineEditttt_10.setText(binance_lvrg[2][2])
+    ui.lv_lineEditttt_11.setText(binance_lvrg[3][0])
+    ui.lv_lineEditttt_12.setText(binance_lvrg[3][1])
+    ui.lv_lineEditttt_13.setText(binance_lvrg[3][2])
+    ui.lv_lineEditttt_14.setText(binance_lvrg[4][0])
+    ui.lv_lineEditttt_15.setText(binance_lvrg[4][1])
+    ui.lv_lineEditttt_16.setText(binance_lvrg[4][2])
 
 
 def lvbutton_clicked_03(ui):

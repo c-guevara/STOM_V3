@@ -221,10 +221,3 @@ class UpbitTrader(BaseTrader):
             호가 단위
         """
         return get_hogaunit_coin(주문가격또는종목코드)
-
-    def _get_order_code_list(self):
-        """주문 종목 코드 리스트를 반환합니다.
-        Returns:
-            주문 종목 코드 리스트
-        """
-        return tuple(self.dict_order['매수']) + tuple(self.dict_order['매도'])

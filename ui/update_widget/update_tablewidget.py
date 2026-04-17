@@ -525,7 +525,7 @@ class UpdateTablewidget:
             x = dt_ymdhms(ymdhms).timestamp()
         try:
             xpoint = self.ui.ctpg_xticks.index(x)
-        except:
+        except Exception:
             return
 
         if self.ui.ctpg_hline is None:

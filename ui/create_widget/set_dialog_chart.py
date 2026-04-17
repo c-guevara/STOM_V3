@@ -255,7 +255,7 @@ class SetDialogChart:
             if self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
                 try:
                     self.ui.dialog_chart.move(self.ui.dict_set['창위치'][2], self.ui.dict_set['창위치'][3])
-                except:
+                except Exception:
                     pass
         else:
             self.ui.dialog_chart.setFixedSize(1403, 1370)

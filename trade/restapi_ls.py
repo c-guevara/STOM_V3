@@ -69,362 +69,445 @@ class LsRestAPI:
 
     def create_token(self):
         """토큰 발급"""
-        data = self._post('토큰발급')
-        self.token = data['access_token']
-        return self.token
+        try:
+            data = self._post('토큰발급')
+            self.token = data['access_token']
+            return self.token
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return None
 
     def get_code_info_stock(self, etfgubun=0):
         """국내주식종목정보 ['구분'], '국내주식상장주수' ['종목코드', '거래소구분코드']
         etfgubun: 0 (코스피 + 코스닥), 1 (ETF), 2 (ETN)
         data['spac_gubun'] == 'N' - 구분 무관 공통사항 스펙 제외
         data['shcode'][-1] == '0' - 우선주 및 ETN 제외(ETN일 경우 확인X)"""
-        tr_name = '국내주식종목정보'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='0')
-        dict_data = {}
-        for data in data[out_block]:
-            gubun = int(data['etfgubun'])
-            if gubun == etfgubun and data['spac_gubun'] == 'N' and (etfgubun == 2 or data['shcode'][-1] == '0'):
-                dict_data[data['shcode']] = {'종목명': data['hname']}
+        try:
+            tr_name = '국내주식종목정보'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 구분='0')
+            dict_data = {}
+            for data in data[out_block]:
+                gubun = int(data['etfgubun'])
+                if gubun == etfgubun and data['spac_gubun'] == 'N' and (etfgubun == 2 or data['shcode'][-1] == '0'):
+                    dict_data[data['shcode']] = {'종목명': data['hname']}
 
-        tr_name = '국내주식상장주수'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        last = len(dict_data)
-        for i, code in enumerate(dict_data):
-            data = self._post(tr_name, 종목코드=code, 거래소구분코드='')
-            dict_data[code].update({
-                '상장주식수': int(data[out_block]['listing']) * 1000
-            })
-            if i % 100 == 0 or i == last - 1:
-                self.windowQ.put((ui_num['기본로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
-            time.sleep(0.1)
+            tr_name = '국내주식상장주수'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            last = len(dict_data)
+            for i, code in enumerate(dict_data):
+                data = self._post(tr_name, 종목코드=code, 거래소구분코드='')
+                dict_data[code].update({
+                    '상장주식수': int(data[out_block]['listing']) * 1000
+                })
+                if i % 100 == 0 or i == last - 1:
+                    self.windowQ.put((ui_num['기본로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
+                time.sleep(0.1)
 
-        return dict_data, list(dict_data.keys())
+            return dict_data, list(dict_data.keys())
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return {}, []
 
     def get_code_info_stock_usa(self):
         """해외주식종목정보 ['지연구분', '국가구분', '거래소구분', '조회갯수', '연속구분']
         거래소구분: '1' (뉴욕거래소), '2' (나스닥)
         제외: 우선주, 채권, 워런트, ADR, 유닛, 종목명이 영문인 종목, 종목코드에 '-', '.' 이 포함된 종목"""
-        tr_name = '해외주식종목정보'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data_list = []
-        data = self._post(tr_name, 지연구분='R', 국가구분='US', 거래소구분='1', 조회갯수=9999, 연속구분='')
-        data_list.extend(data[out_block])
-        data = self._post(tr_name, 지연구분='R', 국가구분='US', 거래소구분='2', 조회갯수=9999, 연속구분='')
-        data_list.extend(data[out_block])
-        keysymbols = []
-        dict_data = {}
-        korean_pattern = re.compile(r'[\uAC00-\uD7A3]')
-        for data in data_list:
-            code = data['symbol']
-            name = data['korname']
-            if not bool(korean_pattern.search(name)) or '-' in code or '.' in code or '유닛' in name or \
-                    '채권' in name or '우선주' in name or '워런트' in name or '(ADR)' in name:
-                continue
-            keysymbols.append(data['keysymbol'])
-            dict_data[code] = {
-                '종목명': name,
-                '거래소코드': data['exchcd'],
-                '상장주식수': int(data['share'])
-            }
-        return dict_data, keysymbols
+        try:
+            tr_name = '해외주식종목정보'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data_list = []
+            data = self._post(tr_name, 지연구분='R', 국가구분='US', 거래소구분='1', 조회갯수=9999, 연속구분='')
+            data_list.extend(data[out_block])
+            data = self._post(tr_name, 지연구분='R', 국가구분='US', 거래소구분='2', 조회갯수=9999, 연속구분='')
+            data_list.extend(data[out_block])
+            keysymbols = []
+            dict_data = {}
+            korean_pattern = re.compile(r'[\uAC00-\uD7A3]')
+            for data in data_list:
+                code = data['symbol']
+                name = data['korname']
+                if not bool(korean_pattern.search(name)) or '-' in code or '.' in code or '유닛' in name or \
+                        '채권' in name or '우선주' in name or '워런트' in name or '(ADR)' in name:
+                    continue
+                keysymbols.append(data['keysymbol'])
+                dict_data[code] = {
+                    '종목명': name,
+                    '거래소코드': data['exchcd'],
+                    '상장주식수': int(data['share'])
+                }
+            return dict_data, keysymbols
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return {}, []
 
     def get_code_info_future(self):
         """지수선물종목정보1 ['구분'], 지수선물종목정보2 ['구분'], '파생상품증거금조회' ['종목대분류코드', '종목중분류코드']
         t8432(코스피200), t8435(미니코스피200, 코스닥150) 조회 TR이 다름
         구분: '' (코스피200), 'MF' (미니코스피200), 'SF' (코스닥150)"""
-        dict_data = {}
-        dict_expcode = {}
+        try:
+            dict_data = {}
+            dict_expcode = {}
 
-        tr_name = '지수선물종목정보1'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='')
-        data = data[out_block][0]
-        코스피200_종목코드 = data['shcode']
-        dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
-        dict_expcode[코스피200_종목코드] = data['expcode']
+            tr_name = '지수선물종목정보1'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 구분='')
+            data = data[out_block][0]
+            코스피200_종목코드 = data['shcode']
+            dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
+            dict_expcode[코스피200_종목코드] = data['expcode']
 
-        tr_name = '지수선물종목정보2'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='MF')
-        data = data[out_block][0]
-        미니코스피200_종목코드 = data['shcode']
-        dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
-        dict_expcode[미니코스피200_종목코드] = data['expcode']
+            tr_name = '지수선물종목정보2'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 구분='MF')
+            data = data[out_block][0]
+            미니코스피200_종목코드 = data['shcode']
+            dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
+            dict_expcode[미니코스피200_종목코드] = data['expcode']
 
-        data = self._post(tr_name, 구분='SF')
-        data = data[out_block][0]
-        코스닥150_종목코드 = data['shcode']
-        dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
-        dict_expcode[코스닥150_종목코드] = data['expcode']
+            data = self._post(tr_name, 구분='SF')
+            data = data[out_block][0]
+            코스닥150_종목코드 = data['shcode']
+            dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
+            dict_expcode[코스닥150_종목코드] = data['expcode']
 
-        tr_name = '파생상품증거금조회'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
-        for data in data[out_block]:
-            name = data['ShtnHanglIsuNm']
-            if name == 'KOSPI200':
-                dict_data[코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.05,
-                    '틱가치': 250_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '미니KOSPI200':
-                dict_data[미니코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.02,
-                    '틱가치': 50_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '코스닥150':
-                dict_data[코스닥150_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.1,
-                    '틱가치': 100_000,
-                    '소숫점자리수': 1
-                })
+            tr_name = '파생상품증거금조회'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
+            for data in data[out_block]:
+                name = data['ShtnHanglIsuNm']
+                if name == 'KOSPI200':
+                    dict_data[코스피200_종목코드].update({
+                        '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                        '호가단위': 0.05,
+                        '틱가치': 250_000,
+                        '소숫점자리수': 2
+                    })
+                elif name == '미니KOSPI200':
+                    dict_data[미니코스피200_종목코드].update({
+                        '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                        '호가단위': 0.02,
+                        '틱가치': 50_000,
+                        '소숫점자리수': 2
+                    })
+                elif name == '코스닥150':
+                    dict_data[코스닥150_종목코드].update({
+                        '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                        '호가단위': 0.1,
+                        '틱가치': 100_000,
+                        '소숫점자리수': 1
+                    })
 
-        return dict_data, list(dict_data.keys()), dict_expcode
+            return dict_data, list(dict_data.keys()), dict_expcode
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return {}, [], []
 
     def get_code_info_future_night(self):
         """야간선물종목정보 ['구분'], 구분: 'NF' (코스피200선물), 'NQF' (코스닥150선물)"""
-        dict_data = {}
-        dict_expcode = {}
+        try:
+            dict_data = {}
+            dict_expcode = {}
 
-        tr_name = '야간선물종목정보'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='NFU')
-        data = data[out_block][0]
-        코스피200_종목코드 = data['shcode']
-        dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
-        dict_expcode[코스피200_종목코드] = data['expcode']
+            tr_name = '야간선물종목정보'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 구분='NFU')
+            data = data[out_block][0]
+            코스피200_종목코드 = data['shcode']
+            dict_data[코스피200_종목코드] = {'종목명': '코스피200'}
+            dict_expcode[코스피200_종목코드] = data['expcode']
 
-        data = self._post(tr_name, 구분='NMF')
-        data = data[out_block][0]
-        미니코스피200_종목코드 = data['shcode']
-        dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
-        dict_expcode[미니코스피200_종목코드] = data['expcode']
+            data = self._post(tr_name, 구분='NMF')
+            data = data[out_block][0]
+            미니코스피200_종목코드 = data['shcode']
+            dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
+            dict_expcode[미니코스피200_종목코드] = data['expcode']
 
-        time.sleep(1)
+            time.sleep(1)
 
-        data = self._post(tr_name, 구분='NQF')
-        data = data[out_block][0]
-        코스닥150_종목코드 = data['shcode']
-        dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
-        dict_expcode[코스닥150_종목코드] = data['expcode']
+            data = self._post(tr_name, 구분='NQF')
+            data = data[out_block][0]
+            코스닥150_종목코드 = data['shcode']
+            dict_data[코스닥150_종목코드] = {'종목명': '코스닥150'}
+            dict_expcode[코스닥150_종목코드] = data['expcode']
 
-        tr_name = '파생상품증거금조회'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
-        for data in data[out_block]:
-            name = data['ShtnHanglIsuNm']
-            if name == 'KOSPI200':
-                dict_data[코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.05,
-                    '틱가치': 250_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '미니KOSPI200':
-                dict_data[미니코스피200_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.02,
-                    '틱가치': 50_000,
-                    '소숫점자리수': 2
-                })
-            elif name == '코스닥150':
-                dict_data[코스닥150_종목코드].update({
-                    '위탁증거금': int(data['OnePrcntrOrdMgn']),
-                    '호가단위': 0.1,
-                    '틱가치': 100_000,
-                    '소숫점자리수': 1
-                })
+            tr_name = '파생상품증거금조회'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 종목대분류코드='', 종목중분류코드='')
+            for data in data[out_block]:
+                name = data['ShtnHanglIsuNm']
+                if name == 'KOSPI200':
+                    dict_data[코스피200_종목코드].update({
+                        '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                        '호가단위': 0.05,
+                        '틱가치': 250_000,
+                        '소숫점자리수': 2
+                    })
+                elif name == '미니KOSPI200':
+                    dict_data[미니코스피200_종목코드].update({
+                        '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                        '호가단위': 0.02,
+                        '틱가치': 50_000,
+                        '소숫점자리수': 2
+                    })
+                elif name == '코스닥150':
+                    dict_data[코스닥150_종목코드].update({
+                        '위탁증거금': int(data['OnePrcntrOrdMgn']),
+                        '호가단위': 0.1,
+                        '틱가치': 100_000,
+                        '소숫점자리수': 1
+                    })
 
-        return dict_data, list(dict_data.keys()), dict_expcode
+            return dict_data, list(dict_data.keys()), dict_expcode
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return {}, [], []
 
     def get_code_info_future_oversea(self):
         """해외선물종목정보 ['구분']"""
-        tr_name = '해외선물종목정보'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 구분='')
-        dict_data = {}
-        for data in data[out_block]:
-            name = data['BscGdsNm'].replace(' ', '_')
-            dict_data[data['Symbol']] = {
-                '종목명': name,
-                '위탁증거금': int(float(data['OpngMgn'])),
-                '호가단위': float(data['UntPrc']),
-                '틱가치': float(data['MnChgAmt']),
-                '소숫점자리수': int(data['DotGb'])
-            }
-        return dict_data, list(dict_data.keys())
+        try:
+            tr_name = '해외선물종목정보'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 구분='')
+            dict_data = {}
+            for data in data[out_block]:
+                name = data['BscGdsNm'].replace(' ', '_')
+                dict_data[data['Symbol']] = {
+                    '종목명': name,
+                    '위탁증거금': int(float(data['OpngMgn'])),
+                    '호가단위': float(data['UntPrc']),
+                    '틱가치': float(data['MnChgAmt']),
+                    '소숫점자리수': int(data['DotGb'])
+                }
+            return dict_data, list(dict_data.keys())
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return {}, []
 
     def get_balance_stock(self):
         """국내주식예수금 ['레코드갯수', '잔고생성구분']"""
-        tr_name = '국내주식예수금'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 레코드갯수=1, 잔고생성구분='1')
-        return int(data[out_block]['D2Dps'])
+        try:
+            tr_name = '국내주식예수금'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 레코드갯수=1, 잔고생성구분='1')
+            return int(data[out_block]['D2Dps'])
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return 0
 
     def get_balance_stock_usa(self):
         """해외주식예수금 ['레코드갯수', '통화코드']"""
-        tr_name = '해외주식예수금'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 레코드갯수=1, 통화코드='USD')
-        return int(data[out_block]['FcurrDps'])
+        try:
+            tr_name = '해외주식예수금'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 레코드갯수=1, 통화코드='USD')
+            return int(data[out_block]['FcurrDps'])
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return 0
 
     def get_balance_future(self):
         """지수선물예수금 ['레코드갯수']"""
-        tr_name = '지수선물예수금'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 레코드갯수=1)
-        return int(data[out_block]['Dps'])
+        try:
+            tr_name = '지수선물예수금'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 레코드갯수=1)
+            return int(data[out_block]['Dps'])
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return 0
 
     def get_balance_future_oversea(self):
         """ 해외선물예수금 ['계좌구분코드', '거래일자']"""
-        tr_name = '해외선물예수금'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 계좌구분코드='1', 거래일자=LsRestData.당일일자)
-        return int(data[out_block]['FcurrOrdAbleAmt'])
+        try:
+            tr_name = '해외선물예수금'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 계좌구분코드='1', 거래일자=LsRestData.당일일자)
+            return int(data[out_block]['FcurrOrdAbleAmt'])
+        except Exception:
+            self.windowQ.put((ui_num['시스템로그'], format_exc()))
+            return 0
 
     def order_stock(self, 종목코드, 주문구분, 주문수량, 주문가격, 호가유형):
         """국내주식일반주문
         ['종목코드', '주문수량', '주문가격', '주문구분코드', '호가유형코드', '신용거래코드', '대출일', '주문조건코드', '회원사번호']"""
-        tr_name = '국내주식일반주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.국내주식주문구분코드[주문구분]
-        호가유형코드 = LsRestData.국내주식호가유형코드[호가유형]
-        주문조건코드 = LsRestData.국내주식주문조건코드[호가유형]
-        data = self._post(tr_name, 종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드,
-                          신용거래코드='000', 대출일='', 주문조건코드=주문조건코드, 회원사번호='')
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '국내주식일반주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.국내주식주문구분코드[주문구분]
+            호가유형코드 = LsRestData.국내주식호가유형코드[호가유형]
+            주문조건코드 = LsRestData.국내주식주문조건코드[호가유형]
+            data = self._post(tr_name, 종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드,
+                              신용거래코드='000', 대출일='', 주문조건코드=주문조건코드, 회원사번호='')
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_modify_stock(self, 종목코드, 원주문번호, 주문수량, 주문가격, 호가유형):
         """국내주식정정주문 ['원주문번호', '종목코드', '주문수량', '호가유형코드', '주문조건코드', '주문가격']"""
-        tr_name = '국내주식정정주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        호가유형코드 = LsRestData.국내주식호가유형코드[호가유형]
-        주문조건코드 = LsRestData.국내주식주문조건코드[호가유형]
-        data = self._post(tr_name, 원주문번호=원주문번호, 종목코드=종목코드, 주문수량=주문수량, 호가유형코드=호가유형코드,
-                          주문조건코드=주문조건코드, 주문가격=주문가격)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '국내주식정정주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            호가유형코드 = LsRestData.국내주식호가유형코드[호가유형]
+            주문조건코드 = LsRestData.국내주식주문조건코드[호가유형]
+            data = self._post(tr_name, 원주문번호=원주문번호, 종목코드=종목코드, 주문수량=주문수량, 호가유형코드=호가유형코드,
+                              주문조건코드=주문조건코드, 주문가격=주문가격)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_cancel_stock(self, 종목코드, 원주문번호, 주문수량):
         """국내주식취소주문 ['원주문번호', '종목코드', '주문수량']"""
-        tr_name = '국내주식취소주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 원주문번호=원주문번호, 종목코드=종목코드, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '국내주식취소주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 원주문번호=원주문번호, 종목코드=종목코드, 주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_stock_usa(self, 종목코드, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형, 원주문번호=''):
         """해외주식일반주문
         ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
-        tr_name = '해외주식일반주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
-        호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
-        if 주문구분 in ('매수', '매도'):
-            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 주문시장코드=주문시장코드, 종목코드=종목코드,
-                              주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
-        else:
-            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
-                              종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '해외주식일반주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
+            호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
+            if 주문구분 in ('매수', '매도'):
+                data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 주문시장코드=주문시장코드, 종목코드=종목코드,
+                                  주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
+            else:
+                data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
+                                  종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_modify_stock_usa(self, 종목코드, 원주문번호, 주문구분, 주문시장코드, 주문수량, 주문가격, 호가유형):
         """해외주식정정주문
         ['레코드갯수', '주문구분코드', '원주문번호', '주문시장코드', '종목코드', '주문수량', '주문가격', '호가유형코드', '중개인구분코드']"""
-        tr_name = '해외주식정정주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
-        호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
-        data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
-                          종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '해외주식정정주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.해외주식주문구분코드[주문구분]
+            호가유형코드 = LsRestData.해외주식호가유형코드[호가유형]
+            data = self._post(tr_name, 레코드갯수=1, 주문구분코드=주문구분코드, 원주문번호=원주문번호, 주문시장코드=주문시장코드,
+                              종목코드=종목코드, 주문수량=주문수량, 주문가격=주문가격, 호가유형코드=호가유형코드, 중개인구분코드='')
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_future(self, 종목코드, 주문구분, 주문가격, 주문수량, 호가유형):
         """지수선물일반주문 ['종목코드', '주문구분코드', '호가유형코드', '주문가격', '주문수량']"""
-        tr_name = '지수선물일반주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.선물주문구분코드[주문구분]
-        호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
-        data = self._post(tr_name, 종목코드=종목코드, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '지수선물일반주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.선물주문구분코드[주문구분]
+            호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
+            data = self._post(tr_name, 종목코드=종목코드, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_modify_future(self, 종목코드, 원주문번호, 주문가격, 주문수량, 호가유형):
         """지수선물정정주문 ['종목코드', '원주문번호', '호가유형코드', '주문가격', '주문수량']"""
-        tr_name = '지수선물정정주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
-        data = self._post(tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '지수선물정정주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
+            data = self._post(tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_cancel_future(self, 종목코드, 원주문번호, 주문수량):
         """지수선물취소주문 ['종목코드', '원주문번호', '주문수량']"""
-        tr_name = '지수선물취소주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '지수선물취소주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_future_night(self, 종목코드, 주문구분, 주문가격, 주문수량, 호가유형):
         """야간선물일반주문 ['종목코드', '주문구분코드', '호가유형코드', '주문가격', '주문수량']"""
-        tr_name = '야간선물일반주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.선물주문구분코드[주문구분]
-        호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
-        data = self._post(tr_name, 종목코드=종목코드, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 주문가격=주문가격,
-                          주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '야간선물일반주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.선물주문구분코드[주문구분]
+            호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
+            data = self._post(tr_name, 종목코드=종목코드, 주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 주문가격=주문가격,
+                              주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_modify_future_night(self, 종목코드, 원주문번호, 주문가격, 주문수량, 호가유형):
         """야간선물정정주문 ['종목코드', '원주문번호', '호가유형코드', '주문가격', '주문수량']"""
-        tr_name = '야간선물정정주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
-        data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 호가유형코드=호가유형코드, 주문가격=주문가격, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '야간선물정정주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            호가유형코드 = LsRestData.지수선물호가유형코드[호가유형]
+            data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 호가유형코드=호가유형코드, 주문가격=주문가격,
+                               주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_cancel_future_night(self, 종목코드, 원주문번호, 주문수량):
         """야간선물취소주문 ['종목코드', '원주문번호', '주문수량']"""
-        tr_name = '야간선물취소주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
-        return data[out_block]['OrdNo'], data['rsp_msg']
+        try:
+            tr_name = '야간선물취소주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post( tr_name, 종목코드=종목코드, 원주문번호=원주문번호, 주문수량=주문수량)
+            return data[out_block]['OrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_future_oversea(self, 종목코드, 주문구분, 주문가격, 주문수량, 주문유형, 조건주문가격=0):
         """해외선물일반주문
         ['주문일자', '종목코드', '주문구분', '주문구분코드', '호가유형코드', '통화코드', '주문가격', '조건주문가격', '주문수량',
         '상품코드', '만기년월', '거래소코드']"""
-        tr_name = '해외선물일반주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.선물주문구분코드[주문구분]
-        호가유형코드 = LsRestData.해외선물호가유형코드[주문유형]
-        data = self._post(tr_name, 주문일자=LsRestData.당일일자, 종목코드=종목코드, 주문구분='1', 주문구분코드=주문구분코드,
-                          호가유형코드=호가유형코드, 통화코드=' ',  주문가격=주문가격, 조건주문가격=조건주문가격,
-                          주문수량=주문수량, 상품코드='000000', 만기년월='000001', 거래소코드=' ')
-        return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
+        try:
+            tr_name = '해외선물일반주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.선물주문구분코드[주문구분]
+            호가유형코드 = LsRestData.해외선물호가유형코드[주문유형]
+            data = self._post(tr_name, 주문일자=LsRestData.당일일자, 종목코드=종목코드, 주문구분='1', 주문구분코드=주문구분코드,
+                              호가유형코드=호가유형코드, 통화코드=' ',  주문가격=주문가격, 조건주문가격=조건주문가격,
+                              주문수량=주문수량, 상품코드='000000', 만기년월='000001', 거래소코드=' ')
+            return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_modify_future_oversea(self, 종목코드, 원주문번호, 주문구분, 주문가격, 주문수량, 주문유형, 조건주문가격=0):
         """해외선물정정주문
         ['주문일자', '원주문번호', '종목코드', '주문구분', '주문구분코드', '호가유형코드', '통화코드', '주문가격', '조건주문가격',
         '주문수량', '상품코드', '만기년월', '거래소코드']"""
-        tr_name = '해외선물정정주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        주문구분코드 = LsRestData.선물주문구분코드[주문구분]
-        호가유형코드 = LsRestData.해외선물호가유형코드[주문유형]
-        data = self._post(tr_name, 주문일자=LsRestData.당일일자, 원주문번호=원주문번호, 종목코드=종목코드, 주문구분='2',
-                          주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 통화코드=' ', 주문가격=주문가격,
-                          조건주문가격=조건주문가격, 주문수량=주문수량, 상품코드='', 만기년월='', 거래소코드=' ')
-        return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
+        try:
+            tr_name = '해외선물정정주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            주문구분코드 = LsRestData.선물주문구분코드[주문구분]
+            호가유형코드 = LsRestData.해외선물호가유형코드[주문유형]
+            data = self._post(tr_name, 주문일자=LsRestData.당일일자, 원주문번호=원주문번호, 종목코드=종목코드, 주문구분='2',
+                              주문구분코드=주문구분코드, 호가유형코드=호가유형코드, 통화코드=' ', 주문가격=주문가격,
+                              조건주문가격=조건주문가격, 주문수량=주문수량, 상품코드='', 만기년월='', 거래소코드=' ')
+            return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
     def order_cancel_future_oversea(self, 종목코드, 원주문번호):
         """해외선물취소주문 ['주문일자', '종목코드', '원주문번호', '주문구분', '상품구분코드', '거래소코드']"""
-        tr_name = '해외선물취소주문'
-        out_block = LsRestData.tr_data[tr_name]['out_block']
-        data = self._post(tr_name, 주문일자=LsRestData.당일일자, 종목코드=종목코드, 원주문번호=원주문번호, 주문구분='3',
-                          상품구분코드=' ', 거래소코드=' ')
-        return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
+        try:
+            tr_name = '해외선물취소주문'
+            out_block = LsRestData.tr_data[tr_name]['out_block']
+            data = self._post(tr_name, 주문일자=LsRestData.당일일자, 종목코드=종목코드, 원주문번호=원주문번호, 주문구분='3',
+                              상품구분코드=' ', 거래소코드=' ')
+            return data[out_block]['OvrsFutsOrdNo'], data['rsp_msg']
+        except Exception:
+            return 0, format_exc()
 
 
 class LsWebSocketReceiver(QThread):
@@ -453,7 +536,7 @@ class LsWebSocketReceiver(QThread):
                     await self._connect()
                     asyncio.create_task(self._real_reg())
                 await self._receive_message()
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketReceiver'))
 
             await self._disconnect()
@@ -490,6 +573,17 @@ class LsWebSocketReceiver(QThread):
                 )
 
         gubun = f'{self.gubun}호가'
+        for i, code in enumerate(self.symbols):
+            data = self._get_send_data(gubun, '실시간시세등록', code)
+            await self.websocket.send(json.dumps(data))
+            await asyncio.sleep(0.02)
+
+            if i % 100 == 0 or i == last - 1:
+                self.windowQ.put(
+                    (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
+                )
+
+        gubun = f'{self.gubun}VI'
         for i, code in enumerate(self.symbols):
             data = self._get_send_data(gubun, '실시간시세등록', code)
             await self.websocket.send(json.dumps(data))
@@ -555,7 +649,7 @@ class LsWebSocketTrader(QThread):
                 if not self.connected:
                     await self._connect()
                 await self._receive_message()
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - LsWebSocketTrader'))
 
             await self._disconnect()

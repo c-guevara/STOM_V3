@@ -462,6 +462,18 @@ class BaseTrader:
                 주문구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 체결시간, '모의투자'
             )
 
+    def _check_order_error(self, 주문번호, 응답메시지, 주문구분, 종목명, 주문가격, 주문수량):
+        if 주문번호 == 0:
+            if 'Traceback' in 응답메시지:
+                self.windowQ.put((ui_num['시스템로그'], 응답메시지))
+            else:
+                주문구분기록 = f'{주문구분}실패' if self.market_gubun < 6 else f'{주문구분}_FAIL'
+                self.windowQ.put((
+                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분기록}] {종목명} | {주문가격} | {주문수량} | {응답메시지}'
+                ))
+            return False
+        return True
+
     def _order_time_log(self, signal_time):
         """주문 시간 로그를 기록합니다.
         Args:
@@ -549,7 +561,7 @@ class BaseTrader:
                     '평가손익': 평가손익,
                     '평가금액': 평가금액
                 })
-        except:
+        except Exception:
             pass
 
     def _update_dict_info(self):
@@ -895,7 +907,6 @@ class BaseTrader:
             self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호)
 
         self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
-        self.receivQ.put(('주문목록', self._get_order_code_list()))
 
     def _update_chejan_data_future(self, 체결구분, 종목코드, 체결수량, 체결가격, 체결시간, 주문번호):
         """선물 체결 데이터를 업데이트합니다.
@@ -1070,7 +1081,6 @@ class BaseTrader:
             self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 체결수량, 체결가격, 체결시간, 주문가격, 주문번호)
 
         self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
-        self.receivQ.put(('주문목록', self._get_order_code_list()))
 
     def _update_chejan_data_coin_future(self, 주문구분, 종목코드, 주문수량, 체결수량, 미체결수량, 체결가격, 주문가격, 체결시간, 주문번호):
         """코인 선물 체결 데이터를 업데이트합니다.
@@ -1241,7 +1251,6 @@ class BaseTrader:
             self._update_chegeollist(index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호)
 
         self.receivQ.put(('잔고목록', tuple(self.dict_jg)))
-        self.receivQ.put(('주문목록', self._get_order_code_list()))
 
     def _update_tradelist(self, index, 종목명, 매입금액, 평가금액, 체결수량, 수익률, 수익금, 주문시간, 포지션=None):
         """거래 리스트를 업데이트합니다.
@@ -1328,7 +1337,7 @@ class BaseTrader:
         if self.dict_set['스톰라이브']:
             수익률 = round(수익금합계 / 총매수금액 * 100, 2)
             data_list = [거래횟수, 총매수금액, 총매도금액, 총수익금액, 총손실금액, 수익률, 수익금합계]
-            self.liveQ.put(('', data_list))
+            self.liveQ.put((self.market_info['마켓구분'], data_list))
 
     def _update_chegeollist(self, index, 종목코드, 종목명, 주문구분, 주문수량, 체결수량, 미체결수량, 체결가격, 체결시간, 주문가격, 주문번호):
         """체결 리스트를 업데이트합니다.
@@ -1438,6 +1447,17 @@ class BaseTrader:
             self.stgQ.put('매수전략중지')
         self._jango_cheongsan('수동')
 
+    def _get_order_code_list(self):
+        """주문 종목 코드 리스트를 반환합니다.
+        Returns:
+            주문 종목 코드 리스트
+        """
+        if self.market_gubun < 6:
+            return tuple(self.dict_order['매수']) + tuple(self.dict_order['매도'])
+        else:
+            return tuple(self.dict_order['BUY_LONG']) + tuple(self.dict_order['SELL_SHORT']) + \
+                tuple(self.dict_order['SELL_LONG']) + tuple(self.dict_order['BUY_SHORT'])
+
     def _get_order_buy_price(self, 종목코드, 주문구분, 주문가격):
         """매수 주문 가격을 반환합니다.
         Args:
@@ -1520,13 +1540,6 @@ class BaseTrader:
             호가 단위
         """
         return 0
-
-    def _get_order_code_list(self):
-        """주문 종목 코드 리스트를 반환합니다.
-        Returns:
-            주문 종목 코드 리스트
-        """
-        return []
 
     def _set_position(self):
         """포지션을 설정합니다.

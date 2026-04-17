@@ -200,7 +200,7 @@ class SetDialogBack:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_backengine.move(self.ui.dict_set['창위치'][16], self.ui.dict_set['창위치'][17])
-            except:
+            except Exception:
                 pass
         self.ui.be_groupBoxxxxx_01.setGeometry(5, 5, 470, 590)
         self.ui.be_labellllllll_04.setGeometry(10, 5, 450, 30)
@@ -222,7 +222,7 @@ class SetDialogBack:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_scheduler.move(self.ui.dict_set['창위치'][4], self.ui.dict_set['창위치'][5])
-            except:
+            except Exception:
                 pass
         self.ui.sd_groupBoxxxxx_01.setGeometry(5, 5, 1390, 40)
         self.ui.sd_groupBoxxxxx_02.setGeometry(5, 50, 1390, 520)

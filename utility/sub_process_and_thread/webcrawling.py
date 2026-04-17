@@ -113,7 +113,7 @@ class WebCrawling(QThread):
             webimage1 = request.urlopen(random.choice(self.imagelist1)).read()
             webimage2 = request.urlopen(random.choice(self.imagelist2)).read()
             self.signal.emit((ui_num['풍경사진'], webimage1, webimage2))
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -133,7 +133,7 @@ class WebCrawling(QThread):
                 if title:
                     gugy_result += title
             self.signal.emit((ui_num['기업개요'], gugy_result))
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -161,7 +161,7 @@ class WebCrawling(QThread):
                 jbjg_list += [info.get_text(strip=True) for info in soup.select('td.info')]
             df = pd.DataFrame({'일자': date_list, '정보제공': jbjg_list, '공시': gygs_list, '링크': link_list})
             self.signal.emit((ui_num['기업공시'], df))
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     # noinspection PyUnresolvedReferences
@@ -196,7 +196,7 @@ class WebCrawling(QThread):
                     })
             df = pd.DataFrame(data_list)
             self.signal.emit((ui_num['기업뉴스'], df))
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -232,7 +232,7 @@ class WebCrawling(QThread):
             df2 = pd.DataFrame(dict(zip(columns2, data2)))
             self.signal.emit((ui_num['재무년도'], df1))
             self.signal.emit((ui_num['재무분기'], df2))
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -277,7 +277,7 @@ class WebCrawling(QThread):
             self.signal.emit((ui_num['트리맵'], df1, df2, cl1, cl2))
             if self.treemap:
                 Timer(10, self._ujtm_crawling).start()
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -302,7 +302,7 @@ class WebCrawling(QThread):
                 self.signal.emit((ui_num['트리맵1'], df, '', cl, ''))
             else:
                 self.signal.emit((ui_num['트리맵2'], '', df, '', cl))
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     def _crawling_homtap_data(self):
@@ -437,7 +437,7 @@ class WebCrawling(QThread):
                 else:
                     self.dict_data[name] = df
                 self.thread_join += 1
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -515,7 +515,7 @@ class WebCrawling(QThread):
                     else:
                         self.dict_data[name] = df
                     self.thread_join += 1
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))
 
     @thread_decorator
@@ -539,7 +539,7 @@ class WebCrawling(QThread):
                 try:
                     resp = requests.get(url, headers=self.headers, timeout=10)
                     data = resp.json()
-                except:
+                except Exception:
                     time_list = []
                     price_list = []
                     change_list = []
@@ -562,5 +562,5 @@ class WebCrawling(QThread):
                     self.thread_join += 1
 
                 time.sleep(0.1)
-        except:
+        except Exception:
             self.signal.emit((ui_num['시스템로그'], format_exc()))

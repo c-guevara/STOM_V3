@@ -22,7 +22,7 @@ def error_decorator(func):
     def wrapper(*args, **kwargs):
         try:
             func(*args, **kwargs)
-        except:
+        except Exception:
             self_obj = args[0]
             QMessageBox.critical(self_obj.ui.splash, '오류 알림', format_exc())
             sys.exit()
@@ -133,7 +133,7 @@ class CustomViewBox(pg.ViewBox):
                     hms  = self.ui.ctpg_labels[0].toPlainText()
                     hms  = hms.split('시간')[1].split('이평')[0].strip().replace(':', '')
                     self.ui.hogaQ.put(('차트용호가정보요청', code, name, ymd + hms))
-            except:
+            except Exception:
                 pass
         else:
             super().mouseClickEvent(ev)

@@ -121,6 +121,10 @@ class StockReceiver(BaseReceiver):
             ch    = float(body['cpower'])
             self._update_tick_data(dt, code, c, o, h, low, per, dm, v, cg, tbids, tasks, ch)
 
+        elif tr_cd == self.tr_cd_vi:
+            if body['krx_vi_gubun'] in ('1', '3'):
+                self._update_vi(body['shcode'])
+
         elif tr_cd == self.tr_cd_oper:
             if body['jangubun'] == self.oper_gubun:
                 operation = int(body['jstatus'])

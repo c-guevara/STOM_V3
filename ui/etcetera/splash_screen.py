@@ -82,7 +82,7 @@ class StomSplashScreen(QSplashScreen):
                 first_line = f.readline().strip()
                 version = first_line.split("V")[1] if "V" in first_line else "2.00"
                 version_int = version.split(".")[0] + '.0'
-        except:
+        except Exception:
             version     = "2.00"
             version_int = "2.0"
 

@@ -95,7 +95,7 @@ class SetMainMenu:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.move(self.ui.dict_set['창위치'][0], self.ui.dict_set['창위치'][1])
-            except:
+            except Exception:
                 pass
 
         for i in range(6):

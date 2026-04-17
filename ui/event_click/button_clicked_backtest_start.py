@@ -56,7 +56,7 @@ def backtest_engine_kill(ui):
                 shm = shared_memory.SharedMemory(name=shared_info['shm_name'])
                 shm.close()
                 shm.unlink()
-            except:
+            except Exception:
                 pass
         ui.shared_info = []
         if ui.dialog_backengine.isVisible():
@@ -71,7 +71,7 @@ def backtest_engine_kill(ui):
         for shared_info in ui.shared_info:
             try:
                 os.remove(shared_info['file_name'])
-            except:
+            except Exception:
                 pass
         if ui.dialog_backengine.isVisible():
             ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>임시파일 삭제 완료</font>'))

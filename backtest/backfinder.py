@@ -54,7 +54,7 @@ class BackFinder:
             self._start()
         except SystemExit:
             sys.exit()
-        except:
+        except Exception:
             self.wq.put((ui_num['시스템로그'], format_exc()))
             self._sys_exit(True)
 

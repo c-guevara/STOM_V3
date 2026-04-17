@@ -10,7 +10,7 @@ def bactivated_01(ui):
     """
     try:
         gubun = ui.list_checkBoxxxxxx.index(ui.dialog_scheduler.focusWidget())
-    except:
+    except Exception:
         gubun = ui.list_gcomboBoxxxxx.index(ui.dialog_scheduler.focusWidget())
 
     ui.list_bcomboBoxxxxx[gubun].clear()
@@ -187,5 +187,5 @@ def bactivated_03(ui):
                 ui.sd_oclineEdittt_01.setText(values[1])
                 ui.sd_oclineEdittt_02.setText(values[2])
                 ui.sd_oclineEdittt_03.setText(values[3])
-    except:
+    except Exception:
         pass

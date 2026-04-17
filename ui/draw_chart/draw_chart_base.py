@@ -121,7 +121,7 @@ class DrawChartBase:
                     else:
                         self.draw_line(i, fidx1, self.rgb_red)
                     self.draw_line(i, fidx2, self.rgb_green)
-                except:
+                except Exception:
                     self.ymax, self.ymin = 0, 0
 
             elif factor in ('초당체결수량', '분당체결수량', '누적초당매도수수량', '누적분당매도수수량', '초당매도수금액', '분당매도수금액',
@@ -133,7 +133,7 @@ class DrawChartBase:
                     self.draw_formula(i, factor)
                     self.draw_line(i, fidx1, self.rgb_blue)
                     self.draw_line(i, fidx2, self.rgb_red)
-                except:
+                except Exception:
                     self.ymax, self.ymin = 0, 0
 
             elif factor == '체결강도':
@@ -146,7 +146,7 @@ class DrawChartBase:
                     self.draw_line(i, fidx3, self.rgb_red)
                     self.draw_line(i, fidx2, self.rgb_blue)
                     self.draw_line(i, fidx1, self.rgb_green)
-                except:
+                except Exception:
                     self.ymax, self.ymin = 0, 0
 
             elif factor in ('AROON', 'DMI', 'STOCHS', 'STOCHF'):
@@ -159,7 +159,7 @@ class DrawChartBase:
                     self.draw_formula(i, factor)
                     self.draw_line(i, fidx2, color1)
                     self.draw_line(i, fidx1, color2)
-                except:
+                except Exception:
                     self.ymax, self.ymin = 0, 0
 
             elif factor == 'BBAND':
@@ -172,7 +172,7 @@ class DrawChartBase:
                     self.draw_line(i, fidx3, self.rgb_blue)
                     self.draw_line(i, fidx2, self.rgb_green)
                     self.draw_line(i, fidx1, self.rgb_red)
-                except:
+                except Exception:
                     self.ymax, self.ymin = 0, 0
 
             elif factor == 'MACD':
@@ -184,7 +184,7 @@ class DrawChartBase:
                     self.draw_line(i, fidx3, self.rgb_gray)
                     self.draw_line(i, fidx2, self.rgb_red)
                     self.draw_line(i, fidx1, self.rgb_green)
-                except:
+                except Exception:
                     self.ymax, self.ymin = 0, 0
 
             else:

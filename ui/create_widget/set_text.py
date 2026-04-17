@@ -267,7 +267,7 @@ elif not (초당거래대금 > 초당거래대금N(1)):
 현재날짜 = str(self.index)[:8]
 try:
     마지막날짜 = str(self.arry_code[self.indexn + 탐색틱수, 0])[:8]
-except:
+except Exception:
     마지막날짜 = ''
 if 현재날짜 == 마지막날짜 and 매수:
     data1 = ['종목코드', '체결시간'] + self.tickcols
@@ -319,7 +319,7 @@ elif not (초당거래대금 > 초당거래대금N(1)):
 현재날짜 = str(self.index)[:8]
 try:
     마지막날짜 = str(self.arry_code[self.indexn + 탐색틱수, 0])[:8]
-except:
+except Exception:
     마지막날짜 = ''
 if 현재날짜 == 마지막날짜 and BUY_LONG:
     data1 = ['종목코드', '체결시간'] + self.tickcols

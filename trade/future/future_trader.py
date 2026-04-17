@@ -87,8 +87,8 @@ class FutureTrader(BaseTrader):
                     주문유형 = 수동주문유형
 
             """def order_future(self, 종목코드, 주문구분, 주문가격, 주문수량, 호가유형):"""
-            od_no, msg = self.ls.order_future(종목코드, 주문구분, 주문가격, 주문수량, 주문유형)
-            if od_no != '0':
+            주문번호, 응답메시지 = self.ls.order_future(종목코드, 주문구분, 주문가격, 주문수량, 주문유형)
+            if self._check_order_error(주문번호, 응답메시지, 주문구분, 종목명, 주문가격, 주문수량):
                 index = self._get_index()
                 if 주문구분 in ('BUY_LONG', 'SELL_SHORT'):
                     self.dict_intg['추정예수금'] -= 주문수량 * 주문가격
@@ -101,37 +101,23 @@ class FutureTrader(BaseTrader):
                 ]
 
                 self._update_chegeollist(
-                    index, 종목코드, 종목명, f'{주문구분}_REG', 주문수량, 0, 주문수량, 0, index[:14], 주문가격, od_no
+                    index, 종목코드, 종목명, f'{주문구분}_REG', 주문수량, 0, 주문수량, 0, index[:14], 주문가격, 주문번호
                 )
 
                 self.windowQ.put((
                     ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}_REG] {종목명} | {주문가격} | {주문수량}'
                 ))
-            else:
-                self._put_order_complete('매수취소', 종목코드)
-                self.windowQ.put((
-                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}_FAIL] {종목명} | {주문가격} | {주문수량}'
-                ))
-                self.windowQ.put((ui_num['기본로그'], msg))
 
         elif 'MODIFY' in 주문구분:
             """def order_modify_future(self, 종목코드, 원주문번호, 주문가격, 주문수량, 호가유형):"""
             주문유형 = self.dict_set['매수주문유형' if 주문구분 in ('BUY_LONG_MODIFY', 'SELL_SHORT_MODIFY') else '매도주문유형']
-            od_no, msg = self.ls.order_modify_future(종목코드, 원주문번호, 주문가격, 주문수량, 주문유형)
-            if od_no == '0':
-                self.windowQ.put((
-                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}_FAIL] {종목명} | {주문가격} | {주문수량}'
-                ))
-                self.windowQ.put((ui_num['기본로그'], msg))
+            주문번호, 응답메시지 = self.ls.order_modify_future(종목코드, 원주문번호, 주문가격, 주문수량, 주문유형)
+            self._check_order_error(주문번호, 응답메시지, 주문구분, 종목명, 주문가격, 주문수량)
 
         elif 'CANCEL' in 주문구분:
             """def order_cancel_future(self, 종목코드, 원주문번호, 주문수량):"""
-            od_no, msg = self.ls.order_cancel_future(종목코드, 원주문번호, 주문수량)
-            if od_no == '0':
-                self.windowQ.put((
-                    ui_num['기본로그'], f'주문 관리 시스템 알림 - [{주문구분}_FAIL] {종목명} | {주문가격} | {주문수량}'
-                ))
-                self.windowQ.put((ui_num['기본로그'], msg))
+            주문번호, 응답메시지 = self.ls.order_cancel_future(종목코드, 원주문번호, 주문수량)
+            self._check_order_error(주문번호, 응답메시지, 주문구분, 종목명, 주문가격, 주문수량)
 
         self.order_time = timedelta_sec(0.2)
         self.receivQ.put(('주문목록', self._get_order_code_list()))
@@ -243,11 +229,3 @@ class FutureTrader(BaseTrader):
             호가 단위
         """
         return self.dict_info[주문가격또는종목코드]['호가단위']
-
-    def _get_order_code_list(self):
-        """주문 종목 코드 리스트를 반환합니다.
-        Returns:
-            주문 종목 코드 리스트
-        """
-        return tuple(self.dict_order['BUY_LONG']) + tuple(self.dict_order['SELL_SHORT']) + \
-            tuple(self.dict_order['SELL_LONG']) + tuple(self.dict_order['BUY_SHORT'])

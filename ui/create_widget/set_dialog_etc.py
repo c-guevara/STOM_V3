@@ -278,7 +278,7 @@ class SetDialogEtc:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_hoga.move(self.ui.dict_set['창위치'][14], self.ui.dict_set['창위치'][15])
-            except:
+            except Exception:
                 pass
         self.ui.hj_tableWidgett_01.setGeometry(5, 5, 562, 42)
         self.ui.hc_tableWidgett_01.setGeometry(5, 52, 282, 297)
@@ -295,7 +295,7 @@ class SetDialogEtc:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_info.move(self.ui.dict_set['창위치'][6], self.ui.dict_set['창위치'][7])
-            except:
+            except Exception:
                 pass
         self.ui.gg_textEdittttt_01.setGeometry(7, 5, 692, 90)
         self.ui.gs_tableWidgett_01.setGeometry(7, 100, 692, 463)
@@ -307,14 +307,14 @@ class SetDialogEtc:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_web.move(self.ui.dict_set['창위치'][8], self.ui.dict_set['창위치'][9])
-            except:
+            except Exception:
                 pass
 
         self.ui.dialog_tree.resize(1000, 1000)
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_tree.move(self.ui.dict_set['창위치'][10], self.ui.dict_set['창위치'][11])
-            except:
+            except Exception:
                 pass
 
         self.ui.dialog_graph.setFixedSize(1403, 1010)
@@ -363,7 +363,7 @@ class SetDialogEtc:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_order.move(self.ui.dict_set['창위치'][18], self.ui.dict_set['창위치'][19])
-            except:
+            except Exception:
                 pass
         self.ui.od_groupBoxxxxx_01.setGeometry(5, 5, 222, 293)
         self.ui.od_labellllllll_01.setGeometry(10, 10, 100, 30)
@@ -407,7 +407,7 @@ class SetDialogEtc:
         if self.ui.dict_set is not None and self.ui.dict_set['창위치기억'] and self.ui.dict_set['창위치'] is not None:
             try:
                 self.ui.dialog_kimp.move(self.ui.dict_set['창위치'][12], self.ui.dict_set['창위치'][13])
-            except:
+            except Exception:
                 pass
         self.ui.kp_tableWidget_01.setGeometry(5, 5, 525, 753)
 

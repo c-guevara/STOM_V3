@@ -65,7 +65,7 @@ def get_indicator_detail(ui):
                     vars_text = df2['변수값'][stg_name]
                     vars_list = [float(i) if '.' in i else int(i) for i in vars_text.split(';')]
                     vars_ = {i: var for i, var in enumerate(vars_list)}
-            except:
+            except Exception:
                 pass
             else:
                 indistg = ''

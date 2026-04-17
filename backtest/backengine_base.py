@@ -333,7 +333,7 @@ class BackEngineBase(StgGlobalsFunc):
                             self.endtime   = data[5]
                             try:
                                 self.buystg = compile(data[6], '<string>', 'exec')
-                            except:
+                            except Exception:
                                 if self.gubun == 0:
                                     self.wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
                                 self._back_stop()
@@ -359,7 +359,7 @@ class BackEngineBase(StgGlobalsFunc):
                     self.shared_info  = data[2]
                 elif data == '백테중지':
                     self._back_stop(2)
-            except:
+            except Exception:
                 if self.gubun == 0:
                     self.wq.put((ui_num['시스템로그'], format_exc()))
 
@@ -379,7 +379,7 @@ class BackEngineBase(StgGlobalsFunc):
             """종목코드별 로드"""
             try:
                 df = pd.read_sql(get_back_load_code_query(self.is_tick, code, days, starttime, endtime), con)
-            except:
+            except Exception:
                 pass
             else:
                 if len(df) > 0:
@@ -396,7 +396,7 @@ class BackEngineBase(StgGlobalsFunc):
             """배치 쿼리로 여러 종목 한번에 로드"""
             try:
                 df = pd.read_sql(get_back_load_code_query_batch(self.is_tick, code_batch_, days, starttime, endtime), con)
-            except:
+            except Exception:
                 pass
             else:
                 if len(df) > 0:
@@ -691,7 +691,7 @@ class BackEngineBase(StgGlobalsFunc):
 
                         try:
                             self._strategy()
-                        except:
+                        except Exception:
                             if self.gubun == 0: self.wq.put((ui_num['시스템로그'], format_exc()))
                             self._back_stop(3)
                             return

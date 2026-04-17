@@ -248,7 +248,7 @@ def opti_to_buy_save(ui):
         exec(compile(opt, '<string>', 'exec'))
         for i in range(len(vars_)):
             stg = stg.replace(f'self.vars[{i}]', f'{vars_[i][1]}')
-    except:
+    except Exception:
         QMessageBox.critical(ui, '오류 알림', format_exc())
         return
 
@@ -288,7 +288,7 @@ def opti_to_sell_save(ui):
         exec(compile(opt, '<string>', 'exec'))
         for i in range(len(vars_)):
             stg = stg.replace(f'self.vars[{i}]', f'{vars_[i][1]}')
-    except:
+    except Exception:
         QMessageBox.critical(ui, '오류 알림', format_exc())
         return
 

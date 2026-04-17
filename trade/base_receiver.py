@@ -99,6 +99,7 @@ class BaseReceiver:
         self.tr_cd_trade  = None
         self.tr_cd_hoga   = None
         self.tr_cd_oper   = None
+        self.tr_cd_vi     = None
         self.oper_gubun   = None
 
         self.is_tick      = self.dict_set['타임프레임']
@@ -116,6 +117,8 @@ class BaseReceiver:
             self.tr_cd_hoga  = LsRestData.실시간거래코드[f"{self.market_info['마켓이름']}호가"]
             self.tr_cd_oper  = LsRestData.실시간거래코드['장운영정보']
             self.oper_gubun  = LsRestData.장구분[self.market_gubun]
+            if self.market_gubun < 4:
+                self.tr_cd_vi = LsRestData.실시간거래코드['국내주식VI']
 
     def _save_code_info_and_noti(self):
         """종목명 정보를 조회하고 저장 후 리시버 시작 알림을 보냅니다."""
@@ -136,13 +139,24 @@ class BaseReceiver:
 
         self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 리시버 시작"))
 
-    def _check_vi(self, code, c, o):
-        """VI를 확인합니다.
-        체결 수신 시 VI가격 업데이트를 확인합니다.
+    def _update_vi(self, code):
+        """정적VI 발동을 기록합니다.
         Args:
-            code (str): 종목 코드
-            c (int): 현재가
-            o (int): 시작가
+            code: 종목 코드
+        """
+        if code in self.dict_vipr:
+            self.dict_vipr[code][:2] = False, timedelta_sec(5)
+        else:
+            self.dict_vipr[code] = [False, timedelta_sec(5), 0, 0, 0]
+
+        self.windowQ.put((ui_num['기본로그'], f"변동성 완화 장치 발동 - [{code}] {self.dict_info[code]['종목명']}"))
+
+    def _check_vi(self, code, c, o):
+        """장시작 최초틱 및 VI발동 이후 최초틱 수신 시 VI가격을 계산합니다.
+        Args:
+            code: 종목 코드
+            c: 현재가
+            o: 시작가
         """
         vipr = self.dict_vipr.get(code)
         if vipr is None:
@@ -151,60 +165,40 @@ class BaseReceiver:
             self._update_vi_price(code, c)
 
     def _insert_vi_price(self, code, o):
-        """VI 가격을 삽입합니다.
-        시작가 기준 첫 VI가격을 계산합니다.
+        """시가 기준 VI가격을 계산합니다.
         Args:
-            code (str): 종목 코드
-            o (int): 시작가
+            code: 종목 코드
+            o: 시가
         """
         uvi, dvi, vi_hgunit = get_vi_price(o)
         self.dict_vipr[code] = [True, timedelta_sec(-3600), uvi, dvi, vi_hgunit]
 
-    def _update_vi(self, gubun, code, name):
-        """VI를 업데이트합니다.
-        VI발동 데이터를 수신합니다.
+    def _update_vi_price(self, code, price):
+        """VI발동 이후 현재가 기준 VI가격을 계산합니다.
         Args:
-            gubun (str): 구분
-            code (str): 종목 코드
-            name (str or int): 가격 또는 종목명
+            code: 종목 코드
+            price: 가격
         """
-        if gubun == '1' and (code not in self.dict_vipr or (self.dict_vipr[code][0] and now() > self.dict_vipr[code][1])):
-            self._update_vi_price(code, name)
-
-    def _update_vi_price(self, code, key):
-        """VI 가격을 업데이트합니다.
-        VI발동 및 해제 시 VI딕셔너리를 업데이트합니다.
-        Args:
-            code (str): 종목 코드
-            key (str or int): 가격 또는 종목명
-        """
-        if key.__class__ == str:
-            if code in self.dict_vipr:
-                self.dict_vipr[code][:2] = False, timedelta_sec(5)
-            else:
-                self.dict_vipr[code] = [False, timedelta_sec(5), 0, 0, 0]
-            self.windowQ.put((ui_num['기본로그'], f'변동성 완화 장치 발동 - [{code}] {key}'))
-        elif key.__class__ == int:
-            uvi, dvi, vi_hgunit = get_vi_price(key)
-            self.dict_vipr[code] = [True, timedelta_sec(5), uvi, dvi, vi_hgunit]
+        uvi, dvi, vi_hgunit = get_vi_price(price)
+        self.dict_vipr[code] = [True, timedelta_sec(5), uvi, dvi, vi_hgunit]
 
     def _update_tick_data(self, dt, code, c, o, h, low, per, dm, v=None, cg=None, tbids=None, tasks=None, ch=None):
         """틱 데이터를 업데이트합니다.
         실시간 체결 데이터를 처리합니다 (바이낸스선물 제외).
         Args:
-            dt (datetime): 데이터 시간
-            code (str): 종목 코드
-            c (int): 현재가
-            o (int): 시작가
-            h (int): 고가
-            low (int): 저가
-            per (float): 등락율
-            dm (int): 당일거래대금
-            v (float, optional): 거래량
-            cg (str, optional): 체결구분
-            tbids (float, optional): 총 매수수량
-            tasks (float, optional): 총 매도수량
-            ch (float, optional): 체결강도
+            dt: 데이터 시간
+            code: 종목 코드
+            c: 현재가
+            o: 시작가
+            h: 고가
+            low: 저가
+            per: 등락율
+            dm: 당일거래대금
+            v: 거래량
+            cg: 체결구분
+            tbids: 총 매수수량
+            tasks: 총 매도수량
+            ch: 체결강도
         """
         if self.market_gubun < 4:
             self._check_vi(code, c, o)
@@ -276,11 +270,11 @@ class BaseReceiver:
         """코인 선물 틱 데이터를 업데이트합니다.
         실시간 체결 데이터를 처리합니다 (바이낸스선물용).
         Args:
-            dt (datetime): 데이터 시간
-            code (str): 종목 코드
-            c (float): 현재가
-            v (float): 거래량
-            m (bool): 매수여부
+            dt: 데이터 시간
+            code: 종목 코드
+            c: 현재가
+            v: 거래량
+            m: 매수여부
         """
         if not self.is_tick and code in self.tuple_jango:
             pre_dt = self.dict_jgdt.get(code)
@@ -660,35 +654,39 @@ class BaseReceiver:
     def _money_top_search(self):
         """머니 탑을 검색합니다."""
         if self.dict_daym:
-            list_mtop = [x for x, y in sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:self.mtop_rank]]
+            sorted_daym = sorted(self.dict_daym.items(), key=lambda x: x[1], reverse=True)[:self.mtop_rank]
+            if self.market_gubun in (6, 7, 8):
+                list_mtop = [self.dict_info[x]['종목명'] for x, y in sorted_daym]
+            else:
+                list_mtop = [x for x, y in sorted_daym]
             insert_set = set(list_mtop) - set(self.list_gsjm)
             delete_set = set(self.list_gsjm) - set(list_mtop)
             if insert_set:
-                for codeorname in insert_set:
-                    self._insert_gsjm_list(codeorname)
+                for code in insert_set:
+                    self._insert_gsjm_list(code)
             if delete_set:
-                for codeorname in delete_set:
-                    self._delete_gsjm_list(codeorname)
+                for code in delete_set:
+                    self._delete_gsjm_list(code)
 
-    def _insert_gsjm_list(self, codeorname):
+    def _insert_gsjm_list(self, code):
         """관심종목 리스트에 추가합니다.
         Args:
-            codeorname: 종목코드 또는 종목명
+            code: 종목코드
         """
-        if codeorname not in self.list_gsjm:
-            self.list_gsjm.append(codeorname)
+        if code not in self.list_gsjm:
+            self.list_gsjm.append(code)
             if self.market_gubun not in (6, 7, 8) and self.dict_set['매도취소관심진입']:
-                self.traderQ.put(('관심진입', codeorname))
+                self.traderQ.put(('관심진입', code))
 
-    def _delete_gsjm_list(self, codeorname):
+    def _delete_gsjm_list(self, code):
         """관심종목 리스트에서 삭제합니다.
         Args:
-            codeorname: 종목코드 또는 종목명
+            code: 종목코드
         """
-        if codeorname in self.list_gsjm:
-            self.list_gsjm.remove(codeorname)
+        if code in self.list_gsjm:
+            self.list_gsjm.remove(code)
             if self.market_gubun in (6, 7, 8) and self.dict_set['매수취소관심이탈']:
-                self.traderQ.put(('관심이탈', codeorname))
+                self.traderQ.put(('관심이탈', code))
 
     def _receiver_process_kill(self):
         """리시버 프로세스를 종료합니다."""

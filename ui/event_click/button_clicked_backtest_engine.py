@@ -27,7 +27,7 @@ def backengine_show(ui):
         for table in code_info_tables:
             if table in table_list:
                 table_list.remove(table)
-    except:
+    except Exception:
         pass
     con.close()
 
@@ -126,7 +126,7 @@ def backengine_start(ui):
             df_mt['일자'] = (df_mt['index'].values // 10000).astype(np.int64)
         df_mt.set_index('index', inplace=True)
         con.close()
-    except:
+    except Exception:
         if ui.market_gubun not in (6, 7, 8) and len(dict_info) < 100:
             ui.windowQ.put((ui_num['백테엔진'], '종목명 테이블이 갱신되지 않았습니다. 수동로그인(Alt + S)을 1회 실행하시오.'))
         else:

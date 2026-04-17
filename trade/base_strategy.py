@@ -204,7 +204,7 @@ class BaseStrategy(StgGlobalsFunc):
         if indistg is not None:
             try:
                 exec(indistg)
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - indistg'))
         self.indi_settings = list(self.indicator.values())
 
@@ -221,14 +221,14 @@ class BaseStrategy(StgGlobalsFunc):
         if buystg:
             try:
                 buystg = compile(buystg, '<string>', 'exec')
-            except:
+            except Exception:
                 buystg = None
         else:
             buystg = None
         if indistg:
             try:
                 indistg = compile(indistg, '<string>', 'exec')
-            except:
+            except Exception:
                 indistg = None
         else:
             indistg = None
@@ -268,7 +268,7 @@ class BaseStrategy(StgGlobalsFunc):
                     self._update_tuple(data)
                 elif data.__class__ == str:
                     self._update_string(data)
-            except:
+            except Exception:
                 from traceback import format_exc
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
@@ -1130,7 +1130,7 @@ class BaseStrategy(StgGlobalsFunc):
                 for k, v in self.dict_condition.items():
                     try:
                         exec(v)
-                    except:
+                    except Exception:
                         self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 경과틱수 연산오류'))
 
             if 데이터길이 >= self.rolling_window and self.fm_list:
@@ -1217,7 +1217,7 @@ class BaseStrategy(StgGlobalsFunc):
                         if self.buystrategy is not None:
                             try:
                                 exec(self.buystrategy)
-                            except:
+                            except Exception:
                                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매수전략'))
                     elif D or E:
                         BUY_LONG, SELL_SHORT = False, False
@@ -1281,7 +1281,7 @@ class BaseStrategy(StgGlobalsFunc):
                         if self.sellstrategy is not None:
                             try:
                                 exec(self.sellstrategy)
-                            except:
+                            except Exception:
                                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 매도전략'))
 
                     elif D or E or 강제청산:

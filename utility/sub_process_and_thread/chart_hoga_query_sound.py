@@ -166,7 +166,7 @@ class ChartHogaQuerySound:
                     self._text_to_speak(data)
 
                 time.sleep(0.01)
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
 
     def _init_hoga(self):
@@ -280,7 +280,7 @@ class ChartHogaQuerySound:
                 con = sqlite3.connect(db_name2)
                 df = pd.read_sql(query, con)
                 con.close()
-        except:
+        except Exception:
             pass
 
         if df is not None and len(df) > 0:
@@ -471,7 +471,7 @@ class ChartHogaQuerySound:
         con = sqlite3.connect(DB_FILE)
         try:
             df = pd.read_sql('SELECT * FROM moneytop', con)
-        except:
+        except Exception:
             self.windowQ.put((ui_num['DB관리'], '당일DB에 데이터가 존재하지 않습니다.'))
         else:
             cur = con.cursor()
@@ -612,7 +612,7 @@ class ChartHogaQuerySound:
         con = sqlite3.connect(DB_FILE)
         try:
             df = pd.read_sql('SELECT * FROM moneytop', con)
-        except:
+        except Exception:
             self.windowQ.put((ui_num['DB관리'], '당일DB에 데이터가 존재하지 않습니다.'))
             con.close()
         else:
@@ -657,7 +657,7 @@ class ChartHogaQuerySound:
         con = sqlite3.connect(DB_FILE)
         try:
             df = pd.read_sql('SELECT * FROM moneytop', con)
-        except:
+        except Exception:
             self.windowQ.put((ui_num['DB관리'], '당일DB에 데이터가 존재하지 않습니다.'))
         else:
             df['일자'] = df['index'].apply(lambda x: int(str(x)[:8]))
@@ -759,7 +759,7 @@ class ChartHogaQuerySound:
                 con = sqlite3.connect(db_name2)
                 df = pd.read_sql(query1 if starttime and endtime else query2, con)
                 con.close()
-        except:
+        except Exception:
             pass
 
         if df is None or df.empty:
@@ -849,7 +849,7 @@ class ChartHogaQuerySound:
                     WILLR = talib.WILLR(mh, ml, mc, timeperiod=k[34])
                     arry[:,  -1] = WILLR
                 arry = np.nan_to_num(arry)
-            except:
+            except Exception:
                 arry = None
                 self.windowQ.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - 보조지표의 설정값이 잘못되었습니다.'))
 

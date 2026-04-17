@@ -724,7 +724,7 @@ class StgGlobalsFunc:
     def _AD_N(self, pre):
         if self.backtest:
             try:    AD_ = stream.AD(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], self.mv[:-pre])
-            except: AD_ = 0
+            except Exception: AD_ = 0
             return  AD_
         else:
             return self._parameter_previous(self.dict_findex['AD'], pre)
@@ -732,7 +732,7 @@ class StgGlobalsFunc:
     def _ADOSC_N(self, pre):
         if self.backtest:
             try:    ADOSC_ = stream.ADOSC(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], self.mv[:-pre], fastperiod=self.k[0], slowperiod=self.k[1])
-            except: ADOSC_ = 0
+            except Exception: ADOSC_ = 0
             return  ADOSC_
         else:
             return self._parameter_previous(self.dict_findex['ADOSC'], pre)
@@ -740,7 +740,7 @@ class StgGlobalsFunc:
     def _ADXR_N(self, pre):
         if self.backtest:
             try:    ADXR_ = stream.ADXR(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], timeperiod=self.k[2])
-            except: ADXR_ = 0
+            except Exception: ADXR_ = 0
             return  ADXR_
         else:
             return self._parameter_previous(self.dict_findex['ADXR'], pre)
@@ -748,7 +748,7 @@ class StgGlobalsFunc:
     def _APO_N(self, pre):
         if self.backtest:
             try:    APO_ = stream.APO(self.mc[:-pre], fastperiod=self.k[3], slowperiod=self.k[4], matype=self.k[5])
-            except: APO_ = 0
+            except Exception: APO_ = 0
             return  APO_
         else:
             return self._parameter_previous(self.dict_findex['APO'], pre)
@@ -756,7 +756,7 @@ class StgGlobalsFunc:
     def _AROOND_N(self, pre):
         if self.backtest:
             try:    AROOND_, AROONU_ = stream.AROON(self.mh[:-pre], self.ml[:-pre], timeperiod=self.k[6])
-            except: AROOND_, AROONU_ = 0, 0
+            except Exception: AROOND_, AROONU_ = 0, 0
             return  AROOND_
         else:
             return self._parameter_previous(self.dict_findex['AROOND'], pre)
@@ -764,7 +764,7 @@ class StgGlobalsFunc:
     def _AROONU_N(self, pre):
         if self.backtest:
             try:    AROOND_, AROONU_ = stream.AROON(self.mh[:-pre], self.ml[:-pre], timeperiod=self.k[3])
-            except: AROOND_, AROONU_ = 0, 0
+            except Exception: AROOND_, AROONU_ = 0, 0
             return  AROONU_
         else:
             return self._parameter_previous(self.dict_findex['AROONU'], pre)
@@ -772,7 +772,7 @@ class StgGlobalsFunc:
     def _ATR_N(self, pre):
         if self.backtest:
             try:    ATR_ = stream.ATR(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], timeperiod=self.k[7])
-            except: ATR_ = 0
+            except Exception: ATR_ = 0
             return  ATR_
         else:
             return self._parameter_previous(self.dict_findex['ATR'], pre)
@@ -780,7 +780,7 @@ class StgGlobalsFunc:
     def _BBU_N(self, pre):
         if self.backtest:
             try:    BBU_, BBM_, BBL_ = stream.BBANDS(self.mc[:-pre], timeperiod=self.k[8], nbdevup=self.k[9], nbdevdn=self.k[10], matype=self.k[11])
-            except: BBU_, BBM_, BBL_ = 0, 0, 0
+            except Exception: BBU_, BBM_, BBL_ = 0, 0, 0
             return  BBU_
         else:
             return self._parameter_previous(self.dict_findex['BBU'], pre)
@@ -788,7 +788,7 @@ class StgGlobalsFunc:
     def _BBM_N(self, pre):
         if self.backtest:
             try:    BBU_, BBM_, BBL_ = stream.BBANDS(self.mc[:-pre], timeperiod=self.k[8], nbdevup=self.k[9], nbdevdn=self.k[10], matype=self.k[11])
-            except: BBU_, BBM_, BBL_ = 0, 0, 0
+            except Exception: BBU_, BBM_, BBL_ = 0, 0, 0
             return  BBM_
         else:
             return self._parameter_previous(self.dict_findex['BBM'], pre)
@@ -796,7 +796,7 @@ class StgGlobalsFunc:
     def _BBL_N(self, pre):
         if self.backtest:
             try:    BBU_, BBM_, BBL_ = stream.BBANDS(self.mc[:-pre], timeperiod=self.k[8], nbdevup=self.k[9], nbdevdn=self.k[10], matype=self.k[11])
-            except: BBU_, BBM_, BBL_ = 0, 0, 0
+            except Exception: BBU_, BBM_, BBL_ = 0, 0, 0
             return  BBL_
         else:
             return self._parameter_previous(self.dict_findex['BBL'], pre)
@@ -804,7 +804,7 @@ class StgGlobalsFunc:
     def _CCI_N(self, pre):
         if self.backtest:
             try:    CCI_ = stream.CCI(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], timeperiod=self.k[12])
-            except: CCI_ = 0
+            except Exception: CCI_ = 0
             return  CCI_
         else:
             return self._parameter_previous(self.dict_findex['CCI'], pre)
@@ -812,7 +812,7 @@ class StgGlobalsFunc:
     def _DIM_N(self, pre):
         if self.backtest:
             try:    DIM_ = stream.MINUS_DI(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], timeperiod=self.k[13])
-            except: DIM_ = 0, 0
+            except Exception: DIM_ = 0, 0
             return  DIM_
         else:
             return self._parameter_previous(self.dict_findex['DIM'], pre)
@@ -820,7 +820,7 @@ class StgGlobalsFunc:
     def _DIP_N(self, pre):
         if self.backtest:
             try:    DIP_ = stream.PLUS_DI(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], timeperiod=self.k[13])
-            except: DIP_ = 0
+            except Exception: DIP_ = 0
             return  DIP_
         else:
             return self._parameter_previous(self.dict_findex['DIP'], pre)
@@ -828,7 +828,7 @@ class StgGlobalsFunc:
     def _MACD_N(self, pre):
         if self.backtest:
             try:    MACD_, MACDS_, MACDH_ = stream.MACD(self.mc[:-pre], fastperiod=self.k[14], slowperiod=self.k[15], signalperiod=self.k[16])
-            except: MACD_, MACDS_, MACDH_ = 0, 0, 0
+            except Exception: MACD_, MACDS_, MACDH_ = 0, 0, 0
             return  MACD_
         else:
             return self._parameter_previous(self.dict_findex['MACD'], pre)
@@ -836,7 +836,7 @@ class StgGlobalsFunc:
     def _MACDS_N(self, pre):
         if self.backtest:
             try:    MACD_, MACDS_, MACDH_ = stream.MACD(self.mc[:-pre], fastperiod=self.k[14], slowperiod=self.k[15], signalperiod=self.k[16])
-            except: MACD_, MACDS_, MACDH_ = 0, 0, 0
+            except Exception: MACD_, MACDS_, MACDH_ = 0, 0, 0
             return  MACDS_
         else:
             return self._parameter_previous(self.dict_findex['MACDS'], pre)
@@ -844,7 +844,7 @@ class StgGlobalsFunc:
     def _MACDH_N(self, pre):
         if self.backtest:
             try:    MACD_, MACDS_, MACDH_ = stream.MACD(self.mc[:-pre], fastperiod=self.k[14], slowperiod=self.k[15], signalperiod=self.k[16])
-            except: MACD_, MACDS_, MACDH_ = 0, 0, 0
+            except Exception: MACD_, MACDS_, MACDH_ = 0, 0, 0
             return  MACDH_
         else:
             return self._parameter_previous(self.dict_findex['MACDH'], pre)
@@ -852,7 +852,7 @@ class StgGlobalsFunc:
     def _MFI_N(self, pre):
         if self.backtest:
             try:    MFI_ = stream.MFI(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], self.mv[:-pre], timeperiod=self.k[17])
-            except: MFI_ = 0
+            except Exception: MFI_ = 0
             return  MFI_
         else:
             return self._parameter_previous(self.dict_findex['MFI'], pre)
@@ -860,7 +860,7 @@ class StgGlobalsFunc:
     def _MOM_N(self, pre):
         if self.backtest:
             try:    MOM_ = stream.MOM(self.mc[:-pre], timeperiod=self.k[18])
-            except: MOM_ = 0
+            except Exception: MOM_ = 0
             return  MOM_
         else:
             return self._parameter_previous(self.dict_findex['MOM'], pre)
@@ -868,7 +868,7 @@ class StgGlobalsFunc:
     def _OBV_N(self, pre):
         if self.backtest:
             try:    OBV_ = stream.OBV(self.mc[:-pre], self.mv)
-            except: OBV_ = 0
+            except Exception: OBV_ = 0
             return  OBV_
         else:
             return self._parameter_previous(self.dict_findex['OBV'], pre)
@@ -876,7 +876,7 @@ class StgGlobalsFunc:
     def _PPO_N(self, pre):
         if self.backtest:
             try:    PPO_ = stream.PPO(self.mc[:-pre], fastperiod=self.k[19], slowperiod=self.k[20], matype=self.k[21])
-            except: PPO_ = 0
+            except Exception: PPO_ = 0
             return  PPO_
         else:
             return self._parameter_previous(self.dict_findex['PPO'], pre)
@@ -884,7 +884,7 @@ class StgGlobalsFunc:
     def _ROC_N(self, pre):
         if self.backtest:
             try:    ROC_ = stream.ROC(self.mc[:-pre], timeperiod=self.k[22])
-            except: ROC_ = 0
+            except Exception: ROC_ = 0
             return  ROC_
         else:
             return self._parameter_previous(self.dict_findex['ROC'], pre)
@@ -892,7 +892,7 @@ class StgGlobalsFunc:
     def _RSI_N(self, pre):
         if self.backtest:
             try:    RSI_ = stream.RSI(self.mc[:-pre], timeperiod=self.k[23])
-            except: RSI_ = 0
+            except Exception: RSI_ = 0
             return  RSI_
         else:
             return self._parameter_previous(self.dict_findex['RSI'], pre)
@@ -900,7 +900,7 @@ class StgGlobalsFunc:
     def _SAR_N(self, pre):
         if self.backtest:
             try:    SAR_ = stream.SAR(self.mh[:-pre], self.ml[:-pre], acceleration=self.k[24], maximum=self.k[25])
-            except: SAR_ = 0
+            except Exception: SAR_ = 0
             return  SAR_
         else:
             return self._parameter_previous(self.dict_findex['SAR'], pre)
@@ -908,7 +908,7 @@ class StgGlobalsFunc:
     def _STOCHSK_N(self, pre):
         if self.backtest:
             try:    STOCHSK_, STOCHSD_ = stream.STOCH(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], fastk_period=self.k[26], slowk_period=self.k[27], slowk_matype=self.k[28], slowd_period=self.k[29], slowd_matype=self.k[30])
-            except: STOCHSK_, STOCHSD_ = 0, 0
+            except Exception: STOCHSK_, STOCHSD_ = 0, 0
             return  STOCHSK_
         else:
             return self._parameter_previous(self.dict_findex['STOCHSK'], pre)
@@ -916,7 +916,7 @@ class StgGlobalsFunc:
     def _STOCHSD_N(self, pre):
         if self.backtest:
             try:    STOCHSK_, STOCHSD_ = stream.STOCH(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], fastk_period=self.k[26], slowk_period=self.k[27], slowk_matype=self.k[28], slowd_period=self.k[29], slowd_matype=self.k[30])
-            except: STOCHSK_, STOCHSD_ = 0, 0
+            except Exception: STOCHSK_, STOCHSD_ = 0, 0
             return  STOCHSD_
         else:
             return self._parameter_previous(self.dict_findex['STOCHSD'], pre)
@@ -924,7 +924,7 @@ class StgGlobalsFunc:
     def _STOCHFK_N(self, pre):
         if self.backtest:
             try:    STOCHFK_, STOCHFD_ = stream.STOCHF(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], fastk_period=self.k[31], fastd_period=self.k[32], fastd_matype=self.k[33])
-            except: STOCHFK_, STOCHFD_ = 0, 0
+            except Exception: STOCHFK_, STOCHFD_ = 0, 0
             return  STOCHFK_
         else:
             return self._parameter_previous(self.dict_findex['STOCHFK'], pre)
@@ -932,7 +932,7 @@ class StgGlobalsFunc:
     def _STOCHFD_N(self, pre):
         if self.backtest:
             try:    STOCHFK_, STOCHFD_ = stream.STOCHF(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], fastk_period=self.k[31], fastd_period=self.k[32], fastd_matype=self.k[33])
-            except: STOCHFK_, STOCHFD_ = 0, 0
+            except Exception: STOCHFK_, STOCHFD_ = 0, 0
             return  STOCHFD_
         else:
             return self._parameter_previous(self.dict_findex['STOCHFD'], pre)
@@ -940,7 +940,7 @@ class StgGlobalsFunc:
     def _WILLR_N(self, pre):
         if self.backtest:
             try:    WILLR_ = stream.WILLR(self.mh[:-pre], self.ml[:-pre], self.mc[:-pre], timeperiod=self.k[34])
-            except: WILLR_ = 0
+            except Exception: WILLR_ = 0
             return  WILLR_
         else:
             return self._parameter_previous(self.dict_findex['WILLR'], pre)

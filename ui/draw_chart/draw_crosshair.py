@@ -137,7 +137,7 @@ class CrossHair:
                 pg13.addItem(vLine13, ignoreBounds=True)
                 pg13.addItem(hLine13, ignoreBounds=True)
                 pg13.addItem(self.ui.ctpg_labels[12])
-        except:
+        except Exception:
             pass
 
         def mouseMoved(evt):

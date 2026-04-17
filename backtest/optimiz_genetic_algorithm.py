@@ -134,7 +134,7 @@ class Total:
                     self.mq.put('백테중지')
                     time.sleep(1)
                     break
-            except:
+            except Exception:
                 self.wq.put((ui_num['시스템로그'], format_exc()))
                 self.mq.put('백테중지')
                 time.sleep(1)
@@ -219,7 +219,7 @@ class OptimizeGeneticAlgorithm:
             self._start()
         except SystemExit:
             pass
-        except:
+        except Exception:
             self.wq.put((ui_num['시스템로그'], format_exc()))
             self.tq.put('백테중지')
 
@@ -297,7 +297,7 @@ class OptimizeGeneticAlgorithm:
         try:
             optivars_ = compile(optivars, '<string>', 'exec')
             exec(optivars_)
-        except:
+        except Exception:
             self.wq.put((ui_num['백테스트'], f'{format_exc()}오류 알림 - {self.backname} 변수설정'))
             self._sys_exit(True)
 
@@ -323,7 +323,7 @@ class OptimizeGeneticAlgorithm:
                     vdaycnt = len(valid_days_list)
                     tdaycnt = train_count - vdaycnt
                     valid_days.append([valid_days_list[0], valid_days_list[-1], tdaycnt, vdaycnt])
-                except:
+                except Exception:
                     self.wq.put((ui_num['백테스트'], f'[{vsday} ~ {veday}] 구간의 데이터가 존재하지 않습니다.'))
                     self._sys_exit(True)
             if not valid_days:

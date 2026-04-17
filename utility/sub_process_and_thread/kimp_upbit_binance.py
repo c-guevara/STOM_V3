@@ -86,7 +86,7 @@ class Kimp:
             # noinspection PyUnresolvedReferences
             converted_currency = soup.find('p', class_='no_today').get_text().replace('\n', '').replace('원', '')
             self.usdtokrw = comma2float(converted_currency)
-        except:
+        except Exception:
             pass
 
 
@@ -148,7 +148,7 @@ class KimpWebSocketManager(QThread):
             data = [{'ticket': str(uuid.uuid4())[:6]}, {'type': 'ticker', 'codes': self.codes, 'isOnlyRealtime': True}]
             await self.wsk_upbit.send(json.dumps(data))
             self.con_upbit = True
-        except:
+        except Exception:
             self.con_upbit = False
 
     async def connect_binance(self):
@@ -159,7 +159,7 @@ class KimpWebSocketManager(QThread):
             bsm = BinanceSocketManager(client)
             self.wsk_binance = bsm.miniticker_socket()
             self.con_binance = True
-        except:
+        except Exception:
             self.con_binance = False
 
     async def receive_upbit(self):
@@ -170,7 +170,7 @@ class KimpWebSocketManager(QThread):
                 data = await self.wsk_upbit.recv()
                 data = json.loads(data)
                 self.signal1.emit(data)
-            except:
+            except Exception:
                 await self.wsk_upbit.close()
                 self.con_upbit = False
 
@@ -182,5 +182,5 @@ class KimpWebSocketManager(QThread):
                 try:
                     data = await self.wsk_binance.recv()
                     self.signal2.emit(data)
-                except:
+                except Exception:
                     self.con_binance = False

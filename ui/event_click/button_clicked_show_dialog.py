@@ -487,7 +487,7 @@ def chart_moneytop_list(ui):
             con = sqlite3.connect(db_name2)
             df = pd.read_sql(query, con)
             con.close()
-    except:
+    except Exception:
         pass
 
     if df is None or len(df) == 0:

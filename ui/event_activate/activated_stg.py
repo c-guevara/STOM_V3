@@ -150,7 +150,7 @@ def activated_09(ui):
     if len(df) > 0:
         try:
             optivars = [float(i) if '.' in i else int(i) for i in df['변수값'][strategy_name].split(';')]
-        except:
+        except Exception:
             optivars = ''
         QMessageBox.warning(
             ui, '경고',

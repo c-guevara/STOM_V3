@@ -44,7 +44,7 @@ class BackCodeTest(QThread):
             error = False
             try:
                 exec(compile(self.var, '<string>', 'exec'))
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
                 error = True
 
@@ -77,7 +77,7 @@ class BackCodeTest(QThread):
 
             try:
                 self.stg = compile(self.stg, '<string>', 'exec')
-            except:
+            except Exception:
                 self.windowQ.put((ui_num['시스템로그'], format_exc()))
                 error = True
 
@@ -661,7 +661,7 @@ class BackCodeTest(QThread):
 
         try:
             exec(self.stg)
-        except:
+        except Exception:
             self.windowQ.put((ui_num['시스템로그'], format_exc()))
             self._error_end()
         else:

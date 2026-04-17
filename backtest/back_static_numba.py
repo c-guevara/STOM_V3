@@ -69,9 +69,9 @@ def get_result(arry_tsg, arry_bct, betting, market_gubun, day_count):
 
     exclud_top1per = int(len(arry_bct) / 100)
     try:    mhct = int(arry_bct[exclud_top1per:, 1].max())
-    except: mhct = 0
+    except Exception: mhct = 0
     try:    seed = int(arry_bct[exclud_top1per:, 2].max())
-    except: seed = betting
+    except Exception: seed = betting
     if seed < betting: seed = betting
 
     tpp  = tsg / seed * 100

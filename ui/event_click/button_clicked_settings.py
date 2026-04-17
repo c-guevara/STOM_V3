@@ -41,6 +41,8 @@ def setting_load_02(ui):
         ui.sj_accc_liEdit_01.setText(de_text(ui.dict_set['키'], access_key))
         ui.sj_accc_liEdit_02.setText(de_text(ui.dict_set['키'], secret_key))
     else:
+        ui.sj_accc_liEdit_01.clear()
+        ui.sj_accc_liEdit_02.clear()
         QMessageBox.critical(ui, '오류 알림', '계정 설정값이\n존재하지 않습니다.\n')
 
 
@@ -57,6 +59,8 @@ def setting_load_03(ui):
         ui.sj_tele_liEdit_01.setText(de_text(ui.dict_set['키'], bot_token))
         ui.sj_tele_liEdit_02.setText(de_text(ui.dict_set['키'], chatingid))
     else:
+        ui.sj_tele_liEdit_01.clear()
+        ui.sj_tele_liEdit_02.clear()
         QMessageBox.critical(ui, '오류 알림', '텔레그램 봇토큰 및 사용자 아이디\n설정값이 존재하지 않습니다.\n')
 
 

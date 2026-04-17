@@ -190,7 +190,7 @@ class Total:
                     break
             except SystemExit:
                 break
-            except:
+            except Exception:
                 self.wq.put((ui_num['시스템로그'], format_exc()))
                 self.mq.put('백테중지')
                 time.sleep(1)
@@ -416,7 +416,7 @@ class Optimize:
             self._start()
         except SystemExit:
             sys.exit()
-        except:
+        except Exception:
             self.wq.put((ui_num['시스템로그'], format_exc()))
             self.tq.put('백테중지')
 
@@ -464,7 +464,7 @@ class Optimize:
         if data[17]:
             try:
                 optuna_fixvars = [int(x.strip()) for x in data[17].split(',')]
-            except:
+            except Exception:
                 self.wq.put((ui_num['백테스트'], '고정할 범위의 번호를 잘못입력하였습니다.'))
                 self._sys_exit(True)
 
@@ -516,7 +516,7 @@ class Optimize:
 
         try:
             exec(compile(text_vars, '<string>', 'exec'))
-        except:
+        except Exception:
             self.wq.put((ui_num['백테스트'], f'{format_exc()}오류 알림 - {self.backname} 변수설정'))
             self._sys_exit(True)
 
@@ -656,7 +656,7 @@ class Optimize:
                     vdays_count = len(valid_days_list)
                     total_vdays_count += vdays_count
                     valid_days.append([valid_days_list[0], valid_days_list[-1], vdays_count])
-                except:
+                except Exception:
                     self.wq.put((ui_num['백테스트'], f'[{vdays[0]} ~ {vdays[1]}] 구간의 데이터가 존재하지 않습니다.'))
                     self._sys_exit(True)
             if valid_days:

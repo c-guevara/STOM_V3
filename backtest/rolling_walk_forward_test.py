@@ -197,7 +197,7 @@ class Total:
                     break
             except SystemExit:
                 break
-            except:
+            except Exception:
                 self.wq.put((ui_num['시스템로그'], format_exc()))
                 self.mq.put('백테중지')
                 time.sleep(1)
@@ -400,7 +400,7 @@ class RollingWalkForwardTest:
             self._start()
         except SystemExit:
             sys.exit()
-        except:
+        except Exception:
             self.wq.put((ui_num['시스템로그'], format_exc()))
             self.tq.put('백테중지')
 
@@ -449,7 +449,7 @@ class RollingWalkForwardTest:
         if data[19]:
             try:
                 optuna_fixvars = [int(x.strip()) for x in data[19].split(',')]
-            except:
+            except Exception:
                 self.wq.put((ui_num['백테스트'], '고정할 범위의 번호를 잘못입력하였습니다.'))
                 self.sys_exit(True)
 
@@ -490,7 +490,7 @@ class RollingWalkForwardTest:
 
         try:
             exec(compile(optivars, '<string>', 'exec'))
-        except:
+        except Exception:
             self.wq.put((ui_num['백테스트'], f'{format_exc()}오류 알림 - 최적화 변수설정 1단계'))
             self.sys_exit(True)
 

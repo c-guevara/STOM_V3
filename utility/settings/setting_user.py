@@ -251,7 +251,7 @@ def load_settings():
         }
     except fernet.InvalidToken:
         return 'fernet.InvalidToken'
-    except:
+    except Exception:
         return format_exc()
     else:
         return DICT_SET

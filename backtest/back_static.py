@@ -16,7 +16,7 @@ def RunOptunaServer():
     from utility.settings.setting_base import DB_OPTUNA
     try:
         run_server(DB_OPTUNA)
-    except:
+    except Exception:
         pass
 
 
@@ -170,7 +170,7 @@ def get_buy_stg(buytxt, gubun, wq):
     if buystg:
         try:
             buystg = compile(buystg, '<string>', 'exec')
-        except:
+        except Exception:
             buystg = None
             if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_buy_stg'))
     else:
@@ -178,7 +178,7 @@ def get_buy_stg(buytxt, gubun, wq):
     if indistg:
         try:
             indistg = compile(indistg, '<string>', 'exec')
-        except:
+        except Exception:
             indistg = None
     else:
         indistg = None
@@ -198,7 +198,7 @@ def get_sell_stg(sellstg, gubun, wq):
     sellstg, dict_cond = set_sell_cond(sellstg.split('\n'))
     try:
         sellstg = compile(sellstg, '<string>', 'exec')
-    except:
+    except Exception:
         sellstg = None
         if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_sell_stg'))
     return sellstg, dict_cond
@@ -218,7 +218,7 @@ def get_buy_conds(buy_conds, gubun, wq):
                 '):\n    매수 = False\nif 매수:\n    self.Buy()'
     try:
         buy_conds = compile(buy_conds, '<string>', 'exec')
-    except:
+    except Exception:
         buy_conds = None
         if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_buy_conds'))
     return buy_conds
@@ -239,7 +239,7 @@ def get_sell_conds(sell_conds, gubun, wq):
     sell_conds, dict_cond = set_sell_cond(sell_conds.split('\n'))
     try:
         sell_conds = compile(sell_conds, '<string>', 'exec')
-    except:
+    except Exception:
         sell_conds = None
         if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_sell_conds'))
     return sell_conds, dict_cond
@@ -280,7 +280,7 @@ def get_buy_stg_future(buystg, gubun, wq):
     if buystg:
         try:
             buystg = compile(buystg, '<string>', 'exec')
-        except:
+        except Exception:
             buystg = None
             if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_buy_stg_future'))
     else:
@@ -288,7 +288,7 @@ def get_buy_stg_future(buystg, gubun, wq):
     if indistg:
         try:
             indistg = compile(indistg, '<string>', 'exec')
-        except:
+        except Exception:
             indistg = None
     else:
         indistg = None
@@ -308,7 +308,7 @@ def get_sell_stg_future(sellstg, gubun, wq):
     sellstg, dict_cond = set_sell_cond_future(sellstg.split('\n'))
     try:
         sellstg = compile(sellstg, '<string>', 'exec')
-    except:
+    except Exception:
         sellstg = None
         if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_sell_stg_future'))
     return sellstg, dict_cond
@@ -334,7 +334,7 @@ def get_buy_conds_future(is_long, buy_conds, gubun, wq):
                     '):\n    SELL_SHORT = False\nif SELL_SHORT:\n    self.Buy(BUY_LONG)'
     try:
         buy_conds = compile(buy_conds, '<string>', 'exec')
-    except:
+    except Exception:
         buy_conds = None
         if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_buy_conds_future'))
     return buy_conds
@@ -359,7 +359,7 @@ def get_sell_conds_future(is_long, sell_conds, gubun, wq):
     sell_conds, dict_cond = set_sell_cond_future(sell_conds.split('\n'))
     try:
         sell_conds = compile(sell_conds, '<string>', 'exec')
-    except:
+    except Exception:
         sell_conds = None
         if gubun == 0: wq.put((ui_num['시스템로그'], f'{format_exc()}오류 알림 - get_sell_conds_future'))
     return sell_conds, dict_cond
@@ -648,7 +648,7 @@ def plot_show(gubun, is_tick, teleQ, df_tsg, df_bct, market_gubun, seed, mdd, st
                 df_ndf = get_yf_ticker('QQQ', startday, endday)
             else:
                 df_bc = get_yf_ticker('BTC-USD', startday, endday)
-        except:
+        except Exception:
             pass
 
     profit_series = df_tsg['수익금합계']
@@ -859,7 +859,7 @@ def add_mdd(arry_tsg, result):
         upper = np.argmax(array[:lower])
         mdd   = round(abs(array[upper] - array[lower]) / (array[upper] + result[10]) * 100, 2)
         mdd_  = int(abs(array[upper] - array[lower]))
-    except:
+    except Exception:
         mdd   = abs(result[7])
         mdd_  = abs(result[8])
     result = result + (mdd, mdd_)
