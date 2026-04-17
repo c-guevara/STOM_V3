@@ -1,10 +1,8 @@
 
 from PyQt5.QtWidgets import QMessageBox
 from utility.settings.setting_base import ui_num
-from utility.static_method.static import error_decorator
 
 
-@error_decorator
 def dbbutton_clicked_01(ui):
     """백테DB 지정일자 데이터를 삭제합니다.
     Args:
@@ -21,7 +19,6 @@ def dbbutton_clicked_01(ui):
             ui.queryQ.put(('백테DB지정일자삭제', date))
 
 
-@error_decorator
 def dbbutton_clicked_02(ui):
     """일자DB 지정일자 데이터를 삭제합니다.
     Args:
@@ -38,7 +35,6 @@ def dbbutton_clicked_02(ui):
             ui.queryQ.put(('일자DB지정일자삭제', date))
 
 
-@error_decorator
 def dbbutton_clicked_03(ui):
     """일자DB 지정시간 이후 데이터를 삭제합니다.
     Args:
@@ -55,7 +51,6 @@ def dbbutton_clicked_03(ui):
             ui.queryQ.put(('일자DB지정시간이후삭제', time))
 
 
-@error_decorator
 def dbbutton_clicked_04(ui):
     """당일 데이터 지정시간 이후 데이터를 삭제합니다.
     Args:
@@ -72,7 +67,6 @@ def dbbutton_clicked_04(ui):
             ui.queryQ.put(('당일데이터지정시간이후삭제', time))
 
 
-@error_decorator
 def dbbutton_clicked_05(ui):
     """당일DB 체결시간을 조정합니다.
     Args:
@@ -89,7 +83,6 @@ def dbbutton_clicked_05(ui):
             ui.queryQ.put(('체결시간조정', date))
 
 
-@error_decorator
 def dbbutton_clicked_06(ui):
     """일자DB로 백테DB를 생성합니다.
     Args:
@@ -107,7 +100,6 @@ def dbbutton_clicked_06(ui):
             ui.queryQ.put(('백테DB생성', date1, date2))
 
 
-@error_decorator
 def dbbutton_clicked_07(ui):
     """일자DB를 백테DB로 추가합니다.
     Args:
@@ -125,7 +117,6 @@ def dbbutton_clicked_07(ui):
             ui.queryQ.put(('백테디비추가1', date1, date2))
 
 
-@error_decorator
 def dbbutton_clicked_08(ui):
     """당일DB를 백테DB로 추가합니다.
     Args:
@@ -138,7 +129,6 @@ def dbbutton_clicked_08(ui):
             ui.queryQ.put(('백테디비추가2', ''))
 
 
-@error_decorator
 def dbbutton_clicked_09(ui):
     """당일DB를 일자DB로 분리합니다.
     Args:
@@ -151,7 +141,6 @@ def dbbutton_clicked_09(ui):
             ui.queryQ.put(('일자DB분리', ''))
 
 
-@error_decorator
 def dbbutton_clicked_10(ui):
     """거래기록을 삭제합니다.
     Args:

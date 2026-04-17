@@ -3,11 +3,9 @@ import random
 from PyQt5.QtCore import Qt
 from ui.create_widget.set_text import famous_saying
 from PyQt5.QtWidgets import QMessageBox, QApplication
-from utility.static_method.static import error_decorator
 from ui.create_widget.set_text_stg_button import dict_stg_button, dict_stg_name
 
 
-@error_decorator
 def strategy_custom_button_show(ui):
     """전략 커스텀 버튼 다이얼로그를 토글합니다.
     Args:
@@ -16,7 +14,6 @@ def strategy_custom_button_show(ui):
     ui.dialog_strategy.show() if not ui.dialog_strategy.isVisible() else ui.dialog_strategy.close()
 
 
-@error_decorator
 def strategy_custom_dialog_show(ui):
     """전략 커스텀 다이얼로그를 표시합니다.
     Args:
@@ -51,7 +48,6 @@ def strategy_custom_dialog_show(ui):
         ui.dialog_stg_input1.close() if ui.stg_btn_number <= 205 else ui.dialog_stg_input2.close()
 
 
-@error_decorator
 def button_clicked_strategy(ui, cmd):
     """전략 버튼을 클릭합니다.
     Args:
@@ -93,7 +89,6 @@ def button_clicked_strategy(ui, cmd):
     textEdit.insertPlainText(stg_text)
 
 
-@error_decorator
 def button_clicked_strategy_delete(ui):
     """전략 버튼을 삭제합니다.
     Args:
@@ -117,7 +112,6 @@ def button_clicked_strategy_delete(ui):
             QMessageBox.information(ui.dialog_stg_input2, '삭제 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def button_clicked_strategy_save(ui):
     """전략 버튼을 저장합니다.
     Args:

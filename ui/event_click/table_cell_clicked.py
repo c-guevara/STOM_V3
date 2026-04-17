@@ -5,13 +5,11 @@ from ui.event_change.changed_text import text_changed_05
 from ui.etcetera.process_alive import trader_process_alive
 from ui.event_click.button_clicked_chart import get_indicator_detail
 from utility.settings.setting_base import columns_jg, columns_jgf, columns_jgcf, ui_num
+from utility.static_method.static import comma2int, comma2float, now, str_ymd, now_utc, now_cme, qtest_qwait
 from ui.event_click.button_clicked_show_dialog import show_db, show_dialog_graph, show_dialog, show_dialog_web, \
     show_dialog_chart
-from utility.static_method.static import comma2int, comma2float, now, str_ymd, now_utc, now_cme, qtest_qwait, \
-    error_decorator
 
 
-@error_decorator
 def cell_clicked_01(ui, row, col):
     """테이블 셀 클릭 시 다이얼로그를 표시합니다.
     Args:
@@ -41,7 +39,6 @@ def cell_clicked_01(ui, row, col):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def cell_clicked_02(ui, row, col):
     """시장가 매도를 실행합니다.
     Args:
@@ -71,7 +68,6 @@ def cell_clicked_02(ui, row, col):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def cell_clicked_03(ui, row, col):
     """날짜별 테이블 셀 클릭 시 다이얼로그를 표시합니다.
     Args:
@@ -98,7 +94,6 @@ def cell_clicked_03(ui, row, col):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def cell_clicked_04(ui, row, col):
     """날짜별 거래 그래프를 표시합니다.
     Args:
@@ -128,7 +123,6 @@ def cell_clicked_04(ui, row, col):
 
 
 # noinspection PyUnusedLocal,PyUnresolvedReferences
-@error_decorator
 def cell_clicked_05(ui, row, col):
     """백테스트 결과 차트를 표시합니다.
     Args:
@@ -177,7 +171,6 @@ def cell_clicked_05(ui, row, col):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def cell_clicked_06(ui, row, col):
     """차트 테이블 셀 클릭 시 차트를 표시합니다.
     Args:
@@ -209,7 +202,6 @@ def cell_clicked_06(ui, row, col):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def cell_clicked_07(ui, row, col):
     """웹페이지를 로드합니다.
     Args:
@@ -224,7 +216,6 @@ def cell_clicked_07(ui, row, col):
         ui.webEngineView.load(QUrl(item.text()))
 
 
-@error_decorator
 def cell_clicked_08(ui, row, col):
     """데이터베이스 항목을 삭제합니다.
     Args:
@@ -290,7 +281,6 @@ def cell_clicked_08(ui, row, col):
     show_db(ui)
 
 
-@error_decorator
 def cell_clicked_09(ui, row, col):
     """호가 테이블 셀 클릭 시 주문 가격을 설정합니다.
     Args:
@@ -310,7 +300,6 @@ def cell_clicked_09(ui, row, col):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def cell_clicked_10(ui, row, col):
     """전체 거래 그래프를 표시합니다.
     Args:

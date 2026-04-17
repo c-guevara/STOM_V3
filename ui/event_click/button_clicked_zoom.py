@@ -1,5 +1,4 @@
 
-from utility.static_method.static import error_decorator
 from PyQt5.QtCore import QRect, QParallelAnimationGroup, QPropertyAnimation, QEasingCurve
 
 
@@ -35,7 +34,6 @@ def group_animation(ui, pushButton, textEdit, pushButton_qrect, textEdit_qrect):
     ui.animation_group3.start()
 
 
-@error_decorator
 def sz_button_clicked_01(ui):
     """첫 번째 줌 버튼을 클릭합니다.
     Args:
@@ -93,7 +91,6 @@ def sz_button_clicked_01(ui):
         ui.szoo_pushButon_02.setVisible(visible)
 
 
-@error_decorator
 def sz_button_clicked_02(ui):
     """두 번째 줌 버튼을 클릭합니다.
     Args:

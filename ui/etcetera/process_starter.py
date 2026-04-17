@@ -1,10 +1,9 @@
 
 from ui.etcetera.etc import auto_back_schedule
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_03
-from utility.static_method.static import now, now_utc, now_cme, str_ymdhms_ios, str_hms, error_decorator
+from utility.static_method.static import now, now_utc, now_cme, str_ymdhms_ios, str_hms
 
 
-@error_decorator
 def process_starter(ui):
     """프로세스 스타터를 실행합니다.
     자동 백테스트 스케줄러, 자동 실행 등을 처리합니다.
@@ -25,7 +24,6 @@ def process_starter(ui):
     ui.int_time = inthms
 
 
-@error_decorator
 def _update_window_title(ui):
     """윈도우 제목을 업데이트합니다.
     Args:

@@ -1,4 +1,5 @@
 /** @type {import('tailwindcss').Config} */
+// eslint-disable-next-line no-unused-vars
 export default {
   darkMode: ["class"],
   content: [

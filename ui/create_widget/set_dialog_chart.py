@@ -2,7 +2,6 @@
 import pyqtgraph as pg
 from ui.etcetera.etc import chart_screenshot2
 from utility.settings.setting_base import indi_base
-from ui.create_widget.set_widget import error_decorator
 from utility.static_method.static import str_hms, dt_hms
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout
 from ui.event_click.table_cell_clicked import cell_clicked_06
@@ -30,7 +29,6 @@ class SetDialogChart:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """차트 다이얼로그를 설정합니다."""
         self.ui.dialog_chart = self.wc.setDialog('STOM CHART')

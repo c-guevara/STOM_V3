@@ -1,8 +1,4 @@
 
-from utility.static_method.static import error_decorator
-
-
-@error_decorator
 def receiver_process_alive(ui):
     """수신기 프로세스存活 상태를 확인합니다.
     Args:
@@ -13,7 +9,6 @@ def receiver_process_alive(ui):
     return ui.proc_receiver is not None and ui.proc_receiver.is_alive()
 
 
-@error_decorator
 def trader_process_alive(ui):
     """트레이더 프로세스存活 상태를 확인합니다.
     Args:
@@ -24,7 +19,6 @@ def trader_process_alive(ui):
     return ui.proc_trader is not None and ui.proc_trader.is_alive()
 
 
-@error_decorator
 def strategy_process_alive(ui):
     """전략 프로세스存活 상태를 확인합니다.
     Args:
@@ -35,7 +29,6 @@ def strategy_process_alive(ui):
     return ui.proc_strategys and ui.proc_strategys[0].is_alive()
 
 
-@error_decorator
 def coinkimp_process_alive(ui):
     """코인 김치 프리미엄 프로세스存活 상태를 확인합니다.
     Args:
@@ -46,7 +39,6 @@ def coinkimp_process_alive(ui):
     return ui.proc_coin_kimp is not None and ui.proc_coin_kimp.is_alive()
 
 
-@error_decorator
 def backtest_process_alive(ui):
     """백테스트 프로세스存活 상태를 확인합니다.
     Args:

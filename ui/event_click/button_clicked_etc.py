@@ -7,8 +7,8 @@ from ui.etcetera.etc import update_dictset
 from backtest.back_static import RunOptunaServer
 from ui.create_widget.set_text import famous_saying
 from PyQt5.QtWidgets import QMessageBox, QPushButton
+from utility.static_method.static import qtest_qwait, strf_time
 from utility.settings.setting_base import columns_nt, ui_num, columns_nd
-from utility.static_method.static import qtest_qwait, strf_time, error_decorator
 
 
 # noinspection PyUnusedLocal
@@ -22,7 +22,6 @@ def opbutton_clicked_01(ui):
     webbrowser.open_new('http://localhost:8080/')
 
 
-@error_decorator
 def cpbutton_clicked_01(ui):
     """백테스트 상세기록을 그래프로 비교합니다.
     Args:
@@ -39,7 +38,6 @@ def cpbutton_clicked_01(ui):
         QMessageBox.critical(ui.dialog_comp, '오류 알림', '두개 이상의 상세기록을 선택하십시오.\n')
 
 
-@error_decorator
 def ttbutton_clicked_01(ui, cmd):
     """집계 버튼 클릭 이벤트를 처리합니다.
     Args:
@@ -101,7 +99,6 @@ def ttbutton_clicked_01(ui, cmd):
             ui.update_tablewidget.update_tablewidget((ui_num['누적상세'], df2))
 
 
-@error_decorator
 def change_back_sdate(ui):
     """백테스트 스케줄러 시작일자를 변경합니다.
     Args:
@@ -115,7 +112,6 @@ def change_back_sdate(ui):
                 widget.setDate(QDate.fromString(date, 'yyyyMMdd'))
 
 
-@error_decorator
 def change_back_edate(ui):
     """백테스트 스케줄러 종료일자를 변경합니다.
     Args:
@@ -129,7 +125,6 @@ def change_back_edate(ui):
                 widget.setDate(QDate.fromString(date, 'yyyyMMdd'))
 
 
-@error_decorator
 def stbutton_clicked_01(ui):
     """최적화 기준값 제한을 로드합니다.
     Args:
@@ -153,7 +148,6 @@ def stbutton_clicked_01(ui):
     ui.st_lineEditttt_14.setText(std_text[13])
 
 
-@error_decorator
 def stbutton_clicked_02(ui):
     """최적화 기준값 제한을 저장합니다.
     Args:
@@ -186,7 +180,6 @@ def stbutton_clicked_02(ui):
             QMessageBox.information(ui.dialog_std, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def lvbutton_clicked_01(ui):
     """레버리지 다이얼로그를 토글합니다.
     Args:
@@ -195,7 +188,6 @@ def lvbutton_clicked_01(ui):
     ui.dialog_leverage.show() if not ui.dialog_leverage.isVisible() else ui.dialog_leverage.close()
 
 
-@error_decorator
 def lvbutton_clicked_02(ui):
     """레버리지 설정을 로드합니다.
     Args:
@@ -229,7 +221,6 @@ def lvbutton_clicked_02(ui):
         QMessageBox.critical(ui.dialog_leverage, '오류 알림', '기본 설정값이\n존재하지 않습니다.\n')
 
 
-@error_decorator
 def lvbutton_clicked_03(ui):
     """레버리지 설정을 저장합니다.
     Args:
@@ -277,7 +268,6 @@ def lvbutton_clicked_03(ui):
                 QMessageBox.information(ui.dialog_leverage, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def lvcheck_changed_01(ui, state):
     """레버리지 체크박스 상태 변경을 처리합니다.
     Args:
@@ -290,7 +280,6 @@ def lvcheck_changed_01(ui, state):
                 widget.nextCheckState()
 
 
-@error_decorator
 def hg_button_clicked_01(ui, gubun):
     """호가 이전/다음 버튼 클릭 이벤트를 처리합니다.
     Args:
@@ -306,7 +295,6 @@ def hg_button_clicked_01(ui, gubun):
     ui.hogaQ.put(('이전호가정보요청' if gubun == '이전' else '다음호가정보요청', code, name, index))
 
 
-@error_decorator
 def hg_button_clicked_02(ui, gubun):
     """호가 매수/매도 버튼 클릭 이벤트를 처리합니다.
     Args:

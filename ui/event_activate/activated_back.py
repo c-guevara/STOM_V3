@@ -1,10 +1,8 @@
 
 from PyQt5.QtWidgets import QMessageBox
-from utility.static_method.static import error_decorator
 from ui.create_widget.set_text import opti_standard, train_period, valid_period, test_period, optimized_count
 
 
-@error_decorator
 def bactivated_01(ui):
     """백테스트 스케줄러 그룹박스 활성화 이벤트를 처리합니다.
     Args:
@@ -96,7 +94,6 @@ def bactivated_01(ui):
 
 
 # noinspection PyUnresolvedReferences
-@error_decorator
 def bactivated_02(ui):
     """백테스트 스케줄러 콤보박스 활성화 이벤트를 처리합니다.
     Args:
@@ -136,7 +133,6 @@ def bactivated_02(ui):
             QMessageBox.critical(ui.dialog_scheduler, '오류 알림', '전진분석은 학습기간을 전체로 설정할 수 없습니다.\n')
 
 
-@error_decorator
 def bactivated_03(ui):
     """백테스트 스케줄러 로드 이벤트를 처리합니다.
     Args:

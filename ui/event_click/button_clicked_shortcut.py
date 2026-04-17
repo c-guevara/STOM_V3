@@ -7,11 +7,9 @@ from ui.etcetera.process_alive import receiver_process_alive
 from utility.settings.setting_base import GRAPH_PATH, ui_num
 from ui.create_widget.set_style import style_bc_bb, style_bc_st
 from PyQt5.QtCore import QTimer, QPropertyAnimation, QSize, QEasingCurve
-from utility.static_method.static import qtest_qwait, error_decorator, cme_normal_open, now, thread_decorator, \
-    get_inthms
+from utility.static_method.static import qtest_qwait, cme_normal_open, now, thread_decorator, get_inthms
 
 
-@error_decorator
 def mnbutton_c_clicked_01(ui, index):
     """메인 탭을 변경합니다.
     Args:
@@ -47,7 +45,6 @@ def mnbutton_c_clicked_01(ui, index):
     ui.animation.start()
 
 
-@error_decorator
 def mnbutton_c_clicked_02(ui):
     """테이블 표시를 전환합니다.
     Args:
@@ -68,7 +65,6 @@ def mnbutton_c_clicked_02(ui):
         QMessageBox.warning(ui, '오류 알림', '해당 버튼은 트레이더탭에서만 작동합니다.\n')
 
 
-@error_decorator
 def mnbutton_c_clicked_03(ui, auto=False):
     """매매 시스템을 시작합니다.
     Args:
@@ -121,7 +117,6 @@ def mnbutton_c_clicked_03(ui, auto=False):
             ui.ms_pushButton.setStyleSheet(style_bc_st)
 
 
-@error_decorator
 def mnbutton_c_clicked_04(ui):
     """창 크기를 변경합니다.
     Args:
@@ -135,7 +130,6 @@ def mnbutton_c_clicked_04(ui):
         ui.zo_pushButton.setStyleSheet(style_bc_bb)
 
 
-@error_decorator
 def mnbutton_c_clicked_05(ui):
     """백테 그래프 및 기록 DB를 삭제합니다.
     Args:
@@ -158,7 +152,6 @@ def mnbutton_c_clicked_05(ui):
             QMessageBox.information(ui, '알림', '백테그래프 및 기록DB가 삭제되었습니다.')
 
 
-@error_decorator
 def mnbutton_c_clicked_06(ui):
     """계정 설정을 초기화합니다.
     Args:

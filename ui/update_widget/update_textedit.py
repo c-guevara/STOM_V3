@@ -21,7 +21,6 @@ class UpdateTextedit:
         self.ui        = ui
         self.data_save = False
 
-    @error_decorator
     def update_texedit(self, data):
         """텍스트 에디터를 업데이트합니다.
         수신된 데이터를 기반으로 로그 텍스트 에디터에 내용을 추가합니다.

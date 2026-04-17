@@ -2,7 +2,6 @@
 import pyqtgraph as pg
 from PyQt5.QtGui import QFont, QPen, QColor
 from PyQt5.QtCore import Qt, QPropertyAnimation, QRect
-from ui.create_widget.set_widget import error_decorator
 from PyQt5.QtWidgets import QGroupBox, QLabel, QVBoxLayout, QHBoxLayout
 from ui.create_widget.set_style import color_fg_bc, color_bg_ct, style_ht_gb, style_ht_pb
 
@@ -181,7 +180,6 @@ class SetHomeTap:
         subplot.getViewBox().setMouseEnabled(x=False, y=False)
         return subplot
 
-    @error_decorator
     def set(self):
         """홈 탭을 설정합니다."""
         self.ui.kospi_boxxxxxx = HomTapGroupBox('', self.ui.hm_tab, self.ui)

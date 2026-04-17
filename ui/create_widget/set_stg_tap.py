@@ -33,7 +33,6 @@ class SetStrategyTab:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """전략 탭을 설정합니다."""
         self.ui.ss_textEditttt_01 = self.wc.setTextEdit(self.ui.st_tab, vscroll=True, filter_=True, font=qfont14)

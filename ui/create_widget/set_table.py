@@ -1,7 +1,6 @@
 
 from PyQt5.QtCore import QDate
 from ui.etcetera.etc import calendar_clicked
-from ui.create_widget.set_widget import error_decorator
 from PyQt5.QtWidgets import QCalendarWidget, QTabWidget
 from ui.event_click.button_clicked_etc import ttbutton_clicked_01
 from ui.event_click.table_cell_clicked import cell_clicked_01, cell_clicked_02, cell_clicked_03, cell_clicked_04, \
@@ -24,7 +23,6 @@ class SetTable:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """테이블 위젯을 설정합니다."""
         self.ui.tt_tableWidgettt = self.wc.setTablewidget(self.ui.td_tab, columns_tt, 1)

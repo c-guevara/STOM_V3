@@ -2,11 +2,9 @@
 import random
 from PyQt5.QtWidgets import QMessageBox
 from ui.create_widget.set_text import famous_saying
-from utility.static_method.static import error_decorator
 from utility.settings.setting_base import indi_base, indicator
 
 
-@error_decorator
 def indicator_setting_basic(ui):
     """보조지표 기본 설정을 로드합니다.
     Args:
@@ -17,7 +15,6 @@ def indicator_setting_basic(ui):
         linedit.setText(str(k[i]))
 
 
-@error_decorator
 def indicator_setting_load(ui):
     """보조지표 설정을 데이터베이스에서 로드합니다.
     Args:
@@ -30,7 +27,6 @@ def indicator_setting_load(ui):
         linedit.setText(k_list[i])
 
 
-@error_decorator
 def indicator_setting_save(ui):
     """보조지표 설정을 데이터베이스에 저장합니다.
     Args:
@@ -46,7 +42,6 @@ def indicator_setting_save(ui):
         QMessageBox.information(ui.dialog_factor, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def get_indicator_detail(ui):
     """보조지표 상세 설정을 가져옵니다.
     Args:

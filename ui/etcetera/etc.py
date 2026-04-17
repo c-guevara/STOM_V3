@@ -9,13 +9,12 @@ from PyQt5.QtWidgets import QApplication, QMessageBox
 from PyQt5.QtCore import QSize, Qt, QBuffer, QIODevice
 from utility.settings.setting_base import columns_dt, columns_dd, ui_num
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
+from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdhmsf
 from ui.event_click.button_clicked_backtest_engine import backengine_start, backengine_show
 from ui.event_click.button_clicked_backtest_start import backtest_engine_kill, sdbutton_clicked_04
-from utility.static_method.static import thread_decorator, qtest_qwait, str_ymdhmsf, error_decorator
 from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 
 
-@error_decorator
 def update_image(ui, data):
     """이미지를 업데이트합니다.
     Args:
@@ -43,7 +42,6 @@ def update_cpuper(ui):
     ui.cpu_per = int(psutil.cpu_percent(interval=1))
 
 
-@error_decorator
 def auto_back_schedule(ui, gubun):
     """자동 백테스트 스케줄러를 실행합니다.
     Args:
@@ -76,7 +74,6 @@ def auto_back_schedule(ui, gubun):
         ui.auto_mode = False
 
 
-@error_decorator
 def update_dictset(ui):
     """설정 딕셔너리를 업데이트합니다.
     Args:
@@ -105,7 +102,6 @@ def update_dictset(ui):
             bpq.put(('설정변경', ui.dict_set))
 
 
-@error_decorator
 def update_market_gubun(ui):
     """시장 구분을 업데이트합니다.
     Args:
@@ -119,7 +115,6 @@ def update_market_gubun(ui):
     ui.dict_findex  = {factor: i for i, factor in enumerate(factor_list)}
 
 
-@error_decorator
 def chart_clear(ui):
     """차트 데이터를 초기화합니다.
     Args:
@@ -137,7 +132,6 @@ def chart_clear(ui):
     ui.ctpg_labels  = []
 
 
-@error_decorator
 def calendar_clicked(ui):
     """캘린더 클릭 이벤트를 처리합니다.
     Args:
@@ -164,7 +158,6 @@ def calendar_clicked(ui):
     ui.update_tablewidget.update_tablewidget((ui_num['당일상세'], df1))
 
 
-@error_decorator
 def stom_live_screenshot(ui):
     """STOM 라이브 스크린샷을 찍습니다.
     Args:
@@ -199,7 +192,6 @@ def stom_live_screenshot(ui):
     mnbutton_c_clicked_01(ui, prev_main_btn)
 
 
-@error_decorator
 def chart_screenshot(ui):
     """차트 스크린샷을 찍습니다.
     Args:
@@ -215,7 +207,6 @@ def chart_screenshot(ui):
         QMessageBox.information(ui, '차트 스샷 전송 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def chart_screenshot2(ui):
     """차트 스크린샷을 찍습니다 (다이얼로그 기준).
     Args:
@@ -231,7 +222,6 @@ def chart_screenshot2(ui):
         QMessageBox.information(ui.dialog_chart, '차트 스샷 전송 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def manual_save_and_exit(ui):
     """수동으로 저장하고 종료합니다.
     Args:

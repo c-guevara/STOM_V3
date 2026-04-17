@@ -2,12 +2,10 @@
 from PyQt5.QtCore import QDate
 from ui.create_widget.set_style import style_bc_dk
 from PyQt5.QtWidgets import QLineEdit, QMessageBox
-from utility.static_method.static import error_decorator
 from ui.event_click.button_clicked_show_dialog import show_dialog
 from ui.event_click.button_clicked_chart import get_indicator_detail
 
 
-@error_decorator
 def return_press_01(ui):
     """차트 다이얼로그에서 엔터키 누름 이벤트를 처리합니다.
     Args:
@@ -50,7 +48,6 @@ def return_press_01(ui):
         ui.chartQ.put(data)
 
 
-@error_decorator
 def return_press_02(ui):
     """비밀번호 다이얼로그에서 엔터키 누름 이벤트를 처리합니다.
     Args:

@@ -1,7 +1,6 @@
 
 from PyQt5.QtGui import QColor
 from PyQt5.QtWidgets import QLabel, QGroupBox, QFrame
-from ui.create_widget.set_widget import error_decorator
 from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14
 from ui.event_click.button_clicked_formula import formula_button_clicked, formula_activated
 
@@ -20,7 +19,6 @@ class SetDialogFormula:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """수식 관리자 다이얼로그를 설정합니다."""
         self.ui.dialog_formula = self.wc.setDialog('STOM FORMULA', parent=self.ui.dialog_chart)

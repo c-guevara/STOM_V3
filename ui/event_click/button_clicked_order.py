@@ -1,10 +1,9 @@
 
 from PyQt5.QtWidgets import QMessageBox
+from utility.static_method.static import comma2float, now
 from ui.etcetera.process_alive import trader_process_alive
-from utility.static_method.static import comma2float, now, error_decorator
 
 
-@error_decorator
 def odbutton_clicked_01(ui):
     """매수 주문을 전송합니다.
     Args:
@@ -24,7 +23,6 @@ def odbutton_clicked_01(ui):
         ui.traderQ.put(('매수', code, name, comma2float(op), comma2float(oc), now(), False, ordertype))
 
 
-@error_decorator
 def odbutton_clicked_02(ui):
     """매도 주문을 전송합니다.
     Args:
@@ -44,7 +42,6 @@ def odbutton_clicked_02(ui):
         ui.traderQ.put(('매도', code, name, comma2float(op), comma2float(oc), now(), False, ordertype))
 
 
-@error_decorator
 def odbutton_clicked_03(ui):
     """롱 매수 주문을 전송합니다.
     Args:
@@ -64,7 +61,6 @@ def odbutton_clicked_03(ui):
         ui.traderQ.put(('BUY_LONG', code, name, comma2float(op), comma2float(oc), now(), False, ordertype))
 
 
-@error_decorator
 def odbutton_clicked_04(ui):
     """롱 매도 주문을 전송합니다.
     Args:
@@ -84,7 +80,6 @@ def odbutton_clicked_04(ui):
         ui.traderQ.put(('SELL_LONG', code, name, comma2float(op), comma2float(oc), now(), False, ordertype))
 
 
-@error_decorator
 def odbutton_clicked_05(ui):
     """숏 매도 주문을 전송합니다.
     Args:
@@ -104,7 +99,6 @@ def odbutton_clicked_05(ui):
         ui.traderQ.put(('SELL_SHORT', code, name, comma2float(op), comma2float(oc), now(), False, ordertype))
 
 
-@error_decorator
 def odbutton_clicked_06(ui):
     """숏 매수 주문을 전송합니다.
     Args:
@@ -124,7 +118,6 @@ def odbutton_clicked_06(ui):
         ui.traderQ.put(('BUY_SHORT', code, name, comma2float(op), comma2float(oc), now(), False, ordertype))
 
 
-@error_decorator
 def odbutton_clicked_07(ui):
     """매수 주문을 취소합니다.
     Args:
@@ -145,7 +138,6 @@ def odbutton_clicked_07(ui):
             ui.traderQ.put(('매수취소', code, name, 0, 0, now(), False))
 
 
-@error_decorator
 def odbutton_clicked_08(ui):
     """매도 주문을 취소합니다.
     Args:

@@ -3,14 +3,13 @@ import random
 from PyQt5.QtCore import Qt
 from PyQt5.QtWidgets import QMessageBox, QApplication
 from ui.create_widget.set_style import style_bc_st, style_bc_dk
+from utility.static_method.static import text_not_in_special_characters
 from ui.event_click.button_clicked_varstext_change import get_fix_strategy
 from ui.event_click.button_clicked_strategy_version import strategy_version
 from utility.static_method.strategy_version_manager import stg_save_version
-from utility.static_method.static import text_not_in_special_characters, error_decorator
 from ui.create_widget.set_text import famous_saying, buy_signal, buy_text_min, buy_signal_future, buy_text_tick
 
 
-@error_decorator
 def buy_stg_load(ui):
     """매수 전략을 로드합니다.
     Args:
@@ -35,7 +34,6 @@ def buy_stg_load(ui):
             ui.svjb_pushButon_04.setStyleSheet(style_bc_st)
 
 
-@error_decorator
 def buy_stg_save(ui):
     """매수 전략을 저장합니다.
     Args:
@@ -65,7 +63,6 @@ def buy_stg_save(ui):
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def buy_factor(ui):
     """매수 팩터를 로드합니다.
     Args:
@@ -76,7 +73,6 @@ def buy_factor(ui):
     ui.svjb_pushButon_04.setStyleSheet(style_bc_st)
 
 
-@error_decorator
 def buy_stg_start(ui):
     """매수 전략 연산을 시작합니다.
     Args:
@@ -96,7 +92,6 @@ def buy_stg_start(ui):
             ui.svjb_pushButon_12.setStyleSheet(style_bc_st)
 
 
-@error_decorator
 def buy_signal_insert(ui):
     """매수 시그널을 삽입합니다.
     Args:
@@ -106,7 +101,6 @@ def buy_signal_insert(ui):
     ui.ss_textEditttt_01.append(signal)
 
 
-@error_decorator
 def buy_stg_stop(ui):
     """매수 전략 연산을 중지합니다.
     Args:

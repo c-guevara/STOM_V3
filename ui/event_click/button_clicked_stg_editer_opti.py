@@ -4,13 +4,12 @@ from PyQt5.QtCore import Qt
 from traceback import format_exc
 from ui.create_widget.set_text import *
 from PyQt5.QtWidgets import QMessageBox, QApplication
+from utility.static_method.static import text_not_in_special_characters
 from ui.event_click.button_clicked_varstext_change import get_fix_strategy
 from ui.event_click.button_clicked_strategy_version import strategy_version
 from utility.static_method.strategy_version_manager import stg_save_version
-from utility.static_method.static import text_not_in_special_characters, error_decorator
 
 
-@error_decorator
 def opti_buy_load(ui):
     """최적화 매수 전략을 로드합니다.
     Args:
@@ -34,7 +33,6 @@ def opti_buy_load(ui):
                     ui.svc_lineEdittt_01.setText(index)
 
 
-@error_decorator
 def opti_buy_save(ui):
     """최적화 매수 전략을 저장합니다.
     Args:
@@ -67,7 +65,6 @@ def opti_buy_save(ui):
                     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def opti_vars_load(ui):
     """최적화 변수 범위를 로드합니다.
     Args:
@@ -91,7 +88,6 @@ def opti_vars_load(ui):
                     ui.svc_lineEdittt_02.setText(index)
 
 
-@error_decorator
 def opti_vars_save(ui):
     """최적화 변수 범위를 저장합니다.
     Args:
@@ -118,7 +114,6 @@ def opti_vars_save(ui):
                     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def opti_sell_load(ui):
     """최적화 매도 전략을 로드합니다.
     Args:
@@ -142,7 +137,6 @@ def opti_sell_load(ui):
                     ui.svc_lineEdittt_03.setText(index)
 
 
-@error_decorator
 def opti_sell_save(ui):
     """최적화 매도 전략을 저장합니다.
     Args:
@@ -171,7 +165,6 @@ def opti_sell_save(ui):
                     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def opti_sample(ui):
     """최적화 샘플을 로드합니다.
     Args:
@@ -228,7 +221,6 @@ def opti_sample(ui):
         ui.ss_textEditttt_08.append(example_sellconds if ui.market_gubun < 6 else example_sellconds_future)
 
 
-@error_decorator
 def opti_to_buy_save(ui):
     """최적화 매수 전략을 매수 전략으로 저장합니다.
     Args:
@@ -269,7 +261,6 @@ def opti_to_buy_save(ui):
         QMessageBox.information(ui, '저장 알림', '최적값으로 매수전략을 저장하였습니다.\n')
 
 
-@error_decorator
 def opti_to_sell_save(ui):
     """최적화 매도 전략을 매도 전략으로 저장합니다.
     Args:
@@ -310,7 +301,6 @@ def opti_to_sell_save(ui):
         QMessageBox.information(ui, '저장 알림', '최적값으로 매도전략을 저장하였습니다.\n')
 
 
-@error_decorator
 def show_opti_std(ui):
     """최적화 기준 다이얼로그를 토글합니다.
     Args:
@@ -319,7 +309,6 @@ def show_opti_std(ui):
     ui.dialog_std.show() if not ui.dialog_std.isVisible() else ui.dialog_std.close()
 
 
-@error_decorator
 def show_opti_optuna(ui):
     """옵튜나 다이얼로그를 토글합니다.
     Args:

@@ -6,7 +6,7 @@ from PyQt5.QtCore import QTimer
 from PyQt5.QtWidgets import QApplication
 from trade.restapi_binance import BinanceWebSocketReceiver
 from trade.base_receiver import BaseReceiver, MonitorReceivQ
-from utility.static_method.static import now, now_utc, str_ymd, error_decorator, str_ymdhms_utc
+from utility.static_method.static import now, now_utc, str_ymd, str_ymdhms_utc
 
 
 class BinanceReceiver(BaseReceiver):
@@ -90,7 +90,6 @@ class BinanceReceiver(BaseReceiver):
         data = tuple(self.list_gsjm)
         self.stgQ.put(('관심목록', data))
 
-    @error_decorator
     def _convert_real_data(self, data):
         """실시간 데이터를 변환합니다.
         Args:

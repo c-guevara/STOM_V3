@@ -22,7 +22,6 @@ class SetMainMenu:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """메인 메뉴를 설정합니다."""
         self.ui.setFont(qfont12)

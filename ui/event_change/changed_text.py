@@ -1,9 +1,7 @@
 
-from utility.static_method.static import error_decorator
 from utility.settings.setting_base import columns_jg, columns_jgf, columns_jgcf
 
 
-@error_decorator
 def text_changed_01(ui):
     """시작일 라인에딧 변경 이벤트를 처리합니다.
     Args:
@@ -19,7 +17,6 @@ def text_changed_01(ui):
                 widget.setText(text)
 
 
-@error_decorator
 def text_changed_02(ui):
     """종료일 라인에딧 변경 이벤트를 처리합니다.
     Args:
@@ -35,7 +32,6 @@ def text_changed_02(ui):
                 widget.setText(text)
 
 
-@error_decorator
 def text_changed_03(ui):
     """배팅금액 라인에딧 변경 이벤트를 처리합니다.
     Args:
@@ -51,7 +47,6 @@ def text_changed_03(ui):
                 widget.setText(text)
 
 
-@error_decorator
 def text_changed_04(ui):
     """추가매수 라인에딧 변경 이벤트를 처리합니다.
     Args:
@@ -68,7 +63,6 @@ def text_changed_04(ui):
                 widget.setText(text)
 
 
-@error_decorator
 def text_changed_05(ui):
     """주문 종목 테이블 변경 이벤트를 처리합니다.
     Args:

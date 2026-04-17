@@ -3,6 +3,7 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "../../lib/utils"
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const Tabs = TabsPrimitive.Root
 
 const TabsList = React.forwardRef<

@@ -1,6 +1,5 @@
 
 from PyQt5.QtWidgets import QMessageBox
-from utility.static_method.static import error_decorator
 from ui.event_click.button_clicked_strategy_version import strategy_version
 
 
@@ -73,7 +72,6 @@ def _activated_common(ui, idx):
         QMessageBox.critical(ui, '오류 알림', UI_ACTIBATED_CONFIG['errors'][idx - 1])
 
 
-@error_decorator
 def activated_01(ui):
     """전략 탭 활성화 이벤트 1을 처리합니다.
     Args:
@@ -82,7 +80,6 @@ def activated_01(ui):
     _activated_common(ui, 1)
 
 
-@error_decorator
 def activated_02(ui):
     """전략 탭 활성화 이벤트 2를 처리합니다.
     Args:
@@ -91,7 +88,6 @@ def activated_02(ui):
     _activated_common(ui, 2)
 
 
-@error_decorator
 def activated_03(ui):
     """전략 탭 활성화 이벤트 3을 처리합니다.
     Args:
@@ -100,7 +96,6 @@ def activated_03(ui):
     _activated_common(ui, 3)
 
 
-@error_decorator
 def activated_04(ui):
     """전략 탭 활성화 이벤트 4를 처리합니다.
     Args:
@@ -109,7 +104,6 @@ def activated_04(ui):
     _activated_common(ui, 4)
 
 
-@error_decorator
 def activated_05(ui):
     """전략 탭 활성화 이벤트 5를 처리합니다.
     Args:
@@ -118,7 +112,6 @@ def activated_05(ui):
     _activated_common(ui, 5)
 
 
-@error_decorator
 def activated_06(ui):
     """전략 탭 활성화 이벤트 6을 처리합니다.
     Args:
@@ -127,7 +120,6 @@ def activated_06(ui):
     _activated_common(ui, 6)
 
 
-@error_decorator
 def activated_07(ui):
     """전략 탭 활성화 이벤트 7을 처리합니다.
     Args:
@@ -136,7 +128,6 @@ def activated_07(ui):
     _activated_common(ui, 7)
 
 
-@error_decorator
 def activated_08(ui):
     """전략 탭 활성화 이벤트 8을 처리합니다.
     Args:
@@ -146,7 +137,6 @@ def activated_08(ui):
 
 
 # noinspection PyUnresolvedReferences
-@error_decorator
 def activated_09(ui):
     """최적화용 전략 선택시 경고 메시지 (09번 공통)"""
     widgets = UI_ACTIBATED_CONFIG['widgets']
@@ -172,7 +162,6 @@ def activated_09(ui):
         )
 
 
-@error_decorator
 def activated_10(ui):
     """바이낸스 선물 마진타입 경고"""
     if ui.sj_main_comBox_03.currentText() == '교차':
@@ -180,7 +169,6 @@ def activated_10(ui):
         QMessageBox.warning(ui, '경고', '현재 바이낸스 선물 마진타입은 격리타입만 지원합니다.\n')
 
 
-@error_decorator
 def activated_11(ui):
     """바이낸스 선물 포지션모드 경고"""
     if ui.sj_main_comBox_04.currentText() == '양방향':

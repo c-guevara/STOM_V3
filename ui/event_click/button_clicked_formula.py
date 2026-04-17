@@ -2,13 +2,12 @@
 import random
 import sqlite3
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static import qtest_qwait
 from utility.settings.setting_base import DB_STRATEGY
 from PyQt5.QtWidgets import QMessageBox, QColorDialog
 from ui.create_widget.set_text_stg_button import dict_stg_name
-from utility.static_method.static import qtest_qwait, error_decorator
 
 
-@error_decorator
 def formula_activated(ui):
     """수식을 활성화합니다.
     Args:
@@ -47,7 +46,6 @@ def formula_activated(ui):
         ui.fm_textEdittttt_01.append(stg)
 
 
-@error_decorator
 def formula_button_clicked(ui):
     """수식 버튼 클릭 이벤트를 처리합니다.
     Args:

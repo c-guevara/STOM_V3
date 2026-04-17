@@ -18,7 +18,6 @@ class SetDialogStrategy:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """전략 다이얼로그를 설정합니다."""
         self.ui.dialog_strategy = self.wc.setDialog('STOM STRATEGY')

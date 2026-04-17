@@ -18,7 +18,6 @@ class SetOrderTap:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """주문 탭을 설정합니다."""
         self.ui.ss_od_groupBoxxx_01 = self.wc.setQGroupBox(' 매수주문 설정', self.ui.sod_tab)

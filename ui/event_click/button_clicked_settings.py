@@ -8,11 +8,10 @@ from utility.settings.setting_base import DB_PATH
 from PyQt5.QtWidgets import QMessageBox, QLineEdit
 from ui.create_widget.set_style import style_bc_bt
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static import de_text, en_text, qtest_qwait
 from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
-from utility.static_method.static import de_text, en_text, qtest_qwait, error_decorator
 
 
-@error_decorator
 def setting_load_01(ui):
     """기본 설정을 로드합니다.
     Args:
@@ -29,7 +28,6 @@ def setting_load_01(ui):
     ui.sj_main_comBox_04.setCurrentText('단방향' if df['바이낸스선물포지션'][0] == 'false' else '양방향')
 
 
-@error_decorator
 def setting_load_02(ui):
     """계정 설정을 로드합니다.
     Args:
@@ -46,7 +44,6 @@ def setting_load_02(ui):
         QMessageBox.critical(ui, '오류 알림', '계정 설정값이\n존재하지 않습니다.\n')
 
 
-@error_decorator
 def setting_load_03(ui):
     """텔레그램 설정을 로드합니다.
     Args:
@@ -63,7 +60,6 @@ def setting_load_03(ui):
         QMessageBox.critical(ui, '오류 알림', '텔레그램 봇토큰 및 사용자 아이디\n설정값이 존재하지 않습니다.\n')
 
 
-@error_decorator
 def setting_load_04(ui):
     """전략 설정을 로드합니다.
     Args:
@@ -120,7 +116,6 @@ def setting_load_04(ui):
         QMessageBox.critical(ui, '오류 알림', f"{ui.market_info['마켓이름']} 전략종료시간은 {time_limit}을 초과할 수 없습니다.\n")
 
 
-@error_decorator
 def setting_load_05(ui):
     """백테스트 설정을 로드합니다.
     Args:
@@ -166,7 +161,6 @@ def setting_load_05(ui):
         ui.sj_back_liEdit_03.setText(df['백테날짜'][0])
 
 
-@error_decorator
 def setting_load_06(ui):
     """기타 설정을 로드합니다.
     Args:
@@ -187,7 +181,6 @@ def setting_load_06(ui):
         ui.sj_etc_liEditt_01.setText(de_text(ui.dict_set['키'], df['시리얼키'][0]))
 
 
-@error_decorator
 def setting_save_01(ui):
     """기본 설정을 저장합니다.
     Args:
@@ -236,7 +229,6 @@ def setting_save_01(ui):
     ui.pa_labelllllll_01.setText('프로그램 비밀번호을 입력하십시오.\n미설정 시 입력없이 엔터!!\n')
 
 
-@error_decorator
 def setting_save_02(ui):
     """계정 설정을 저장합니다.
     Args:
@@ -262,7 +254,6 @@ def setting_save_02(ui):
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_save_03(ui):
     """텔레그램 설정을 저장합니다.
     Args:
@@ -289,7 +280,6 @@ def setting_save_03(ui):
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_save_04(ui):
     """전략 설정을 저장합니다.
     Args:
@@ -342,7 +332,6 @@ def setting_save_04(ui):
             QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_save_05(ui):
     """백테스트 설정을 저장합니다.
     Args:
@@ -404,7 +393,6 @@ def setting_save_05(ui):
                 backtest_engine_kill(ui)
 
 
-@error_decorator
 def setting_save_06(ui):
     """기타 설정을 저장합니다.
     Args:
@@ -440,7 +428,6 @@ def setting_save_06(ui):
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_acc_view(ui):
     """계정 텍스트 표시/숨김을 토글합니다.
     Args:
@@ -460,7 +447,6 @@ def setting_acc_view(ui):
         ui.sj_etc_pButton_01.setStyleSheet(style_bc_bt)
 
 
-@error_decorator
 def setting_order_load_01(ui):
     """매수 주문 설정을 로드합니다.
     Args:
@@ -535,7 +521,6 @@ def setting_order_load_01(ui):
     ui.ss_bj_lineEdittt_09.setText(bjjj_list[9])
 
 
-@error_decorator
 def setting_order_load_02(ui):
     """매도 주문 설정을 로드합니다.
     Args:
@@ -586,7 +571,6 @@ def setting_order_load_02(ui):
     ui.ss_sell_lineEdit_14.setText(str(df['매도손절수익금'][0]))
 
 
-@error_decorator
 def setting_order_save_01(ui):
     """매수 주문 설정을 저장합니다.
     Args:
@@ -722,7 +706,6 @@ def setting_order_save_01(ui):
         QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_order_save_02(ui):
     """매도 주문 설정을 저장합니다.
     Args:
@@ -835,7 +818,6 @@ def setting_all_load(ui):
     load_setting_file(ui)
 
 
-@error_decorator
 def setting_all_app(ui):
     """모든 설정을 적용합니다.
     Args:
@@ -875,7 +857,6 @@ def setting_all_app(ui):
         QMessageBox.information(ui, '모든 설정 적용 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_all_del(ui):
     """설정 파일을 삭제합니다.
     Args:
@@ -892,7 +873,6 @@ def setting_all_del(ui):
     QMessageBox.information(ui, '삭제 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_all_save(ui):
     """모든 설정을 저장합니다.
     Args:
@@ -910,7 +890,6 @@ def setting_all_save(ui):
     QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def setting_passticks(ui):
     """패스틱스 설정 다이얼로그를 토글합니다.
     Args:
@@ -919,7 +898,6 @@ def setting_passticks(ui):
     ui.dialog_setsj.show() if not ui.dialog_setsj.isVisible() else ui.dialog_setsj.close()
 
 
-@error_decorator
 def load_setting_file(ui):
     """설정 파일 목록을 로드합니다.
     Args:

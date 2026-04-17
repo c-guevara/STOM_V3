@@ -1,11 +1,9 @@
 
 import pyqtgraph as pg
 from ui.etcetera.etc import chart_clear
-from utility.static_method.static import error_decorator
 from ui.create_widget.set_style import style_bc_bt, color_bg_bk
 
 
-@error_decorator
 def chart_count_change(ui):
     """차트 개수를 변경합니다.
     Args:

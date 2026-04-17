@@ -2,10 +2,8 @@
 from PyQt5.QtWidgets import QPushButton
 from utility.settings.setting_base import ui_num
 from ui.create_widget.set_widget import BounceButton
-from utility.static_method.static import error_decorator
 
 
-@error_decorator
 def dactivated_01(ui):
     """테이블 콤보박스 활성화 이벤트를 처리합니다.
     Args:
@@ -19,7 +17,6 @@ def dactivated_01(ui):
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
 
 
-@error_decorator
 def dactivated_02(ui):
     """설정 이름 콤보박스 활성화 이벤트를 처리합니다.
     Args:
@@ -29,7 +26,6 @@ def dactivated_02(ui):
     ui.sj_set_liEditt_01.setText(name)
 
 
-@error_decorator
 def dactivated_03(ui):
     """주문 종목 콤보박스 활성화 이벤트를 처리합니다.
     Args:

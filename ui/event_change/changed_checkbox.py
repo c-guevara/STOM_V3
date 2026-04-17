@@ -2,11 +2,9 @@
 from PyQt5.QtCore import Qt
 from ui.create_widget.set_widget import BounceButton
 from PyQt5.QtWidgets import QPushButton, QMessageBox
-from utility.static_method.static import error_decorator
 from ui.etcetera.process_alive import trader_process_alive
 
 
-@error_decorator
 def checkbox_changed_01(ui, state):
     """모의투자 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -18,7 +16,6 @@ def checkbox_changed_01(ui, state):
         QMessageBox.critical(ui, '오류 알림', '트레이더 실행 중에는 모의모드를 해제할 수 없습니다.\n')
 
 
-@error_decorator
 def checkbox_changed_02(ui, state):
     """팩터 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -31,7 +28,6 @@ def checkbox_changed_02(ui, state):
             QMessageBox.critical(ui.dialog_factor, '오류 알림', '현재가는 해제할 수 없습니다.\n')
 
 
-@error_decorator
 def checkbox_changed_03(ui, state):
     """일괄/분할 로딩 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -44,7 +40,6 @@ def checkbox_changed_03(ui, state):
                 widget.nextCheckState()
 
 
-@error_decorator
 def checkbox_changed_04(ui, state):
     """백테스트로그 기록 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -56,7 +51,6 @@ def checkbox_changed_04(ui, state):
             ui.sj_back_cheBox_13.nextCheckState()
 
 
-@error_decorator
 def checkbox_changed_05(ui, state):
     """그래프 저장 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -68,7 +62,6 @@ def checkbox_changed_05(ui, state):
             ui.sj_back_cheBox_12.nextCheckState()
 
 
-@error_decorator
 def checkbox_changed_06(ui, state):
     """백테스트 스케줄러 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -99,7 +92,6 @@ def checkbox_changed_06(ui, state):
         ui.list_tcomboBoxxxxx[gubun].clear()
 
 
-@error_decorator
 def checkbox_changed_07(ui, state):
     """일전 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -115,7 +107,6 @@ def checkbox_changed_07(ui, state):
                 ui.sj_back_cheBox_16.nextCheckState()
 
 
-@error_decorator
 def checkbox_changed_08(ui, state):
     """고정 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -132,7 +123,6 @@ def checkbox_changed_08(ui, state):
 
 
 # noinspection PyUnusedLocal
-@error_decorator
 def checkbox_changed_09(ui, state):
     """차트 코드 초기화 이벤트를 처리합니다.
     Args:
@@ -143,7 +133,6 @@ def checkbox_changed_09(ui, state):
 
 
 # noinspection PyUnresolvedReferences
-@error_decorator
 def sbcheckbox_changed_01(ui, state):
     """매수 주문유형 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -181,7 +170,6 @@ def sbcheckbox_changed_01(ui, state):
                     widget.nextCheckState()
 
 
-@error_decorator
 def sbcheckbox_changed_02(ui, state):
     """분할매수방법 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -195,7 +183,6 @@ def sbcheckbox_changed_02(ui, state):
 
 
 # noinspection PyUnresolvedReferences
-@error_decorator
 def sscheckbox_changed_01(ui, state):
     """매도 주문유형 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -234,7 +221,6 @@ def sscheckbox_changed_01(ui, state):
                     widget.nextCheckState()
 
 
-@error_decorator
 def sscheckbox_changed_02(ui, state):
     """분할매도방법 체크박스 변경 이벤트를 처리합니다.
     Args:
@@ -247,7 +233,6 @@ def sscheckbox_changed_02(ui, state):
                 widget.nextCheckState()
 
 
-@error_decorator
 def setting_stock_weight_cotrol_changed(ui, state):
     """비중조절 체크박스 변경 이벤트를 처리합니다.
     Args:

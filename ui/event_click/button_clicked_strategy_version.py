@@ -5,7 +5,6 @@ from PyQt5.QtWidgets import QMessageBox
 from ui.create_widget.set_style import color_bf_dk
 from ui.create_widget.set_text import famous_saying
 from utility.static_method.static import qtest_qwait
-from utility.static_method.static import error_decorator
 from utility.static_method.strategy_version_manager import StrategyVersionManager
 from ui.event_click.button_clicked_stg_editer import change_pre_button_edit, change_version_button_color
 
@@ -80,7 +79,6 @@ def get_widget(ui, gubun1, gubun2):
     return textEdit1, textEdit2, comboBox1, comboBox2
 
 
-@error_decorator
 def strategy_version(ui, gubun1, gubun2, strategy_name):
     """전략 버전 관리를 표시합니다.
     Args:
@@ -138,7 +136,6 @@ def sync_scroll(version_delete_btn, target_edit, value):
         target_edit.verticalScrollBar().setValue(value)
 
 
-@error_decorator
 def strategy_version_delete(ui):
     """버전 삭제 버튼 호출"""
     global SVM
@@ -152,7 +149,6 @@ def strategy_version_delete(ui):
         QMessageBox.information(ui, '삭제 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def dactivated_04(ui):
     """버전 콤보박스 변경 시 호출 diff 표시"""
     global SVM

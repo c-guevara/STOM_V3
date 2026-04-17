@@ -1,9 +1,8 @@
 
-from utility.static_method.static import now, timedelta_sec, error_decorator
+from utility.static_method.static import now, timedelta_sec
 from ui.create_widget.set_style import style_bc_bb, style_bc_bt, style_bc_by, style_bc_sl, style_bc_st
 
 
-@error_decorator
 def update_back_progressbar(ui):
     """백테스트 프로그레스바를 업데이트합니다.
     백테스트 진행 상황, 경과 시간, 남은 시간을 표시합니다.
@@ -41,7 +40,6 @@ def update_back_progressbar(ui):
                 ui.cs_progressBar_01.setRange(0, total_back_count)
 
 
-@error_decorator
 def update_progressbar(ui):
     """메인 프로그레스바와 버튼 스타일을 업데이트합니다.
     CPU 사용량을 표시하고 다이얼로그 상태에 따라 버튼 스타일을 변경합니다.

@@ -11,10 +11,9 @@ from backtest.back_static import get_moneytop_query
 from multiprocessing import Process, Queue, Value, Lock
 from ui.create_widget.dialog_animation import DialogAnimator
 from utility.settings.setting_base import ui_num, DB_STRATEGY, code_info_tables
-from utility.static_method.static import thread_decorator, str_hms, dt_hms, timedelta_sec, error_decorator
+from utility.static_method.static import thread_decorator, str_hms, dt_hms, timedelta_sec
 
 
-@error_decorator
 def backengine_show(ui):
     """백테스트 엔진 다이얼로그를 표시합니다.
     Args:
@@ -214,7 +213,6 @@ def backengine_start(ui):
     ui.windowQ.put((ui_num['백테엔진'], '백테엔진 준비 완료'))
 
 
-@error_decorator
 def back_code_test1(ui, stg, testQ):
     """전략 코드를 테스트합니다.
     Args:
@@ -240,7 +238,6 @@ def back_code_test1(ui, stg, testQ):
     return get_code_test_result(ui, '전략', testQ)
 
 
-@error_decorator
 def back_code_test2(ui, vars_code, testQ, ga):
     """범위 코드를 테스트합니다.
     Args:
@@ -259,7 +256,6 @@ def back_code_test2(ui, vars_code, testQ, ga):
     return get_code_test_result(ui, '범위', testQ)
 
 
-@error_decorator
 def back_code_test3(ui, gubun, conds_code, testQ):
     """조건 코드를 테스트합니다.
     Args:
@@ -284,7 +280,6 @@ def back_code_test3(ui, gubun, conds_code, testQ):
     return get_code_test_result(ui, '조건', testQ)
 
 
-@error_decorator
 def formula_code_test(ui, stg, testQ):
     """수식 코드를 테스트합니다.
     Args:
@@ -310,7 +305,6 @@ def formula_code_test(ui, stg, testQ):
     return get_code_test_result(ui, '수식', testQ)
 
 
-@error_decorator
 def get_code_test_result(ui, gubun, testQ):
     """코드 테스트 결과를 가져옵니다.
     Args:
@@ -328,7 +322,6 @@ def get_code_test_result(ui, gubun, testQ):
         return True
 
 
-@error_decorator
 def clear_backtestQ(ui):
     """백테스트 큐를 비웁니다.
     Args:
@@ -342,7 +335,6 @@ def clear_backtestQ(ui):
             ui.totalQ.get()
 
 
-@error_decorator
 def backtest_process_kill(ui, coin, enginekill):
     """백테스트 프로세스를 중지합니다.
     Args:

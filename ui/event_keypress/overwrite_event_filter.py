@@ -50,7 +50,6 @@ class SyntaxHighlighter:
     def schedule_check(self):
         self.timer.start(300)
 
-    @error_decorator
     def check_syntax(self):
         text = self.widget.toPlainText()
         error_msg, error_line = check_python_syntax(text)
@@ -105,7 +104,6 @@ def handle_auto_indent(widget):
         widget.textCursor().insertText(' ' * total_indent)
 
 
-@error_decorator
 def event_filter(_ui, widget, event):
     """이벤트 필터를 처리합니다.
     Args:

@@ -1,6 +1,5 @@
 
 from PyQt5.QtWidgets import QDialog
-from utility.static_method.static import error_decorator
 from PyQt5.QtCore import QPropertyAnimation, QEasingCurve
 
 
@@ -98,7 +97,6 @@ class DialogAnimator:
     _animated_dialogs = set()
 
     @staticmethod
-    @error_decorator
     def setup_dialog_animation(dialog, duration=200):
         """다이얼로그에 애니메이션 설정"""
         if id(dialog) in DialogAnimator._animated_dialogs:

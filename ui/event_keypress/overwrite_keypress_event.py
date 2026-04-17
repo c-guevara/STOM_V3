@@ -10,7 +10,6 @@ from utility.static_method.static import comma2int, comma2float, str_ymd, now_cm
 from ui.event_click.button_clicked_show_dialog import show_dialog_graph, show_dialog, show_dialog_chart
 
 
-@error_decorator
 def key_press_event(_ui, event):
     """키 누름 이벤트를 처리합니다.
     Args:

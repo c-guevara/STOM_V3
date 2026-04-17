@@ -1,7 +1,4 @@
 
-from ui.create_widget.set_widget import error_decorator
-
-
 class SetLogTap:
     """로그 탭 설정 클래스입니다.
     로그 탭을 설정합니다.
@@ -16,7 +13,6 @@ class SetLogTap:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """로그 탭을 설정합니다."""
         self.ui.log_trade_basic_textedit = self.wc.setTextEdit(self.ui.lg_tab, vscroll=True)

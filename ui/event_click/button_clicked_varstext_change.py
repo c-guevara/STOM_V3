@@ -1,11 +1,9 @@
 
 from traceback import format_exc
 from utility.settings.setting_base import ui_num
-from utility.static_method.static import error_decorator
 from ui.create_widget.set_text import buy_signal, sell_signal, buy_signal_future, sell_signal_future
 
 
-@error_decorator
 def get_fix_strategy(ui, strategy, gubun):
     """전략에 시그널을 추가합니다.
     Args:
@@ -40,7 +38,6 @@ def get_fix_strategy(ui, strategy, gubun):
     return strategy
 
 
-@error_decorator
 def get_optivars_to_gavars(ui, opti_vars_text):
     """최적화 변수를 GA 변수로 변환합니다.
     Args:
@@ -82,7 +79,6 @@ def get_optivars_to_gavars(ui, opti_vars_text):
     return ga_vars_text[:-1]
 
 
-@error_decorator
 def get_gavars_to_optivars(ui, ga_vars_text):
     """GA 변수를 최적화 변수로 변환합니다.
     Args:
@@ -132,7 +128,6 @@ def convert_varstext(cnt, stg_text):
     return cnt, convert_text
 
 
-@error_decorator
 def get_stgtxt_to_varstxt(ui, buystg, sellstg):
     """전략 텍스트를 변수 텍스트로 변환합니다.
     Args:
@@ -187,7 +182,6 @@ def sort_varstext(cnt, stg_text):
     return cnt, sort_text[:-1]
 
 
-@error_decorator
 def get_stgtxt_sort(buystg, sellstg):
     """전략 텍스트를 정렬합니다.
     Args:
@@ -209,7 +203,6 @@ def get_stgtxt_sort(buystg, sellstg):
     return buystg, sellstg
 
 
-@error_decorator
 def get_stgtxt_sort2(optivars, gavars):
     """최적화 변수를 정렬합니다.
     Args:

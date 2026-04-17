@@ -21,7 +21,6 @@ class SetSetupTap:
         self.wc = wc
         self.set()
 
-    @error_decorator
     def set(self):
         """설정 탭을 설정합니다."""
         self.ui.set_tapWidgett_01 = QTabWidget(self.ui.sj_tab)

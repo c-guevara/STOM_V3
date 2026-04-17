@@ -1,9 +1,7 @@
 
 from PyQt5.QtWidgets import QMessageBox
-from utility.static_method.static import error_decorator
 
 
-@error_decorator
 def extend_window(ui):
     """전략탭 창을 확장/축소합니다.
     Args:

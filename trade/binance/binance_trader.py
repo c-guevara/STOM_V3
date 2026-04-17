@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication
 from utility.settings.setting_base import ui_num
 from trade.base_trader import BaseTrader, MonitorTraderQ
 from utility.static_method.static import now, timedelta_sec, get_profit_coin_future_short, get_profit_coin_future_long, \
-    get_str_ymdhms, error_decorator
+    get_str_ymdhms
 
 
 class BinanceTrader(BaseTrader):
@@ -187,7 +187,6 @@ class BinanceTrader(BaseTrader):
                 break
         return leverage
 
-    @error_decorator
     def _convert_order_data(self, data):
         """주문 데이터를 변환합니다.
         Args:

@@ -7,19 +7,18 @@ from backtest.backtest import BackTest
 from utility.settings.setting_base import ui_num
 from multiprocessing import Process, shared_memory
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static import qtest_qwait
 from PyQt5.QtWidgets import QMessageBox, QApplication
 from backtest.optimiz_conditions import OptimizeConditions
 from ui.etcetera.process_alive import backtest_process_alive
 from ui.event_click.button_clicked_stg_editer import backtest_log
 from backtest.rolling_walk_forward_test import RollingWalkForwardTest
-from utility.static_method.static import qtest_qwait, error_decorator
 from backtest.optimiz_genetic_algorithm import OptimizeGeneticAlgorithm
 from ui.event_click.button_clicked_shortcut import mnbutton_c_clicked_01
 from ui.event_click.button_clicked_stg_editer_backlog import ssbutton_clicked_06
 from ui.event_click.button_clicked_backtest_engine import clear_backtestQ, backengine_start, backengine_show
 
 
-@error_decorator
 def bebutton_clicked_01(ui):
     """백테스트 엔진 시작 버튼 클릭 이벤트를 처리합니다.
     Args:
@@ -42,7 +41,6 @@ def bebutton_clicked_01(ui):
             backengine_start(ui)
 
 
-@error_decorator
 def backtest_engine_kill(ui):
     """백테스트 엔진을 종료합니다.
     Args:
@@ -102,7 +100,6 @@ def backtest_engine_kill(ui):
         ui.windowQ.put((ui_num['백테엔진'], '<font color=#54d2f9>백테스트 엔진 종료 완료</font>'))
 
 
-@error_decorator
 def sdbutton_clicked_02(ui):
     """백테스트 스케줄러 시작 버튼 클릭 이벤트를 처리합니다.
     Args:
@@ -496,7 +493,6 @@ def sdbutton_clicked_02(ui):
             stop_scheduler(ui, True)
 
 
-@error_decorator
 def stop_scheduler(ui, gubun=False):
     """백테스트 스케줄러를 중지합니다.
     Args:
@@ -513,7 +509,6 @@ def stop_scheduler(ui, gubun=False):
         os.system('shutdown /s /t 300')
 
 
-@error_decorator
 def sdbutton_clicked_03(ui):
     """백테스트 스케줄러 중지 버튼 클릭 이벤트를 처리합니다.
     Args:
@@ -524,7 +519,6 @@ def sdbutton_clicked_03(ui):
         progressBar.setValue(0)
 
 
-@error_decorator
 def sdbutton_clicked_04(ui):
     """백테스트 스케줄러 로드 버튼 클릭 이벤트를 처리합니다.
     Args:
@@ -543,7 +537,6 @@ def sdbutton_clicked_04(ui):
                 ui.sd_dlineEditttt_01.setText(index)
 
 
-@error_decorator
 def sdbutton_clicked_05(ui):
     """백테스트 스케줄러 저장 버튼 클릭 이벤트를 처리합니다.
     Args:

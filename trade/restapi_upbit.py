@@ -10,7 +10,6 @@ from traceback import format_exc
 from urllib.parse import unquote, urlencode
 from PyQt5.QtCore import QThread, pyqtSignal
 from utility.settings.setting_base import ui_num
-from utility.static_method.static import set_builtin_print, error_decorator
 
 
 def get_symbols_info():
@@ -134,7 +133,6 @@ class UpbitRestAPI:
         response = requests.delete(url, headers=headers, data=json.dumps(data))
         return response.json()
 
-    @error_decorator
     def get_balances(self):
         """잔고를 조회합니다.
         Returns:
@@ -144,7 +142,6 @@ class UpbitRestAPI:
         ret = self._get(url)
         return int(float(ret[0]['balance']))
 
-    @error_decorator
     def order_coin(self, 종목코드='', 주문구분='', 주문유형='', 주문금액=0, 주문수량=0):
         """코인 주문을 전송합니다.
         Args:
@@ -175,7 +172,6 @@ class UpbitRestAPI:
 
         return self._post(url, data)
 
-    @error_decorator
     def order_cancel(self, od_no):
         """주문을 취소합니다.
         Args:

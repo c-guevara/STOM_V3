@@ -1,7 +1,6 @@
 
 from PyQt5.QtGui import QIcon
 from utility.settings.setting_base import ICON_PATH
-from ui.create_widget.set_widget import error_decorator
 
 
 class SetIcon:
@@ -16,7 +15,6 @@ class SetIcon:
         self.ui = ui_class
         self.set()
 
-    @error_decorator
     def set(self):
         """아이콘을 설정합니다."""
         self.ui.icon_main    = QIcon(f'{ICON_PATH}/python.png')

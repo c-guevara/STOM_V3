@@ -3,12 +3,11 @@ import random
 from PyQt5.QtCore import Qt
 from ui.create_widget.set_text import famous_saying
 from PyQt5.QtWidgets import QMessageBox, QApplication
+from utility.static_method.static import text_not_in_special_characters
 from ui.event_click.button_clicked_strategy_version import strategy_version
 from utility.static_method.strategy_version_manager import stg_save_version
-from utility.static_method.static import text_not_in_special_characters, error_decorator
 
 
-@error_decorator
 def gavars_load(ui):
     """GA 변수 범위를 로드합니다.
     Args:
@@ -32,7 +31,6 @@ def gavars_load(ui):
                     ui.sva_lineEdittt_01.setText(index)
 
 
-@error_decorator
 def gavars_save(ui):
     """GA 변수 범위를 저장합니다.
     Args:
@@ -58,7 +56,6 @@ def gavars_save(ui):
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def condbuy_load(ui):
     """조건 최적화 매수 전략을 로드합니다.
     Args:
@@ -82,7 +79,6 @@ def condbuy_load(ui):
                     ui.svo_lineEdittt_01.setText(index)
 
 
-@error_decorator
 def condbuy_save(ui):
     """조건 최적화 매수 전략을 저장합니다.
     Args:
@@ -108,7 +104,6 @@ def condbuy_save(ui):
                 QMessageBox.information(ui, '저장 완료', random.choice(famous_saying))
 
 
-@error_decorator
 def condsell_load(ui):
     """조건 최적화 매도 전략을 로드합니다.
     Args:
@@ -132,7 +127,6 @@ def condsell_load(ui):
                     ui.svo_lineEdittt_02.setText(index)
 
 
-@error_decorator
 def condsell_save(ui):
     """조건 최적화 매도 전략을 저장합니다.
     Args:

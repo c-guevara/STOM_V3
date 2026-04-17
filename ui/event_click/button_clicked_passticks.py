@@ -2,10 +2,8 @@
 import random
 from PyQt5.QtWidgets import QMessageBox
 from ui.create_widget.set_text import famous_saying
-from utility.static_method.static import error_decorator
 
 
-@error_decorator
 def setting_passticks_sample(ui):
     """패스틱스 설정 샘플을 로드합니다.
     Args:
@@ -17,7 +15,6 @@ def setting_passticks_sample(ui):
     ui.set_lineEdittt_12.setText('현재가N(1) <= 이동평균(60, 1) and  이동평균(60) < 현재가')
 
 
-@error_decorator
 def setting_passticks_load(ui):
     """패스틱스 설정을 로드합니다.
     Args:
@@ -38,7 +35,6 @@ def setting_passticks_load(ui):
             ui.scc_lineedit_list[i].setText(value)
 
 
-@error_decorator
 def setting_passticks_save(ui):
     """패스틱스 설정을 저장합니다.
     Args:

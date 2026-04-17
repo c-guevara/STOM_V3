@@ -708,7 +708,6 @@ def group_animation_07(ui, pushButton1, pushButton2, pushButton3, pushButton4, p
     ui.animation_group2.start()
 
 
-@error_decorator
 def opti_test_editer(ui):
     """최적화 테스트 에디터를 표시합니다.
     Args:
@@ -768,7 +767,6 @@ def opti_test_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def rwf_test_editer(ui):
     """전진분석 테스트 에디터를 표시합니다.
     Args:
@@ -829,7 +827,6 @@ def rwf_test_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def opti_ga_editer(ui):
     """유전알고리즘 최적화 에디터를 표시합니다.
     Args:
@@ -889,7 +886,6 @@ def opti_ga_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def opti_vars_editer(ui):
     """최적화 변수 에디터를 표시합니다.
     Args:
@@ -967,7 +963,6 @@ def opti_vars_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def opti_editer(ui):
     """최적화 에디터를 표시합니다.
     Args:
@@ -1027,7 +1022,6 @@ def opti_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def opti_gavars_editer(ui):
     """최적화 GA 변수 에디터를 표시합니다.
     Args:
@@ -1094,7 +1088,6 @@ def opti_gavars_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def change_pre_button_edit(ui):
     """이전 버튼의 색상을 변경합니다.
     Args:
@@ -1118,7 +1111,6 @@ def change_pre_button_edit(ui):
         ui.svj_pushButton_08.setStyleSheet(style_bc_bd)
 
 
-@error_decorator
 def backtest_log(ui):
     """백테스트 로그를 표시합니다.
     Args:
@@ -1155,7 +1147,6 @@ def backtest_log(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def backtest_detail(ui):
     """백테스트 상세 정보를 표시합니다.
     Args:
@@ -1192,7 +1183,6 @@ def backtest_detail(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def stg_editer(ui):
     """전략 에디터를 표시합니다.
     Args:
@@ -1251,7 +1241,6 @@ def stg_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def opti_cond_editer(ui):
     """조건 최적화 에디터를 표시합니다.
     Args:
@@ -1324,7 +1313,6 @@ def opti_cond_editer(ui):
     change_version_button_color(ui)
 
 
-@error_decorator
 def backtest_start(ui):
     """백테스트를 시작합니다.
     Args:
@@ -1388,7 +1376,6 @@ def backtest_start(ui):
         ui.ssicon_alert = True
 
 
-@error_decorator
 def backfinder_start(ui):
     """백파인더를 시작합니다.
     Args:
@@ -1446,7 +1433,6 @@ def backfinder_start(ui):
         ui.ssicon_alert = True
 
 
-@error_decorator
 def backfinder_sample(ui):
     """백파인더 샘플을 로드합니다.
     Args:
@@ -1458,7 +1444,6 @@ def backfinder_sample(ui):
         ui.ss_textEditttt_01.append(example_backfinder)
 
 
-@error_decorator
 def opti_start(ui, back_name):
     """최적화를 시작합니다.
     Args:
@@ -1620,7 +1605,6 @@ def opti_start(ui, back_name):
         ui.ssicon_alert = True
 
 
-@error_decorator
 def opti_rwft_start(ui, back_name):
     """전진분석 최적화를 시작합니다.
     Args:
@@ -1738,7 +1722,6 @@ def opti_rwft_start(ui, back_name):
         ui.ssicon_alert = True
 
 
-@error_decorator
 def opti_ga_start(ui, back_name):
     """유전알고리즘 최적화를 시작합니다.
     Args:
@@ -1823,7 +1806,6 @@ def opti_ga_start(ui, back_name):
         ui.ssicon_alert = True
 
 
-@error_decorator
 def opti_cond_start(ui, back_name):
     """조건 최적화를 시작합니다.
     Args:
@@ -1911,7 +1893,6 @@ def opti_cond_start(ui, back_name):
         ui.ssicon_alert = True
 
 
-@error_decorator
 def optivars_to_gavars(ui):
     """최적화 변수를 GA 변수로 변환합니다.
     Args:
@@ -1926,7 +1907,6 @@ def optivars_to_gavars(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 최적화 범위 코드가 공백 상태입니다.\n최적화 범위 코드를 작성하거나 로딩하십시오.\n')
 
 
-@error_decorator
 def gavars_to_optivars(ui):
     """GA 변수를 최적화 변수로 변환합니다.
     Args:
@@ -1941,7 +1921,6 @@ def gavars_to_optivars(ui):
         QMessageBox.critical(ui, '오류 알림', '현재 GA 범위 코드가 공백 상태입니다.\nGA 범위 코드를 작성하거나 로딩하십시오.\n')
 
 
-@error_decorator
 def stg_vars_change(ui):
     """전략 변수를 변경합니다.
     Args:
@@ -1956,7 +1935,6 @@ def stg_vars_change(ui):
     ui.ss_textEditttt_04.append(sellstg_str)
 
 
-@error_decorator
 def stgvars_key_sort(ui):
     """전략 변수 키를 정렬합니다.
     Args:
@@ -1971,7 +1949,6 @@ def stgvars_key_sort(ui):
     ui.ss_textEditttt_06.append(gavars_str)
 
 
-@error_decorator
 def optivars_key_sort(ui):
     """최적화 변수 키를 정렬합니다.
     Args:
@@ -1986,7 +1963,6 @@ def optivars_key_sort(ui):
     ui.ss_textEditttt_04.append(sellstg_str)
 
 
-@error_decorator
 def change_svj_button_color(ui):
     """버튼 색상을 변경합니다.
     Args:
@@ -1996,7 +1972,6 @@ def change_svj_button_color(ui):
         button.setStyleSheet(style_bc_dk if ui.focusWidget() == button else style_bc_bs)
 
 
-@error_decorator
 def change_version_button_color(ui):
     """버전 버튼 색상을 변경합니다.
     Args:

@@ -2,11 +2,9 @@
 import sqlite3
 import pandas as pd
 from PyQt5.QtWidgets import QCompleter
-from utility.static_method.static import error_decorator
 from utility.settings.setting_base import DB_CODE_INFO, code_info_tables
 
 
-@error_decorator
 def load_database(ui):
     """데이터베이스를 로드합니다.
 

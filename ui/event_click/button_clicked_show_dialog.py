@@ -6,13 +6,13 @@ from PyQt5.QtCore import QUrl, Qt
 from multiprocessing import Process
 from ui.etcetera.etc import chart_clear
 from utility.settings.setting_base import columns_hc
+from utility.static_method.static import str_hms, dt_hms
 from ui.create_widget.dialog_animation import DialogAnimator
 from utility.sub_process_and_thread.kimp_upbit_binance import Kimp
 from PyQt5.QtWebEngineWidgets import QWebEngineView, QWebEnginePage
 from ui.event_click.button_clicked_chart import get_indicator_detail
 from PyQt5.QtWidgets import QVBoxLayout, QTableWidgetItem, QMessageBox
 from ui.event_click.button_clicked_chart_count import chart_count_change
-from utility.static_method.static import str_hms, dt_hms, error_decorator
 from ui.create_widget.set_style import style_bc_bt, style_bc_bb, style_bc_st
 from ui.etcetera.process_alive import coinkimp_process_alive, strategy_process_alive, receiver_process_alive
 
@@ -23,7 +23,6 @@ class QuietPage(QWebEnginePage):
         pass
 
 
-@error_decorator
 def show_dialog_graph(ui, df):
     """그래프 다이얼로그를 표시합니다.
     Args:
@@ -64,7 +63,6 @@ def show_dialog_graph(ui, df):
     plt.draw()
 
 
-@error_decorator
 def show_dialog(ui, code, name, tickcount, searchdate, col):
     """다이얼로그를 표시합니다.
     Args:
@@ -104,7 +102,6 @@ def show_dialog(ui, code, name, tickcount, searchdate, col):
             show_dialog_chart(ui, False, code, tickcount, searchdate, starttime, endtime)
 
 
-@error_decorator
 def show_dialog_web(ui, _show, code):
     """웹 다이얼로그를 표시합니다.
     Args:
@@ -126,7 +123,6 @@ def show_dialog_web(ui, _show, code):
         ui.webcQ.put(('기업정보', code))
 
 
-@error_decorator
 def webengineview_set(ui):
     """웹엔진 뷰를 설정합니다.
     Args:
@@ -140,7 +136,6 @@ def webengineview_set(ui):
     web_layout.addWidget(ui.webEngineView)
 
 
-@error_decorator
 def show_dialog_hoga(ui, _show, code):
     """호가 다이얼로그를 표시합니다.
     Args:
@@ -160,7 +155,6 @@ def show_dialog_hoga(ui, _show, code):
         ui.od_comboBoxxxxx_01.setCurrentText(name)
 
 
-@error_decorator
 def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime=None, endtime=None,
                       detail=None, buytimes=None):
     """차트 다이얼로그를 표시합니다.
@@ -197,7 +191,6 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
             ui.chartQ.put(data)
 
 
-@error_decorator
 def dialog_chart_show(ui):
     """차트 다이얼로그를 표시합니다.
     Args:
@@ -227,7 +220,6 @@ def dialog_chart_show(ui):
     ui.dialog_chart.show()
 
 
-@error_decorator
 def show_qsize(ui):
     """큐 사이즈 표시를 토글합니다.
     Args:
@@ -241,7 +233,6 @@ def show_qsize(ui):
         ui.showQsize = False
 
 
-@error_decorator
 def show_dialog_formula(ui):
     """수식 관리자 다이얼로그를 표시합니다.
     Args:
@@ -254,7 +245,6 @@ def show_dialog_formula(ui):
         ui.dialog_formula.close()
 
 
-@error_decorator
 def show_dialog_factor(ui):
     """팩터 다이얼로그를 표시합니다.
     Args:
@@ -267,7 +257,6 @@ def show_dialog_factor(ui):
         ui.dialog_factor.close()
 
 
-@error_decorator
 def show_chart(ui):
     """차트 다이얼로그를 토글합니다.
     Args:
@@ -279,7 +268,6 @@ def show_chart(ui):
         ui.dialog_chart.close()
 
 
-@error_decorator
 def show_hoga(ui):
     """호가 다이얼로그를 토글합니다.
     Args:
@@ -305,7 +293,6 @@ def show_hoga(ui):
         ui.dialog_hoga.close()
 
 
-@error_decorator
 def show_giup(ui):
     """기업정보 다이얼로그를 토글합니다.
     Args:
@@ -327,7 +314,6 @@ def show_giup(ui):
         ui.dialog_info.close()
 
 
-@error_decorator
 def show_treemap(ui):
     """트리맵 다이얼로그를 토글합니다.
     Args:
@@ -341,7 +327,6 @@ def show_treemap(ui):
         ui.dialog_tree.close()
 
 
-@error_decorator
 def show_db(ui):
     """데이터베이스 관리 다이얼로그를 표시합니다.
     Args:
@@ -403,7 +388,6 @@ def show_db(ui):
         ui.db_tableWidgett_03.setRowCount(8)
 
 
-@error_decorator
 def show_backscheduler(ui):
     """백테스트 스케줄러 다이얼로그를 토글합니다.
     Args:
@@ -416,7 +400,6 @@ def show_backscheduler(ui):
         ui.dialog_scheduler.close()
 
 
-@error_decorator
 def show_kimp(ui):
     """김프 다이얼로그를 토글합니다.
     Args:
@@ -434,7 +417,6 @@ def show_kimp(ui):
             ui.proc_coin_kimp.kill()
 
 
-@error_decorator
 def show_order(ui):
     """주문 다이얼로그를 토글합니다.
     Args:
@@ -463,7 +445,6 @@ def show_order(ui):
         ui.dialog_order.close()
 
 
-@error_decorator
 def put_hoga_code(ui, code):
     """호가 코드를 전송합니다.
     Args:
@@ -474,7 +455,6 @@ def put_hoga_code(ui, code):
         ui.receivQ.put(('호가종목코드', code))
 
 
-@error_decorator
 def chart_moneytop_list(ui):
     """차트 거래대금 순위 목록을 표시합니다.
     Args:
@@ -527,7 +507,6 @@ def chart_moneytop_list(ui):
         ui.ct_tableWidgett_01.setRowCount(100)
 
 
-@error_decorator
 def chart_size_change(ui):
     """차트 크기를 변경합니다.
     Args:

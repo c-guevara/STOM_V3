@@ -55,7 +55,6 @@ class SetDialogBack:
             widgets.append(widget)
         return widgets
 
-    @error_decorator
     def set(self):
         """백테스트 다이얼로그를 설정합니다."""
         self.ui.dialog_backengine = self.wc.setDialog('STOM BACKTEST ENGINE')

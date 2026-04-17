@@ -1,12 +1,10 @@
 
 from PIL import Image
 from PyQt5.QtWidgets import QMessageBox
-from utility.static_method.static import error_decorator
 from utility.settings.setting_base import ui_num, GRAPH_PATH
 from ui.event_click.button_clicked_backtest_engine import backtest_process_kill
 
 
-@error_decorator
 def ssbutton_clicked_01(ui):
     """백테스트 기록 테이블 목록을 로드합니다.
     Args:
@@ -25,7 +23,6 @@ def ssbutton_clicked_01(ui):
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
 
 
-@error_decorator
 def ssbutton_clicked_02(ui):
     """최적화 기록 테이블 목록을 로드합니다.
     Args:
@@ -46,7 +43,6 @@ def ssbutton_clicked_02(ui):
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
 
 
-@error_decorator
 def ssbutton_clicked_03(ui):
     """전진분석 기록 테이블 목록을 로드합니다.
     Args:
@@ -67,7 +63,6 @@ def ssbutton_clicked_03(ui):
         ui.update_tablewidget.update_tablewidget((ui_num['상세기록'], df))
 
 
-@error_decorator
 def ssbutton_clicked_04(ui):
     """선택된 백테스트 그래프를 표시합니다.
     Args:
@@ -96,7 +91,6 @@ def ssbutton_clicked_04(ui):
         QMessageBox.critical(ui, '오류 알림', '저장된 그래프 파일이 존재하지 않습니다.\n')
 
 
-@error_decorator
 def ssbutton_clicked_05(ui):
     """백테스트 비교 다이얼로그를 토글합니다.
     Args:
@@ -123,7 +117,6 @@ def ssbutton_clicked_05(ui):
         ui.dialog_comp.close()
 
 
-@error_decorator
 def ssbutton_clicked_06(ui):
     """백테스트를 중지합니다.
     Args:
