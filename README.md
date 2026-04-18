@@ -106,8 +106,8 @@ STOM/
 │   └── sub_process_and_thread/         # 서브 프로세스 및 서브 스레드 모듈
 │
 ├── ai_agent/                           # AI 에이전트
+│   ├── plan/                           # 작업 계획 저장 폴더
 │   ├── strategy/                       # AI가 생성한 전략 저장 폴더
-│   ├── working/                        # 작업 계획 저장 및 로그 기록 폴더
 │   ├── strategy.txt                    # 전략 작성 방법 및 변수 설명
 │   └── ruled.md                        # AI 에이전트 규칙용 파일
 │
