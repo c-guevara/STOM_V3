@@ -25,7 +25,7 @@ class ImportProgressHook:
             'utility.sub_process_and_thread.telegram_bot',
             'utility.sub_process_and_thread.chart_hoga_query_sound',
             'utility.static_method.static',
-    
+
             'ui.create_widget.set_icon',
             'ui.create_widget.set_table',
             'ui.create_widget.set_log_tap',
@@ -40,7 +40,7 @@ class ImportProgressHook:
             'ui.create_widget.set_dialog_chart',
             'ui.create_widget.set_dialog_formula',
             'ui.create_widget.set_dialog_strategy',
-    
+
             'ui.etcetera.etc',
             'ui.draw_chart.draw_treemap',
             'ui.draw_chart.draw_chart_db',

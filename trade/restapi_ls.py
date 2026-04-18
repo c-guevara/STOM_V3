@@ -560,6 +560,13 @@ class LsWebSocketReceiver(QThread):
         await self.websocket.send(json.dumps(data))
         await asyncio.sleep(0.02)
 
+        if self.gubun == '국내주식':
+            gubun = f'{self.gubun}VI'
+            data = self._get_send_data(gubun, '실시간시세등록', '0000000000')
+            await self.websocket.send(json.dumps(data))
+            await asyncio.sleep(0.02)
+            self.windowQ.put((ui_num['기본로그'], f'{gubun}발동해제 실시간시세 등록'))
+
         last = len(self.symbols)
         gubun = f'{self.gubun}체결'
         for i, code in enumerate(self.symbols):
@@ -568,9 +575,7 @@ class LsWebSocketReceiver(QThread):
             await asyncio.sleep(0.02)
 
             if i % 100 == 0 or i == last - 1:
-                self.windowQ.put(
-                    (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
-                )
+                self.windowQ.put((ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]'))
 
         gubun = f'{self.gubun}호가'
         for i, code in enumerate(self.symbols):
@@ -579,24 +584,10 @@ class LsWebSocketReceiver(QThread):
             await asyncio.sleep(0.02)
 
             if i % 100 == 0 or i == last - 1:
-                self.windowQ.put(
-                    (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
-                )
-
-        if self.gubun == '국내주식':
-            gubun = f'{self.gubun}VI'
-            for i, code in enumerate(self.symbols):
-                data = self._get_send_data(gubun, '실시간시세등록', code)
-                await self.websocket.send(json.dumps(data))
-                await asyncio.sleep(0.02)
-
-                if i % 100 == 0 or i == last - 1:
-                    self.windowQ.put(
-                        (ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]')
-                    )
+                self.windowQ.put((ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]'))
 
     def _get_send_data(self, gubun: str, tr_type: str, code: str):
-        if '국내주식' in gubun:
+        if gubun in ('국내주식체결', '국내주식호가'):
             tr_key = f'U{code:<9}'
         elif '해외주식' in gubun:
             tr_key = f'{code:<18}'
