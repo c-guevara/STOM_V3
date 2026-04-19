@@ -99,7 +99,7 @@ class UpdateTextedit:
                 self.ui.ss_textEditttt_09.append(text)
 
                 if '백테스트 엔진 전략연산 오류, 자동 중지 중 ...' in data[1]:
-                    backtest_process_kill(self.ui, False, False)
+                    backtest_process_kill(self.ui, False)
 
                 elif 'COMPLETE' in data[1] or 'STOP' in data[1]:
                     if data[1] in ('최적화O COMPLETE', '최적화OV COMPLETE', '최적화OVC COMPLETE', '최적화B COMPLETE',
