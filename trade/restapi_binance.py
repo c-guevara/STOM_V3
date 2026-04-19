@@ -187,6 +187,8 @@ class BinanceWebSocketTrader(QThread):
         self.loop        = None
         self.websocket   = None
         self.connected   = False
+        self.client      = None
+        self.bsm         = None
 
     def run(self):
         """웹소켓 루프를 실행합니다."""
@@ -212,9 +214,24 @@ class BinanceWebSocketTrader(QThread):
 
     async def connect(self):
         """유저 웹소켓에 연결합니다."""
-        client = await AsyncClient.create(self.api_key, self.scret_key)
-        bsm    = BinanceSocketManager(client, max_queue_size=100000)
-        self.websocket = bsm.futures_user_socket()
+        if self.websocket:
+            try:
+                await self.websocket.__aexit__(None, None, None)
+            except:
+                pass
+        if self.bsm:
+            try:
+                await self.bsm.close()
+            except:
+                pass
+        if self.client:
+            try:
+                await self.client.close_connection()
+            except:
+                pass
+        self.client = await AsyncClient.create(self.api_key, self.scret_key)
+        self.bsm = BinanceSocketManager(self.client, max_queue_size=100000)
+        self.websocket = self.bsm.futures_user_socket()
         self.connected = True
 
     async def receive_msgs(self):
@@ -226,5 +243,28 @@ class BinanceWebSocketTrader(QThread):
 
     def stop(self):
         """웹소켓을 종료합니다."""
+        self.connected = False
         if self.loop and self.loop.is_running():
+            if self.websocket:
+                self.loop.call_soon_threadsafe(
+                    self.loop.create_task, self._cleanup_resources()
+                )
             self.loop.stop()
+
+    async def _cleanup_resources(self):
+        """모든 리소스를 정리합니다."""
+        if self.websocket:
+            try:
+                await self.websocket.__aexit__(None, None, None)
+            except:
+                pass
+        if self.bsm:
+            try:
+                await self.bsm.close()
+            except:
+                pass
+        if self.client:
+            try:
+                await self.client.close_connection()
+            except:
+                pass
