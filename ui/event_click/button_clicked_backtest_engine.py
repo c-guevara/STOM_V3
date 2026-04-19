@@ -58,7 +58,7 @@ def backengine_start(ui):
         ui: UI 클래스 인스턴스
     """
     from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
-    ui.back_engining = True
+    ui.backengine_starting = True
     ui.startday   = int(ui.be_dateEdittttt_01.date().toString('yyyyMMdd'))
     ui.endday     = int(ui.be_dateEdittttt_02.date().toString('yyyyMMdd'))
     ui.starttime  = int(ui.be_lineEdittttt_01.text())
@@ -208,8 +208,8 @@ def backengine_start(ui):
     for q in ui.back_eques:
         q.put(('공유데이터', ui.back_count, ui.shared_info))
 
-    ui.back_engining = False
-    ui.backtest_engine = True
+    ui.backengine_starting = False
+    ui.backengine_running  = True
     ui.windowQ.put((ui_num['백테엔진'], '백테엔진 준비 완료'))
 
 
@@ -341,7 +341,7 @@ def backtest_process_kill(ui, enginekill):
         ui: UI 클래스 인스턴스
         enginekill: 엔진 중지 여부
     """
-    if not ui.backtest_engine:
+    if not ui.backengine_running:
         QMessageBox.critical(ui, '오류 알림', '백테스트 엔진이 미실행중입니다.\n')
         return
 

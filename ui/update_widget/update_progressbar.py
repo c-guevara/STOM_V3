@@ -45,7 +45,7 @@ def update_progressbar(ui):
     ui.progressBarrr.setValue(ui.cpu_per)
     ui.counter = 0 if ui.counter == 599 else ui.counter + 1
 
-    ui.be_pushButtonnn_01.setStyleSheet(style_bc_by if ui.backtest_engine else style_bc_bt)
+    ui.be_pushButtonnn_01.setStyleSheet(style_bc_by if ui.backengine_running else style_bc_bt)
 
     ui.tt_pushButton.setStyleSheet(style_bc_bb if not ui.calendarWidgetttt.isVisible() and not ui.calendarWidgetttt.isVisible() else style_bc_st)
     ui.dd_pushButton.setStyleSheet(style_bc_bb if not ui.dialog_db.isVisible() else style_bc_st)
