@@ -29,7 +29,7 @@ class BackEngineBinanceOms(BackEngineFutureOms):
             매수 수량
         """
         dict_info = self.dict_info.get(self.code)
-        소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수'] if dict_info else 8
+        소숫점자리수 = dict_info['수량소숫점자리수'] if dict_info else 8
         return round(betting / (현재가 if 매수가 == 0 else 매수가) * oc_ratio / 100, 소숫점자리수)
 
     def _set_sell_count(self, 보유수량, 보유비율, oc_ratio):
@@ -42,7 +42,7 @@ class BackEngineBinanceOms(BackEngineFutureOms):
             매도 수량
         """
         dict_info = self.dict_info.get(self.code)
-        소숫점자리수 = self.dict_info[self.code]['수량소숫점자리수'] if dict_info else 8
+        소숫점자리수 = dict_info['수량소숫점자리수'] if dict_info else 8
         return round(보유수량 / 보유비율 * oc_ratio, 소숫점자리수)
 
     def _get_order_price(self, 거래금액, 주문수량):
@@ -54,7 +54,7 @@ class BackEngineBinanceOms(BackEngineFutureOms):
             float: 주문 가격
         """
         dict_info = self.dict_info.get(self.code)
-        소숫점자리수 = self.dict_info[self.code]['가격소숫점자리수'] if dict_info else 4
+        소숫점자리수 = dict_info['가격소숫점자리수'] if dict_info else 4
         return round(거래금액 / 주문수량, 소숫점자리수) if 주문수량 != 0 else 0.0
 
     def _get_last_sell_price(self, 매도금액, 보유수량, 미체결수량):
