@@ -428,7 +428,7 @@ class OptimizeGeneticAlgorithm:
 
         stg_save_version(self.market_info['전략구분'], 'opti', 'gavars', optivars_name, optivars)
 
-        if self.dict_set['스톰라이브']: self.lq.put(f'{self.backname}')
+        if self.dict_set['스톰라이브']: self.lq.put(self.backname)
         self.sq.put('지에이 최적화가 완료되었습니다.')
         self.wq.put((ui_num['백테스트'], f'{self.backname} 백테스트 소요시간 {now() - start_time}'))
         self._sys_exit(False)
