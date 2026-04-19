@@ -37,7 +37,7 @@
 ## 파이썬 및 라이브러리 설치 방법
 - https://www.python.org/downloads/windows/ 에서 Python 3.13.** 64비트 버전 설치
 - pip_install.bat 파일 실행으로 라이브러리 설치
-- 웹대시보드를 사용할려면 pip_install_wd.bat 파일 실행하여 추가 라이브러리 설치
+- 웹대시보드를 사용할려면 pip_install_wd.bat 파일 실행하여 추가 라이브러리 설치 및 방화벽에서 포트번호 인바운드 규칙 추가
 - stom.bat 실행 후 시리얼키 입력, LS증권 RESTAPI 또는 업비트, 바이낸스 계정 설정
 - 윈도우 작업스케쥴러에 stom_login.bat 등록하여 자동 실행
 - 그외 자세한 사항은 유튜브 강의를 참고하시길 바랍니다.
