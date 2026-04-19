@@ -1,15 +1,14 @@
 
 import re
 import json
-import time
 import asyncio
 import requests
 import websockets
 from traceback import format_exc
 from trade.restapi_lsdata import LsRestData
 from PyQt5.QtCore import QThread, pyqtSignal
-from utility.static_method.static import now
 from utility.settings.setting_base import ui_num
+from utility.static_method.static import now, qtest_qwait
 
 
 class LsRestAPI:
@@ -102,7 +101,7 @@ class LsRestAPI:
                 })
                 if i % 100 == 0 or i == last - 1:
                     self.windowQ.put((ui_num['기본로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
-                time.sleep(0.1)
+                qtest_qwait(0.09)
 
             return dict_data, list(dict_data.keys())
         except Exception:
@@ -223,7 +222,7 @@ class LsRestAPI:
             dict_data[미니코스피200_종목코드] = {'종목명': '미니코스피200'}
             dict_expcode[미니코스피200_종목코드] = data['expcode']
 
-            time.sleep(1)
+            qtest_qwait(1)
 
             data = self._post(tr_name, 구분='NQF')
             data = data[out_block][0]
