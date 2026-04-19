@@ -101,7 +101,7 @@ class LsRestAPI:
                 })
                 if i % 100 == 0 or i == last - 1:
                     self.windowQ.put((ui_num['기본로그'], f'국내주식 상장수식주 조회 중 ... [{i+1}/{last}]'))
-                qtest_qwait(0.09)
+                qtest_qwait(0.05)
 
             return dict_data, list(dict_data.keys())
         except Exception:
