@@ -37,6 +37,7 @@ def setting_load_02(ui):
     no = int(ui.sj_main_comBox_01.currentText()[-2:])
     access_key = df['access_key'][no]
     secret_key = df['secret_key'][no]
+
     if access_key and secret_key:
         ui.sj_accc_liEdit_01.setText(de_text(ui.dict_set['키'], access_key))
         ui.sj_accc_liEdit_02.setText(de_text(ui.dict_set['키'], secret_key))
@@ -55,6 +56,7 @@ def setting_load_03(ui):
     no = int(ui.sj_main_comBox_01.currentText()[-2:])
     bot_token = df['bot_token'][no]
     chatingid = df['chatingid'][no]
+
     if bot_token and chatingid:
         ui.sj_tele_liEdit_01.setText(de_text(ui.dict_set['키'], bot_token))
         ui.sj_tele_liEdit_02.setText(de_text(ui.dict_set['키'], chatingid))
@@ -88,30 +90,37 @@ def setting_load_04(ui):
     ui.sj_strgy_cbBox_02.clear()
     ui.sj_strgy_cbBox_01.addItem('사용안함')
     ui.sj_strgy_cbBox_02.addItem('사용안함')
+
     if len(dfb) > 0:
         stg_list = list(dfb.index)
         stg_list.sort()
         for stg in stg_list:
             ui.sj_strgy_cbBox_01.addItem(stg)
+
     if len(dfob) > 0:
         stg_list = list(dfob.index)
         stg_list.sort()
         for stg in stg_list:
             ui.sj_strgy_cbBox_01.addItem(stg)
+
     if df['매수전략'][0]:
         ui.sj_strgy_cbBox_01.setCurrentText(df['매수전략'][0])
+
     if len(dfs) > 0:
         stg_list = list(dfs.index)
         stg_list.sort()
         for stg in stg_list:
             ui.sj_strgy_cbBox_02.addItem(stg)
+
     if len(dfos) > 0:
         stg_list = list(dfos.index)
         stg_list.sort()
         for stg in stg_list:
             ui.sj_strgy_cbBox_02.addItem(stg)
+
     if df['매도전략'][0]:
         ui.sj_strgy_cbBox_02.setCurrentText(df['매도전략'][0])
+
     ui.sj_strgy_lEdit_04.setText(str(df['투자금'][0]))
     ui.sj_strgy_lEdit_05.setText(str(df['손실중지수익률'][0]))
     ui.sj_strgy_lEdit_06.setText(str(df['수익중지수익률'][0]))
@@ -148,8 +157,10 @@ def setting_load_05(ui):
     dfs = ui.dbreader.read_sql('전략디비', 'SELECT * FROM schedule').set_index('index')
     indexs = list(dfs.index)
     indexs.sort()
+
     for index in indexs:
         ui.sj_back_comBox_03.addItem(index)
+
     if df['백테스케쥴요일'][0] == 4:
         ui.sj_back_comBox_01.setCurrentText('금')
     elif df['백테스케쥴요일'][0] == 5:
@@ -159,6 +170,7 @@ def setting_load_05(ui):
 
     ui.sj_back_liEdit_02.setText(str(df['백테스케쥴시간'][0]))
     ui.sj_back_comBox_03.setCurrentText(df['백테스케쥴명'][0])
+
     if df['백테날짜고정'][0]:
         ui.sj_back_daEdit_01.setDate(QDate.fromString(ui.dict_set['백테날짜'], 'yyyyMMdd'))
     else:
@@ -181,6 +193,7 @@ def setting_load_06(ui):
     ui.sj_etc_checBox_07.setChecked(True) if df['창위치기억'][0] else ui.sj_etc_checBox_07.setChecked(False)
     ui.sj_etc_checBox_08.setChecked(True) if df['프로그램종료'][0] else ui.sj_etc_checBox_08.setChecked(False)
     ui.sj_etc_liEditt_02.setText(str(df['웹대시보드포트번호'][0]))
+
     if df['시리얼키'][0]:
         ui.sj_etc_liEditt_01.setText(de_text(ui.dict_set['키'], df['시리얼키'][0]))
 
@@ -310,6 +323,7 @@ def setting_save_04(ui):
         평균값계산틱수, 최대매수종목수, 전략종료시간, 투자금, 손실중지수익률, 수익중지수익률 = \
             int(평균값계산틱수), int(최대매수종목수), int(전략종료시간), float(투자금), float(손실중지수익률), float(수익중지수익률)
         time_limit = ui.market_info['프로세스종료시간'] - 30
+
         if 전략종료시간 < 10000:
             QMessageBox.critical(ui, '오류 알림', '전략종료시간을 초단위 시간까지 입력하십시오.\n')
             return
@@ -910,6 +924,7 @@ def load_setting_file(ui):
     ui.sj_set_comBoxx_01.clear()
     file_list = os.listdir(DB_PATH)
     file_list = [x for x in file_list if 'setting_' in x]
+
     for file_name in file_list:
         name = file_name.replace('setting_', '').replace('.db', '')
         ui.sj_set_comBoxx_01.addItem(name)
