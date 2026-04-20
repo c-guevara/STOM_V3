@@ -683,7 +683,7 @@ class BaseReceiver:
         """
         if code in self.list_gsjm:
             self.list_gsjm.remove(code)
-            if self.market_gubun in (6, 7, 8) and self.dict_set['매수취소관심이탈']:
+            if self.market_gubun not in (6, 7, 8) and self.dict_set['매수취소관심이탈']:
                 self.traderQ.put(('관심이탈', code))
 
     def _receiver_process_kill(self):
