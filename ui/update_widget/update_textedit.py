@@ -57,7 +57,7 @@ class UpdateTextedit:
                 self.ui.log_trade_error_textedit.append(text)
 
             elif data[0] == ui_num['시스템로그']:
-                ansi_escape = re.compile(r'\x1b\[[0-9;]*m')
+                ansi_escape = re.compile(r'\x1B\[[0-?]*[ -/]*[@-~]')
                 text = ansi_escape.sub('', text)
                 self.ui.log_system_textedit.append(text)
 
