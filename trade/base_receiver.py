@@ -458,7 +458,7 @@ class BaseReceiver:
                 if not self.is_tick:
                     send_data.append(send)
 
-                if self.market_gubun in (1, 2, 4):
+                if self.market_gubun in (1, 4):
                     self.stgQs[self.dict_sgbn[code]].put(send_data)
                 else:
                     self.stgQ.put(send_data)
@@ -635,7 +635,7 @@ class BaseReceiver:
         if self.market_gubun not in (6, 7, 8):
             current_gsjm = tuple(self.list_gsjm)
             if current_gsjm != self.last_gsjm:
-                if self.market_gubun in (1, 2, 4):
+                if self.market_gubun in (1, 4):
                     for q in self.stgQs:
                         q.put(('관심목록', current_gsjm))
                 else:
@@ -731,7 +731,7 @@ class BaseReceiver:
         if data == '프로세스종료' and self.dict_set['데이터저장']:
             self._save_moneytop()
         else:
-            if self.market_gubun in (1, 2, 4):
+            if self.market_gubun in (1, 4):
                 for q in self.stgQs:
                     q.put('프로세스종료')
             else:
@@ -760,7 +760,7 @@ class BaseReceiver:
 
             self.windowQ.put((ui_num['기본로그'], f"시스템 명령 실행 알림 - {self.market_info['마켓이름']} 거래대금순위 저장 완료"))
 
-        if self.market_gubun in (1, 2, 4):
+        if self.market_gubun in (1, 4):
             self.stgQs[0].put(('데이터저장', codes))
         else:
             self.stgQ.put(('데이터저장', codes))

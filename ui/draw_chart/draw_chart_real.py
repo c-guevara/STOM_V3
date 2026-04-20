@@ -22,7 +22,7 @@ class DrawRealChart(DrawChartBase):
             if receiver_process_alive(self.ui):
                 self.ui.receivQ.put(('차트종목코드', None))
             if strategy_process_alive(self.ui):
-                if self.ui.market_gubun < 5:
+                if self.ui.market_gubun in (1, 4):
                     for q in self.ui.stgQs:
                         q.put(('차트종목코드', None))
                 else:
