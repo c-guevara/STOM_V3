@@ -391,13 +391,13 @@ class BackEngineBase(StgGlobalsFunc):
             code_list = set()
             for day in day_list:
                 code_list.update(day_codes[day])
-            for code in enumerate(code_list):
+            for code in code_list:
                 days = day_list
                 load_and_add_data()
 
         else:
             _, startday, endday, starttime, endtime, day_list, avg_list, _, _, code, _ = data
-            for day in enumerate(day_list):
+            for day in day_list:
                 days = [day]
                 load_and_add_data()
 
