@@ -196,7 +196,7 @@ class DrawChartBase:
             self.draw_legend(i)
             if i == self.chart_cnt - 1: break
 
-        if self.ui.ct_checkBoxxxxx_01.isChecked():
+        if not (self.same_code and self.same_time) and self.ui.ct_checkBoxxxxx_01.isChecked():
             self.insert_crosshair()
 
         self.ui.ctpg_code = self.code
