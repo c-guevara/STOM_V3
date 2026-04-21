@@ -9,7 +9,7 @@ from PyQt5.QtWidgets import QGroupBox, QLabel, QTabWidget, QWidget
 from ui.event_keypress.overwrite_return_press import return_press_02
 from ui.create_widget.set_style import style_ck_bx, style_bc_dk, qfont14, style_fc_dk
 from ui.event_click.table_cell_clicked import cell_clicked_09, cell_clicked_07, cell_clicked_08
-from trade.analyzer_pattern import pattern_setting_load, pattern_setting_save, pattern_learning
+from trade.analyzer_pattern import pattern_setting_load, pattern_setting_save, pattern_train
 from utility.settings.setting_base import columns_hj, columns_hc, columns_hg, columns_gc, columns_ns, columns_jm1, \
     columns_jm2, columns_stg1, columns_stg2, columns_kp, columns_hc2
 
@@ -277,7 +277,7 @@ class SetDialogEtc:
         self.ui.ptn_comboBoxxx_02 = self.wc.setCombobox(self.ui.dialog_pattern, items=['5', '10', '15', '20', '25', '30'])
         self.ui.ptn_pushButton_01 = self.wc.setPushbutton('설정불러오기', parent=self.ui.dialog_pattern, click=lambda: pattern_setting_load(self.ui))
         self.ui.ptn_pushButton_02 = self.wc.setPushbutton('설정저장하기', parent=self.ui.dialog_pattern, click=lambda: pattern_setting_save(self.ui))
-        self.ui.ptn_pushButton_03 = self.wc.setPushbutton('패턴학습하기', parent=self.ui.dialog_pattern, click=lambda: pattern_learning(self.ui))
+        self.ui.ptn_pushButton_03 = self.wc.setPushbutton('패턴학습하기', parent=self.ui.dialog_pattern, click=lambda: pattern_train(self.ui))
         self.ui.ptn_groupBoxxx_01 = QGroupBox('', self.ui.dialog_pattern)
         text = '''
         ▣ 패턴학습은 TALIB 라이브러리에 있는 60여개의 패턴을 기반으로 종목별로 각 패턴이 발생한 이후에\n
