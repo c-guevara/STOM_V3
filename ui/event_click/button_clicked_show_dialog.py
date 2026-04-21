@@ -4,6 +4,7 @@ import sqlite3
 import pandas as pd
 from PyQt5.QtCore import QUrl, Qt
 from multiprocessing import Process
+from ui.etcetera.etc import chart_clear
 from utility.settings.setting_base import columns_hc
 from utility.static_method.static import str_hms, dt_hms
 from ui.create_widget.dialog_animation import DialogAnimator
@@ -14,23 +15,6 @@ from PyQt5.QtWidgets import QVBoxLayout, QTableWidgetItem, QMessageBox
 from ui.event_click.button_clicked_chart_count import chart_count_change
 from ui.create_widget.set_style import style_bc_bt, style_bc_bb, style_bc_st
 from ui.etcetera.process_alive import coinkimp_process_alive, strategy_process_alive, receiver_process_alive
-
-
-def chart_clear(ui):
-    """차트 데이터를 초기화합니다.
-    Args:
-        ui: UI 객체
-    """
-    ui.ctpg_code    = None
-    ui.ctpg_cline   = None
-    ui.ctpg_hline   = None
-    ui.ctpg_xticks  = None
-    ui.ctpg_arry    = None
-    ui.ctpg_legend  = {}
-    ui.ctpg_item    = {}
-    ui.ctpg_data    = {}
-    ui.ctpg_factors = []
-    ui.ctpg_labels  = []
 
 
 class QuietPage(QWebEnginePage):

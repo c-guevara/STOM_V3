@@ -172,7 +172,7 @@ class BackEngineBaseOms(BackEngineBase):
 
                     if '매수' in gubun:
                         if not 관심종목: continue
-                        if self._cancel_buy_order(현재가): continue
+                        if self._cancel_buy_order(): continue
                         if not 보유중:
                             exec(self.buystg)
                         else:
@@ -236,7 +236,7 @@ class BackEngineBaseOms(BackEngineBase):
 
                     if '매수' in gubun:
                         if not 관심종목: continue
-                        if self._cancel_buy_order(현재가): continue
+                        if self._cancel_buy_order(): continue
                         if not 보유중:
                             if self.back_type != '조건최적화':
                                 exec(self.buystg)
@@ -305,7 +305,7 @@ class BackEngineBaseOms(BackEngineBase):
 
             if '매수' in gubun:
                 if not 관심종목: return
-                if self._cancel_buy_order(현재가): return
+                if self._cancel_buy_order(): return
                 if not 보유중:
                     exec(self.buystg)
                 else:
@@ -401,10 +401,8 @@ class BackEngineBaseOms(BackEngineBase):
 
         return gubun
 
-    def _cancel_buy_order(self, 현재가):
+    def _cancel_buy_order(self):
         """매수 주문 취소 조건을 확인합니다.
-        Args:
-            현재가: 현재 가격
         Returns:
             취소 여부
         """
