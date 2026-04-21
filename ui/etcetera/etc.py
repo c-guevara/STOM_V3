@@ -1,26 +1,12 @@
 
-import random
-import pandas as pd
-from io import BytesIO
-from PyQt5.QtGui import QPixmap
-from PyQt5.QtCore import QSize, Qt
-from PyQt5.QtCore import QBuffer, QIODevice
-from ui.create_widget.set_text import famous_saying
-from utility.static_method.static import qtest_qwait
-from PyQt5.QtWidgets import QApplication, QMessageBox
-from trade.analyzer_pattern import pattern_setting_load, pattern_train
-from utility.settings.setting_base import columns_dt, columns_dd, ui_num
-from ui.event_click.button_clicked_backtest_engine import backengine_start, backengine_show
-from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
-from ui.event_click.button_clicked_backtest_start import backtest_engine_kill, sdbutton_clicked_04, sdbutton_clicked_02
-
-
 def update_image(ui, data):
     """이미지를 업데이트합니다.
     Args:
         ui: UI 객체
         data: 이미지 데이터 튜플
     """
+    from PyQt5.QtGui import QPixmap
+    from PyQt5.QtCore import QSize, Qt
     ui.image_label1.clear()
     qpix = QPixmap()
     qpix.loadFromData(data[1])
@@ -39,10 +25,11 @@ def auto_back_schedule(ui, gubun):
         ui: UI 객체
         gubun (int): 구분 번호 (0: 패턴학습확인, 1: 시작, 2: 스케줄러 표시)
     """
-    from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
+    from utility.static_method.static import qtest_qwait
 
     if gubun == 0:
         from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
+        from trade.analyzer_pattern import pattern_setting_load, pattern_train
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
             ui.soundQ.put('예약된 패턴학습을 시작합니다.')
@@ -52,7 +39,23 @@ def auto_back_schedule(ui, gubun):
         pattern_setting_load(ui)
         qtest_qwait(2)
         pattern_train(ui)
+
+    elif gubun == 0.5:
+        from ui.event_click.button_clicked_show_dialog import show_volume_dialog
+        from trade.analyzer_volume_profile import volume_setting_load, volume_profile_train
+        ui.auto_mode = True
+        if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
+            ui.soundQ.put('예약된 패턴학습을 시작합니다.')
+        if not ui.dialog_volume.isVisible():
+            show_volume_dialog(ui)
+        qtest_qwait(2)
+        volume_setting_load(ui)
+        qtest_qwait(2)
+        volume_profile_train(ui)
+
     elif gubun == 1:
+        from ui.event_click.button_clicked_backtest_start import backtest_engine_kill
+        from ui.event_click.button_clicked_backtest_engine import backengine_show, backengine_start
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
             ui.soundQ.put('예약된 백테스트 스케쥴러를 시작합니다.')
@@ -62,7 +65,9 @@ def auto_back_schedule(ui, gubun):
         backtest_engine_kill(ui)
         qtest_qwait(3)
         backengine_start(ui)
+
     elif gubun == 2:
+        from ui.event_click.button_clicked_backtest_start import sdbutton_clicked_04, sdbutton_clicked_02
         if not ui.dialog_scheduler.isVisible():
             ui.dialog_scheduler.show()
         qtest_qwait(2)
@@ -71,6 +76,7 @@ def auto_back_schedule(ui, gubun):
         ui.sd_dcomboBoxxxx_01.setCurrentText(ui.dict_set['백테스케쥴명'])
         qtest_qwait(2)
         sdbutton_clicked_02(ui)
+
     elif gubun == 3:
         if ui.dialog_scheduler.isVisible():
             ui.dialog_scheduler.close()
@@ -84,6 +90,7 @@ def update_dictset(ui):
         ui: UI 객체
     """
     update_market_gubun(ui)
+    from ui.etcetera.process_alive import strategy_process_alive, trader_process_alive, receiver_process_alive
 
     if receiver_process_alive(ui):
         ui.receivQ.put(('설정변경', ui.dict_set))
@@ -141,6 +148,8 @@ def calendar_clicked(ui):
     Args:
         ui: UI 객체
     """
+    import pandas as pd
+    from utility.settings.setting_base import columns_dt, columns_dd, ui_num
     table_name = ui.market_info['거래디비']
     searchday = ui.calendarWidgetttt.selectedDate().toString('yyyyMMdd')
     df1 = ui.dbreader.read_sql('거래디비', f"SELECT * FROM {table_name} WHERE 체결시간 LIKE '{searchday}%'").set_index('index')
@@ -167,6 +176,9 @@ def chart_screenshot(ui):
     Args:
         ui: UI 객체
     """
+    import random
+    from PyQt5.QtWidgets import QMessageBox
+    from ui.create_widget.set_text import famous_saying
     if ui.dialog_chart.isVisible():
         send_chart_screenshot(ui)
         QMessageBox.information(ui, '차트 스샷 전송 완료', random.choice(famous_saying))
@@ -177,12 +189,18 @@ def chart_screenshot2(ui):
     Args:
         ui: UI 객체
     """
+    import random
+    from PyQt5.QtWidgets import QMessageBox
+    from ui.create_widget.set_text import famous_saying
     if ui.dialog_chart.isVisible():
         send_chart_screenshot(ui)
         QMessageBox.information(ui.dialog_chart, '차트 스샷 전송 완료', random.choice(famous_saying))
 
 
 def send_chart_screenshot(ui):
+    from io import BytesIO
+    from PyQt5.QtWidgets import QApplication
+    from PyQt5.QtCore import QBuffer, QIODevice
     widget = QApplication.primaryScreen()
     # noinspection PyUnresolvedReferences
     pixmap = widget.grabWindow(ui.dialog_chart.winId())
@@ -202,11 +220,13 @@ def manual_save_and_exit(ui):
     Args:
         ui: UI 객체
     """
+    from PyQt5.QtWidgets import QMessageBox
     buttonReply = QMessageBox.question(
         ui, '수동종료', '현재까지의 데이터를 저장하고 수동종료합니다.\n계속 하시겠습니까?\n',
         QMessageBox.Yes | QMessageBox.No, QMessageBox.No
     )
     if buttonReply == QMessageBox.Yes:
+        from ui.etcetera.process_alive import receiver_process_alive
         if receiver_process_alive(ui):
             ui.receivQ.put(('수동데이터저장', 'dummy'))
 

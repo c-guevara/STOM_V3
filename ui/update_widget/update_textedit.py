@@ -2,6 +2,7 @@
 import re
 from ui.event_activate import activated_stg
 from ui.etcetera.etc import auto_back_schedule
+from utility.settings.setting_base import ui_num
 from ui.event_click.button_clicked_database import *
 from utility.static_method.static import now, qtest_qwait, now_cme
 from ui.event_click.button_clicked_stg_editer import backtest_detail
