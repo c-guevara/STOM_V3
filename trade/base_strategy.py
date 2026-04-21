@@ -8,6 +8,7 @@ from traceback import format_exc
 from trade.analyzer_risk import AnalyzerRisk
 from trade.stg_globals_func import StgGlobalsFunc
 from trade.manager_formula import get_formula_data
+from trade.analyzer_pattern import AnalyzerPattern
 from trade.analyzer_microstruc import AnalyzerMicrostructure
 from utility.settings.setting_base import indicator, DB_SETTING
 from utility.settings.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
@@ -114,6 +115,7 @@ class BaseStrategy(StgGlobalsFunc):
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
+        self.pt_analyzer = AnalyzerPattern(self.market_info)
 
         set_builtin_print(self.windowQ)
         self._set_formula_data()
@@ -613,6 +615,10 @@ class BaseStrategy(StgGlobalsFunc):
             if 데이터길이 >= self.rolling_window:
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
+            패턴점수, 패턴신뢰도 = 0, 0
+            if self.dict_set['패턴인식분석'] and 데이터길이 >= 5:
+                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_patterns(self.code, self.arry_code)
+
             indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],
                 self.arry_code[:, self.dict_findex['분봉고가']],
@@ -1104,6 +1110,10 @@ class BaseStrategy(StgGlobalsFunc):
 
             if 데이터길이 >= self.rolling_window:
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
+
+            패턴점수, 패턴신뢰도 = 0, 0
+            if self.dict_set['패턴인식분석'] and 데이터길이 >= 5:
+                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_patterns(self.code, self.arry_code)
 
             indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],

@@ -5,8 +5,8 @@ import random
 import sqlite3
 import numpy as np
 from typing import Dict, List
-from multiprocessing import Pool, cpu_count
 from PyQt5.QtWidgets import QMessageBox
+from multiprocessing import Pool, cpu_count
 from utility.static_method.static import now, thread_decorator
 from utility.settings.setting_base import ui_num
 from ui.create_widget.set_text import famous_saying
@@ -30,16 +30,24 @@ PATTERN_FUNCTIONS = [
 ]
 
 
+window_queue = None
+
+
+def init_worker(q):
+    """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
+    global window_queue
+    window_queue = q
+
+
 class AnalyzerPattern:
     """메인 패턴 분석 통합 클래스"""
-    def __init__(self, market_info: dict, minute: int, pct: int):
+    def __init__(self, market_info: dict, minute: int = 30, pct: int = 5):
         self.market_info      = market_info
         self.strategy_type    = market_info['전략구분']
         self.backtest_db_path = market_info['백테디비'][0]
         self.minute           = minute
         self.pct              = pct
         self.pattern_database = PatternDatabase(self.strategy_type)
-        self.pattern_learning = PatternLearning(market_info, minute, pct)
         self.pattern_realtime = PatternRealtime(market_info)
 
     def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
@@ -58,15 +66,22 @@ class AnalyzerPattern:
         code_list = self.get_code_list()
         num_processes = cpu_count()
         code_chunks = self._split_codes(code_list, num_processes)
-        
-        with Pool(processes=num_processes) as pool:
+
+        with Pool(processes=num_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
             args = [(i, chunk, self.backtest_db_path, self.market_info, self.minute, self.pct)
                     for i, chunk in enumerate(code_chunks)]
             results = pool.starmap(self._train_code_chunk, args)
-        
-        total_processed = sum(results)
-        windowQ.put((ui_num['패턴학습'], f"전체 종목 패턴 학습 완료 [{total_processed}]"))
+
+        total_processed = 0
+        for i, chunk_results in enumerate(results):
+            for code, pattern_scores in chunk_results.items():
+                self.pattern_database.save_pattern_scores(code, pattern_scores)
+                total_processed += 1
+            windowQ.put((ui_num['패턴학습'], f"학습 데이터 저장 중 ... [{i+1}/{num_processes}]"))
+
+        windowQ.put((ui_num['패턴학습'], "학습 데이터 저장 완료"))
         windowQ.put((ui_num['패턴학습'], f"{PATTERN_DB} -> {self.pattern_database.table_name}"))
+        windowQ.put((ui_num['패턴학습'], f"전체 종목 패턴 학습 완료 [{total_processed}]"))
 
     def get_code_list(self) -> List[str]:
         """
@@ -97,7 +112,7 @@ class AnalyzerPattern:
 
     @staticmethod
     def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str,
-                          market_info: dict, minute: int, pct: int) -> int:
+                          market_info: dict, minute: int, pct: int) -> Dict[str, Dict[str, float]]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         :param code_chunk: 종목코드 청크
@@ -105,24 +120,28 @@ class AnalyzerPattern:
         :param market_info: 마켓 정보 딕셔너리
         :param minute: 분봉 설정
         :param pct: 퍼센트 설정
-        :return: 처리한 종목 수
+        :return: 종목별 패턴 점수 딕셔너리 {code: pattern_scores}
         """
+        global window_queue
         pattern_learning = PatternLearning(market_info, minute, pct)
-        learning_count = 0
+        all_pattern_scores = {}
         last = len(code_chunk)
-        for code in code_chunk:
+        for k, code in enumerate(code_chunk):
             try:
                 with sqlite3.connect(backtest_db_path) as conn:
                     cursor = conn.cursor()
                     cursor.execute(f'SELECT * FROM "{code}"')
                     results = cursor.fetchall()
                     historical_data = np.array(results)
-                pattern_learning.train_patterns(code, historical_data)
-                learning_count += 1
-                print(f"[{i}][{code}] 패턴 학습 중 ... [{learning_count}/{last}]")
+                pattern_scores = pattern_learning.train_patterns(historical_data)
+                if pattern_scores:
+                    all_pattern_scores[code] = pattern_scores
+                # noinspection PyUnresolvedReferences
+                window_queue.put((ui_num['패턴학습'], f"[{i}][{code}] 패턴 학습 중 ... [{k+1}/{last}]"))
             except Exception as e:
-                print(f"[{i}][{code}] 패턴 학습 실패\n{e}")
-        return learning_count
+                # noinspection PyUnresolvedReferences
+                window_queue.put((ui_num['패턴학습'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
+        return all_pattern_scores
 
 
 class PatternLearning:
@@ -140,12 +159,11 @@ class PatternLearning:
         self.num_processes    = os.cpu_count()
         self.pattern_database = PatternDatabase(self.strategy_type)
 
-    def train_patterns(self, code: str, historical_data: np.ndarray):
+    def train_patterns(self, historical_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
         종목별 과거데이터로 패턴 점수 학습 (순차 처리)
-        :param code: 종목코드
-        :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
-                             칼럼순서는 self.market_info['팩터목록'][0]에 따름
+        :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이) 칼럼순서는 self.market_info['팩터목록'][0]에 따름
+        :return: 패턴별 점수 딕셔너리
         """
         open_price     = historical_data[:, self.idx_open]
         high_price     = historical_data[:, self.idx_high]
@@ -186,7 +204,7 @@ class PatternLearning:
                     'sample_count': len(scores)
                 }
 
-        self.pattern_database.save_pattern_scores(code, pattern_scores)
+        return pattern_scores
 
     def _calculate_score(self, price_change_percent: float) -> float:
         """가격변화율을 기반으로 점수 계산"""
@@ -206,16 +224,16 @@ class PatternRealtime:
         self.idx_close        = factor_list.index('현재가')
         self.pattern_database = PatternDatabase(self.strategy_type)
         self.pattern_scores   = {}
-        self._load_all_pattern_scores()
+        self._load_pattern_scores()
 
-    def _load_all_pattern_scores(self):
-        """
-        데이터베이스에서 모든 종목의 패턴 점수를 미리 로드
-        """
+    def _load_pattern_scores(self):
+        """데이터베이스에서 모든 종목의 패턴 점수를 미리 로드"""
         all_codes = self.pattern_database.get_all_codes()
         if all_codes:
             for code in all_codes:
                 self.pattern_scores[code] = self.pattern_database.get_all_pattern_scores(code)
+            return True
+        return False
 
     def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
@@ -227,10 +245,11 @@ class PatternRealtime:
         """
         pattern_score, reliability = 0, 0
 
-        open_price  = realtime_data[:, self.idx_open]
-        high_price  = realtime_data[:, self.idx_high]
-        low_price   = realtime_data[:, self.idx_low]
-        close_price = realtime_data[:, self.idx_close]
+        realtime_data = realtime_data[-5:]
+        open_price    = realtime_data[:, self.idx_open]
+        high_price    = realtime_data[:, self.idx_high]
+        low_price     = realtime_data[:, self.idx_low]
+        close_price   = realtime_data[:, self.idx_close]
 
         for pattern_name in PATTERN_FUNCTIONS:
             pattern_func = getattr(talib, pattern_name)

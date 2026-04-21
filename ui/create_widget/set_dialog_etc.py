@@ -470,13 +470,13 @@ class SetDialogEtc:
             xw = 100 if i < 10 else 675
             getattr(self.ui, f'set_lineEdittt_{i+1:02d}').setGeometry(x, y, xw, 25)
 
-        self.ui.dialog_pattern.setFixedSize(590, 285)
+        self.ui.dialog_pattern.setFixedSize(590, 400)
         self.ui.ptn_labellllll_01.setGeometry(5, 7, 300, 25)
         self.ui.ptn_comboBoxxx_01.setGeometry(105, 7, 50, 25)
         self.ui.ptn_comboBoxxx_02.setGeometry(220, 7, 50, 25)
         self.ui.ptn_pushButton_01.setGeometry(275, 7, 100, 25)
         self.ui.ptn_pushButton_02.setGeometry(380, 7, 100, 25)
         self.ui.ptn_pushButton_03.setGeometry(485, 7, 100, 25)
-        self.ui.ptn_groupBoxxx_01.setGeometry(5, 35, 580, 245)
+        self.ui.ptn_groupBoxxx_01.setGeometry(5, 35, 580, 360)
         self.ui.ptn_labellllll_02.setGeometry(7, 5, 568, 110)
-        self.ui.ptn_textEdittt_01.setGeometry(7, 130, 568, 110)
+        self.ui.ptn_textEdittt_01.setGeometry(7, 130, 568, 225)
