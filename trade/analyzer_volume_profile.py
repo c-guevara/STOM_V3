@@ -180,12 +180,13 @@ class VolumeProfileLearning:
             )
             
             if sample_count >= 20:
-                score = self._calculate_score(penetration_rate, bounce_rate)
+                score, confidence = self._calculate_score(penetration_rate, bounce_rate, sample_count)
                 node_scores[node_price] = {
                     'avg_score': score,
                     'penetration_rate': penetration_rate,
                     'bounce_rate': bounce_rate,
-                    'sample_count': sample_count
+                    'sample_count': sample_count,
+                    'confidence_score': confidence
                 }
         
         return node_scores
@@ -249,12 +250,17 @@ class VolumeProfileLearning:
         
         return penetration_rate, bounce_rate, total_count
     
-    def _calculate_score(self, penetration_rate: float, bounce_rate: float) -> float:
-        """종합 점수 계산"""
+    def _calculate_score(self, penetration_rate: float, bounce_rate: float, sample_count: int) -> Tuple[float, float]:
+        """종합 점수 및 신뢰도 계산"""
         penetration_score = (penetration_rate - 0.5) / 0.5 * 100
         bounce_score = (bounce_rate - 0.5) / 0.5 * 100
         final_score = penetration_score * 0.6 + bounce_score * 0.4
-        return max(-100.0, min(100.0, final_score))
+        final_score = max(-100.0, min(100.0, final_score))
+        
+        # 신뢰도 점수 계산 (sample_count 기반)
+        confidence_score = min(100.0, sample_count) if sample_count >= 20 else 0.0
+        
+        return final_score, confidence_score
 
 
 class VolumeProfileRealtime:
@@ -305,7 +311,8 @@ class VolumeProfileRealtime:
                 'score': node_data['avg_score'],
                 'penetration_rate': node_data['penetration_rate'],
                 'bounce_rate': node_data['bounce_rate'],
-                'distance_pct': distance_pct
+                'distance_pct': distance_pct,
+                'confidence_score': node_data['confidence_score']
             }
         
         return None
@@ -352,6 +359,7 @@ class VolumeProfileDatabase:
                     penetration_rate REAL NOT NULL,
                     bounce_rate REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
+                    confidence_score REAL NOT NULL,
                     last_update TEXT NOT NULL,
                     PRIMARY KEY (code, price_level)
                 )
@@ -371,7 +379,7 @@ class VolumeProfileDatabase:
         with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
             cursor = conn.cursor()
             cursor.execute(f'''
-                SELECT price_level, avg_score, penetration_rate, bounce_rate, sample_count
+                SELECT price_level, avg_score, penetration_rate, bounce_rate, sample_count, confidence_score
                 FROM {self.table_name}
                 WHERE code = ?
             ''', (code,))
@@ -383,7 +391,8 @@ class VolumeProfileDatabase:
                     'avg_score': result[1],
                     'penetration_rate': result[2],
                     'bounce_rate': result[3],
-                    'sample_count': result[4]
+                    'sample_count': result[4],
+                    'confidence_score': result[5]
                 }
             return volume_scores
 
@@ -397,8 +406,8 @@ class VolumeProfileDatabase:
             for price_level, scores in volume_scores.items():
                 cursor.execute(f'''
                     INSERT OR REPLACE INTO {self.table_name} 
-                    (code, price_level, avg_score, penetration_rate, bounce_rate, sample_count, last_update)
-                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                    (code, price_level, avg_score, penetration_rate, bounce_rate, sample_count, confidence_score, last_update)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
                 ''', (
                     code,
                     price_level,
@@ -406,6 +415,7 @@ class VolumeProfileDatabase:
                     scores['penetration_rate'],
                     scores['bounce_rate'],
                     scores['sample_count'],
+                    scores['confidence_score'],
                     current_date
                 ))
             conn.commit()
