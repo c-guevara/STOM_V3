@@ -4,7 +4,6 @@ import sqlite3
 import pandas as pd
 from PyQt5.QtCore import QUrl, Qt
 from multiprocessing import Process
-from ui.etcetera.etc import chart_clear
 from utility.settings.setting_base import columns_hc
 from utility.static_method.static import str_hms, dt_hms
 from ui.create_widget.dialog_animation import DialogAnimator
@@ -177,6 +176,7 @@ def show_dialog_chart(ui, real, code, tickcount=None, searchdate=None, starttime
     if not ui.dialog_chart.isVisible():
         dialog_chart_show(ui)
     if ui.proc_chqs.is_alive():
+        from ui.etcetera.etc import chart_clear
         if real:
             chart_clear(ui)
             if receiver_process_alive(ui):

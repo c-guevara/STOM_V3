@@ -1,0 +1,411 @@
+
+import os
+import sqlite3
+import numpy as np
+from typing import Dict, List, Tuple
+from multiprocessing import Pool, cpu_count
+from utility.settings.setting_base import ui_num
+
+
+VOLUME_PROFILE_DB = './_database/volume_profile.db'
+
+
+window_queue = None
+
+
+def init_worker(q):
+    """Pool worker 프로세스 초기화 함수: 윈도우 큐를 전역 변수로 설정"""
+    global window_queue
+    window_queue = q
+
+
+class AnalyzerVolumeProfile:
+    """메인 볼륨 프로파일 분석 통합 클래스"""
+
+    def __init__(self, market_info: dict, backtest_db_path: str,
+                 price_range_pct: float = 0.005, top_nodes: int = 10,
+                 penetration_threshold: float = 0.005):
+        """
+        초기화
+        :param market_info: 마켓 정보 딕셔너리
+        :param backtest_db_path: 백테디비 경로
+        :param price_range_pct: 가격대 분할 퍼센트 (기본값 0.5%)
+        :param top_nodes: 상위 볼륨 노드 개수 (기본값 10개)
+        :param penetration_threshold: 돌파/반등 판정 기준 퍼센트 (기본값 0.5%)
+        """
+        self.market_info = market_info
+        self.strategy_type = market_info['전략구분']
+        self.backtest_db_path = backtest_db_path
+        self.price_range_pct = price_range_pct
+        self.top_nodes = top_nodes
+        self.penetration_threshold = penetration_threshold
+        self.volume_database = VolumeProfileDatabase(self.strategy_type)
+        self.volume_realtime = VolumeProfileRealtime(market_info)
+
+    def analyze_current_position(self, code: str, current_price: float) -> Dict[str, float]:
+        """
+        실시간 볼륨 프로파일 분석 수행
+        :param code: 종목코드
+        :param current_price: 현재 가격
+        :return: 볼륨 프로파일 점수 정보
+        """
+        return self.volume_realtime.analyze_current_position(code, current_price)
+
+    def train_all_codes(self, windowQ):
+        """
+        전체 종목 볼륨 프로파일 학습 수행 (종목 기반 멀티프로세싱)
+        """
+        code_list = self.get_code_list()
+        num_processes = cpu_count()
+        code_chunks = self._split_codes(code_list, num_processes)
+
+        actual_processes = min(num_processes, len(code_chunks))
+        with Pool(processes=actual_processes, initializer=init_worker, initargs=(windowQ,)) as pool:
+            args = [(i, chunk, self.backtest_db_path, self.market_info,
+                     self.price_range_pct, self.top_nodes, self.penetration_threshold)
+                    for i, chunk in enumerate(code_chunks)]
+            results = pool.starmap(self._train_code_chunk, args)
+
+        total_processed = 0
+        for i, chunk_results in enumerate(results):
+            for code, volume_scores in chunk_results.items():
+                self.volume_database.save_volume_scores(code, volume_scores)
+                total_processed += 1
+            windowQ.put((ui_num['패턴학습'], f"학습 데이터 저장 중 ... [{i+1}/{actual_processes}]"))
+
+        windowQ.put((ui_num['패턴학습'], "학습 데이터 저장 완료"))
+        windowQ.put((ui_num['패턴학습'], f"{VOLUME_PROFILE_DB} -> {self.volume_database.table_name}"))
+        windowQ.put((ui_num['패턴학습'], f"전체 종목 볼륨 프로파일 학습 완료 [{total_processed}]"))
+
+    def get_code_list(self) -> List[str]:
+        """백테 디비에서 종목코드 목록 추출"""
+        with sqlite3.connect(self.backtest_db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("SELECT name FROM sqlite_master WHERE TYPE = 'table'")
+            results = cursor.fetchall()
+            code_list = [result[0] for result in results if result[0] != 'moneytop' and '_info' not in result[0]]
+            return code_list
+
+    def _split_codes(self, code_list: List[str], num_chunks: int) -> List[List[str]]:
+        """종목 리스트를 CPU수만큼 분할"""
+        if len(code_list) <= num_chunks:
+            return [[code] for code in code_list]
+
+        chunk_size = len(code_list) // num_chunks
+        chunks = []
+        for i in range(num_chunks):
+            start = i * chunk_size
+            end = start + chunk_size if i < num_chunks - 1 else len(code_list)
+            chunks.append(code_list[start:end])
+        return chunks
+
+    @staticmethod
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str,
+                          market_info: dict, price_range_pct: float,
+                          top_nodes: int, penetration_threshold: float) -> Dict[str, Dict[str, float]]:
+        """종목 청크별 학습 (프로세스 내에서 실행)"""
+        global window_queue
+        volume_learning = VolumeProfileLearning(market_info, price_range_pct, top_nodes, penetration_threshold)
+        all_volume_scores = {}
+
+        for code in code_chunk:
+            try:
+                with sqlite3.connect(backtest_db_path) as conn:
+                    cursor = conn.cursor()
+                    cursor.execute(f'SELECT * FROM "{code}"')
+                    results = cursor.fetchall()
+                    historical_data = np.array(results)
+
+                volume_scores = volume_learning.train_volume_profile(historical_data)
+                if volume_scores:
+                    all_volume_scores[code] = volume_scores
+                # noinspection PyUnresolvedReferences
+                window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 볼륨 프로파일 학습 중 ... [{k+1}/{last}]"))
+            except Exception as e:
+                # noinspection PyUnresolvedReferences
+                window_queue.put((ui_num['볼륨학습'], f"[{i}][{code}] 패턴 프로파일 학습 실패 - {e}"))
+
+        return all_volume_scores
+
+
+class VolumeProfileLearning:
+    """과거데이터 기반 볼륨 프로파일 학습 모듈"""
+    
+    def __init__(self, market_info: dict, price_range_pct: float = 0.005, 
+                 top_nodes: int = 10, penetration_threshold: float = 0.005):
+        """
+        초기화
+        :param market_info: 마켓 정보 딕셔너리
+        :param price_range_pct: 가격대 분할 퍼센트 (기본값 0.5%)
+        :param top_nodes: 상위 볼륨 노드 개수 (기본값 10개)
+        :param penetration_threshold: 돌파/반등 판정 기준 퍼센트 (기본값 0.5%)
+        """
+        self.market_info = market_info
+        self.strategy_type = market_info['전략구분']
+        factor_list = market_info['팩터목록'][0]
+        self.idx_close = factor_list.index('현재가')
+        self.idx_volume = factor_list.index('당일거래대금')
+        self.price_range_pct = price_range_pct
+        self.top_nodes = top_nodes
+        self.penetration_threshold = penetration_threshold
+        self.volume_database = VolumeProfileDatabase(self.strategy_type)
+    
+    def train_volume_profile(self, historical_data: np.ndarray) -> Dict[str, Dict[str, float]]:
+        """
+        종목별 과거데이터로 볼륨 프로파일 학습
+        :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
+        :return: 가격대별 점수 딕셔너리
+        """
+        # 최근 30일 데이터만 필터링 (약 30 * 240 = 7200 캔들)
+        recent_data = historical_data[-7200:] if len(historical_data) > 7200 else historical_data
+        close_price = recent_data[:, self.idx_close]
+        volume_data = recent_data[:, self.idx_volume]
+        
+        # 가격대 분할
+        min_price = close_price.min()
+        max_price = close_price.max()
+        price_bins = self._create_price_bins(min_price, max_price)
+        
+        # 각 가격대별 거래량 집계
+        volume_by_bin = self._aggregate_volume_by_price(close_price, volume_data, price_bins)
+        
+        # 상위 볼륨 노드 식별
+        volume_nodes = self._identify_volume_nodes(price_bins, volume_by_bin)
+        
+        # 각 볼륨 노드별 돌파/반등 확률 계산
+        node_scores = {}
+        for node_price in volume_nodes:
+            penetration_rate, bounce_rate, sample_count = self._calculate_penetration_bounce_rate(
+                close_price, node_price
+            )
+            
+            if sample_count >= 20:
+                score = self._calculate_score(penetration_rate, bounce_rate)
+                node_scores[node_price] = {
+                    'avg_score': score,
+                    'penetration_rate': penetration_rate,
+                    'bounce_rate': bounce_rate,
+                    'sample_count': sample_count
+                }
+        
+        return node_scores
+    
+    def _create_price_bins(self, min_price: float, max_price: float) -> np.ndarray:
+        """퍼센트 기반 가격대 분할"""
+        bin_size = min_price * self.price_range_pct
+        num_bins = int((max_price - min_price) / bin_size) + 1
+        bins = np.linspace(min_price, max_price, num_bins)
+        return bins
+    
+    def _aggregate_volume_by_price(self, close_price: np.ndarray, volume_data: np.ndarray, 
+                                   price_bins: np.ndarray) -> np.ndarray:
+        """각 가격대별 거래량 집계"""
+        volume_by_bin = np.zeros(len(price_bins) - 1)
+        for i in range(len(close_price)):
+            price = close_price[i]
+            volume = volume_data[i]
+            bin_idx = np.digitize(price, price_bins) - 1
+            if 0 <= bin_idx < len(volume_by_bin):
+                volume_by_bin[bin_idx] += volume
+        return volume_by_bin
+    
+    def _identify_volume_nodes(self, price_bins: np.ndarray, volume_by_bin: np.ndarray) -> List[float]:
+        """상위 거래량 구간 식별"""
+        bin_centers = (price_bins[:-1] + price_bins[1:]) / 2
+        sorted_indices = np.argsort(volume_by_bin)[::-1]
+        top_indices = sorted_indices[:self.top_nodes]
+        volume_nodes = [bin_centers[idx] for idx in top_indices]
+        return volume_nodes
+    
+    def _calculate_penetration_bounce_rate(self, close_price: np.ndarray,
+                                           node_price: float) -> Tuple[float, float, int]:
+        """돌파/반등 확률 계산"""
+        penetration_count = 0
+        bounce_count = 0
+        total_count = 0
+        
+        threshold = node_price * self.penetration_threshold
+        
+        for i in range(len(close_price) - 10):
+            price = close_price[i]
+            
+            if abs(price - node_price) / node_price <= self.penetration_threshold:
+                total_count += 1
+                
+                future_prices = close_price[i+1:i+11]
+                
+                if future_prices.max() >= node_price + threshold:
+                    penetration_count += 1
+                elif future_prices.min() <= node_price - threshold:
+                    penetration_count += 1
+                else:
+                    bounce_count += 1
+        
+        if total_count == 0:
+            return 0.0, 0.0, 0
+        
+        penetration_rate = penetration_count / total_count
+        bounce_rate = bounce_count / total_count
+        
+        return penetration_rate, bounce_rate, total_count
+    
+    def _calculate_score(self, penetration_rate: float, bounce_rate: float) -> float:
+        """종합 점수 계산"""
+        penetration_score = (penetration_rate - 0.5) / 0.5 * 100
+        bounce_score = (bounce_rate - 0.5) / 0.5 * 100
+        final_score = penetration_score * 0.6 + bounce_score * 0.4
+        return max(-100.0, min(100.0, final_score))
+
+
+class VolumeProfileRealtime:
+    """실시간 볼륨 프로파일 분석 모듈"""
+    
+    def __init__(self, market_info: dict, search_range_pct: float = 0.005):
+        """
+        초기화
+        :param market_info: 마켓 정보 딕셔너리
+        :param search_range_pct: 볼륨 노드 탐색 범위 퍼센트 (기본값 0.5%)
+        """
+        self.market_info = market_info
+        self.strategy_type = market_info['전략구분']
+        factor_list = market_info['팩터목록'][0]
+        self.idx_close = factor_list.index('현재가')
+        self.search_range_pct = search_range_pct
+        self.volume_database = VolumeProfileDatabase(self.strategy_type)
+        self.volume_nodes = {}
+        self._load_volume_nodes()
+    
+    def _load_volume_nodes(self):
+        """데이터베이스에서 모든 종목의 볼륨 노드 로드"""
+        all_codes = self.volume_database.get_all_codes()
+        if all_codes:
+            for code in all_codes:
+                self.volume_nodes[code] = self.volume_database.get_all_volume_scores(code)
+            return True
+        return False
+    
+    def analyze_current_position(self, code: str, current_price: float) -> Dict[str, float]:
+        """
+        현재 가격 위치의 볼륨 프로파일 점수 반환
+        :param code: 종목코드
+        :param current_price: 현재 가격
+        :return: 볼륨 프로파일 점수 정보
+        """
+        if code not in self.volume_nodes:
+            return None
+        
+        nearest_node = self._find_nearest_volume_node(current_price, self.volume_nodes[code])
+        
+        if nearest_node:
+            node_data = self.volume_nodes[code][nearest_node]
+            distance_pct = abs(current_price - nearest_node) / nearest_node * 100
+            
+            return {
+                'node_price': nearest_node,
+                'score': node_data['avg_score'],
+                'penetration_rate': node_data['penetration_rate'],
+                'bounce_rate': node_data['bounce_rate'],
+                'distance_pct': distance_pct
+            }
+        
+        return None
+    
+    def _find_nearest_volume_node(self, current_price: float, volume_scores: Dict[str, Dict[str, float]]) -> float:
+        """가장 가까운 볼륨 노드 탐색"""
+        nearest_node = None
+        min_distance = float('inf')
+        
+        for node_price in volume_scores.keys():
+            distance = abs(current_price - node_price)
+            if distance / node_price <= self.search_range_pct:
+                if distance < min_distance:
+                    min_distance = distance
+                    nearest_node = node_price
+        
+        return nearest_node
+
+
+class VolumeProfileDatabase:
+    """볼륨 프로파일 점수 데이터베이스 관리 클래스"""
+
+    def __init__(self, strategy_type: str):
+        self.strategy_type = strategy_type
+        self.table_name = f'{strategy_type}_volume_score'
+        self._ensure_db_directory()
+        self._initialize_tables()
+
+    def _ensure_db_directory(self):
+        """데이터베이스 디렉토리 생성"""
+        db_dir = os.path.dirname(VOLUME_PROFILE_DB)
+        if db_dir and not os.path.exists(db_dir):
+            os.makedirs(db_dir, exist_ok=True)
+
+    def _initialize_tables(self):
+        """데이터베이스 테이블 초기화"""
+        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'''
+                CREATE TABLE IF NOT EXISTS {self.table_name} (
+                    code TEXT NOT NULL,
+                    price_level REAL NOT NULL,
+                    avg_score REAL NOT NULL,
+                    penetration_rate REAL NOT NULL,
+                    bounce_rate REAL NOT NULL,
+                    sample_count INTEGER NOT NULL,
+                    last_update TEXT NOT NULL,
+                    PRIMARY KEY (code, price_level)
+                )
+            ''')
+            conn.commit()
+
+    def get_all_codes(self) -> List[str]:
+        """데이터베이스에 저장된 전체 종목코드 조회"""
+        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'SELECT DISTINCT code FROM {self.table_name}')
+            results = cursor.fetchall()
+            return [result[0] for result in results]
+
+    def get_all_volume_scores(self, code: str) -> Dict[str, Dict[str, float]]:
+        """종목의 전체 볼륨 프로파일 점수 조회"""
+        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+            cursor = conn.cursor()
+            cursor.execute(f'''
+                SELECT price_level, avg_score, penetration_rate, bounce_rate, sample_count
+                FROM {self.table_name}
+                WHERE code = ?
+            ''', (code,))
+            results = cursor.fetchall()
+
+            volume_scores = {}
+            for result in results:
+                volume_scores[result[0]] = {
+                    'avg_score': result[1],
+                    'penetration_rate': result[2],
+                    'bounce_rate': result[3],
+                    'sample_count': result[4]
+                }
+            return volume_scores
+
+    def save_volume_scores(self, code: str, volume_scores: Dict[str, Dict[str, float]]):
+        """종목별 볼륨 프로파일 점수 저장"""
+        from utility.static_method.static import now
+        current_date = now().strftime('%Y-%m-%d')
+
+        with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
+            cursor = conn.cursor()
+            for price_level, scores in volume_scores.items():
+                cursor.execute(f'''
+                    INSERT OR REPLACE INTO {self.table_name} 
+                    (code, price_level, avg_score, penetration_rate, bounce_rate, sample_count, last_update)
+                    VALUES (?, ?, ?, ?, ?, ?, ?)
+                ''', (
+                    code,
+                    price_level,
+                    scores['avg_score'],
+                    scores['penetration_rate'],
+                    scores['bounce_rate'],
+                    scores['sample_count'],
+                    current_date
+                ))
+            conn.commit()

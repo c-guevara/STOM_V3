@@ -7,9 +7,9 @@ import numpy as np
 from typing import Dict, List
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
-from utility.static_method.static import now, thread_decorator
 from utility.settings.setting_base import ui_num
 from ui.create_widget.set_text import famous_saying
+from utility.static_method.static import now, thread_decorator
 
 
 PATTERN_DB = './_database/pattern_analysis.db'
@@ -145,6 +145,7 @@ class AnalyzerPattern:
             except Exception as e:
                 # noinspection PyUnresolvedReferences
                 window_queue.put((ui_num['패턴학습'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
+
         return all_pattern_scores
 
 
@@ -380,16 +381,6 @@ class PatternDatabase:
                     scores['sample_count'],
                     current_date
                 ))
-            conn.commit()
-
-    def delete_all_pattern_scores(self, code: str):
-        """
-        종목의 전체 패턴 점수 삭제
-        code: 종목코드
-        """
-        with sqlite3.connect(PATTERN_DB) as conn:
-            cursor = conn.cursor()
-            cursor.execute(f'DELETE FROM {self.table_name} WHERE code = ?', (code,))
             conn.commit()
 
     def load_pattern_setting(self, market: int) -> tuple:
