@@ -53,6 +53,7 @@ class StockUsaReceiver(BaseReceiver):
                 int_hms = int(body['loctime'])
                 if int_hms < self.market_open:
                     return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code = body['symbol']
                 hoga_seprice = [
@@ -81,6 +82,7 @@ class StockUsaReceiver(BaseReceiver):
                 int_hms = int(body['trdtm'])
                 if int_hms < self.market_open:
                     return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code = body['symbol']
                 c    = float(body['price'])

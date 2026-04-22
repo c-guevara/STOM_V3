@@ -56,6 +56,7 @@ class StockReceiver(BaseReceiver):
                 int_hms = int(body['hotime'])
                 if int_hms < self.market_open:
                     return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code = body['shcode']
                 hoga_seprice = [
@@ -92,6 +93,7 @@ class StockReceiver(BaseReceiver):
                 int_hms = int(body['chetime'])
                 if int_hms < self.market_open:
                     return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code  = body['shcode']
                 c     = int(body['price'])

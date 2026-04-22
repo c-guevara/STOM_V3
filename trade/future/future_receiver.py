@@ -52,6 +52,9 @@ class FutureReceiver(BaseReceiver):
 
             if tr_cd == self.tr_cd_hoga:
                 int_hms = int(body['hotime'])
+                if int_hms < self.market_open:
+                    return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code = body['futcode']
                 hoga_seprice = [
@@ -78,6 +81,9 @@ class FutureReceiver(BaseReceiver):
 
             elif tr_cd == self.tr_cd_trade:
                 int_hms = int(body['chetime'])
+                if int_hms < self.market_open:
+                    return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code  = body['futcode']
                 c     = float(body['price'])

@@ -51,6 +51,7 @@ class FutureOsReceiver(BaseReceiver):
                 int_hms = int(body['hotime'])
                 if int_hms < self.market_open:
                     return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code = body['symbol']
                 hoga_seprice = [
@@ -79,6 +80,7 @@ class FutureOsReceiver(BaseReceiver):
                 int_hms = int(body['trdtm'])
                 if int_hms < self.market_open:
                     return
+
                 dt = int(f"{self.str_today}{int_hms}")
                 code  = body['symbol']
                 c     = float(body['curpr'])
