@@ -316,7 +316,7 @@ class SetDialogChart:
             getattr(self.ui, f'ft_checkBoxxxxx_{i+19}').setGeometry(10, y, 380, 20)
 
         for i in range(18):
-            y = 150 + i * 25 if i < 10 else 175 + i * 25
+            y = 150 + i * 25 if i < 11 else 175 + i * 25
             getattr(self.ui, f'ft_labellllllll_{i+1:02d}').setGeometry(100, y, 300, 20)
 
         self.ui.ft_lineEdittttt_01.setGeometry(180, 150, 40, 20)
