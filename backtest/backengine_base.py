@@ -2,7 +2,6 @@
 import sqlite3
 import numpy as np
 import pandas as pd
-import polars as pl
 from traceback import format_exc
 from multiprocessing import shared_memory
 from trade.analyzer_risk import AnalyzerRisk
@@ -361,13 +360,12 @@ class BackEngineBase(StgGlobalsFunc):
             """종목의 코드, 일자들, 시작시간, 종료시간으로 쿼리를 만들어서 데이터를 로딩 한 후에 롤링 데이터를 추가하고 2차원 어레이로 만든다.
             만든 2차원 어레이와 관련 정보를 all_data에 기록한다."""
             try:
-                query = get_back_load_code_query(self.is_tick, code, days, starttime, endtime)
-                df_pl = pl.read_database(query, connection=con)
+                df = pd.read_sql(get_back_load_code_query(self.is_tick, code, days, starttime, endtime), con)
             except Exception:
                 pass
             else:
-                if df_pl.height > 0:
-                    arry = add_rolling_data(df_pl, round_unit, angle_cf_list, self.is_tick, avg_list)
+                if len(df) > 0:
+                    arry = add_rolling_data(df, round_unit, angle_cf_list, self.is_tick, avg_list)
                     all_data.append({
                         'code': code,
                         'data': arry,
@@ -378,13 +376,13 @@ class BackEngineBase(StgGlobalsFunc):
 
         self._update_sub_vars()
 
-        all_data = []
-        divid_mode = data[-1]
-
         round_unit = self.market_info['반올림단위']
         angle_cf_list = self.market_info['각도계수'][self.is_tick]
 
         con = sqlite3.connect(self.market_info['백테디비'][self.is_tick])
+
+        all_data = []
+        divid_mode = data[-1]
 
         if divid_mode == '종목코드별 분류':
             _, startday, endday, starttime, endtime, code_list, avg_list, code_days, _, _, _ = data
