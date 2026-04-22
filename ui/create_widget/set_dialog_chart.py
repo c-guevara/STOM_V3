@@ -28,6 +28,8 @@ class SetDialogChart:
         """차트 다이얼로그를 설정합니다."""
         self.ui.dialog_chart = self.wc.setDialog('STOM CHART')
         self.ui.dialog_chart.geometry().center()
+        self.ui.dialog_list.append(self.ui.dialog_chart)
+
         self.ui.ct_groupBoxxxxx_01 = QGroupBox(' ', self.ui.dialog_chart)
         self.ui.ct_groupBoxxxxx_02 = QGroupBox(' ', self.ui.dialog_chart)
 
@@ -110,6 +112,8 @@ class SetDialogChart:
 
         self.ui.dialog_factor = self.wc.setDialog('STOM FACTOR', parent=self.ui.dialog_chart)
         self.ui.dialog_factor.geometry().center()
+        self.ui.dialog_list.append(self.ui.dialog_factor)
+
         self.ui.jp_groupBoxxxxx_01 = QGroupBox(' ', self.ui.dialog_factor)
 
         if self.ui.dict_set is not None:
