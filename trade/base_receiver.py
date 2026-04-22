@@ -34,7 +34,6 @@ class BaseReceiver:
     다양한 큐를 통해 다른 모듈과 통신하며,
     시장 데이터(체결, 호가)를 처리합니다.
     """
-
     def __init__(self, qlist, dict_set, market_infos):
         """
         windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ

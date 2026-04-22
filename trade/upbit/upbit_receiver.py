@@ -54,12 +54,14 @@ class UpbitReceiver(BaseReceiver):
         Args:
             data: 데이터
         """
+        if self.dict_bool['프로세스종료']:
+            return
+
         try:
             if data['type'] == 'orderbook':
-                dt = int(str_ymdhms_utc(data['timestamp']))
-                if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
+                if self.dict_bool['프로세스종료']:
                     return
-
+                dt = int(str_ymdhms_utc(data['timestamp']))
                 receivetime = now()
                 code = data['code']
                 hoga_tamount = [
@@ -90,10 +92,9 @@ class UpbitReceiver(BaseReceiver):
                                        hoga_bamount, hoga_tamount, receivetime)
 
             elif data['type'] == 'ticker':
-                dt = int(str_ymdhms_utc(data['timestamp']))
-                if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
+                if self.dict_bool['프로세스종료']:
                     return
-
+                dt    = int(str_ymdhms_utc(data['timestamp']))
                 code  = data['code']
                 c     = data['trade_price']
                 o     = data['opening_price']

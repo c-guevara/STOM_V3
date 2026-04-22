@@ -93,17 +93,15 @@ class BinanceReceiver(BaseReceiver):
         Args:
             data: 데이터
         """
-        if 'stream' not in data:
+        if self.dict_bool['프로세스종료']:
             return
 
         try:
             stream_name = data['stream']
             data = data['data']
+
             if '@depth10' in stream_name:
                 dt = int(str_ymdhms_utc(data['T']))
-                if self.dict_set['전략종료시간'] < int(str(dt)[8:]):
-                    return
-
                 receivetime = now()
                 code = data['s']
                 asks_data = data['a']

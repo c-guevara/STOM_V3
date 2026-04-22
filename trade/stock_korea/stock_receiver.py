@@ -57,16 +57,17 @@ class StockReceiver(BaseReceiver):
         Args:
             data: 데이터
         """
-        body = data['body']
-        if body is None:
+        if self.dict_bool['프로세스종료']:
             return
 
         try:
             start = now()
             tr_cd = data['header']['tr_cd']
+            body  = data['body']
+
             if tr_cd == self.tr_cd_hoga:
                 int_hms = int(body['hotime'])
-                if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
+                if int_hms < self.market_open:
                     return
                 dt = int(f"{self.str_today}{int_hms}")
                 code = body['shcode']
@@ -102,7 +103,7 @@ class StockReceiver(BaseReceiver):
                 if market != 'KRX':
                     return
                 int_hms = int(body['chetime'])
-                if int_hms < self.market_open or self.dict_set['전략종료시간'] < int_hms:
+                if int_hms < self.market_open:
                     return
                 dt = int(f"{self.str_today}{int_hms}")
                 code  = body['shcode']
