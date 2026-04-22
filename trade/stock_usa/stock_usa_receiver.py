@@ -1,24 +1,21 @@
 
 import sys
-from PyQt5.QtCore import QTimer
 from traceback import format_exc
 from trade.restapi_ls import LsRestData
 from PyQt5.QtWidgets import QApplication
+from trade.base_receiver import BaseReceiver
 from utility.static_method.static import now
 from utility.settings.setting_base import ui_num
 from trade.restapi_ls import LsRestAPI, LsWebSocketReceiver
-from trade.base_receiver import BaseReceiver, MonitorReceivQ
 
 
 class StockUsaReceiver(BaseReceiver):
     """미국 주식 데이터 수신 클래스입니다.
-    BaseReceiver를 상속받아 미국 주식 시장 데이터를 수신합니다.
-    """
-
+    BaseReceiver를 상속받아 미국 주식 시장 데이터를 수신합니다."""
     def __init__(self, qlist, dict_set, market_infos):
-        super().__init__(qlist, dict_set, market_infos)
-
         app = QApplication(sys.argv)
+
+        super().__init__(qlist, dict_set, market_infos)
 
         self.ls = LsRestAPI(self.windowQ, self.access_key, self.secret_key)
         self.token = self.ls.create_token()
@@ -29,16 +26,6 @@ class StockUsaReceiver(BaseReceiver):
         self.ws_thread = LsWebSocketReceiver(self.market_info['마켓이름'], self.token, self.codes, self.windowQ)
         self.ws_thread.signal.connect(self._convert_real_data)
         self.ws_thread.start()
-
-        self.updater = MonitorReceivQ(self.receivQ)
-        self.updater.signal1.connect(self._update_tuple)
-        self.updater.signal2.connect(self._sys_exit)
-        self.updater.start()
-
-        self.qtimer = QTimer()
-        self.qtimer.setInterval(1 * 1000)
-        self.qtimer.timeout.connect(self._scheduler)
-        self.qtimer.start()
 
         app.exec_()
 
