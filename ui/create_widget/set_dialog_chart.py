@@ -119,7 +119,7 @@ class SetDialogChart:
             is_min = False
             checkbox_choice = []
 
-        if len(checkbox_choice) < 43: checkbox_choice = [1] * 43
+        if len(checkbox_choice) < 38: checkbox_choice = [1] * 38
 
         # 체크박스 데이터 정의 (텍스트, 변경 핸들러 인덱스)
         checkbox_data = [
@@ -311,7 +311,7 @@ class SetDialogChart:
         self.ui.ft_checkBoxxxxx_17.setGeometry(570, 75, 120, 20)
         self.ui.ft_checkBoxxxxx_18.setGeometry(710, 75, 120, 20)
 
-        for i in range(16):
+        for i in range(20):
             y = 125 + i * 25
             getattr(self.ui, f'ft_checkBoxxxxx_{i+19}').setGeometry(10, y, 380, 20)
 
@@ -329,11 +329,11 @@ class SetDialogChart:
         self.ui.ft_lineEdittttt_14.setGeometry(180, 325, 40, 20)
         self.ui.ft_lineEdittttt_15.setGeometry(180, 350, 40, 20)
         self.ui.ft_lineEdittttt_18.setGeometry(180, 375, 40, 20)
-        self.ui.ft_lineEdittttt_19.setGeometry(180, 425, 40, 20)
-        self.ui.ft_lineEdittttt_23.setGeometry(180, 450, 40, 20)
-        self.ui.ft_lineEdittttt_24.setGeometry(180, 475, 40, 20)
-        self.ui.ft_lineEdittttt_25.setGeometry(180, 500, 40, 20)
-        self.ui.ft_lineEdittttt_20.setGeometry(180, 525, 40, 20)
+        self.ui.ft_lineEdittttt_19.setGeometry(180, 400, 40, 20)
+        self.ui.ft_lineEdittttt_20.setGeometry(180, 450, 40, 20)
+        self.ui.ft_lineEdittttt_23.setGeometry(180, 475, 40, 20)
+        self.ui.ft_lineEdittttt_24.setGeometry(180, 500, 40, 20)
+        self.ui.ft_lineEdittttt_25.setGeometry(180, 525, 40, 20)
         self.ui.ft_lineEdittttt_27.setGeometry(180, 550, 40, 20)
         self.ui.ft_lineEdittttt_32.setGeometry(180, 575, 40, 20)
         self.ui.ft_lineEdittttt_35.setGeometry(180, 600, 40, 20)

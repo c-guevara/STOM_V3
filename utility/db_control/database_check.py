@@ -108,11 +108,13 @@ def database_check():
                 df['가격대분석'] = 0
                 df.to_sql('back', con, if_exists='replace')
 
+        FACTOR_COUNT = 38
+
         if 'etc' not in table_list:
             columns = ["index", "테마", "저해상도", "휴무프로세스종료", "휴무컴퓨터종료", "창위치기억", "창위치", "스톰라이브",
                        "프로그램종료", "웹대시보드", "웹대시보드포트번호", "팩터선택", "시리얼키"]
             data = [0, '다크블루', 0, 1, 0, 1, '', 1, 0, 0, 3000,
-                    '1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1;1', '']
+                    ';'.join(['1'] * FACTOR_COUNT), '']
             df = pd.DataFrame([data], columns=columns).set_index('index')
             df.to_sql('etc', con)
 
