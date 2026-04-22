@@ -2,6 +2,7 @@
 import bisect
 import datetime
 import numpy as np
+import polars as pl
 from numba import njit
 
 
@@ -63,10 +64,10 @@ def get_ema_list(is_tick):
     return (60, 150, 300, 600, 1200) if is_tick else (5, 10, 20, 60, 120)
 
 
-def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None, cf2=None):
+def add_rolling_data(df_pl, round_unit, angle_cf_list, is_tick, avg_list, cf1=None, cf2=None):
     """롤링 데이터를 추가합니다.
     Args:
-        df: 데이터프레임
+        df_pl: 폴라스 데이터프레임
         round_unit: 반올림 단위
         angle_cf_list: 각도 계수 리스트
         is_tick: 틱 데이터 여부
@@ -76,52 +77,125 @@ def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None,
     Returns:
         배열
     """
+    # 이동평균 계산
     for window in get_ema_list(is_tick):
-        df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(round_unit)
-
+        df_pl = df_pl.with_columns([
+            pl.col('현재가')
+            .rolling_mean(window_size=window)
+            .round(round_unit)
+            .alias(f'이동평균{window}')
+        ])
+    
+    # 롤링 데이터 계산
     for avg in avg_list:
-        rolling_data = df['현재가'].rolling(window=avg)
-        df[f'최고현재가{avg}'] = rolling_data.max()
-        df[f'최저현재가{avg}'] = rolling_data.min()
-
+        # 현재가 최고/최저
+        df_pl = df_pl.with_columns([
+            pl.col('현재가')
+            .rolling_max(window_size=avg)
+            .alias(f'최고현재가{avg}'),
+            pl.col('현재가')
+            .rolling_min(window_size=avg)
+            .alias(f'최저현재가{avg}')
+        ])
+        
+        # 분봉 고가/저가 (틱 아닌 경우)
         if not is_tick:
-            df[f'최고분봉고가{avg}'] = df['분봉고가'].rolling(window=avg).max()
-            df[f'최저분봉저가{avg}'] = df['분봉저가'].rolling(window=avg).min()
-
-        rolling_data = df['체결강도'].rolling(window=avg)
-        df[f'체결강도평균{avg}'] = rolling_data.mean().round(3)
-        df[f'최고체결강도{avg}'] = rolling_data.max()
-        df[f'최저체결강도{avg}'] = rolling_data.min()
-
+            df_pl = df_pl.with_columns([
+                pl.col('분봉고가')
+                .rolling_max(window_size=avg)
+                .alias(f'최고분봉고가{avg}'),
+                pl.col('분봉저가')
+                .rolling_min(window_size=avg)
+                .alias(f'최저분봉저가{avg}')
+            ])
+        
+        # 체결강도 평균/최고/최저
+        df_pl = df_pl.with_columns([
+            pl.col('체결강도')
+            .rolling_mean(window_size=avg)
+            .round(3)
+            .alias(f'체결강도평균{avg}'),
+            pl.col('체결강도')
+            .rolling_max(window_size=avg)
+            .alias(f'최고체결강도{avg}'),
+            pl.col('체결강도')
+            .rolling_min(window_size=avg)
+            .alias(f'최저체결강도{avg}')
+        ])
+        
+        # 틱/분봉별 추가 계산
         if is_tick:
-            rolling_data1 = df['초당매수수량'].rolling(window=avg)
-            rolling_data2 = df['초당매도수량'].rolling(window=avg)
-            df[f'최고초당매수수량{avg}'] = rolling_data1.max()
-            df[f'최고초당매도수량{avg}'] = rolling_data2.max()
-            df[f'누적초당매수수량{avg}'] = rolling_data1.sum()
-            df[f'누적초당매도수량{avg}'] = rolling_data2.sum()
-            df[f'초당거래대금평균{avg}'] = df['초당거래대금'].rolling(window=avg).mean().round(0)
+            df_pl = df_pl.with_columns([
+                pl.col('초당매수수량')
+                .rolling_max(window_size=avg)
+                .alias(f'최고초당매수수량{avg}'),
+                pl.col('초당매도수량')
+                .rolling_max(window_size=avg)
+                .alias(f'최고초당매도수량{avg}'),
+                pl.col('초당매수수량')
+                .rolling_sum(window_size=avg)
+                .alias(f'누적초당매수수량{avg}'),
+                pl.col('초당매도수량')
+                .rolling_sum(window_size=avg)
+                .alias(f'누적초당매도수량{avg}'),
+                pl.col('초당거래대금')
+                .rolling_mean(window_size=avg)
+                .round(0)
+                .alias(f'초당거래대금평균{avg}')
+            ])
         else:
-            rolling_data1 = df['분당매수수량'].rolling(window=avg)
-            rolling_data2 = df['분당매도수량'].rolling(window=avg)
-            df[f'최고분당매수수량{avg}'] = rolling_data1.max()
-            df[f'최고분당매도수량{avg}'] = rolling_data2.max()
-            df[f'누적분당매수수량{avg}'] = rolling_data1.sum()
-            df[f'누적분당매도수량{avg}'] = rolling_data2.sum()
-            df[f'분당거래대금평균{avg}'] = df['분당거래대금'].rolling(window=avg).mean().round(0)
-
+            df_pl = df_pl.with_columns([
+                pl.col('분당매수수량')
+                .rolling_max(window_size=avg)
+                .alias(f'최고분당매수수량{avg}'),
+                pl.col('분당매도수량')
+                .rolling_max(window_size=avg)
+                .alias(f'최고분당매도수량{avg}'),
+                pl.col('분당매수수량')
+                .rolling_sum(window_size=avg)
+                .alias(f'누적분당매수수량{avg}'),
+                pl.col('분당매도수량')
+                .rolling_sum(window_size=avg)
+                .alias(f'누적분당매도수량{avg}'),
+                pl.col('분당거래대금')
+                .rolling_mean(window_size=avg)
+                .round(0)
+                .alias(f'분당거래대금평균{avg}')
+            ])
+        
+        # 각도 계산
         if cf1 is None:
             cf1, cf2 = angle_cf_list
-
-        df2 = df[['등락율', '당일거래대금']].copy()
-        df2[f'등락율N{avg}'] = df2['등락율'].shift(avg - 1)
-        df2['등락율차이'] = df2['등락율'] - df2[f'등락율N{avg}']
-        df2[f'당일거래대금N{avg}'] = df2['당일거래대금'].shift(avg - 1)
-        df2['당일거래대금차이'] = df2['당일거래대금'] - df2[f'당일거래대금N{avg}']
-        df['등락율각도'] = round(np.arctan2(df2['등락율차이'] * cf1, avg) / (2 * np.pi) * 360, 2)
-        df['당일거래대금각도'] = round(np.arctan2(df2['당일거래대금차이'] * cf2, avg) / (2 * np.pi) * 360, 2)
-
-    arry = np.array(df)
+        
+        # 등락율/당일거래대금 각도 계산
+        df_pl = df_pl.with_columns([
+            pl.col('등락율')
+            .shift(avg - 1)
+            .alias(f'등락율N{avg}'),
+            pl.col('당일거래대금')
+            .shift(avg - 1)
+            .alias(f'당일거래대금N{avg}')
+        ])
+        
+        df_pl = df_pl.with_columns([
+            (pl.col('등락율') - pl.col(f'등락율N{avg}'))
+            .alias('등락율차이'),
+            (pl.col('당일거래대금') - pl.col(f'당일거래대금N{avg}'))
+            .alias('당일거래대금차이')
+        ])
+        
+        # 각도 계산 (Polars 표현식 사용)
+        df_pl = df_pl.with_columns([
+            ((pl.col('등락율차이') * cf1 / avg).arctan() / (2 * np.pi) * 360)
+            .round(2)
+            .alias('등락율각도'),
+            ((pl.col('당일거래대금차이') * cf2 / avg).arctan() / (2 * np.pi) * 360)
+            .round(2)
+            .alias('당일거래대금각도')
+        ])
+    
+    # numpy 배열로 변환
+    arry = df_pl.to_numpy()
     return np.nan_to_num(arry)
 
 
