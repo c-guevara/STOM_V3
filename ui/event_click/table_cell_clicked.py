@@ -211,11 +211,14 @@ def cell_clicked_06(ui, row, col):
     ui.ct_lineEdittttt_04.setText(code)
     ui.ct_lineEdittttt_05.setText(name)
     ui.ct_dateEdittttt_01.setDate(QDate.fromString(searchdate, 'yyyyMMdd'))
+
     data = (code, tickcount, searchdate, starttime, endtime, get_indicator_detail(ui))
     cf1, cf2 = ui.ft_lineEdittttt_36.text(), ui.ft_lineEdittttt_37.text()
     if cf1 and cf2: data += (float(cf1), float(cf2))
     ui.chartQ.put(data)
-    if ui.dialog_web.isVisible(): show_dialog_web(ui, False, code)
+
+    if ui.dialog_web.isVisible():
+        show_dialog_web(ui, False, code)
 
 
 # noinspection PyUnusedLocal

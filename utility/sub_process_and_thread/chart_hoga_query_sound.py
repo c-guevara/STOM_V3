@@ -150,7 +150,7 @@ class ChartHogaQuerySound:
                         self._set_dict_findex()
                     elif data[0] == '그래프비교':
                         self._graph_comparison(data[1])
-                    elif len(data) >= 7:
+                    elif len(data) >= 6:
                         self._update_chart(data)
 
                 if not self.soundQ.empty():
