@@ -108,7 +108,7 @@ def mnbutton_c_clicked_03(ui, auto=False):
                 holiday = True
 
             if holiday:
-                ui.windowQ.put((ui_num['시스템로그'], f"거래소 {ui.market_info['마켓이름']}, 휴무 종료"))
+                ui.windowQ.put((ui_num['기본로그'], f"거래소 {ui.market_info['마켓이름']}, 휴무 종료"))
                 return
 
         mnbutton_c_clicked_01(ui, 1)
