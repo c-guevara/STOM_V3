@@ -57,23 +57,23 @@ class StockReceiver(BaseReceiver):
                 if int(str_hms) < self.market_open:
                     return
 
-                dt = int(f"{self.str_today}{str_hms}")
+                dt   = int(f"{self.str_today}{str_hms}")
                 code = body['shcode']
                 hoga_seprice = [
-                    float(body['offerho1']), float(body['offerho2']), float(body['offerho3']), float(body['offerho4']),
-                    float(body['offerho5']), float(body['offerho6']), float(body['offerho7']), float(body['offerho8']),
-                    float(body['offerho9']), float(body['offerho10'])
+                    int(body['offerho1']), int(body['offerho2']), int(body['offerho3']), int(body['offerho4']),
+                    int(body['offerho5']), int(body['offerho6']), int(body['offerho7']), int(body['offerho8']),
+                    int(body['offerho9']), int(body['offerho10'])
                 ]
                 hoga_buprice = [
-                    float(body['bidho1']), float(body['bidho2']), float(body['bidho3']), float(body['bidho4']),
-                    float(body['bidho5']), float(body['bidho6']), float(body['bidho7']), float(body['bidho8']),
-                    float(body['bidho9']), float(body['bidho10'])
+                    int(body['bidho1']), int(body['bidho2']), int(body['bidho3']), int(body['bidho4']),
+                    int(body['bidho5']), int(body['bidho6']), int(body['bidho7']), int(body['bidho8']),
+                    int(body['bidho9']), int(body['bidho10'])
                 ]
                 hoga_samount = [
-                    float(body['krx_offerrem1']), float(body['krx_offerrem2']), float(body['krx_offerrem3']),
-                    float(body['krx_offerrem4']), float(body['krx_offerrem5']), float(body['krx_offerrem6']),
-                    float(body['krx_offerrem7']), float(body['krx_offerrem8']), float(body['krx_offerrem9']),
-                    float(body['krx_offerrem10'])
+                    int(body['krx_offerrem1']), int(body['krx_offerrem2']), int(body['krx_offerrem3']),
+                    int(body['krx_offerrem4']), int(body['krx_offerrem5']), int(body['krx_offerrem6']),
+                    int(body['krx_offerrem7']), int(body['krx_offerrem8']), int(body['krx_offerrem9']),
+                    int(body['krx_offerrem10'])
                 ]
                 hoga_bamount = [
                     int(body['krx_bidrem1']), int(body['krx_bidrem2']), int(body['krx_bidrem3']), int(body['krx_bidrem4']),
@@ -94,7 +94,7 @@ class StockReceiver(BaseReceiver):
                 if int(str_hms) < self.market_open:
                     return
 
-                dt = int(f"{self.str_today}{str_hms}")
+                dt    = int(f"{self.str_today}{str_hms}")
                 code  = body['shcode']
                 c     = int(body['price'])
                 o     = int(body['open'])

@@ -123,11 +123,11 @@ class BinanceReceiver(BaseReceiver):
                                        hoga_bamount, hoga_tamount, receivetime)
 
             elif '@aggTrade' in stream_name:
-                dt = int(str_ymdhms_utc(data['T']))
+                dt   = int(str_ymdhms_utc(data['T']))
                 code = data['s']
-                c = float(data['p'])
-                v = float(data['q'])
-                m = data['m']
+                c    = float(data['p'])
+                v    = float(data['q'])
+                m    = data['m']
                 self._update_tick_data_coin_future(dt, code, c, v, m)
 
         except Exception:

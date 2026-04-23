@@ -54,7 +54,7 @@ class StockUsaReceiver(BaseReceiver):
                 if int(str_hms) < self.market_open:
                     return
 
-                dt = int(f"{self.str_today}{str_hms}")
+                dt   = int(f"{self.str_today}{str_hms}")
                 code = body['symbol']
                 hoga_seprice = [
                     float(body['offerho1']), float(body['offerho2']), float(body['offerho3']),
@@ -83,7 +83,7 @@ class StockUsaReceiver(BaseReceiver):
                 if int(str_hms) < self.market_open:
                     return
 
-                dt = int(f"{self.str_today}{str_hms}")
+                dt   = int(f"{self.str_today}{str_hms}")
                 code = body['symbol']
                 c    = float(body['price'])
                 o    = float(body['open'])
