@@ -46,6 +46,7 @@ class ImportProgressHook:
             'ui.create_widget.set_text_stg_button',
             'ui.update_widget.update_tablewidget',
             'ui.update_widget.update_telegram_msg',
+            'utility.sub_process_and_thread.pyttsx_sound',
             'ui.event_click.button_clicked_settings',
             'ui.update_widget.update_crawling_date',
             'ui.event_keypress.overwrite_keypress_event',
