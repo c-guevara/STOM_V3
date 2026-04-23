@@ -16,6 +16,7 @@ class ImportProgressHook:
             'utility.db_control.database_read_only',
             'utility.sub_process_and_thread.webcrawling',
             'utility.sub_process_and_thread.telegram_bot',
+            'utility.sub_process_and_thread.pyttsx_sound',
             'utility.sub_process_and_thread.chart_hoga_query_sound',
             'utility.static_method.static',
 
@@ -46,14 +47,13 @@ class ImportProgressHook:
             'ui.create_widget.set_text_stg_button',
             'ui.update_widget.update_tablewidget',
             'ui.update_widget.update_telegram_msg',
-            'utility.sub_process_and_thread.pyttsx_sound',
             'ui.event_click.button_clicked_settings',
             'ui.update_widget.update_crawling_date',
             'ui.event_keypress.overwrite_keypress_event',
             'ui.event_keypress.overwrite_event_filter',
             'ui.etcetera.process_alive',
             'ui.update_widget.update_progressbar',
-            'ui.event_click.button_clicked_backtest_engine',
+            'ui.event_click.button_clicked_backtest_engine'
         ]
         self.total_modules = len(self.modules)
         self.current_index = 0

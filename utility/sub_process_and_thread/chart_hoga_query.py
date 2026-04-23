@@ -39,7 +39,6 @@ class ChartHogaQuery:
         self.dict_hj      = None
         self.dict_hc      = None
         self.dict_hg      = None
-        self.is_tick      = False
 
         self.con1 = sqlite3.connect(DB_SETTING)
         self.cur1 = self.con1.cursor()
