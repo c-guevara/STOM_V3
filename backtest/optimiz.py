@@ -320,7 +320,7 @@ class Total:
             con = sqlite3.connect(DB_SETTING)
             cur = con.cursor()
             df = pd.read_sql('SELECT * FROM strategy', con).set_index('index')
-            if self.buystg_name == df['매수전략'][0]:
+            if self.buystg_name == df['매수전략'][int(self.dict_set['거래소'][-2:])]:
                 cur.execute(f'UPDATE strategy SET 평균값계산틱수={self.vars[0]}')
             con.commit()
             con.close()

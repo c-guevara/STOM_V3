@@ -34,8 +34,8 @@ class BaseReceiver:
     시장 데이터(체결, 호가)를 처리합니다."""
     def __init__(self, qlist, dict_set, market_infos):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
-           0        1       2      3       4      5      6      7       8        9       10     11
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ, testQ
+           0        1       2      3       4      5      6      7       8        9       10     11    12
         """
         self.windowQ      = qlist[0]
         self.soundQ       = qlist[1]
@@ -95,9 +95,8 @@ class BaseReceiver:
         self.oper_gubun   = None
 
         self.is_tick      = self.dict_set['타임프레임']
-        acc_no            = self.dict_set['거래소'][-2:]
-        self.access_key   = self.dict_set[f"access_key{acc_no}"]
-        self.secret_key   = self.dict_set[f"secret_key{acc_no}"]
+        self.access_key   = self.dict_set['access_key']
+        self.secret_key   = self.dict_set['secret_key']
 
         self.market_open  = self.market_info['시작시간']
         self.market_close = self.market_info['프로세스종료시간']

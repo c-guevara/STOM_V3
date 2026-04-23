@@ -22,14 +22,15 @@ class ChartHogaQuerySound:
     호가 데이터를 처리하고 알림 소리를 재생합니다."""
     def __init__(self, qlist, dict_set):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
-           0        1       2      3       4      5      6      7       8        9       10     11
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ, testQ
+           0        1       2      3       4      5      6      7       8        9       10     11    12
         """
         self.windowQ      = qlist[0]
         self.soundQ       = qlist[1]
         self.queryQ       = qlist[2]
         self.chartQ       = qlist[4]
         self.hogaQ        = qlist[5]
+        self.testQ        = qlist[12]
         self.dict_set     = dict_set
         self.dict_name    = {}
         self.dict_findex  = {}
@@ -113,6 +114,8 @@ class ChartHogaQuerySound:
                         self._settings_change(data)
                     elif data[0] == '설정디비':
                         self._execute_query(data, self.con1, self.cur1)
+                        if len(data) == 3:
+                            self.testQ.put('설정저장완료')
                     elif data[0] == '거래디비':
                         self._execute_query(data, self.con2, self.cur2)
                     elif data[0] == '전략디비':

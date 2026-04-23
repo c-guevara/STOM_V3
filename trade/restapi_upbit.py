@@ -85,22 +85,18 @@ class UpbitRestAPI:
             payload['query_hash'] = query_hash
             payload['query_hash_alg'] = 'SHA512'
 
-        token = jwt.encode(payload, self.secret, algorithm='HS512')
-        if not isinstance(token, str):
-            token = token.decode('utf-8')
-
+        token = jwt.encode(payload, self.secret, algorithm='HS256')
         return {'Authorization': f'Bearer {token}'}
 
-    def _get(self, url, data=None):
+    def _get(self, url):
         """GET 요청을 보냅니다.
         Args:
             url: URL
-            data: 데이터
         Returns:
             응답
         """
-        headers = self._headers(data)
-        response = requests.get(url, headers=headers, data=data)
+        headers = self._headers()
+        response = requests.get(url, headers=headers)
         return response.json()
 
     def _post(self, url, data):

@@ -24,8 +24,8 @@ class BaseStrategy(StgGlobalsFunc):
     실시간 데이터를 기반으로 전략을 실행합니다."""
     def __init__(self, gubun, qlist, dict_set, market_info):
         """
-        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ
-           0        1       2      3       4      5      6      7       8        9       10     11
+        windowQ, soundQ, queryQ, teleQ, chartQ, hogaQ, webcQ, backQ, receivQ, traderQ, stgQs, liveQ, testQ
+           0        1       2      3       4      5      6      7       8        9       10     11    12
         """
         super().__init__()
         self.gubun           = gubun
@@ -154,7 +154,7 @@ class BaseStrategy(StgGlobalsFunc):
         dfbl = pd.read_sql('SELECT * FROM strategy', con).set_index('index')
         con.close()
 
-        blacklist = dfbl['블랙리스트'][0]
+        blacklist = dfbl['블랙리스트'][int(self.dict_set['거래소'][-2:])]
         if blacklist != '':
             self.black_list = blacklist.split(';')
 
