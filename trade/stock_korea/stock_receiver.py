@@ -115,7 +115,7 @@ class StockReceiver(BaseReceiver):
 
         elif tr_cd == self.tr_cd_oper:
             if body['jangubun'] == self.oper_gubun:
-                operation = int(body['jstatus'])
+                operation = body['jstatus']
                 if operation in LsRestData.장운영상태:
                     text = LsRestData.장운영상태[operation]
                     self.windowQ.put((ui_num['기본로그'], f'장운영 정보 수신 알림 - {text}'))

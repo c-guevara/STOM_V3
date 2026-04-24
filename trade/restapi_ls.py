@@ -584,14 +584,14 @@ class LsWebSocketReceiver(QThread):
         while not self.connected:
             await asyncio.sleep(0.1)
 
-        data = self._get_send_data('장운영정보', '실시간시세등록', '0')
+        data = self._get_send_data('장운영정보', '0')
         await self.websocket.send(json.dumps(data))
         await asyncio.sleep(0.02)
         self.windowQ.put((ui_num['기본로그'], '장운영정보 실시간시세 등록'))
 
         if self.gubun == '국내주식':
             gubun = f'{self.gubun}VI'
-            data = self._get_send_data(gubun, '실시간시세등록', '0000000000')
+            data = self._get_send_data(gubun, '0000000000')
             await self.websocket.send(json.dumps(data))
             await asyncio.sleep(0.02)
             self.windowQ.put((ui_num['기본로그'], f'{gubun}발동해제 실시간시세 등록'))
@@ -599,7 +599,7 @@ class LsWebSocketReceiver(QThread):
         last = len(self.symbols)
         gubun = f'{self.gubun}체결'
         for i, code in enumerate(self.symbols):
-            data = self._get_send_data(gubun, '실시간시세등록', code)
+            data = self._get_send_data(gubun, code)
             await self.websocket.send(json.dumps(data))
             await asyncio.sleep(0.02)
 
@@ -608,14 +608,14 @@ class LsWebSocketReceiver(QThread):
 
         gubun = f'{self.gubun}호가'
         for i, code in enumerate(self.symbols):
-            data = self._get_send_data(gubun, '실시간시세등록', code)
+            data = self._get_send_data(gubun, code)
             await self.websocket.send(json.dumps(data))
             await asyncio.sleep(0.02)
 
             if i % 100 == 0 or i == last - 1:
                 self.windowQ.put((ui_num['기본로그'], f'{gubun} 실시간시세 등록 [{i+1}/{last}]'))
 
-    def _get_send_data(self, gubun: str, tr_type: str, code: str):
+    def _get_send_data(self, gubun: str, code: str):
         if gubun in ('국내주식체결', '국내주식호가'):
             tr_key = f'U{code:<9}'
         elif '해외주식' in gubun:
@@ -626,7 +626,7 @@ class LsWebSocketReceiver(QThread):
         data = {
             'header': {
                 'token': self.token,
-                'tr_type': '3' if tr_type == '실시간시세등록' else '4'
+                'tr_type': '3'
             },
             'body': {
                 'tr_cd': LsRestData.실시간거래코드[gubun],
@@ -649,9 +649,9 @@ class LsWebSocketReceiver(QThread):
 class LsWebSocketTrader(QThread):
     signal = pyqtSignal(dict)
 
-    def __init__(self, gubun, token, windowQ):
+    def __init__(self, market, token, windowQ):
         super().__init__()
-        self.gubun     = gubun
+        self.market    = market
         self.token     = token
         self.windowQ   = windowQ
         self.loop      = None
@@ -678,11 +678,11 @@ class LsWebSocketTrader(QThread):
     async def _connect(self):
         self.websocket = await websockets.connect(LsRestData.웹소켓주소, ping_interval=60)
         self.connected = True
-        for gubun in LsRestData.주문거래코드:
-            if self.gubun in gubun:
-                data = self._get_send_data(gubun, '계좌등록')
+        for k, v in LsRestData.주문거래코드.items():
+            if self.market in k:
+                data = self._get_send_data(v)
                 await self.websocket.send(json.dumps(data))
-                self.windowQ.put((ui_num['기본로그'], f'{gubun} 실시간시세 계좌등록'))
+                self.windowQ.put((ui_num['기본로그'], f'{k} 실시간시세 계좌등록'))
 
     async def _receive_message(self):
         while self.connected:
@@ -691,14 +691,14 @@ class LsWebSocketTrader(QThread):
             if data['body']:
                 self.signal.emit(data)
 
-    def _get_send_data(self, gubun: str, tr_type: str):
+    def _get_send_data(self, tr_cd: str):
         data = {
             'header': {
                 'token': self.token,
-                'tr_type': '1' if tr_type == '계좌등록' else '2'
+                'tr_type': '1'
             },
             'body': {
-                'tr_cd': LsRestData.주문거래코드[gubun],
+                'tr_cd': tr_cd,
                 'tr_key': ''
             }
         }
