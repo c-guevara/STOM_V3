@@ -30,6 +30,7 @@ class ChartHogaQuery:
         self.dict_set     = dict_set
         self.dict_name    = {}
         self.dict_findex  = {}
+        self.index_arry   = None
         self.market_gubun = None
         self.market_info  = None
         self.arry_kosp    = None
@@ -68,6 +69,18 @@ class ChartHogaQuery:
         self.is_tick      = self.dict_set['타임프레임']
         factor_list       = self.market_info['팩터목록'][self.is_tick]
         self.dict_findex  = {factor: i for i, factor in enumerate(factor_list)}
+        if self.is_tick:
+            self.index_arry = np.array([
+                self.dict_findex['현재가'], self.dict_findex['체결강도'], self.dict_findex['등락율'],
+                self.dict_findex['당일거래대금'], self.dict_findex['초당매수수량'], self.dict_findex['초당매도수량'],
+                self.dict_findex['초당거래대금']
+            ])
+        else:
+            self.index_arry = np.array([
+                self.dict_findex['현재가'], self.dict_findex['체결강도'], self.dict_findex['등락율'],
+                self.dict_findex['당일거래대금'], self.dict_findex['분당매수수량'], self.dict_findex['분당매도수량'],
+                self.dict_findex['분당거래대금'], self.dict_findex['분봉고가'], self.dict_findex['분봉저가']
+            ])
 
     def __del__(self):
         """소멸자입니다. 데이터베이스 연결을 닫습니다."""
@@ -752,9 +765,9 @@ class ChartHogaQuery:
             w_unit = self.dict_set['평균값계산틱수']
 
         if cf1 is None:
-            arry = add_rolling_data(df, round_unit, angle_cf_list, self.is_tick, [w_unit])
+            arry = add_rolling_data(df, round_unit, angle_cf_list, [w_unit], self.is_tick, self.index_arry)
         else:
-            arry = add_rolling_data(df, round_unit, angle_cf_list, self.is_tick, [w_unit], cf1=cf1, cf2=cf2)
+            arry = add_rolling_data(df, round_unit, angle_cf_list, [w_unit], self.is_tick, self.index_arry, cf1=cf1, cf2=cf2)
 
         if not self.is_tick:
             arry = np.column_stack((arry, np.zeros((arry.shape[0], 28))))

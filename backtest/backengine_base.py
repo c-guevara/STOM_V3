@@ -74,8 +74,11 @@ class BackEngineBase(StgGlobalsFunc):
         self.add_cnt         = None
         self.hoga_sidex      = None
         self.hoga_eidex      = None
+        self.index_arry      = None
         self.ms_analyzer     = None
         self.rk_analyzer     = None
+        self.pt_analyzer     = None
+        self.vf_analyzer     = None
 
         self.code_list       = []
         self.vars_list       = []
@@ -144,6 +147,19 @@ class BackEngineBase(StgGlobalsFunc):
         self.dict_findex['최고매도수가격'] = self.dict_findex['최고매수가격']
         self.dict_findex['호가총잔량'] = self.dict_findex['매수총잔량']
         self.dict_findex['매도수호가잔량1'] = self.dict_findex['매수잔량1']
+
+        if self.is_tick:
+            self.index_arry = np.array([
+                self.dict_findex['현재가'], self.dict_findex['체결강도'], self.dict_findex['등락율'],
+                self.dict_findex['당일거래대금'], self.dict_findex['초당매수수량'], self.dict_findex['초당매도수량'],
+                self.dict_findex['초당거래대금']
+            ])
+        else:
+            self.index_arry = np.array([
+                self.dict_findex['현재가'], self.dict_findex['체결강도'], self.dict_findex['등락율'],
+                self.dict_findex['당일거래대금'], self.dict_findex['분당매수수량'], self.dict_findex['분당매도수량'],
+                self.dict_findex['분당거래대금'], self.dict_findex['분봉고가'], self.dict_findex['분봉저가']
+            ])
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
@@ -365,7 +381,7 @@ class BackEngineBase(StgGlobalsFunc):
                 pass
             else:
                 if len(df) > 0:
-                    arry = add_rolling_data(df, round_unit, angle_cf_list, self.is_tick, avg_list)
+                    arry = add_rolling_data(df, round_unit, angle_cf_list, avg_list, self.is_tick, self.index_arry)
                     all_data.append({
                         'code': code,
                         'data': arry,

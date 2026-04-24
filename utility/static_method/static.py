@@ -62,66 +62,34 @@ def get_ema_list(is_tick):
     return (60, 150, 300, 600, 1200) if is_tick else (5, 10, 20, 60, 120)
 
 
-def add_rolling_data(df, round_unit, angle_cf_list, is_tick, avg_list, cf1=None, cf2=None):
-    """롤링 데이터를 추가합니다.
+def add_rolling_data(df, round_unit, angle_cf_list, avg_list, is_tick, index_arry, cf1=None, cf2=None):
+    """numba를 사용하여 롤링 데이터를 추가합니다.
     Args:
         df: 데이터프레임
         round_unit: 반올림 단위
         angle_cf_list: 각도 계수 리스트
-        is_tick: 틱 데이터 여부
         avg_list: 평균 리스트
-        cf1: 계수1
-        cf2: 계수2
+        is_tick: 틱 데이터 여부
+        index_arry: 칼럼인덱스 배열
+        cf1: 각도 계수1
+        cf2: 각도 계수2
     Returns:
         배열
     """
-    for window in get_ema_list(is_tick):
-        df[f'이동평균{window}'] = df['현재가'].rolling(window=window).mean().round(round_unit)
+    from utility.static_method.numba_rolling import numba_rolling_data_tick, numba_rolling_data_min
 
-    for avg in avg_list:
-        rolling_data = df['현재가'].rolling(window=avg)
-        df[f'최고현재가{avg}'] = rolling_data.max()
-        df[f'최저현재가{avg}'] = rolling_data.min()
+    if cf1 is None:
+        cf1, cf2 = angle_cf_list
 
-        if not is_tick:
-            df[f'최고분봉고가{avg}'] = df['분봉고가'].rolling(window=avg).max()
-            df[f'최저분봉저가{avg}'] = df['분봉저가'].rolling(window=avg).min()
+    input_array = df.values
+    ema_windows = get_ema_list(is_tick)
 
-        rolling_data = df['체결강도'].rolling(window=avg)
-        df[f'체결강도평균{avg}'] = rolling_data.mean().round(3)
-        df[f'최고체결강도{avg}'] = rolling_data.max()
-        df[f'최저체결강도{avg}'] = rolling_data.min()
+    if is_tick:
+        result_array = numba_rolling_data_tick(input_array, ema_windows, avg_list, cf1, cf2, round_unit, index_arry)
+    else:
+        result_array = numba_rolling_data_min(input_array, ema_windows, avg_list, cf1, cf2, round_unit, index_arry)
 
-        if is_tick:
-            rolling_data1 = df['초당매수수량'].rolling(window=avg)
-            rolling_data2 = df['초당매도수량'].rolling(window=avg)
-            df[f'최고초당매수수량{avg}'] = rolling_data1.max()
-            df[f'최고초당매도수량{avg}'] = rolling_data2.max()
-            df[f'누적초당매수수량{avg}'] = rolling_data1.sum()
-            df[f'누적초당매도수량{avg}'] = rolling_data2.sum()
-            df[f'초당거래대금평균{avg}'] = df['초당거래대금'].rolling(window=avg).mean().round(0)
-        else:
-            rolling_data1 = df['분당매수수량'].rolling(window=avg)
-            rolling_data2 = df['분당매도수량'].rolling(window=avg)
-            df[f'최고분당매수수량{avg}'] = rolling_data1.max()
-            df[f'최고분당매도수량{avg}'] = rolling_data2.max()
-            df[f'누적분당매수수량{avg}'] = rolling_data1.sum()
-            df[f'누적분당매도수량{avg}'] = rolling_data2.sum()
-            df[f'분당거래대금평균{avg}'] = df['분당거래대금'].rolling(window=avg).mean().round(0)
-
-        if cf1 is None:
-            cf1, cf2 = angle_cf_list
-
-        df2 = df[['등락율', '당일거래대금']].copy()
-        df2[f'등락율N{avg}'] = df2['등락율'].shift(avg - 1)
-        df2['등락율차이'] = df2['등락율'] - df2[f'등락율N{avg}']
-        df2[f'당일거래대금N{avg}'] = df2['당일거래대금'].shift(avg - 1)
-        df2['당일거래대금차이'] = df2['당일거래대금'] - df2[f'당일거래대금N{avg}']
-        df['등락율각도'] = round(np.arctan2(df2['등락율차이'] * cf1, avg) / (2 * np.pi) * 360, 2)
-        df['당일거래대금각도'] = round(np.arctan2(df2['당일거래대금차이'] * cf2, avg) / (2 * np.pi) * 360, 2)
-
-    arry = np.array(df)
-    return np.nan_to_num(arry)
+    return np.nan_to_num(result_array)
 
 
 def error_decorator(func):
