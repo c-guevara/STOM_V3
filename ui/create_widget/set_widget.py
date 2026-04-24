@@ -1040,11 +1040,12 @@ class WidgetCreater:
         subplot.enableAutoRange(False, False)
         return subplot, cb
 
-    def setDialog(self, name, parent=None):
+    def setDialog(self, name, parent=None, location_save=False):
         """다이얼로그를 생성합니다.
         Args:
             name: 다이얼로그 이름
             parent: 부모 위젯
+            location_save: 창위치 기억
         Returns:
             다이얼로그 위젯
         """
@@ -1056,7 +1057,49 @@ class WidgetCreater:
         dialog.setWindowModality(Qt.WindowModality.NonModal)
         dialog.setWindowIcon(self.ui.icon_main)
         dialog.setFont(qfont12)
+        if location_save:
+            dialog.finished.connect(lambda event: self.location_save(event, name))
         return dialog
+
+    # noinspection PyUnusedLocal
+    def location_save(self, event, name):
+        number = 0
+        dialog = None
+
+        if name == 'STOM CHART':
+            number = 1
+            dialog = self.ui.dialog_chart
+        elif name == 'STOM BACKTEST SCHEDULER':
+            number = 2
+            dialog = self.ui.dialog_scheduler
+        elif name == 'STOM INFO':
+            number = 3
+            dialog = self.ui.dialog_info
+        elif name == 'STOM WEB':
+            number = 4
+            dialog = self.ui.dialog_web
+        elif name == 'STOM TREEMAP':
+            number = 5
+            dialog = self.ui.dialog_tree
+        elif name == 'STOM KIMP':
+            number = 6
+            dialog = self.ui.dialog_kimp
+        elif name == 'STOM HOGA':
+            number = 7
+            dialog = self.ui.dialog_hoga
+        elif name == 'STOM BACKTEST ENGINE':
+            number = 8
+            dialog = self.ui.dialog_backengine
+        elif name == 'STOM ORDER':
+            number = 9
+            dialog = self.ui.dialog_order
+        elif name == 'STOM STRATEGY':
+            number = 10
+            dialog = self.ui.dialog_strategy
+
+        if number > 0 and dialog is not None:
+            # noinspection PyUnresolvedReferences
+            self.ui.location_list[number] = [str(int(dialog.x())), str(int(dialog.y()))]
 
     # noinspection PyUnresolvedReferences
     def setTablewidget(self, parent, columns, rowcount, vscroll=False, visible=True, clicked=None, valuechanged=None,

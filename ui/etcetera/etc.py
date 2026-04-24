@@ -1,4 +1,11 @@
 
+def dialog_move(ui):
+    """다이얼로그를 이동합니다."""
+    for i, dialog in enumerate(ui.move_dialog_list):
+        x, y = ui.dict_set['창위치'][i]
+        dialog.move(int(x), int(y))
+
+
 def update_image(ui, data):
     """이미지를 업데이트합니다.
     Args:
@@ -98,7 +105,7 @@ def update_dictset(ui, force=False):
     from utility.settings.setting_user import load_settings
 
     if force:
-        ui.dict_set = load_settings()
+        ui.dict_set, _ = load_settings()
         change_chart_factors(ui)
         send_dict_set(ui)
 
