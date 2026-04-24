@@ -7,12 +7,12 @@ import numpy as np
 from typing import Dict, List
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
-from utility.settings.setting_base import UI_NUM
 from ui.create_widget.set_text import famous_saying
+from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static import now, thread_decorator
 
 
-PATTERN_DB = './_database/pattern_analysis.db'
+PATTERN_DB = f'{DB_PATH}/pattern_analysis.db'
 PATTERN_FUNCTIONS = [
     'CDL2CROWS', 'CDL3BLACKCROWS', 'CDL3INSIDE', 'CDL3LINESTRIKE', 'CDL3OUTSIDE',
     'CDL3STARSINSOUTH', 'CDL3WHITESOLDIERS', 'CDLABANDONEDBABY', 'CDLADVANCEBLOCK', 'CDLBELTHOLD',

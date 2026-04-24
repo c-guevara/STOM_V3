@@ -1,16 +1,18 @@
 """기본 설정 모듈입니다.
 경로, UI 번호, 컬럼 정의 등 기본 설정을 포함합니다.
 """
-ICON_PATH    = './ui/_icon'
-GRAPH_PATH   = './backtest/_graph'
-BACK_TEMP    = './backtest/_temp'
 DB_PATH      = './_database'
-DB_SETTING   = './_database/setting.db'
-DB_BACKTEST  = './_database/backtest.db'
-DB_TRADELIST = './_database/tradelist.db'
-DB_STRATEGY  = './_database/strategy.db'
-DB_CODE_INFO = './_database/code_info.db'
-DB_OPTUNA    = 'sqlite:///./_database/optuna.db'
+LOG_PATH     = './_log'
+BACK_PATH    = './backtest'
+ICON_PATH    = './ui/_icon'
+GRAPH_PATH   = f'{BACK_PATH}/_graph'
+BACK_TEMP    = f'{BACK_PATH}/_temp'
+DB_SETTING   = f'{DB_PATH}/setting.db'
+DB_BACKTEST  = f'{DB_PATH}/backtest.db'
+DB_TRADELIST = f'{DB_PATH}/tradelist.db'
+DB_STRATEGY  = f'{DB_PATH}/strategy.db'
+DB_CODE_INFO = f'{DB_PATH}/code_info.db'
+DB_OPTUNA    = f'sqlite:///{DB_PATH}/optuna.db'
 
 UI_NUM = {'설정로그': 1, '종목명데이터': 2, '백테엔진': 3, '기본로그': 4, '타임로그': 5,
           '시스템로그': 6, '백테스트': 7, '사용자수식': 8, 'DB관리': 9,  '패턴학습': 10,

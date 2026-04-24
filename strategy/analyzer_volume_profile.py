@@ -6,12 +6,12 @@ import numpy as np
 from typing import Dict, List, Tuple
 from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
-from utility.settings.setting_base import UI_NUM
 from ui.create_widget.set_text import famous_saying
+from utility.settings.setting_base import UI_NUM, DB_PATH
 from utility.static_method.static import thread_decorator
 
 
-VOLUME_PROFILE_DB = './_database/volume_profile.db'
+VOLUME_PROFILE_DB = f'{DB_PATH}/volume_profile.db'
 window_queue = None
 
 

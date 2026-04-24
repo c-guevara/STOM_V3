@@ -1,6 +1,7 @@
 """시장 설정 모듈입니다.
 백테스트 및 트레이딩 관련 클래스와 데이터베이스 경로를 포함합니다.
 """
+from utility.settings.setting_base import DB_PATH
 from trade.stock_korea.stock_trader import StockTrader
 from trade.stock_korea.stock_receiver import StockReceiver
 from trade.stock_korea.stock_strategy import StockStrategy
@@ -33,42 +34,42 @@ from backtest.future_oversea.backengine_future_oversea_oms import BackEngineFutu
 from backtest.binance.backengine_binance import BackEngineBinance
 from backtest.binance.backengine_binance_oms import BackEngineBinanceOms
 
-DB_STOCK_TICK            = './_database/stock_tick.db'
-DB_STOCK_MIN             = './_database/stock_min.db'
-DB_STOCK_TICK_BACK       = './_database/stock_tick_back.db'
-DB_STOCK_MIN_BACK        = './_database/stock_min_back.db'
-DB_STOCK_ETF_TICK        = './_database/stock_etf_tick.db'
-DB_STOCK_ETF_MIN         = './_database/stock_etf_min.db'
-DB_STOCK_ETF_TICK_BACK   = './_database/stock_etf_tick_back.db'
-DB_STOCK_ETF_MIN_BACK    = './_database/stock_etf_min_back.db'
-DB_STOCK_ETN_TICK        = './_database/stock_etn_tick.db'
-DB_STOCK_ETN_MIN         = './_database/stock_etn_min.db'
-DB_STOCK_ETN_TICK_BACK   = './_database/stock_etn_tick_back.db'
-DB_STOCK_ETN_MIN_BACK    = './_database/stock_etn_min_back.db'
-DB_STOCK_USA_TICK        = './_database/stock_usa_tick.db'
-DB_STOCK_USA_MIN         = './_database/stock_usa_min.db'
-DB_STOCK_USA_TICK_BACK   = './_database/stock_usa_tick_back.db'
-DB_STOCK_USA_MIN_BACK    = './_database/stock_usa_min_back.db'
-DB_COIN_TICK             = './_database/coin_tick.db'
-DB_COIN_MIN              = './_database/coin_min.db'
-DB_COIN_TICK_BACK        = './_database/coin_tick_back.db'
-DB_COIN_MIN_BACK         = './_database/coin_min_back.db'
-DB_FUTURE_TICK           = './_database/future_tick.db'
-DB_FUTURE_MIN            = './_database/future_min.db'
-DB_FUTURE_TICK_BACK      = './_database/future_tick_back.db'
-DB_FUTURE_MIN_BACK       = './_database/future_min_back.db'
-DB_FUTURE_NT_TICK        = './_database/future_nt_tick.db'
-DB_FUTURE_NT_MIN         = './_database/future_nt_min.db'
-DB_FUTURE_NT_TICK_BACK   = './_database/future_nt_tick_back.db'
-DB_FUTURE_NT_MIN_BACK    = './_database/future_nt_min_back.db'
-DB_FUTURE_OS_TICK        = './_database/future_os_tick.db'
-DB_FUTURE_OS_MIN         = './_database/future_os_min.db'
-DB_FUTURE_OS_TICK_BACK   = './_database/future_os_tick_back.db'
-DB_FUTURE_OS_MIN_BACK    = './_database/future_os_min_back.db'
-DB_COIN_FUTURE_TICK      = './_database/coin_future_tick.db'
-DB_COIN_FUTURE_MIN       = './_database/coin_future_min.db'
-DB_COIN_FUTURE_TICK_BACK = './_database/coin_future_tick_back.db'
-DB_COIN_FUTURE_MIN_BACK  = './_database/coin_future_min_back.db'
+DB_STOCK_TICK            = f'{DB_PATH}/stock_tick.db'
+DB_STOCK_MIN             = f'{DB_PATH}/stock_min.db'
+DB_STOCK_TICK_BACK       = f'{DB_PATH}/stock_tick_back.db'
+DB_STOCK_MIN_BACK        = f'{DB_PATH}/stock_min_back.db'
+DB_STOCK_ETF_TICK        = f'{DB_PATH}/stock_etf_tick.db'
+DB_STOCK_ETF_MIN         = f'{DB_PATH}/stock_etf_min.db'
+DB_STOCK_ETF_TICK_BACK   = f'{DB_PATH}/stock_etf_tick_back.db'
+DB_STOCK_ETF_MIN_BACK    = f'{DB_PATH}/stock_etf_min_back.db'
+DB_STOCK_ETN_TICK        = f'{DB_PATH}/stock_etn_tick.db'
+DB_STOCK_ETN_MIN         = f'{DB_PATH}/stock_etn_min.db'
+DB_STOCK_ETN_TICK_BACK   = f'{DB_PATH}/stock_etn_tick_back.db'
+DB_STOCK_ETN_MIN_BACK    = f'{DB_PATH}/stock_etn_min_back.db'
+DB_STOCK_USA_TICK        = f'{DB_PATH}/stock_usa_tick.db'
+DB_STOCK_USA_MIN         = f'{DB_PATH}/stock_usa_min.db'
+DB_STOCK_USA_TICK_BACK   = f'{DB_PATH}/stock_usa_tick_back.db'
+DB_STOCK_USA_MIN_BACK    = f'{DB_PATH}/stock_usa_min_back.db'
+DB_COIN_TICK             = f'{DB_PATH}/coin_tick.db'
+DB_COIN_MIN              = f'{DB_PATH}/coin_min.db'
+DB_COIN_TICK_BACK        = f'{DB_PATH}/coin_tick_back.db'
+DB_COIN_MIN_BACK         = f'{DB_PATH}/coin_min_back.db'
+DB_FUTURE_TICK           = f'{DB_PATH}/future_tick.db'
+DB_FUTURE_MIN            = f'{DB_PATH}/future_min.db'
+DB_FUTURE_TICK_BACK      = f'{DB_PATH}/future_tick_back.db'
+DB_FUTURE_MIN_BACK       = f'{DB_PATH}/future_min_back.db'
+DB_FUTURE_NT_TICK        = f'{DB_PATH}/future_nt_tick.db'
+DB_FUTURE_NT_MIN         = f'{DB_PATH}/future_nt_min.db'
+DB_FUTURE_NT_TICK_BACK   = f'{DB_PATH}/future_nt_tick_back.db'
+DB_FUTURE_NT_MIN_BACK    = f'{DB_PATH}/future_nt_min_back.db'
+DB_FUTURE_OS_TICK        = f'{DB_PATH}/future_os_tick.db'
+DB_FUTURE_OS_MIN         = f'{DB_PATH}/future_os_min.db'
+DB_FUTURE_OS_TICK_BACK   = f'{DB_PATH}/future_os_tick_back.db'
+DB_FUTURE_OS_MIN_BACK    = f'{DB_PATH}/future_os_min_back.db'
+DB_COIN_FUTURE_TICK      = f'{DB_PATH}/coin_future_tick.db'
+DB_COIN_FUTURE_MIN       = f'{DB_PATH}/coin_future_min.db'
+DB_COIN_FUTURE_TICK_BACK = f'{DB_PATH}/coin_future_tick_back.db'
+DB_COIN_FUTURE_MIN_BACK  = f'{DB_PATH}/coin_future_min_back.db'
 
 LIST_BASIC_TICK = [
     'index', '현재가', '시가', '고가', '저가', '등락율', '당일거래대금', '체결강도', '초당매수수량', '초당매도수량',
@@ -199,8 +200,8 @@ DICT_MARKET_INFO = {
         '잔고디비': 'stock_jangolist',
         '손익디비': 'stock_totaltradelist',
         '거래디비': 'stock_tradelist',
-        '일자디비경로': {0: './_database/stock_min', 1: './_database/stock_tick'},
-        '팩터목록': {0: LIST_STOCK_MIN, 1: LIST_STOCK_TICK},
+        '일자디비경로': {0: f'{DB_PATH}/stock_min', 1: f'{DB_PATH}/stock_tick'},
+        '팩터목록': {0: LIST_STOCK_MIN,     1: LIST_STOCK_TICK},
         '팩터개수': {0: LEN_LIST_STOCK_MIN, 1: LEN_LIST_STOCK_TICK},
         '당일디비': {0: DB_STOCK_MIN,       1: DB_STOCK_TICK},
         '백테디비': {0: DB_STOCK_MIN_BACK,  1: DB_STOCK_TICK_BACK},
@@ -222,9 +223,9 @@ DICT_MARKET_INFO = {
         '잔고디비': 'stock_etf_jangolist',
         '손익디비': 'stock_etf_totaltradelist',
         '거래디비': 'stock_etf_tradelist',
-        '일자디비경로': {0: './_database/stock_etf_min', 1: './_database/stock_etf_tick'},
-        '팩터목록': {0: LIST_STOCK_MIN, 1: LIST_STOCK_TICK},
-        '팩터개수': {0: LEN_LIST_STOCK_MIN, 1: LEN_LIST_STOCK_TICK},
+        '일자디비경로': {0: f'{DB_PATH}/stock_etf_min', 1: f'{DB_PATH}/stock_etf_tick'},
+        '팩터목록': {0: LIST_STOCK_MIN,        1: LIST_STOCK_TICK},
+        '팩터개수': {0: LEN_LIST_STOCK_MIN,    1: LEN_LIST_STOCK_TICK},
         '당일디비': {0: DB_STOCK_ETF_MIN,      1: DB_STOCK_ETF_TICK},
         '백테디비': {0: DB_STOCK_ETF_MIN_BACK, 1: DB_STOCK_ETF_TICK_BACK},
         '백테엔진': {0: BackEngineStock,       1: BackEngineStockOms},
@@ -245,13 +246,13 @@ DICT_MARKET_INFO = {
         '잔고디비': 'stock_etn_jangolist',
         '손익디비': 'stock_etn_totaltradelist',
         '거래디비': 'stock_etn_tradelist',
-        '일자디비경로': {0: './_database/stock_etn_min', 1: './_database/stock_etn_tick'},
-        '팩터목록': {0: LIST_STOCK_MIN, 1: LIST_STOCK_TICK},
-        '팩터개수': {0: LEN_LIST_STOCK_MIN, 1: LEN_LIST_STOCK_TICK},
+        '일자디비경로': {0: f'{DB_PATH}/stock_etn_min', 1: f'{DB_PATH}/stock_etn_tick'},
+        '팩터목록': {0: LIST_STOCK_MIN,        1: LIST_STOCK_TICK},
+        '팩터개수': {0: LEN_LIST_STOCK_MIN,    1: LEN_LIST_STOCK_TICK},
         '당일디비': {0: DB_STOCK_ETN_MIN,      1: DB_STOCK_ETN_TICK},
         '백테디비': {0: DB_STOCK_ETN_MIN_BACK, 1: DB_STOCK_ETN_TICK_BACK},
         '백테엔진': {0: BackEngineStock,       1: BackEngineStockOms},
-        '프로세스': {0: StockReceiver, 1: StockTrader, 2: StockStrategy},
+        '프로세스': {0: StockReceiver,         1: StockTrader, 2: StockStrategy},
     },
     4: {
         '마켓이름': '해외주식',
@@ -268,7 +269,7 @@ DICT_MARKET_INFO = {
         '잔고디비': 'stock_usa_jangolist',
         '손익디비': 'stock_usa_totaltradelist',
         '거래디비': 'stock_usa_tradelist',
-        '일자디비경로': {0: './_database/stock_usa_min', 1: './_database/stock_usa_tick'},
+        '일자디비경로': {0: f'{DB_PATH}/stock_usa_min', 1: f'{DB_PATH}/stock_usa_tick'},
         '팩터목록': {0: LIST_STOCK_USA_MIN,     1: LIST_STOCK_USA_TICK},
         '팩터개수': {0: LEN_LIST_STOCK_USA_MIN, 1: LEN_LIST_STOCK_USA_TICK},
         '당일디비': {0: DB_STOCK_USA_MIN,       1: DB_STOCK_USA_TICK},
@@ -291,7 +292,7 @@ DICT_MARKET_INFO = {
         '잔고디비': 'coin_jangolist',
         '손익디비': 'coin_totaltradelist',
         '거래디비': 'coin_tradelist',
-        '일자디비경로': {0: './_database/coin_min', 1: './_database/coin_tick'},
+        '일자디비경로': {0: f'{DB_PATH}/coin_min', 1: f'{DB_PATH}/coin_tick'},
         '팩터목록': {0: LIST_BASIC_MIN,     1: LIST_BASIC_TICK},
         '팩터개수': {0: LEN_LIST_BASIC_MIN, 1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_COIN_MIN,        1: DB_COIN_TICK},
@@ -314,7 +315,7 @@ DICT_MARKET_INFO = {
         '잔고디비': 'future_jangolist',
         '손익디비': 'future_totaltradelist',
         '거래디비': 'future_tradelist',
-        '일자디비경로': {0: './_database/future_min', 1: './_database/future_tick'},
+        '일자디비경로': {0: f'{DB_PATH}/future_min', 1: f'{DB_PATH}/future_tick'},
         '팩터목록': {0: LIST_BASIC_MIN,     1: LIST_BASIC_TICK},
         '팩터개수': {0: LEN_LIST_BASIC_MIN, 1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_FUTURE_MIN,      1: DB_FUTURE_TICK},
@@ -337,7 +338,7 @@ DICT_MARKET_INFO = {
         '잔고디비': 'future_nt_jangolist',
         '손익디비': 'future_nt_totaltradelist',
         '거래디비': 'future_nt_tradelist',
-        '일자디비경로': {0: './_database/future_nt_min', 1: './_database/future_nt_tick'},
+        '일자디비경로': {0: f'{DB_PATH}/future_nt_min', 1: f'{DB_PATH}/future_nt_tick'},
         '팩터목록': {0: LIST_BASIC_MIN,        1: LIST_BASIC_TICK},
         '팩터개수': {0: LEN_LIST_BASIC_MIN,    1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_FUTURE_NT_MIN,      1: DB_FUTURE_NT_TICK},
@@ -360,7 +361,7 @@ DICT_MARKET_INFO = {
         '잔고디비': 'future_os_jangolist',
         '손익디비': 'future_os_totaltradelist',
         '거래디비': 'future_os_tradelist',
-        '일자디비경로': {0: './_database/future_os_min', 1: './_database/future_os_tick'},
+        '일자디비경로': {0: f'{DB_PATH}/future_os_min', 1: f'{DB_PATH}/future_os_tick'},
         '팩터목록': {0: LIST_BASIC_MIN,          1: LIST_BASIC_TICK},
         '팩터개수': {0: LEN_LIST_BASIC_MIN,      1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_FUTURE_OS_MIN,        1: DB_FUTURE_OS_TICK},
@@ -383,7 +384,7 @@ DICT_MARKET_INFO = {
         '잔고디비': 'coin_future_jangolist',
         '손익디비': 'coin_future_totaltradelist',
         '거래디비': 'coin_future_tradelist',
-        '일자디비경로': {0: './_database/coin_future_min', 1: './_database/coin_future_tick'},
+        '일자디비경로': {0: f'{DB_PATH}/coin_future_min', 1: f'{DB_PATH}/coin_future_tick'},
         '팩터목록': {0: LIST_BASIC_MIN,          1: LIST_BASIC_TICK},
         '팩터개수': {0: LEN_LIST_BASIC_MIN,      1: LEN_LIST_BASIC_TICK},
         '당일디비': {0: DB_COIN_FUTURE_MIN,      1: DB_COIN_FUTURE_TICK},

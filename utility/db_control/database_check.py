@@ -3,8 +3,9 @@ import os
 import sqlite3
 import pandas as pd
 from traceback import format_exc
-from utility.settings.setting_base import CODE_INFO_TABLES
 from utility.static_method.static import read_key, write_key
+from utility.settings.setting_base import CODE_INFO_TABLES, DB_PATH, LOG_PATH, BACK_TEMP, GRAPH_PATH, DB_SETTING, \
+    DB_CODE_INFO, DB_STRATEGY, DB_TRADELIST
 
 MAIN_CLOUMNS = [
     'index', '거래소', '타임프레임', '데이터저장', '모의투자', '알림소리', '프로그램비밀번호', '바이낸스선물고정레버리지',
@@ -121,16 +122,10 @@ def database_check():
     설정 테이블을 초기화합니다.
     """
     try:
-        os.makedirs('./_log', exist_ok=True)
-        os.makedirs('./_database', exist_ok=True)
-        os.makedirs('./backtest/_temp', exist_ok=True)
-        os.makedirs('./backtest/_graph', exist_ok=True)
-
-        DB_PATH       = './_database'
-        DB_SETTING    = f'{DB_PATH}/setting.db'
-        DB_TRADELIST  = f'{DB_PATH}/tradelist.db'
-        DB_STRATEGY   = f'{DB_PATH}/strategy.db'
-        DB_CODE_INFO  = f'{DB_PATH}/code_info.db'
+        os.makedirs(LOG_PATH, exist_ok=True)
+        os.makedirs(DB_PATH, exist_ok=True)
+        os.makedirs(GRAPH_PATH, exist_ok=True)
+        os.makedirs(BACK_TEMP, exist_ok=True)
 
         try:
             read_key()
