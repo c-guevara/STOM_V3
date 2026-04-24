@@ -5,12 +5,12 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
-from trade.analyzer_risk import AnalyzerRisk
-from trade.stg_globals_func import StgGlobalsFunc
-from trade.manager_formula import get_formula_data
-from trade.analyzer_pattern import AnalyzerPattern
-from trade.analyzer_microstruc import AnalyzerMicrostructure
-from trade.analyzer_volume_profile import AnalyzerVolumeProfile
+from strategy.analyzer_risk import AnalyzerRisk
+from strategy.stg_globals_func import StgGlobalsFunc
+from strategy.manager_formula import get_formula_data
+from strategy.analyzer_pattern import AnalyzerPattern
+from strategy.analyzer_microstruc import AnalyzerMicrostructure
+from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
 from utility.settings.setting_base import indicator, DB_SETTING
 from utility.settings.setting_base import DB_STRATEGY, ui_num, dict_order_ratio
 # noinspection PyUnusedImports

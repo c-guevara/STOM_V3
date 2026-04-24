@@ -30,7 +30,7 @@ def auto_back_schedule(ui, gubun):
 
     if gubun == 0:
         from ui.event_click.button_clicked_show_dialog import show_pattern_dialog
-        from trade.analyzer_pattern import pattern_setting_load, pattern_train
+        from strategy.analyzer_pattern import pattern_setting_load, pattern_train
 
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:
@@ -44,7 +44,7 @@ def auto_back_schedule(ui, gubun):
 
     elif gubun == 0.5:
         from ui.event_click.button_clicked_show_dialog import show_volume_dialog
-        from trade.analyzer_volume_profile import volume_setting_load, volume_profile_train
+        from strategy.analyzer_volume_profile import volume_setting_load, volume_profile_train
 
         ui.auto_mode = True
         if ui.dict_set['알림소리'] or ui.dict_set['알림소리']:

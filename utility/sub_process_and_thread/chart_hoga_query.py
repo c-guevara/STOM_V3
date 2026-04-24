@@ -8,7 +8,7 @@ import numpy as np
 import pandas as pd
 from copy import deepcopy
 from traceback import format_exc
-from trade.manager_formula import ManagerFormula, get_formula_data
+from strategy.manager_formula import ManagerFormula, get_formula_data
 from utility.static_method.static import timedelta_sec, str_ymdhms, dt_ymdhms, add_rolling_data, dt_ymdhm, str_ymdhm
 from utility.settings.setting_base import ui_num, DB_TRADELIST, DB_PATH, DB_BACKTEST, DB_CODE_INFO, DB_SETTING, \
     DB_STRATEGY, columns_hj, code_info_tables
@@ -23,7 +23,6 @@ class ChartHogaQuery:
            0        1       2      3       4      5      6      7       8        9       10     11    12
         """
         self.windowQ      = qlist[0]
-        self.soundQ       = qlist[1]
         self.queryQ       = qlist[2]
         self.chartQ       = qlist[4]
         self.hogaQ        = qlist[5]

@@ -4,12 +4,12 @@ import numpy as np
 import pandas as pd
 from traceback import format_exc
 from multiprocessing import shared_memory
-from trade.analyzer_risk import AnalyzerRisk
-from trade.stg_globals_func import StgGlobalsFunc
-from trade.manager_formula import get_formula_data
-from trade.analyzer_pattern import AnalyzerPattern
-from trade.analyzer_microstruc import AnalyzerMicrostructure
-from trade.analyzer_volume_profile import AnalyzerVolumeProfile
+from strategy.analyzer_risk import AnalyzerRisk
+from strategy.stg_globals_func import StgGlobalsFunc
+from strategy.manager_formula import get_formula_data
+from strategy.analyzer_pattern import AnalyzerPattern
+from strategy.analyzer_microstruc import AnalyzerMicrostructure
+from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
 from utility.settings.setting_base import indicator, ui_num, BACK_TEMP, DB_STRATEGY, DB_SETTING
 from utility.static_method.static import pickle_read, pickle_write, dt_ymdhms, dt_ymdhm, get_ema_list, add_rolling_data, \
     set_builtin_print, get_profile_text

@@ -3,7 +3,7 @@ import re
 from traceback import format_exc
 from PyQt5.QtCore import QThread
 from utility.settings.setting_base import indicator, ui_num
-from trade.analyzer_microstruc import AnalyzerMicrostructure
+from strategy.analyzer_microstruc import AnalyzerMicrostructure
 # noinspection PyUnresolvedReferences
 from utility.static_method.static import timedelta_sec, qtest_qwait, now
 
