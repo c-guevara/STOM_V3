@@ -620,7 +620,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
             패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0, 0, 0
-            if self.dict_set['패턴분석']:
+            if self.dict_set['캔들분석']:
                 패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, self.arry_code)
             if self.dict_set['가격대분석']:
                 가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
@@ -1122,7 +1122,7 @@ class BaseStrategy(StgGlobalsFunc):
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
             패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0, 0, 0
-            if self.dict_set['패턴분석']:
+            if self.dict_set['캔들분석']:
                 패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, self.arry_code)
             if self.dict_set['가격대분석']:
                 가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
