@@ -8,8 +8,7 @@ from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
-from utility.static_method.static import now, thread_decorator
-
+from utility.static_method.static import thread_decorator, str_ymd
 
 PATTERN_DB = f'{DB_PATH}/pattern_analysis.db'
 PATTERN_FUNCTIONS = [
@@ -312,7 +311,7 @@ class CandlePatternDatabase:
                     std_score REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     confidence_score REAL NOT NULL,
-                    last_update TEXT NOT NULL,
+                    last_update INTEGER NOT NULL,
                     PRIMARY KEY (code, pattern_name)
                 )
             ''')
@@ -362,7 +361,7 @@ class CandlePatternDatabase:
         code: 종목코드
         pattern_scores: 패턴별 점수 딕셔너리
         """
-        current_date = now().strftime('%Y-%m-%d')
+        current_date = int(str_ymd())
 
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()

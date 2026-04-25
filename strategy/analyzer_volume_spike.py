@@ -7,8 +7,7 @@ from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
-from utility.static_method.static import now, thread_decorator
-
+from utility.static_method.static import thread_decorator, str_ymd
 
 VOLUME_SPIKE_DB = f'{DB_PATH}/volume_spike.db'
 window_queue = None
@@ -335,7 +334,7 @@ class VolumeSpikeDatabase:
                     std_score REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     confidence_score REAL NOT NULL,
-                    last_update TEXT NOT NULL,
+                    last_update INTEGER NOT NULL,
                     PRIMARY KEY (code, spike_multiplier)
                 )
             ''')
@@ -385,7 +384,7 @@ class VolumeSpikeDatabase:
         code: 종목코드
         spike_scores: 급증 강도별 점수 딕셔너리
         """
-        current_date = now().strftime('%Y-%m-%d')
+        current_date = int(str_ymd())
 
         with sqlite3.connect(VOLUME_SPIKE_DB) as conn:
             cursor = conn.cursor()

@@ -7,8 +7,7 @@ from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
-from utility.static_method.static import now, thread_decorator
-
+from utility.static_method.static import thread_decorator, str_ymd
 
 VOLATILITY_PATTERN_DB = f'{DB_PATH}/volatility_pattern.db'
 window_queue = None
@@ -359,8 +358,8 @@ class VolatilityPatternDatabase:
                     std_score REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     confidence_score REAL NOT NULL,
-                    last_update TEXT NOT NULL,
                     level_boundaries TEXT NOT NULL,
+                    last_update INTEGER NOT NULL,
                     PRIMARY KEY (code, volatility_level)
                 )
             ''')
@@ -406,9 +405,6 @@ class VolatilityPatternDatabase:
                 }
                 level_boundaries = np.array(list(map(float, result[7].split(','))))
 
-            if level_boundaries is None:
-                level_boundaries = np.linspace(0, 1, 6)
-
             return volatility_scores, level_boundaries
 
     def save_volatility_scores(self, code: str, volatility_scores: Dict[int, Dict[str, float]],
@@ -419,7 +415,7 @@ class VolatilityPatternDatabase:
         volatility_scores: 변동성 레벨별 점수 딕셔너리
         level_boundaries: 레벨 경계 배열
         """
-        current_date = now().strftime('%Y-%m-%d')
+        current_date = int(str_ymd())
         boundaries_str = ','.join(map(str, level_boundaries))
 
         with sqlite3.connect(VOLATILITY_PATTERN_DB) as conn:

@@ -7,8 +7,7 @@ from PyQt5.QtWidgets import QMessageBox
 from multiprocessing import Pool, cpu_count
 from ui.create_widget.set_text import famous_saying
 from utility.settings.setting_base import UI_NUM, DB_PATH
-from utility.static_method.static import now, thread_decorator
-
+from utility.static_method.static import thread_decorator, str_ymd
 
 VOLUME_PROFILE_DB = f'{DB_PATH}/volume_profile.db'
 window_queue = None
@@ -354,7 +353,7 @@ class VolumeProfileDatabase:
                     downward_strength REAL NOT NULL,
                     sample_count INTEGER NOT NULL,
                     confidence_score REAL NOT NULL,
-                    last_update TEXT NOT NULL,
+                    last_update INTEGER NOT NULL,
                     PRIMARY KEY (code, price_level)
                 )
             ''')
@@ -392,7 +391,7 @@ class VolumeProfileDatabase:
 
     def save_volume_scores(self, code: str, volume_scores: Dict[str, Dict[str, float]]):
         """종목별 볼륨 프로파일 점수 저장"""
-        current_date = now().strftime('%Y-%m-%d')
+        current_date = int(str_ymd())
 
         with sqlite3.connect(VOLUME_PROFILE_DB) as conn:
             cursor = conn.cursor()
