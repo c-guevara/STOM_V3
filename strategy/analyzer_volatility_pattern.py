@@ -25,9 +25,9 @@ class AnalyzerVolatilityPattern:
     def __init__(self, market_gubun: int, market_info: dict, min_samples: int = 20):
         """
         초기화
-        :param market_gubun: 마켓 구분 번호
-        :param market_info: 마켓 정보 딕셔너리
-        :param min_samples: 최소 샘플 수 (기본값 20)
+        market_gubun: 마켓 구분 번호
+        market_info: 마켓 정보 딕셔너리
+        min_samples: 최소 샘플 수 (기본값 20)
         """
         self.backtest_db_path    = market_info['백테디비'][0]
         self.factor_list         = market_info['팩터목록'][0]
@@ -38,15 +38,14 @@ class AnalyzerVolatilityPattern:
         self.rate_threshold      = rate_threshold
         self.num_levels          = num_levels
         self.min_samples         = min_samples
-        self.volatility_realtime = \
-            VolatilityPatternRealtime(self.factor_list, self.strategy_gubun, analysis_period, num_levels)
+        self.volatility_realtime = VolatilityPatternRealtime(self.factor_list, self.strategy_gubun, analysis_period)
 
     def analyze_current_volatility(self, code: str, realtime_data: np.ndarray) -> Dict[str, float]:
         """
         실시간 변동성 분석 수행
-        :param code: 종목코드
-        :param realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이)
-        :return: 변동성 분석 결과
+        code: 종목코드
+        realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이)
+        return: 변동성 분석 결과
         """
         return self.volatility_realtime.analyze_current_volatility(code, realtime_data)
 
@@ -77,7 +76,7 @@ class AnalyzerVolatilityPattern:
     def get_code_list(self) -> List[str]:
         """
         백테 디비에서 종목코드 목록 추출
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(self.backtest_db_path) as conn:
             cursor = conn.cursor()
@@ -105,14 +104,15 @@ class AnalyzerVolatilityPattern:
         return chunks
 
     @staticmethod
-    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str, factor_list: list,
-                          analysis_period: int, num_levels: int, min_samples: int) -> Dict[str, Dict[str, float]]:
+    def _train_code_chunk(i: int, code_chunk: List[str], backtest_db_path: str, factor_list: list, analysis_period: int,
+                          rate_threshold: int, num_levels: int, min_samples: int) -> Dict[str, Dict[str, float]]:
         """
         종목 청크별 학습 (프로세스 내에서 실행)
         code_chunk: 종목코드 청크
         backtest_db_path: 백테디비 경로
         market_info: 마켓 정보 딕셔너리
         analysis_period: 분석 기간 분
+        rate_threshold: 등락율 임계값
         num_levels: 변동성 레벨 수
         volatility_method: 변동성 계산 방법
         min_samples: 최소 샘플 수
@@ -120,7 +120,7 @@ class AnalyzerVolatilityPattern:
         """
         global window_queue
         volatility_learning = \
-            VolatilityPatternLearning(factor_list, analysis_period, num_levels, min_samples)
+            VolatilityPatternLearning(factor_list, analysis_period, rate_threshold, num_levels, min_samples)
         all_volatility_scores = {}
         last = len(code_chunk)
         for k, code in enumerate(code_chunk):
@@ -134,36 +134,38 @@ class AnalyzerVolatilityPattern:
                 if volatility_scores:
                     all_volatility_scores[code] = (volatility_scores, level_boundaries)
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 변동성 패턴 학습 중 ... [{k + 1}/{last}]"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 변동성분석 학습 중 ... [{k + 1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 변동성 패턴 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 변동성분석 학습 실패 - {e}"))
 
         return all_volatility_scores
 
 
 class VolatilityPatternLearning:
     """과거데이터 기반 변동성 패턴 학습 모듈"""
-    def __init__(self, factor_list: list, analysis_period: int, num_levels: int, min_samples: int):
+    def __init__(self, factor_list: list, analysis_period: int, rate_threshold: int, num_levels: int, min_samples: int):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param analysis_period: 분석 기간 분 (기본값 30)
-        :param num_levels: 변동성 레벨 수 (기본값 5)
-        :param min_samples: 최소 샘플 수 (기본값 20)
+        factor_list: 팩터 리스트
+        analysis_period: 분석 기간 분
+        rate_threshold: 등락율 임계값
+        num_levels: 변동성 레벨 수
+        min_samples: 최소 샘플 수
         """
         self.idx_close       = factor_list.index('현재가')
         self.idx_high        = factor_list.index('분봉고가')
         self.idx_low         = factor_list.index('분봉저가')
         self.analysis_period = analysis_period
+        self.rate_threshold  = rate_threshold
         self.num_levels      = num_levels
         self.min_samples     = min_samples
 
     def train_volatility_patterns(self, historical_data: np.ndarray) -> Tuple[Dict[int, Dict[str, float]], np.ndarray]:
         """
         종목별 과거데이터로 변동성 패턴 학습
-        :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
-        :return: (변동성 레벨별 점수 딕셔너리, 레벨 경계 배열)
+        historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
+        return: (변동성 레벨별 점수 딕셔너리, 레벨 경계 배열)
         """
         recent_data = historical_data[-10000:] if len(historical_data) > 10000 else historical_data
         close_price = recent_data[:, self.idx_close]
@@ -219,17 +221,14 @@ class VolatilityPatternLearning:
 
     def _classify_volatility_levels(self, volatility_data: np.ndarray) -> Tuple[np.ndarray, np.ndarray]:
         """변동성 레벨 분류 및 경계 계산"""
-        # 유효한 데이터만 사용
         valid_data = volatility_data[volatility_data > 0]
 
         if len(valid_data) < self.num_levels:
             return np.zeros(len(volatility_data), dtype=int), np.linspace(0, 1, self.num_levels + 1)
 
-        # 백분위수 기반 레벨 경계 계산
         percentiles      = np.linspace(0, 100, self.num_levels + 1)
         level_boundaries = np.percentile(valid_data, percentiles)
 
-        # 각 변동성 값에 레벨 할당
         levels = np.zeros(len(volatility_data), dtype=int)
         for i in range(len(volatility_data)):
             if volatility_data[i] > 0:
@@ -237,7 +236,7 @@ class VolatilityPatternLearning:
                     if level_boundaries[level] <= volatility_data[i] < level_boundaries[level + 1]:
                         levels[i] = level
                         break
-                # 최대값 처리
+
                 if volatility_data[i] >= level_boundaries[-1]:
                     levels[i] = self.num_levels - 1
 
@@ -245,7 +244,7 @@ class VolatilityPatternLearning:
 
     def _calculate_score(self, price_change_percent: float) -> float:
         """가격변화율을 기반으로 점수 계산"""
-        score = (price_change_percent / 5.0) * 100
+        score = price_change_percent / self.rate_threshold * 100
         return max(-100.0, min(100.0, score))
 
     def _calculate_confidence(self, sample_count: int, std_score: float) -> float:
@@ -257,19 +256,17 @@ class VolatilityPatternLearning:
 
 class VolatilityPatternRealtime:
     """실시간 변동성 패턴 분석 모듈"""
-    def __init__(self, factor_list: list, strategy_gubun: str, analysis_period: int, num_levels: int):
+    def __init__(self, factor_list: list, strategy_gubun: str, analysis_period: int):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param strategy_gubun: 전략 구분
-        :param analysis_period: 분석 기간 분 (기본값 30)
-        :param num_levels: 변동성 레벨 수 (기본값 5)
+        factor_list: 팩터 리스트
+        strategy_gubun: 전략 구분
+        analysis_period: 분석 기간 분
         """
         self.idx_close           = factor_list.index('현재가')
         self.idx_high            = factor_list.index('분봉고가')
         self.idx_low             = factor_list.index('분봉저가')
         self.analysis_period     = analysis_period
-        self.num_levels          = num_levels
         self.volatility_database = VolatilityPatternDatabase(strategy_gubun)
         self.volatility_scores   = {}
         self.level_boundaries    = {}
@@ -286,12 +283,10 @@ class VolatilityPatternRealtime:
     def analyze_current_volatility(self, code: str, realtime_data: np.ndarray) -> Dict[str, float]:
         """
         현재 변동성 분석 수행
-        :param code: 종목코드
-        :param realtime_data: 실시간 1분봉 데이터
-        :return: 변동성 분석 결과
+        code: 종목코드
+        realtime_data: 실시간 1분봉 데이터
+        return: 변동성 분석 결과
         """
-        volatility_level = 0
-        volatility_value = 0.0
         volatility_score = 0.0
         confidence       = 0.0
 
@@ -309,12 +304,7 @@ class VolatilityPatternRealtime:
                 volatility_score = score_data['avg_score']
                 confidence       = score_data['confidence_score']
 
-        return {
-            'volatility_level': volatility_level,
-            'volatility_value': volatility_value,
-            'score': volatility_score,
-            'confidence': confidence
-        }
+        return volatility_score, confidence
 
     def _calculate_volatility(self, close_price: np.ndarray, 
                               high_price: np.ndarray, low_price: np.ndarray) -> np.ndarray:
@@ -379,7 +369,7 @@ class VolatilityPatternDatabase:
     def get_all_codes(self) -> List[str]:
         """
         데이터베이스에 저장된 전체 종목코드 조회
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(VOLATILITY_PATTERN_DB) as conn:
             cursor = conn.cursor()
@@ -458,33 +448,33 @@ class VolatilityPatternDatabase:
         """
         마켓번호로 설정값 불러오기
         market: 마켓번호 (1~9)
-        return: (analysis_period, num_levels, volatility_method) 튜플, 데이터가 없으면 ('std', 20, 10) 반환
+        return: (analysis_period, rate_threshold, num_levels) 튜플, 데이터가 없으면 ('std', 20, 10) 반환
         """
         with sqlite3.connect(VOLATILITY_PATTERN_DB) as conn:
             cursor = conn.cursor()
             cursor.execute(
-                'SELECT analysis_period, num_levels, volatility_method FROM volatility_setting WHERE market = ?',
+                'SELECT analysis_period, rate_threshold, num_levels FROM volatility_setting WHERE market = ?',
                 (market,)
             )
             result = cursor.fetchone()
             if result:
                 return result
-            return 'std', 5, 20
+            return 30, 5, 5
 
-    def save_volatility_setting(self, market: int, analysis_period: int, num_levels: int, volatility_method: str):
+    def save_volatility_setting(self, market: int, analysis_period: int, rate_threshold: str, num_levels: int):
         """
         마켓번호로 설정값 저장
         market: 마켓번호 (1~9)
         analysis_period: 분석 기간 분
+        rate_threshold: 등락율 임계값
         num_levels: 변동성 레벨 수
-        volatility_method: 변동성 계산 방법
         """
         with sqlite3.connect(VOLATILITY_PATTERN_DB) as conn:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT OR REPLACE INTO volatility_setting '
-                '(market, analysis_period, num_levels, volatility_method) VALUES (?, ?, ?, ?)',
-                (market, analysis_period, num_levels, volatility_method)
+                '(market, analysis_period, rate_threshold, num_levels) VALUES (?, ?, ?, ?)',
+                (market, analysis_period, rate_threshold, num_levels)
             )
             conn.commit()
 
@@ -505,13 +495,13 @@ def volatility_setting_save(ui):
     num_levels          = int(ui.vlp_comboBoxxx_03.currentText())
     volatility_database = VolatilityPatternDatabase(ui.market_info['전략구분'])
     volatility_database.save_volatility_setting(ui.market_gubun, analysis_period, rate_threshold, num_levels)
-    QMessageBox.information(ui.dialog_volatility, '저장완료', random.choice(famous_saying))
+    QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
 def volatility_train(ui):
     """변동성 패턴 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_volatility, '오류 알림', '현재 변동성 패턴 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 변동성 패턴 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vlp_comboBoxxx_01.currentText())

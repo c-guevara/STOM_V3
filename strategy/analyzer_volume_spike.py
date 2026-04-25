@@ -25,9 +25,9 @@ class AnalyzerVolumeSpike:
     def __init__(self, market_gubun: int, market_info: dict, min_samples: int = 20):
         """
         초기화
-        :param market_gubun: 마켓 구분 번호
-        :param market_info: 마켓 정보 딕셔너리
-        :param min_samples: 최소 샘플 수 (기본값 20)
+        market_gubun: 마켓 구분 번호
+        market_info: 마켓 정보 딕셔너리
+        min_samples: 최소 샘플 수 (기본값 20)
         """
         self.backtest_db_path = market_info['백테디비'][0]
         self.factor_list      = market_info['팩터목록'][0]
@@ -39,14 +39,14 @@ class AnalyzerVolumeSpike:
         self.ratio_threshold  = ratio_threshold
         self.min_samples      = min_samples
         self.spike_realtime   = \
-            VolumeSpikeRealtime(self.factor_list, self.strategy_gubun, analysis_period, rate_threshold)
+            VolumeSpikeRealtime(self.factor_list, self.strategy_gubun, analysis_period, ratio_threshold)
 
     def analyze_current_spike(self, code: str, realtime_data: np.ndarray) -> Dict[str, float]:
         """
         실시간 거래량 급증 분석 수행
-        :param code: 종목코드
-        :param realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이)
-        :return: 급증 분석 결과
+        code: 종목코드
+        realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이)
+        return: 급증 분석 결과
         """
         return self.spike_realtime.analyze_current_spike(code, realtime_data)
 
@@ -77,7 +77,7 @@ class AnalyzerVolumeSpike:
     def get_code_list(self) -> List[str]:
         """
         백테 디비에서 종목코드 목록 추출
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(self.backtest_db_path) as conn:
             cursor = conn.cursor()
@@ -135,10 +135,10 @@ class AnalyzerVolumeSpike:
                 if spike_scores:
                     all_spike_scores[code] = spike_scores
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 거래량 급증 패턴 학습 중 ... [{k + 1}/{last}]"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 거래량분석 학습 중 ... [{k + 1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 거래량 급증 패턴 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 거래량분석 학습 실패 - {e}"))
 
         return all_spike_scores
 
@@ -149,11 +149,11 @@ class VolumeSpikeLearning:
                  ratio_threshold: int, min_samples: int):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param analysis_period: 분석 기간 분
-        :param rate_threshold: 등락율 임계값
-        :param ratio_threshold: 급증 임계값
-        :param min_samples: 최소 샘플 수
+        factor_list: 팩터 리스트
+        analysis_period: 분석 기간 분
+        rate_threshold: 등락율 임계값
+        ratio_threshold: 급증 임계값
+        min_samples: 최소 샘플 수
         """
         self.idx_close       = factor_list.index('현재가')
         self.idx_volume      = factor_list.index('분당거래대금')
@@ -165,8 +165,8 @@ class VolumeSpikeLearning:
     def train_volume_spikes(self, historical_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
         종목별 과거데이터로 거래량 급증 패턴 학습
-        :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
-        :return: 급증 강도별 점수 딕셔너리
+        historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
+        return: 급증 강도별 점수 딕셔너리
         """
         recent_data = historical_data[-10000:] if len(historical_data) > 10000 else historical_data
         close_price = recent_data[:, self.idx_close]
@@ -220,7 +220,7 @@ class VolumeSpikeLearning:
         for i in range(self.analysis_period, len(volume_data)):
             if ma_volume[i] > 0:
                 multiplier = volume_data[i] / ma_volume[i]
-                if multiplier >= self.rate_threshold:
+                if multiplier >= self.ratio_threshold:
                     spike_indices.append(i)
         return spike_indices
 
@@ -238,7 +238,7 @@ class VolumeSpikeLearning:
 
     def _calculate_score(self, price_change_percent: float) -> float:
         """가격변화율을 기반으로 점수 계산"""
-        score = (price_change_percent / self.ratio_threshold) * 100
+        score = price_change_percent / self.rate_threshold * 100
         return max(-100.0, min(100.0, score))
 
     def _calculate_confidence(self, sample_count: int, std_score: float) -> float:
@@ -250,17 +250,17 @@ class VolumeSpikeLearning:
 
 class VolumeSpikeRealtime:
     """실시간 거래량 급증 분석 모듈"""
-    def __init__(self, factor_list: list, strategy_gubun: str, analysis_period: int, rate_threshold: int):
+    def __init__(self, factor_list: list, strategy_gubun: str, analysis_period: int, ratio_threshold: int):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param strategy_gubun: 전략 구분
-        :param analysis_period: 분석 기간 분
-        :param rate_threshold: 등락율 임계값
+        factor_list: 팩터 리스트
+        strategy_gubun: 전략 구분
+        analysis_period: 분석 기간 분
+        ratio_threshold: 급증 임계값
         """
         self.idx_volume      = factor_list.index('분당거래대금')
         self.analysis_period = analysis_period
-        self.rate_threshold  = rate_threshold
+        self.ratio_threshold  = ratio_threshold
         self.spike_database  = VolumeSpikeDatabase(strategy_gubun)
         self.spike_scores    = {}
         self._load_spike_scores()
@@ -275,12 +275,10 @@ class VolumeSpikeRealtime:
     def analyze_current_spike(self, code: str, realtime_data: np.ndarray) -> Dict[str, float]:
         """
         현재 거래량 급증 분석 수행
-        :param code: 종목코드
-        :param realtime_data: 실시간 1분봉 데이터
-        :return: 급증 분석 결과
+        code: 종목코드
+        realtime_data: 실시간 1분봉 데이터
+        return: 급증 분석 결과
         """
-        is_spike = False
-        spike_multiplier = 0.0
         spike_score = 0.0
         confidence = 0.0
 
@@ -291,21 +289,14 @@ class VolumeSpikeRealtime:
 
             if ma_volume[-1] > 0:
                 spike_multiplier = current_volume / ma_volume[-1]
-                if spike_multiplier >= self.rate_threshold:
-                    is_spike = True
+                if spike_multiplier >= self.ratio_threshold:
                     rounded_multiplier = round(spike_multiplier * 2) / 2
-
                     if code in self.spike_scores and rounded_multiplier in self.spike_scores[code]:
                         score_data  = self.spike_scores[code][rounded_multiplier]
                         spike_score = score_data['avg_score']
                         confidence  = score_data['confidence_score']
 
-        return {
-            'is_spike': is_spike,
-            'spike_multiplier': spike_multiplier,
-            'score': spike_score,
-            'confidence': confidence
-        }
+        return spike_score, confidence
 
     def _calculate_ma_volume(self, volume_data: np.ndarray) -> np.ndarray:
         """이동평균 거래량 계산"""
@@ -353,7 +344,7 @@ class VolumeSpikeDatabase:
     def get_all_codes(self) -> List[str]:
         """
         데이터베이스에 저장된 전체 종목코드 조회
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(VOLUME_SPIKE_DB) as conn:
             cursor = conn.cursor()
@@ -468,13 +459,13 @@ def spike_setting_save(ui):
     ratio_threshold = int(ui.vsp_comboBoxxx_03.currentText())
     spike_database  = VolumeSpikeDatabase(ui.market_info['전략구분'])
     spike_database.save_spike_setting(ui.market_gubun, analysis_period, rate_threshold, ratio_threshold)
-    QMessageBox.information(ui.dialog_spike, '저장완료', random.choice(famous_saying))
+    QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
 def spike_train(ui):
     """급증 패턴 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_spike, '오류 알림', '현재 급증 패턴 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 급증 패턴 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vsp_comboBoxxx_01.currentText())

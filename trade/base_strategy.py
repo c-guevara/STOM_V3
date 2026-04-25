@@ -8,10 +8,12 @@ from traceback import format_exc
 from strategy.analyzer_risk import AnalyzerRisk
 from strategy.stg_globals_func import StgGlobalsFunc
 from strategy.manager_formula import get_formula_data
+from strategy.analyzer_volume_spike import AnalyzerVolumeSpike
 from strategy.analyzer_candle_pattern import AnalyzerCandlePattern
-from strategy.analyzer_microstructure import AnalyzerMicrostructure
 from strategy.analyzer_volume_profile import AnalyzerVolumeProfile
+from strategy.analyzer_microstructure import AnalyzerMicrostructure
 from utility.settings.setting_base import DICT_INDICATOR, DB_SETTING
+from strategy.analyzer_volatility_pattern import AnalyzerVolatilityPattern
 from utility.settings.setting_base import DB_STRATEGY, UI_NUM, DICT_ORDER_RATIO
 # noinspection PyUnusedImports
 from utility.static_method.static import now, timedelta_sec, str_ymdhms, get_ema_list, set_builtin_print, \
@@ -113,8 +115,10 @@ class BaseStrategy(StgGlobalsFunc):
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
-        self.pt_analyzer = AnalyzerCandlePattern(self.market_info)
-        self.vf_analyzer = AnalyzerVolumeProfile(self.market_info)
+        self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info)
+        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info)
+        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info)
+        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info)
 
         set_builtin_print(self.windowQ)
         self._set_formula_data()
@@ -615,11 +619,15 @@ class BaseStrategy(StgGlobalsFunc):
             if 데이터길이 >= self.rolling_window:
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
-            패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도 = 0, 0, 0, 0
-            if self.dict_set['패턴분석'] and 데이터길이 >= 5:
-                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_patterns(self.code, self.arry_code)
+            패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0, 0, 0
+            if self.dict_set['패턴분석']:
+                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, self.arry_code)
             if self.dict_set['가격대분석']:
                 가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+            if self.dict_set['거래량분석']:
+                거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, self.arry_code)
+            if self.dict_set['변동성분석']:
+                변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
 
             indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],
@@ -1113,11 +1121,15 @@ class BaseStrategy(StgGlobalsFunc):
             if 데이터길이 >= self.rolling_window:
                 self.arry_code[-1, self.base_cnt:self.area_cnt] = self._get_parameter_area(self.rolling_window)
 
-            패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도 = 0, 0, 0, 0
-            if self.dict_set['패턴분석'] and 데이터길이 >= 5:
-                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_patterns(self.code, self.arry_code)
+            패턴점수, 패턴신뢰도, 가격대점수, 가격대신뢰도, 거래량점수, 거래량신뢰도, 변동성점수, 변동성신뢰도 = 0, 0, 0, 0, 0, 0, 0, 0
+            if self.dict_set['패턴분석']:
+                패턴점수, 패턴신뢰도 = self.pt_analyzer.analyze_current_patterns(self.code, self.arry_code)
             if self.dict_set['가격대분석']:
                 가격대점수, 가격대신뢰도 = self.vf_analyzer.analyze_current_price(self.code, 현재가)
+            if self.dict_set['거래량분석']:
+                거래량점수, 거래량신뢰도 = self.vs_analyzer.analyze_current_spike(self.code, self.arry_code)
+            if self.dict_set['변동성분석']:
+                변동성점수, 변동성신뢰도 = self.vp_analyzer.analyze_current_volatility(self.code, self.arry_code)
 
             indicator_list = get_indicator(
                 self.arry_code[:, self.dict_findex['현재가']],

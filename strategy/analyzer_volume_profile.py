@@ -25,9 +25,9 @@ class AnalyzerVolumeProfile:
     def __init__(self, market_gubun: int, market_info: dict, top_nodes: int = 20):
         """
         초기화
-        :param market_gubun: 마켓 구분 번호
-        :param market_info: 마켓 정보 딕셔너리
-        :param top_nodes: 상위 볼륨 노드 개수 (기본값 20)
+        market_gubun: 마켓 구분 번호
+        market_info: 마켓 정보 딕셔너리
+        top_nodes: 상위 볼륨 노드 개수 (기본값 20)
         """
         self.backtest_db_path = market_info['백테디비'][0]
         self.factor_list      = market_info['팩터목록'][0]
@@ -35,17 +35,17 @@ class AnalyzerVolumeProfile:
         self.volume_database  = VolumeProfileDatabase(self.strategy_gubun)
         analysis_period, rate_threshold, price_range_pct = self.volume_database.load_volume_setting(market_gubun)
         self.analysis_period  = analysis_period
-        self.rate_threshold   = round(rate_threshold / 100, 4)
-        self.price_range_pct  = round(price_range_pct / 100, 4)
+        self.rate_threshold   = rate_threshold
+        self.price_range_pct  = price_range_pct
         self.top_nodes        = top_nodes
         self.volume_realtime  = VolumeProfileRealtime(self.factor_list, self.strategy_gubun, self.price_range_pct)
 
     def analyze_current_price(self, code: str, current_price: float) -> Dict[str, float]:
         """
         실시간 볼륨 프로파일 분석 수행
-        :param code: 종목코드
-        :param current_price: 현재 가격
-        :return: 볼륨 프로파일 점수 정보
+        code: 종목코드
+        current_price: 현재 가격
+        return: 볼륨 프로파일 점수 정보
         """
         return self.volume_realtime.analyze_current_position(code, current_price)
 
@@ -76,7 +76,7 @@ class AnalyzerVolumeProfile:
     def get_code_list(self) -> List[str]:
         """
         백테 디비에서 종목코드 목록 추출
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(self.backtest_db_path) as conn:
             cursor = conn.cursor()
@@ -136,10 +136,10 @@ class AnalyzerVolumeProfile:
                 if volume_scores:
                     all_volume_scores[code] = volume_scores
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 볼륨 프로파일 학습 중 ... [{k + 1}/{last}]"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 가격대분석 학습 중 ... [{k + 1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 볼륨 프로파일 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 가격대분석 학습 실패 - {e}"))
 
         return all_volume_scores
 
@@ -150,11 +150,11 @@ class VolumeProfileLearning:
                  price_range_pct: float, top_nodes: int):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param analysis_period: 분석 기간 분 (기본값 10)
-        :param rate_threshold: 돌파/반등 판정 기준 퍼센트 (기본값 0.5)
-        :param price_range_pct: 가격대 분할 퍼센트 (기본값 0.5)
-        :param top_nodes: 상위 볼륨 노드 개수 (기본값 20)
+        factor_list: 팩터 리스트
+        analysis_period: 분석 기간 분 (기본값 10)
+        rate_threshold: 돌파/반등 판정 기준 퍼센트 (기본값 0.5)
+        price_range_pct: 가격대 분할 퍼센트 (기본값 0.5)
+        top_nodes: 상위 볼륨 노드 개수 (기본값 20)
         """
         self.idx_close       = factor_list.index('현재가')
         self.idx_volume      = factor_list.index('분당거래대금')
@@ -166,8 +166,8 @@ class VolumeProfileLearning:
     def train_volume_profile(self, historical_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
         종목별 과거데이터로 볼륨 프로파일 학습
-        :param historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
-        :return: 가격대별 점수 딕셔너리
+        historical_data: 과거 1분봉 데이터 (2차원 numpy 어레이)
+        return: 가격대별 점수 딕셔너리
         """
         recent_data   = historical_data[-10000:] if len(historical_data) > 10000 else historical_data
         close_price   = recent_data[:, self.idx_close]
@@ -198,7 +198,7 @@ class VolumeProfileLearning:
 
     def _create_price_bins(self, min_price: float, max_price: float) -> np.ndarray:
         """퍼센트 기반 가격대 분할"""
-        bin_size = min_price * self.price_range_pct
+        bin_size = min_price * self.price_range_pct / 100
         num_bins = int((max_price - min_price) / bin_size) + 1
         bins = np.linspace(min_price, max_price, num_bins)
         return bins
@@ -232,12 +232,12 @@ class VolumeProfileLearning:
         bounce_down = 0             # 반등 후 하락
         total_count = 0
 
-        threshold = node_price * self.rate_threshold
+        threshold = node_price * self.rate_threshold / 100
 
         for i in range(len(close_price) - self.analysis_period):
             price = close_price[i]
 
-            if abs(price - node_price) / node_price <= self.rate_threshold:
+            if abs(price - node_price) / node_price * 100 <= self.rate_threshold:
                 total_count += 1
 
                 future_prices = close_price[i+1:i+1+self.analysis_period]
@@ -275,9 +275,9 @@ class VolumeProfileRealtime:
     def __init__(self, factor_list: list, strategy_gubun: str, price_range_pct: float):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param strategy_gubun: 전략 구분
-        :param price_range_pct: 볼륨 노드 탐색 범위 퍼센트
+        factor_list: 팩터 리스트
+        strategy_gubun: 전략 구분
+        price_range_pct: 볼륨 노드 탐색 범위 퍼센트
         """
         self.idx_close       = factor_list.index('현재가')
         self.price_range_pct = price_range_pct
@@ -295,9 +295,9 @@ class VolumeProfileRealtime:
     def analyze_current_position(self, code: str, current_price: float) -> Dict[str, float]:
         """
         현재 가격 위치의 볼륨 프로파일 점수 반환
-        :param code: 종목코드
-        :param current_price: 현재 가격
-        :return: 볼륨 프로파일 점수 및 신뢰도 정보
+        code: 종목코드
+        current_price: 현재 가격
+        return: 볼륨 프로파일 점수 및 신뢰도 정보
         """
         volume_profile_score, confidence_score = 0, 0
 
@@ -317,7 +317,7 @@ class VolumeProfileRealtime:
 
         for node_price in volume_scores.keys():
             distance = abs(current_price - node_price)
-            if distance / node_price <= self.price_range_pct:
+            if distance / node_price * 100 <= self.price_range_pct:
                 if distance < min_distance:
                     min_distance = distance
                     nearest_node = node_price
@@ -429,7 +429,7 @@ class VolumeProfileDatabase:
             result = cursor.fetchone()
             if result:
                 return result
-            return 0.5, 0.5, 20
+            return 10, 0.5, 0.33
 
     def save_volume_setting(self, market: int, analysis_period: int, rate_threshold: float, price_range_pct: float):
         """
@@ -443,7 +443,7 @@ class VolumeProfileDatabase:
             cursor = conn.cursor()
             cursor.execute(
                 'INSERT OR REPLACE INTO volume_setting (market, analysis_period, rate_threshold, price_range_pct)'
-                'VALUES (?, ?, ?)',
+                'VALUES (?, ?, ?, ?)',
                 (market, analysis_period, rate_threshold, price_range_pct)
             )
             conn.commit()
@@ -465,13 +465,13 @@ def volume_setting_save(ui):
     price_range_pct = float(ui.vpf_comboBoxxx_03.currentText())
     volume_database = VolumeProfileDatabase(ui.market_info['전략구분'])
     volume_database.save_volume_setting(ui.market_gubun, analysis_period, rate_threshold, price_range_pct)
-    QMessageBox.information(ui.dialog_volume, '저장완료', random.choice(famous_saying))
+    QMessageBox.information(ui.dialog_pattern, '저장완료', random.choice(famous_saying))
 
 
 def volume_profile_train(ui):
     """볼륨 프로파일 학습을 시작한다. 스레드로 구동하여 UI멈춤을 방지한다."""
     if ui.learn_running:
-        QMessageBox.critical(ui.dialog_volume, '오류 알림', '현재 볼륨 프로파일 학습이 진행중입니다.\n')
+        QMessageBox.critical(ui.dialog_pattern, '오류 알림', '현재 볼륨 프로파일 학습이 진행중입니다.\n')
         return
 
     _analysis_period = int(ui.vpf_comboBoxxx_01.currentText())

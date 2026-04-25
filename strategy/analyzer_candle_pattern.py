@@ -41,9 +41,9 @@ class AnalyzerCandlePattern:
     def __init__(self, market_gubun: int, market_info: dict, min_samples: int = 10):
         """
         초기화
-        :param market_gubun: 마켓 구분 번호
-        :param market_info: 마켓 정보 딕셔너리
-        :param min_samples: 최소 샘플 수 (기본값 10)
+        market_gubun: 마켓 구분 번호
+        market_info: 마켓 정보 딕셔너리
+        min_samples: 최소 샘플 수 (기본값 10)
         """
         self.backtest_db_path = market_info['백테디비'][0]
         self.factor_list      = market_info['팩터목록'][0]
@@ -55,12 +55,12 @@ class AnalyzerCandlePattern:
         self.min_samples      = min_samples
         self.pattern_realtime = CandlePatternRealtime(self.factor_list, self.strategy_gubun)
 
-    def analyze_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
+    def analyze_current_patterns(self, code: str, realtime_data: np.ndarray) -> Dict[str, Dict[str, float]]:
         """
         실시간 패턴 분석 수행
         code: 종목코드
         realtime_data: 실시간 1분봉 데이터 (2차원 numpy 어레이)
-        :return: 탐지된 패턴과 학습된 점수
+        return: 탐지된 패턴과 학습된 점수
         """
         return self.pattern_realtime.analyze_patterns(code, realtime_data)
 
@@ -91,7 +91,7 @@ class AnalyzerCandlePattern:
     def get_code_list(self) -> List[str]:
         """
         백테 디비에서 종목코드 목록 추출
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(self.backtest_db_path) as conn:
             cursor = conn.cursor()
@@ -128,6 +128,7 @@ class AnalyzerCandlePattern:
         factor_list: 팩터 리스트
         analysis_period: 분봉 설정
         rate_threshold: 퍼센트 설정
+        min_samples: 최소 샘플 수 (기본값 10)
         return: 종목별 패턴 점수 딕셔너리 {code: pattern_scores}
         """
         global window_queue
@@ -145,10 +146,10 @@ class AnalyzerCandlePattern:
                 if pattern_scores:
                     all_pattern_scores[code] = pattern_scores
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 패턴 학습 중 ... [{k + 1}/{last}]"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 캔들분석 학습 중 ... [{k + 1}/{last}]"))
             except Exception as e:
                 # noinspection PyUnresolvedReferences
-                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 패턴 학습 실패 - {e}"))
+                window_queue.put((UI_NUM['학습로그'], f"[{i}][{code}] 캔들분석 학습 실패 - {e}"))
 
         return all_pattern_scores
 
@@ -158,9 +159,9 @@ class CandlePatternLearning:
     def __init__(self, factor_list: list, analysis_period: int, rate_threshold: int, min_samples: int):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param analysis_period: 분석 기간 분
-        :param rate_threshold: 등락율 임계값
+        factor_list: 팩터 리스트
+        analysis_period: 분석 기간 분
+        rate_threshold: 등락율 임계값
         """
         self.idx_open        = factor_list.index('분봉시가')
         self.idx_high        = factor_list.index('분봉고가')
@@ -221,7 +222,7 @@ class CandlePatternLearning:
 
     def _calculate_score(self, price_change_percent: float) -> float:
         """가격변화율을 기반으로 점수 계산"""
-        score = (price_change_percent / self.rate_threshold) * 100
+        score = price_change_percent / self.rate_threshold * 100
         return max(-100.0, min(100.0, score))
 
     def _calculate_confidence(self, sample_count: int, std_score: float) -> float:
@@ -236,8 +237,8 @@ class CandlePatternRealtime:
     def __init__(self, factor_list: list, strategy_gubun: str):
         """
         초기화
-        :param factor_list: 팩터 리스트
-        :param strategy_gubun: 전략 구분
+        factor_list: 팩터 리스트
+        strategy_gubun: 전략 구분
         """
         self.idx_open         = factor_list.index('분봉시가')
         self.idx_high         = factor_list.index('분봉고가')
@@ -263,21 +264,22 @@ class CandlePatternRealtime:
         """
         pattern_score, confidence_score = 0, 0
 
-        realtime_data = realtime_data[-5:]
-        open_price    = realtime_data[:, self.idx_open]
-        high_price    = realtime_data[:, self.idx_high]
-        low_price     = realtime_data[:, self.idx_low]
-        close_price   = realtime_data[:, self.idx_close]
+        if len(realtime_data) >= 5:
+            realtime_data = realtime_data[-5:]
+            open_price    = realtime_data[:, self.idx_open]
+            high_price    = realtime_data[:, self.idx_high]
+            low_price     = realtime_data[:, self.idx_low]
+            close_price   = realtime_data[:, self.idx_close]
 
-        for pattern_name in PATTERN_FUNCTIONS:
-            pattern_func = getattr(talib, pattern_name)
-            pattern_result = pattern_func(open_price, high_price, low_price, close_price)
+            for pattern_name in PATTERN_FUNCTIONS:
+                pattern_func = getattr(talib, pattern_name)
+                pattern_result = pattern_func(open_price, high_price, low_price, close_price)
 
-            if pattern_result[-1] != 0:
-                learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
-                if learned_score:
-                    pattern_score = learned_score['avg_score']
-                    confidence_score = learned_score['confidence_score']
+                if pattern_result[-1] != 0:
+                    learned_score = self.pattern_scores.get(code, {}).get(pattern_name)
+                    if learned_score:
+                        pattern_score = learned_score['avg_score']
+                        confidence_score = learned_score['confidence_score']
 
         return pattern_score, confidence_score
 
@@ -319,7 +321,7 @@ class CandlePatternDatabase:
     def get_all_codes(self) -> List[str]:
         """
         데이터베이스에 저장된 전체 종목코드 조회
-        :return: 종목코드 리스트
+        return: 종목코드 리스트
         """
         with sqlite3.connect(PATTERN_DB) as conn:
             cursor = conn.cursor()
@@ -395,7 +397,7 @@ class CandlePatternDatabase:
             result = cursor.fetchone()
             if result:
                 return result
-            return 30, 10
+            return 30, 5
 
     def save_pattern_setting(self, market: int, analysis_period: int, rate_threshold: int):
         """
