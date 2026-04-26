@@ -165,10 +165,10 @@ class BackEngineBase(StgGlobalsFunc):
 
         self.ms_analyzer = AnalyzerMicrostructure(self.market_info['마켓구분'], factor_list)
         self.rk_analyzer = AnalyzerRisk(self.market_info['마켓구분'], factor_list)
-        self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info)
-        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info)
-        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info)
-        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info)
+        self.pt_analyzer = AnalyzerCandlePattern(self.market_gubun, self.market_info, backtest=True)
+        self.vf_analyzer = AnalyzerVolumeProfile(self.market_gubun, self.market_info, backtest=True)
+        self.vs_analyzer = AnalyzerVolumeSpike(self.market_gubun, self.market_info, backtest=True)
+        self.vp_analyzer = AnalyzerVolatilityPattern(self.market_gubun, self.market_info, backtest=True)
 
         self._set_passticks_and_blacklist()
 
@@ -638,7 +638,7 @@ class BackEngineBase(StgGlobalsFunc):
                 return
 
             self.code = code
-            self.name = self.dict_info.get(self.code, {}).get('종목명', self.code)
+            self.name = self.dict_info.get(code, {}).get('종목명', code)
 
             if self.is_oms:
                 if self.dict_set['매수금지블랙리스트'] and self.name in self.black_list and self.back_type != '백파인더':
@@ -655,6 +655,20 @@ class BackEngineBase(StgGlobalsFunc):
 
                 start_idx = 0
                 for end_idx in day_last_indexs:
+                    if not self.is_tick and (
+                            self.dict_set['캔들분석'] or self.dict_set['가격대분석'] or
+                            self.dict_set['거래량분석'] or self.dict_set['변동성분석']
+                    ):
+                        date = int(str(indexs[start_idx])[:8])
+                        if self.dict_set['캔들분석']:
+                            self.pt_analyzer.load_pattern_code_scores(code, date)
+                        if self.dict_set['가격대분석']:
+                            self.vf_analyzer.load_volume_code_nodes(code, date)
+                        if self.dict_set['거래량분석']:
+                            self.vs_analyzer.load_spike_code_scores(code, date)
+                        if self.dict_set['변동성분석']:
+                            self.vp_analyzer.load_volatility_code_scores(code, date)
+
                     for i in range(start_idx, end_idx):
                         self.index = indexs[i]
                         self.indexn = i
