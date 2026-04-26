@@ -106,7 +106,7 @@ class BackCodeTest(QThread):
                 pattern = rf'(?<![0-9A-Za-z_가-힣]){re.escape(factor)}(?![0-9A-Za-z_가-힣])'
                 for m in re.finditer(pattern, line):
                     if not re.match(r'\s*\(', line[m.end():]):
-                        self.windowQ.put((UI_NUM['시스템로그'], f'오류 알림 - 줄번호[{i + 1}] : {factor}(30), {factor}(30, 1) 형태로 사용하십시오.'))
+                        self.windowQ.put((UI_NUM['시스템로그'], f'오류 알림 - 줄번호[{i+1}] : {factor}(30), {factor}(30, 1) 형태로 사용하십시오.'))
                         error = True
         if error:
             return False
