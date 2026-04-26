@@ -578,6 +578,8 @@ class BaseReceiver:
         """
         c, _, h, low, _, dm, _, bids, asks = code_data[:9]
         tm   = dm - code_dtdm[1]
+        if tm == dm and code_dtdm[1] == 0:
+            tm = 0
         hlp  = round((c / ((h + low) / 2) - 1) * 100, 2)
         lhp  = round((h / low - 1) * 100, 2)
         hjt  = sum(hoga_samount + hoga_bamount)
